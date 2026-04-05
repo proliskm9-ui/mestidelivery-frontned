@@ -1,0 +1,251 @@
+/* MobileCheckout.css — Premium iOS-style mobile checkout */
+
+/* Hide mobile bar by default (desktop) */
+.mobile-checkout-bar {
+    display: none;
+}
+
+@media (max-width: 1100px) {
+
+    /* ===== Page Container ===== */
+    .checkout-page-container {
+        padding: 0 0 200px !important;
+    }
+
+    /* Removed conflicting ho-header, ho-title, ho-back-btn as they now live purely in HeaderBlock.css */
+
+    /* Removing old header block styles to avoid conflicts */
+    .checkout-main-header {
+        display: none;
+    }
+
+    .back-circle-btn {
+        margin-left: 0;
+    }
+
+    /* ===== Cards ===== */
+    .premium-card {
+        background: rgba(255, 255, 255, 0.04);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        border-left: none;
+        border-right: none;
+        border-radius: 0;
+        margin: 0 0 16px 0;
+        padding: 24px 16px;
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+    }
+
+    .card-title {
+        font-size: 16px;
+        margin-bottom: 16px;
+        gap: 10px;
+    }
+
+    .card-title svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    /* ===== Delivery Options — Horizontal Pills ===== */
+    .delivery-options {
+        flex-direction: row !important;
+        gap: 10px;
+    }
+
+    .option-btn {
+        padding: 14px 16px;
+        border-radius: 16px;
+        text-align: center;
+    }
+
+    .option-btn .title {
+        font-size: 15px !important;
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    .option-btn .subtitle {
+        font-size: 12px !important;
+    }
+
+    .option-btn.active {
+        background: rgba(33, 234, 124, 0.08);
+        border-color: rgba(33, 234, 124, 0.5);
+        box-shadow: 0 0 20px rgba(33, 234, 124, 0.08);
+    }
+
+    /* ===== iOS-Style Grouped Inputs ===== */
+    .fields-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        overflow: hidden;
+        padding: 0;
+    }
+
+    .field-group {
+        padding: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .field-group:last-child {
+        border-bottom: none;
+    }
+
+    .field-group.full-width {
+        grid-column: span 1 !important;
+    }
+
+    .field-group label {
+        font-size: 11px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.4);
+        padding: 12px 20px 0;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        height: auto;
+    }
+
+    .premium-input,
+    .premium-textarea {
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 8px 20px 14px;
+        font-size: 16px;
+        color: #fff;
+        box-shadow: none !important;
+    }
+
+    .premium-input:focus,
+    .premium-textarea:focus {
+        outline: none;
+        box-shadow: none !important;
+        border: none !important;
+        background: rgba(255, 255, 255, 0.02) !important;
+    }
+
+    .premium-textarea {
+        min-height: 80px;
+    }
+
+    /* ===== Summary sidebar hidden on mobile ===== */
+    .summary-column {
+        display: none !important;
+    }
+
+    /* ===== Mobile Bottom Pay Bar ===== */
+    .mobile-pay-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+        transform: translateZ(0);
+        z-index: 2147483647;
+
+        display: flex;
+        background: rgba(15, 15, 15, 0.97);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .total-info {
+        flex-shrink: 0;
+    }
+
+    .total-info .label {
+        display: block;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.5);
+        margin-bottom: 2px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .total-info .value {
+        font-size: 22px;
+        font-weight: 800;
+        color: #21EA7C;
+        text-shadow: 0 0 15px rgba(33, 234, 124, 0.2);
+    }
+
+    .mobile-pay-btn {
+        background: #21EA7C;
+        color: #000;
+        border: none;
+        padding: 14px 32px;
+        border-radius: 16px;
+        font-weight: 800;
+        font-size: 16px;
+        box-shadow: 0 8px 24px rgba(33, 234, 124, 0.25);
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        white-space: nowrap;
+    }
+
+    .mobile-pay-btn:active {
+        transform: scale(0.97);
+    }
+
+    /* ===== Mobile Checkout Bar (from Cart → Checkout) ===== */
+    .mobile-checkout-bar {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(15, 15, 15, 0.97);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+        justify-content: space-between;
+        align-items: center;
+        z-index: 9999;
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+    }
+
+    .mobile-confirm-btn {
+        background: #21EA7C;
+        color: #000;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 16px;
+        font-weight: 800;
+        font-size: 16px;
+        box-shadow: 0 8px 24px rgba(33, 234, 124, 0.25);
+        cursor: pointer;
+    }
+
+    .mobile-confirm-btn:active {
+        transform: scale(0.97);
+    }
+
+    .total-info .label {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 12px;
+        display: block;
+        margin-bottom: 2px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .total-info .value {
+        font-size: 22px;
+        font-weight: 800;
+        color: #21EA7C;
+    }
+}

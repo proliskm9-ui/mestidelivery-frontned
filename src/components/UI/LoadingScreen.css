@@ -1,0 +1,160 @@
+/* LoadingScreen.css - Premium Animated Sequence */
+.loading-screen {
+    position: fixed;
+    inset: 0;
+    background: #0f0f12;
+    display: block;
+    z-index: 999999;
+}
+
+.loading-phone {
+    width: 100vw;
+    height: 100vh;
+    background: #0f0f12;
+    border-radius: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Logo */
+.loading-logo {
+    position: absolute;
+    left: 50%;
+    top: 42%;
+    width: 240px;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+    z-index: 10;
+    animation: logoEntrance 1000ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes logoEntrance {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -40%) scale(0.85);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Scene Scaling */
+:root {
+    --scene-scale: 2.2;
+}
+
+/* Scene Container */
+.scene {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 50%;
+    overflow: hidden;
+}
+
+/* Base layer style */
+.loading-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    opacity: 0;
+    will-change: transform, opacity;
+}
+
+/* Animations Triggering */
+.layer-mountains-fg {
+    transform: translateY(180px) scale(calc(var(--scene-scale) + 0.1));
+    animation: mountainsInFG 1400ms cubic-bezier(0.16, 1, 0.3, 1) 200ms forwards;
+}
+
+.layer-mountains-bg {
+    transform: translateY(140px) scale(var(--scene-scale));
+    animation: mountainsInBG 1600ms cubic-bezier(0.16, 1, 0.3, 1) 400ms forwards;
+}
+
+/* Keyframes */
+@keyframes mountainsInFG {
+    to {
+        opacity: 0.9;
+        transform: translateY(-65px) scale(var(--scene-scale));
+    }
+}
+
+@keyframes mountainsInBG {
+    to {
+        opacity: 0.7;
+        transform: translateY(-50px) scale(var(--scene-scale));
+    }
+}
+
+/* Exit Animation */
+.loading-screen.loading-hide {
+    animation: loadingOut 600ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes loadingOut {
+    to {
+        opacity: 0;
+    }
+}
+
+/* PC Specific adjustments for Loading Screen */
+@media (min-width: 1025px) {
+    :root {
+        --scene-scale: 1.4; /* Less extreme scale for large screens */
+    }
+
+    .loading-logo {
+        width: 320px;
+        top: 40%;
+    }
+
+    .scene {
+        height: 45%;
+    }
+
+    @keyframes mountainsInFG {
+        to {
+            opacity: 0.95;
+            transform: translateY(0) scale(var(--scene-scale));
+        }
+    }
+
+    @keyframes mountainsInBG {
+        to {
+            opacity: 0.7;
+            transform: translateY(0) scale(var(--scene-scale));
+        }
+    }
+
+    .layer-mountains-fg {
+        transform: translateY(100px) scale(calc(var(--scene-scale) + 0.1));
+    }
+
+    .layer-mountains-bg {
+        transform: translateY(80px) scale(var(--scene-scale));
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .loading-layer {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: translateY(0) scale(var(--scene-scale)) !important;
+    }
+
+    .loading-screen.loading-hide {
+        animation: none !important;
+        opacity: 0;
+    }
+}

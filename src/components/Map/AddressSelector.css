@@ -1,0 +1,359 @@
+/* AddressSelector.css (Responsive) */
+
+/* Overlay */
+.as-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    /* Mobile: Bottom entry */
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (min-width: 768px) {
+    .as-overlay {
+        align-items: center;
+        /* Desktop: Center modal */
+    }
+}
+
+/* Map Card */
+.as-map-card {
+    width: 100%;
+    height: 100%;
+    /* Mobile: Fullscreen map for easiest selection */
+    background: #111;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 768px) {
+    .as-map-card {
+        width: 800px;
+        height: 80vh;
+        border-radius: 24px;
+        max-height: 800px;
+    }
+}
+
+.as-map-wrapper {
+    flex: 1;
+    position: relative;
+    background: #e0e0e0;
+}
+
+.as-center-pin {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    /* Bottom point of pin hits center */
+    z-index: 10;
+    pointer-events: none;
+    font-size: 40px;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.as-locate-btn {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    /* Bigger tap target */
+    border-radius: 50%;
+    background: #fff;
+    color: #000;
+    border: none;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    z-index: 50;
+    transition: transform 0.1s;
+}
+
+.as-locate-btn:active {
+    transform: scale(0.95);
+}
+
+.as-bottom-panel {
+    background: #181818;
+    padding: 24px 20px 40px;
+    /* Extra bottom padding for mobile safe area */
+    border-top: 1px solid #333;
+    z-index: 60;
+}
+
+@media (min-width: 768px) {
+    .as-bottom-panel {
+        padding: 24px;
+    }
+}
+
+.as-addr-preview {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 20px;
+    text-align: center;
+    line-height: 1.4;
+    min-height: 24px;
+    padding: 0 10px;
+}
+
+.as-confirm-btn {
+    width: 100%;
+    background: #21EA7C;
+    color: #000;
+    font-weight: 700;
+    padding: 16px;
+    border-radius: 16px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.as-confirm-btn:disabled {
+    background: #444;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.as-close-abs {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    z-index: 100;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+
+/* Form Card */
+.as-form-card {
+    width: 100%;
+    background: #181818;
+    border-radius: 24px 24px 0 0;
+    /* Bottom sheet look on mobile */
+    padding: 24px;
+    color: #fff;
+    max-height: 90vh;
+    /* Don't cover entire screen if not needed */
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+    overflow-y: auto;
+    /* Allow scroll if content is long */
+}
+
+@media (min-width: 768px) {
+    .as-form-card {
+        width: 500px;
+        border-radius: 24px;
+        max-height: 85vh;
+        margin: auto;
+        /* Center */
+    }
+}
+
+.as-form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    position: sticky;
+    top: 0;
+    background: #181818;
+    z-index: 10;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #333;
+}
+
+.as-form-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.as-form-header button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0 8px;
+}
+
+.as-selected-addr {
+    background: rgba(255, 255, 255, 0.06);
+    padding: 16px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.as-selected-addr .icon {
+    font-size: 20px;
+}
+
+.as-selected-addr .text {
+    font-size: 14px;
+    flex: 1;
+    /* clamp text */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+}
+
+.as-selected-addr .edit-link {
+    color: #21EA7C;
+    font-weight: 600;
+    font-size: 13px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    padding: 8px;
+}
+
+.as-type-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.as-type-btn {
+    background: #252525;
+    border: 1px solid #333;
+    border-radius: 14px;
+    padding: 12px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    color: #888;
+    transition: all 0.2s;
+}
+
+.as-type-btn.active {
+    background: rgba(33, 234, 124, 0.15);
+    border-color: #21EA7C;
+    color: #21EA7C;
+    transform: translateY(-2px);
+}
+
+.as-type-btn .t-icon {
+    font-size: 22px;
+}
+
+.as-type-btn .t-label {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.as-inputs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+    /* overflow-y handled by card */
+}
+
+.as-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.as-input-group.full {
+    grid-column: span 2;
+}
+
+.as-input-group label {
+    font-size: 12px;
+    color: #aaa;
+    margin-left: 4px;
+    font-weight: 500;
+}
+
+.as-input-group input,
+.as-input-group textarea {
+    background: #252525;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 14px 16px;
+    /* Bigger inputs */
+    border-radius: 14px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.as-input-group input:focus,
+.as-input-group textarea:focus {
+    border-color: #21EA7C;
+    background: #2a2a2a;
+}
+
+.as-input-group textarea {
+    height: 100px;
+    resize: none;
+    font-family: inherit;
+}
+
+.as-save-btn {
+    width: 100%;
+    background: #21EA7C;
+    color: #000;
+    font-weight: 800;
+    padding: 18px;
+    border-radius: 16px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: auto;
+    /* push to bottom if flex */
+    box-shadow: 0 4px 20px rgba(33, 234, 124, 0.3);
+}

@@ -1,0 +1,260 @@
+/* Стили для мобильной оплаты */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+.mobile-payment-wrapper .page {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  margin: 0 auto;
+  background-color: #0A0A0A;
+  color: #ffffff;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  position: relative;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
+}
+
+.mobile-payment-wrapper .page::before {
+  content: '';
+  position: fixed;
+  top: -10%;
+  left: -10%;
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle at 50% 50%, rgba(33, 234, 124, 0.03) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+html:has(.mobile-payment-wrapper)::-webkit-scrollbar,
+body:has(.mobile-payment-wrapper)::-webkit-scrollbar,
+.mobile-payment-wrapper::-webkit-scrollbar,
+.mobile-payment-wrapper *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  -webkit-appearance: none;
+}
+
+html:has(.mobile-payment-wrapper),
+body:has(.mobile-payment-wrapper),
+.mobile-payment-wrapper,
+.mobile-payment-wrapper * {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* Шапка платежа */
+.mobile-payment-top {
+  width: 100%;
+  background: transparent;
+  margin-bottom: 20px;
+  padding: max(24px, calc(14px + env(safe-area-inset-top, 0px))) 20px 0px 20px;
+  position: relative;
+  box-sizing: border-box;
+  z-index: 1;
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.back-btn-minimal {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 10px 20px;
+  border-radius: 14px;
+  color: #8E8E93;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.back-btn-minimal:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mp-back-btn:active {
+  transform: scale(0.92);
+  background: #333333;
+}
+
+.mp-title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin: 0;
+  color: #ffffff;
+}
+
+/* Контент */
+.mobile-payment-content {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0 12px; /* Чуть отступов по бокам как на скрине */
+  gap: 12px;
+}
+
+/* Карточка суммы */
+.mp-amount-card {
+  box-sizing: border-box;
+  width: 100%;
+  background: linear-gradient(110deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 30px;
+  backdrop-filter: blur(20px);
+  padding: 30px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.mp-amount-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 6px;
+}
+
+.mp-amount-value {
+  font-size: 32px;
+  font-weight: 900;
+  color: #21ea7c;
+  margin: 0;
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(33, 234, 124, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Карточка методов */
+.mp-methods-card {
+  box-sizing: border-box;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 30px;
+  backdrop-filter: blur(20px);
+  padding: 30px 20px;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 20px;
+}
+
+.mp-methods-title {
+  margin: 0 0 24px 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #8E8E93;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.mp-method-btn {
+  width: 100%;
+  height: auto;
+  min-height: 76px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  box-sizing: border-box;
+}
+
+.mp-method-btn:active {
+  transform: scale(0.98);
+}
+
+.mp-method-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(5px);
+  border-color: rgba(33, 234, 124, 0.2);
+}
+
+.mp-method-btn.active {
+  border-color: rgba(33, 234, 124, 0.5);
+  background: rgba(33, 234, 124, 0.05);
+  transform: translateX(5px);
+}
+
+.mp-method-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #2a2a2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 14px;
+  color: #fff;
+}
+
+.mp-method-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.mp-method-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.mp-method-desc {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 2px;
+}
+
+.mp-method-arrow {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.mp-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 10, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 30px;
+}
+
+.mp-loading-overlay h3 {
+  color: #fff;
+  margin-top: 20px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.mp-loading-overlay p {
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}

@@ -1,0 +1,110 @@
+/* HeaderBlock.css — glassmorphism стиль как в ресторане */
+
+.checkout-top {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 0 0 20px 20px;
+  margin-bottom: 5px;
+  padding: max(22px, calc(14px + env(safe-area-inset-top, 0px))) 20px 20px 20px;
+  position: relative;
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+}
+
+.ho-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.ho-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  color: #fff;
+}
+
+.ho-back-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.ho-back-btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Контейнер кнопок */
+.time-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.time-btn {
+  height: 60px;
+  border-radius: 16px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 14px;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.time-btn--standard {
+  width: 130px;
+}
+
+.time-btn--schedule {
+  width: 140px;
+}
+
+.time-btn:hover {
+  border-color: rgba(33, 234, 124, 0.4);
+}
+
+.time-btn.active {
+  border-color: rgba(33, 234, 124, 0.85);
+  background: #1F1F1E;
+}
+
+.btn-title {
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 14px;
+  letter-spacing: 0.2px;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+}
+
+.btn-sub {
+  margin-top: 6px;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 12px;
+  letter-spacing: -0.4px;
+  color: rgba(255, 255, 255, 0.40);
+  white-space: nowrap;
+}

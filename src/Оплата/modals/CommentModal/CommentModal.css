@@ -1,0 +1,148 @@
+/* CommentModal.css */
+
+/* --- OVERLAY --- */
+.cm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 200;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.cm-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* --- BOTTOM SHEET --- */
+.cm-bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 393px;
+  background: #191917;
+  border-radius: 25px 25px 0 0;
+  padding: 24px 16px 20px 16px;
+  z-index: 201;
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+.cm-bottom-sheet.active {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* --- HEADER --- */
+.cm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.cm-title {
+  margin: 0;
+  font-weight: 800;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.cm-subtitle {
+  margin: 12px 0 0 0;
+  font-weight: 500;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.60);
+}
+
+.cm-close-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #21EA7C;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cm-close-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* --- ПОЛЕ ВВОДА (Стиль как в Чаевых) --- */
+.cm-input-wrapper {
+  background: #2D2D2B;
+  border-radius: 15px;
+  padding: 16px;
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* Центрируем контент вертикально */
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+/* Когда есть текст, смещаем контент вверх, чтобы влез лейбл */
+.cm-input-wrapper.has-value {
+  justify-content: flex-start;
+  padding-top: 12px;
+}
+
+/* Лейбл (Всплывающий заголовок) */
+.cm-input-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.40);
+  margin-bottom: 8px;
+  display: none;
+  /* Скрыт пока нет текста */
+  text-align: left;
+}
+
+.cm-input-wrapper.has-value .cm-input-label {
+  display: block;
+}
+
+/* Сам Инпут */
+.cm-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 0;
+
+  /* ИСПРАВЛЕНО: Выравнивание по левому краю */
+  text-align: left;
+}
+
+.cm-input::placeholder {
+  color: rgba(255, 255, 255, 0.40);
+  font-weight: 400;
+}
+
+/* --- КНОПКА --- */
+.cm-confirm-btn {
+  width: 100%;
+  height: 56px;
+  background: #21EA7C;
+  border: none;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 17px;
+  color: white;
+  cursor: pointer;
+  margin-top: 34px;
+  box-shadow: 0px 4px 5px 0px rgba(59, 180, 74, 0.20);
+}

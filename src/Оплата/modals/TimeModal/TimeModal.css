@@ -1,0 +1,151 @@
+/* TimeModal.css */
+
+@keyframes tmFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.tm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 200;
+  opacity: 0;
+}
+
+.tm-overlay.active {
+  animation: tmFadeIn 0.3s ease forwards;
+}
+
+@keyframes tmSlideUp {
+  from {
+    transform: translateX(-50%) translateY(100%);
+  }
+
+  to {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* --- BOTTOM SHEET --- */
+.tm-bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 393px;
+  background: #191917;
+  border-radius: 25px 25px 0 0;
+  padding: 24px 16px 20px 16px;
+  z-index: 201;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+
+  /* Разрешаем шторке расти, но не выше 95% экрана, на случай очень маленьких телефонов */
+  max-height: 95vh;
+  /* Если контент все же не влезает в экран, скроллится вся шторка, а не отдельный блок */
+  overflow-y: auto;
+}
+
+.tm-bottom-sheet.active {
+  animation: tmSlideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+/* --- HEADER --- */
+.tm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.tm-title {
+  margin: 0;
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.tm-subtitle {
+  margin: 12px 0 0 0;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.60);
+}
+
+.tm-close-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #21EA7C;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tm-close-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* --- СЕТКА ВРЕМЕНИ --- */
+.tm-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  /* УБРАЛИ max-height и overflow, чтобы все кнопки были видны сразу */
+  width: 393px;
+}
+
+.tm-slot-btn {
+  height: 44px;
+  border: 2px solid #2D2D2B;
+  border-radius: 12px;
+  background: transparent;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.tm-slot-btn:hover {
+  border-color: rgba(33, 234, 124, 0.4);
+}
+
+/* Активное состояние */
+.tm-slot-btn.active {
+  border-color: rgba(33, 234, 124, 0.85);
+  /* Зеленая рамка */
+  background: transparent;
+  /* ФОН УБРАН (прозрачный) */
+}
+
+/* --- КНОПКА ГОТОВО --- */
+.tm-confirm-btn {
+  width: 393px;
+  height: 56px;
+  background: #21EA7C;
+  border: none;
+  border-radius: 16px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 17px;
+  color: #161616;
+  cursor: pointer;
+  margin-top: 24px;
+  box-shadow: 0px 4px 5px 0px rgba(59, 180, 74, 0.20);
+}

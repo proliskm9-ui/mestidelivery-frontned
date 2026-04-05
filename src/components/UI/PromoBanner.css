@@ -1,0 +1,65 @@
+.promoBannerWrap {
+    position: relative;
+    width: 100%;
+    height: 140px;
+    border-radius: 15px;
+    margin: -6px auto 35px auto;
+    display: none;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+    .promoBannerWrap {
+        display: block;
+    }
+}
+
+.promoBannerTrack {
+    display: flex;
+    height: 100%;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    will-change: transform;
+}
+
+.promoBannerSlide {
+    flex: 0 0 100%;
+    height: 100%;
+    position: relative;
+}
+
+.promoBannerImg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: 15% center;
+    border-radius: 15px;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.promoBannerDots {
+    position: absolute;
+    bottom: 8px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    z-index: 10;
+}
+
+.promoBannerDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+}
+
+.promoBannerDot.active {
+    background: #fff;
+    width: 16px;
+    border-radius: 4px;
+}

@@ -1,0 +1,471 @@
+.mobile-cart-container,
+.mobile-cart-empty {
+    min-height: 100vh;
+    background-color: var(--bg);
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    padding-bottom: 110px;
+    /* Уменьшил, чтобы убрать дыру, но оставить место под панель */
+}
+
+.mobile-cart-empty {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.mobile-cart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: max(22px, calc(14px + env(safe-area-inset-top, 0px))) 20px 17px 20px;
+    background-color: var(--bg);
+    position: relative;
+    z-index: 100;
+}
+
+.mc-header-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+}
+
+.mc-header-center h1 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: 'Inter', sans-serif;
+}
+
+.mc-header-subtitle {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 2px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+}
+
+.mc-back-btn,
+.mc-clear-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    color: #21EA7C;
+}
+
+.mc-back-btn:active,
+.mc-clear-btn:active {
+    transform: scale(0.92);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Empty View */
+.mc-empty-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    margin-top: 10vh;
+}
+
+.mc-empty-icon img {
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+    opacity: 0.8;
+}
+
+.mc-empty-content h2 {
+    font-size: 1.5rem;
+    margin: 20px 0 10px;
+}
+
+.mc-empty-content p {
+    color: #888;
+    margin-bottom: 30px;
+}
+
+.mc-return-btn {
+    background: #21EA7C;
+    color: black;
+    border: none;
+    font-weight: 800;
+    padding: 16px 32px;
+    border-radius: 20px;
+    font-size: 1.1rem;
+}
+
+/* Items List */
+.mc-items-list {
+    padding: 16px 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.mc-item-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 16px;
+    position: relative;
+    border-bottom: none;
+}
+
+.mc-item-card::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 88px;
+    /* 76px image + 12px gap */
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.mc-item-card:last-child::after {
+    left: 0;
+    /* Последняя линия на всю ширину */
+}
+
+.mc-item-img {
+    width: 76px;
+    height: 76px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #1a1a1a;
+    flex-shrink: 0;
+}
+
+.mc-item-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mc-item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.mc-item-name {
+    font-size: 17px;
+    font-weight: 500;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: 'Inter', sans-serif;
+}
+
+.mc-item-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Inter', sans-serif;
+}
+
+.mc-item-price,
+.mc-item-weight {
+    font-size: 15px;
+    font-weight: 700;
+    color: #21EA7C;
+}
+
+.mc-item-sep {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 14px;
+}
+
+.mc-qty-control-v2 {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 2px 4px;
+    height: 34px;
+    gap: 8px;
+}
+
+.mc-qty-control-v2 button {
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    color: #21EA7C;
+    font-size: 20px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.mc-qty-val {
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    min-width: 16px;
+    text-align: center;
+}
+
+/* Extras Section */
+.mc-extras-row {
+    display: flex;
+    gap: 12px;
+    padding: 0 20px;
+    margin-top: 0;
+}
+
+.mc-extra-pill-card.cutlery {
+    flex: 0 0 150px;
+    /* Увеличили ширину еще на 5px для идеального зазора */
+}
+
+.mc-extra-pill-card.comment {
+    flex: 1;
+    /* Растягиваем комментарий на остаток */
+}
+
+.mc-extra-pill-card {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    padding: 0 9px 0 14px;
+    /* Симметрия 9px ( (52 высота - 34 счетчик) / 2 ) */
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 0;
+}
+
+.mc-extra-pill-card:active {
+    transform: scale(0.98);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.mc-extra-pill-card .mc-qty-control-v2 {
+    background: rgba(255, 255, 255, 0.15);
+    /* Еще светлее */
+    flex-shrink: 0;
+}
+
+.mc-comment-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mc-comment-text-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.mc-extra-label {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: white;
+    line-height: 1.1;
+    font-family: 'Inter', sans-serif;
+}
+
+.mc-comment-preview {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mc-comment-box-floating {
+    margin: 12px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mc-comment-box-floating textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    min-height: 60px;
+}
+
+/* Recommendations Section */
+.mc-recs-section {
+    margin-top: 40px;
+    padding: 0 20px 20px 20px;
+}
+
+.mc-section-title {
+    font-size: 30px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 20px;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.3px;
+    text-transform: none;
+    /* Убираем капс, если он прилетает извне */
+}
+
+.mc-recs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px 12px;
+    padding-bottom: 10px;
+}
+
+.mc-rec-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.mc-rec-img-container {
+    position: relative;
+    width: 113px;
+    height: 129px;
+    /* Размер по референсу */
+    border-radius: 20px;
+    overflow: hidden;
+    background: #2f2f2f;
+    margin-bottom: 9px;
+    /* Соотв. dish-text margin-top */
+}
+
+.mc-rec-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mc-rec-add-btn-round {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #21EA7C;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    padding: 0;
+    transition: transform 0.1s;
+}
+
+.mc-rec-add-btn-round:active {
+    transform: scale(0.9);
+}
+
+.mc-rec-price-green {
+    color: #21EA7C;
+    font-weight: 600;
+    font-size: 17px;
+    font-family: 'Inter', sans-serif;
+    padding-left: 2px;
+}
+
+.mc-rec-name-white {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1.2;
+    font-family: 'Inter', sans-serif;
+    margin-top: 6px;
+    padding-left: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.3px;
+}
+
+.mc-rec-meta {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 14px;
+    font-weight: 400;
+    font-family: 'Inter', sans-serif;
+    margin-top: 4px;
+    padding-left: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Glass Bottom Panel adjustments for Cart if any needed */
+.glass-panel-container {
+    z-index: 1000;
+}
+
+/* Glass Qty Control for Cutlery */
+.mc-qty-control-glass {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 6px;
+    gap: 12px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.mc-qty-control-glass button {
+    width: 32px;
+    height: 32px;
+    border-radius: 14px;
+    border: none;
+    background: rgba(33, 234, 124, 0.15);
+    color: #21EA7C;
+    font-size: 1.4rem;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.mc-qty-control-glass button:active {
+    background: rgba(33, 234, 124, 0.3);
+}
+
+.mc-qty-control-glass span {
+    font-weight: 700;
+    font-size: 1.1rem;
+    min-width: 28px;
+    text-align: center;
+    color: #fff;
+}

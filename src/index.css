@@ -1,0 +1,200 @@
+/* Global Font Definition */
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../fonts/Montserrat-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../fonts/Montserrat-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../fonts/Montserrat-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../fonts/Montserrat-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../fonts/Montserrat-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+}
+
+:root {
+  --primary: #21EA7C;
+  --primary-rgb: 33, 234, 124;
+  --text-main: rgba(33, 234, 124, 0.85);
+  /* 85% opacity */
+  --bg: #151514;
+  --font-main: 'Montserrat', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  background-color: var(--bg);
+  color: var(--text-main);
+  font-family: var(--font-main);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  position: relative;
+  /* Optimize tap delay on mobile */
+  touch-action: manipulation;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(33, 234, 124, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(33, 234, 124, 0.5);
+}
+
+/* Global class to hide scrollbar but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  -webkit-appearance: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #fff;
+  font-family: var(--font-main);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+
+/* Page entrance animation */
+@keyframes pageFlyIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(15px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.page-enter {
+  animation: pageFlyIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+
+
+/* --- PREMIUM GLOBAL ANIMATIONS --- */
+
+/* Page or Section Entrance */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+
+/* Smooth interactions for interactive elements */
+button,
+.cat-item,
+.filter-pill,
+.back-btn,
+.mobile-header-back-btn,
+.search-pill,
+.address-pill {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* Scale down on tap/click for a tactile feel */
+button:active:not(.fav-btn):not(.allRestaurantFavorite):not(.ric-fav-btn):not(.fav-hero-btn),
+.cat-item:active,
+.filter-pill:active,
+.back-btn:active,
+.mobile-header-back-btn:active,
+.address-pill:active,
+.search-pill:active {
+  transform: scale(0.94) !important;
+}
+
+/* Force favorite buttons to be entirely static without animations */
+button.fav-btn,
+button.allRestaurantFavorite,
+button.ric-fav-btn,
+button.fav-hero-btn {
+  transition: none !important;
+  animation: none !important;
+}
+
+button.fav-btn:active,
+button.allRestaurantFavorite:active,
+button.ric-fav-btn:active,
+button.fav-hero-btn:active {
+  transform: none !important;
+}

@@ -1,0 +1,156 @@
+.cardsBlock {
+    position: relative;
+    width: 343px;
+    height: 195px;
+    /* Increased to fit labels below the blocks */
+    margin: 0 auto 35px auto;
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .cardsBlock.mobile-only {
+        display: block;
+    }
+}
+
+.card {
+    position: absolute;
+    /* Pure Gray Liquid Glass effect */
+    background: linear-gradient(135deg, rgba(80, 80, 80, 0.15) 0%, rgba(40, 40, 40, 0.05) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+
+    border-radius: 20px;
+
+    /* Clean white and dark gray structural borders - NO external green */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+
+    /* Even Deeper green internal illumination */
+    box-shadow:
+        inset 0 4px 6px -2px rgba(255, 255, 255, 0.2),
+        /* Pushed deeper and hidden completely inside the glass - Dimmed */
+        inset 0 -35px 45px -20px rgba(33, 234, 124, 0.2),
+        inset 0 -4px 10px -2px rgba(0, 0, 0, 0.7),
+        0 15px 30px rgba(0, 0, 0, 0.5);
+    /* Pure black ambient drop shadow */
+
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card:active {
+    transform: scale(0.96);
+    box-shadow:
+        inset 0 4px 6px -2px rgba(255, 255, 255, 0.2),
+        inset 0 -35px 45px -20px rgba(33, 234, 124, 0.35),
+        inset 0 -4px 10px -2px rgba(0, 0, 0, 0.8),
+        0 8px 15px rgba(0, 0, 0, 0.6);
+}
+
+.card--restaurants {
+    left: 0;
+    top: 0;
+    width: 159px;
+    height: 159px;
+    /* Scale the green glow up proportionately since the card is 159px high instead of 64px */
+    box-shadow:
+        inset 0 4px 6px -2px rgba(255, 255, 255, 0.2),
+        inset 0 -130px 90px -40px rgba(33, 234, 124, 0.25),
+        inset 0 -4px 10px -2px rgba(0, 0, 0, 0.7),
+        0 15px 30px rgba(0, 0, 0, 0.5);
+}
+
+.card--restaurants:active {
+    box-shadow:
+        inset 0 4px 6px -2px rgba(255, 255, 255, 0.2),
+        inset 0 -130px 90px -40px rgba(33, 234, 124, 0.4),
+        inset 0 -4px 10px -2px rgba(0, 0, 0, 0.8),
+        0 8px 15px rgba(0, 0, 0, 0.6);
+}
+
+.card--shops {
+    left: 184px;
+    top: 0;
+    width: 159px;
+    height: 64px;
+}
+
+.card--promos {
+    left: 184px;
+    top: 95px;
+    width: 159px;
+    height: 64px;
+}
+
+.card--img1 {
+    width: 170px;
+    top: 19px;
+    /* Lowered another 3px */
+    z-index: 2;
+    position: absolute;
+    left: -12px;
+    cursor: pointer;
+    pointer-events: none;
+}
+
+.card--img2 {
+    width: 100px;
+    top: -20px;
+    /* Adjusted to rest neatly on the bottom edge */
+    z-index: 2;
+    position: absolute;
+    left: 213px;
+    cursor: pointer;
+    pointer-events: none;
+}
+
+.card--img3 {
+    width: 90px;
+    top: 88px;
+    z-index: 2;
+    position: absolute;
+    left: 218px;
+    cursor: pointer;
+    pointer-events: none;
+}
+
+.cardLabel {
+    position: absolute;
+    width: 159px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.2px;
+    line-height: 20px;
+    color: #fff;
+    opacity: 0.85;
+    text-align: center;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.cardLabel--restaurants {
+    left: 0;
+    top: 158px;
+}
+
+.cardLabel--shops {
+    left: 184px;
+    top: 66px;
+}
+
+.cardLabel--promos {
+    left: 184px;
+    top: 158px;
+}
+
+/* Scale down for very small screens */
+@media (max-width: 380px) {
+    .cardsBlock {
+        transform: scale(0.9);
+        transform-origin: top center;
+        margin-bottom: 0;
+    }
+}

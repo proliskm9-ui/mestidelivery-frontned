@@ -1,0 +1,321 @@
+.partner-form-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+    animation: fadeInForm 0.4s ease;
+}
+
+@keyframes fadeInForm {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.partner-form-modal {
+    background: #000;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 40px;
+    max-width: 560px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+    animation: slideUpForm 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpForm {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header-accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #21EA7C, #00FF66);
+}
+
+.close-btn-minimal {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.5);
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+}
+
+.close-btn-minimal:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+.form-head {
+    padding: 48px 48px 24px;
+}
+
+.form-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    background: rgba(33, 234, 124, 0.1);
+    color: #21EA7C;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    margin-bottom: 20px;
+}
+
+.form-head h1 {
+    font-size: 34px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 12px;
+    letter-spacing: -1px;
+    line-height: 1.1;
+}
+
+.form-head p {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.premium-form {
+    padding: 0 48px 48px;
+}
+
+.input-row {
+    margin-bottom: 24px;
+}
+
+.input-row.side-by-side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.premium-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.premium-input-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.4);
+    margin-left: 2px;
+}
+
+.premium-input-group input,
+.premium-input-group textarea {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 16px 20px;
+    color: #fff;
+    font-size: 15px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.premium-input-group input:focus,
+.premium-input-group textarea:focus {
+    outline: none;
+    border-color: rgba(33, 234, 124, 0.5);
+    background: rgba(33, 234, 124, 0.02);
+    box-shadow: 0 0 20px rgba(33, 234, 124, 0.05);
+}
+
+.form-error-pill {
+    background: rgba(255, 59, 48, 0.1);
+    border: 1px solid rgba(255, 59, 48, 0.2);
+    border-radius: 16px;
+    padding: 14px 20px;
+    color: #ff3b30;
+    font-size: 14px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+}
+
+.premium-submit-btn {
+    width: 100%;
+    height: 64px;
+    background: #fff;
+    border: none;
+    border-radius: 20px;
+    color: #000;
+    font-size: 17px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-submit-btn:hover:not(:disabled) {
+    background: #21EA7C;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(33, 234, 124, 0.2);
+}
+
+.premium-submit-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.premium-submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.form-footer-note {
+    margin-top: 24px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.3);
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* Success Modal View */
+.partner-form-modal.success {
+    padding: 64px 48px;
+    text-align: center;
+}
+
+.success-icon {
+    width: 80px;
+    height: 80px;
+    background: #21EA7C;
+    color: #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    margin: 0 auto 32px;
+    font-weight: bold;
+    box-shadow: 0 20px 40px rgba(33, 234, 124, 0.3);
+}
+
+.partner-form-modal.success h2 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 16px;
+}
+
+.partner-form-modal.success p {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+.done-btn {
+    padding: 16px 48px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.done-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 600px) {
+    .partner-form-overlay {
+        padding: 12px;
+    }
+
+    .partner-form-modal {
+        border-radius: 28px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .form-head {
+        padding: 32px 24px 20px;
+    }
+
+    .premium-form {
+        padding: 0 24px 32px;
+    }
+
+    .input-row.side-by-side {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .form-head h1 {
+        font-size: 26px;
+    }
+
+    .form-head p {
+        font-size: 14px;
+    }
+
+    .premium-input-group label {
+        font-size: 12px;
+    }
+
+    .premium-input-group input,
+    .premium-input-group textarea {
+        padding: 14px 16px;
+        font-size: 14px;
+    }
+
+    .premium-submit-btn {
+        height: 56px;
+        font-size: 16px;
+    }
+
+    .close-btn-minimal {
+        top: 16px;
+        right: 16px;
+        width: 36px;
+        height: 36px;
+    }
+}
+
+@media (max-width: 400px) {
+    .form-head h1 {
+        font-size: 22px;
+    }
+    
+    .form-head, .premium-form {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}

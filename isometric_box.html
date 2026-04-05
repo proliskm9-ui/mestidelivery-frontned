@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Isometric Box Animation</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f7f9fc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        .anim-container {
+            width: 100%;
+            max-width: 600px;
+            height: 100%;
+            max-height: 600px;
+        }
+
+        /* Shadow beneath the box */
+        .box-shadow {
+            transform-origin: 300px 350px;
+            animation: boxShadow 4s infinite linear;
+        }
+
+        @keyframes boxShadow {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+
+            10% {
+                transform: scale(1.1);
+                opacity: 0.15;
+            }
+
+            15% {
+                transform: scale(0.95);
+                opacity: 0.2;
+            }
+
+            20%,
+            55% {
+                transform: scale(1);
+                opacity: 0.25;
+            }
+
+            60%,
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* The Box wrapper */
+        .box-drop {
+            transform-origin: 300px 325px;
+            animation: boxDrop 4s infinite cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes boxDrop {
+            0% {
+                transform: translateY(-400px) rotate(-10deg) scale(0.8);
+                opacity: 0;
+            }
+
+            5%,
+            7% {
+                opacity: 1;
+            }
+
+            12% {
+                transform: translateY(20px) rotate(5deg) scale(1.05);
+            }
+
+            16% {
+                transform: translateY(-10px) rotate(-2deg) scale(0.98);
+            }
+
+            19%,
+            55% {
+                transform: translateY(0) rotate(0) scale(1);
+                opacity: 1;
+            }
+
+            57% {
+                transform: translateY(0) rotate(0) scale(1.1);
+                opacity: 1;
+            }
+
+            60%,
+            100% {
+                transform: translateY(0) rotate(0) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* The Checkmark */
+        .check-wrapper {
+            transform-origin: 300px 280px;
+            animation: checkPop 4s infinite cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0;
+        }
+
+        @keyframes checkPop {
+
+            0%,
+            58% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            62% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+
+            65%,
+            90% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            94% {
+                transform: scale(0.9);
+                opacity: 1;
+            }
+
+            98%,
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Checkmark Drop Shadow */
+        .check-shadow {
+            transform-origin: 300px 360px;
+            animation: checkShadowPop 4s infinite linear;
+        }
+
+        @keyframes checkShadowPop {
+
+            0%,
+            58% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            62% {
+                transform: scale(1.2);
+                opacity: 0.15;
+            }
+
+            65%,
+            90% {
+                transform: scale(1);
+                opacity: 0.2;
+            }
+
+            94% {
+                transform: scale(0.9);
+                opacity: 0.15;
+            }
+
+            98%,
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Sparkle Particles */
+        .particle {
+            opacity: 0;
+        }
+
+        .p1 {
+            animation: pop1 4s infinite cubic-bezier(0.16, 1, 0.3, 1);
+            transform-origin: 300px 280px;
+        }
+
+        .p2 {
+            animation: pop2 4s infinite cubic-bezier(0.16, 1, 0.3, 1);
+            transform-origin: 300px 280px;
+        }
+
+        .p3 {
+            animation: pop3 4s infinite cubic-bezier(0.16, 1, 0.3, 1);
+            transform-origin: 300px 280px;
+        }
+
+        .p4 {
+            animation: pop4 4s infinite cubic-bezier(0.16, 1, 0.3, 1);
+            transform-origin: 300px 280px;
+        }
+
+        .p5 {
+            animation: pop5 4s infinite cubic-bezier(0.16, 1, 0.3, 1);
+            transform-origin: 300px 280px;
+        }
+
+        @keyframes pop1 {
+
+            0%,
+            60% {
+                transform: translate(300px, 280px) scale(0);
+                opacity: 0;
+            }
+
+            62% {
+                opacity: 1;
+                transform: translate(300px, 280px) scale(1);
+            }
+
+            80%,
+            100% {
+                transform: translate(150px, 120px) scale(0);
+                opacity: 0;
+            }
+        }
+
+        @keyframes pop2 {
+
+            0%,
+            60% {
+                transform: translate(300px, 280px) scale(0);
+                opacity: 0;
+            }
+
+            63% {
+                opacity: 1;
+                transform: translate(300px, 280px) scale(1);
+            }
+
+            82%,
+            100% {
+                transform: translate(450px, 140px) scale(0);
+                opacity: 0;
+            }
+        }
+
+        @keyframes pop3 {
+
+            0%,
+            60% {
+                transform: translate(300px, 280px) scale(0);
+                opacity: 0;
+            }
+
+            64% {
+                opacity: 1;
+                transform: translate(300px, 280px) scale(1);
+            }
+
+            84%,
+            100% {
+                transform: translate(300px, 80px) scale(0);
+                opacity: 0;
+            }
+        }
+
+        @keyframes pop4 {
+
+            0%,
+            60% {
+                transform: translate(300px, 280px) scale(0);
+                opacity: 0;
+            }
+
+            62% {
+                opacity: 1;
+                transform: translate(300px, 280px) scale(1.2);
+            }
+
+            81%,
+            100% {
+                transform: translate(460px, 420px) scale(0);
+                opacity: 0;
+            }
+        }
+
+        @keyframes pop5 {
+
+            0%,
+            60% {
+                transform: translate(300px, 280px) scale(0);
+                opacity: 0;
+            }
+
+            63% {
+                opacity: 1;
+                transform: translate(300px, 280px) scale(1.1);
+            }
+
+            83%,
+            100% {
+                transform: translate(160px, 440px) scale(0);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="anim-container">
+        <svg viewBox="0 0 600 600" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="checkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#46F59B" />
+                    <stop offset="100%" stop-color="#21EA7C" />
+                </linearGradient>
+                <linearGradient id="tapeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="rgba(255, 255, 255, 0.4)" />
+                    <stop offset="100%" stop-color="rgba(255, 255, 255, 0.1)" />
+                </linearGradient>
+            </defs>
+
+            <!-- Main Floor Shadow -->
+            <ellipse class="box-shadow" cx="300" cy="360" rx="140" ry="70" fill="#000" />
+
+            <!-- Isometric Box -->
+            <g class="box-drop">
+                <g transform="translate(100, 100)">
+                    <!-- Floor Inside -->
+                    <polygon points="200,200 300,250 200,300 100,250" fill="#814A17" />
+
+                    <!-- Inside Walls -->
+                    <polygon points="200,200 100,250 100,150 200,100" fill="#9F6024" />
+                    <polygon points="200,200 300,250 300,150 200,100" fill="#8D531D" />
+
+                    <!-- Flap 2 (Inner Back-Left) -->
+                    <!-- keyTimes: 0; 0.18; 0.23; 0.28; 0.33; 1 -->
+                    <polygon id="flap2">
+                        <animate attributeName="points" values="
+                            200,100 100,150 100,200 200,150;
+                            200,100 100,150 100,200 200,150;
+                            200,100 100,150 50,125 150,75;
+                            200,100 100,150 100,100 200,50;
+                            200,100 100,150 150,175 250,125;
+                            200,100 100,150 150,175 250,125" keyTimes="0; 0.18; 0.23; 0.28; 0.33; 1" dur="4s"
+                            repeatCount="indefinite" />
+                        <animate attributeName="fill" values="#B77735; #B77735; #FFC887; #C9833A; #D9944C; #D9944C"
+                            keyTimes="0; 0.18; 0.23; 0.28; 0.33; 1" dur="4s" repeatCount="indefinite" />
+                    </polygon>
+
+                    <!-- Flap 1 (Inner Back-Right) -->
+                    <polygon id="flap1">
+                        <animate attributeName="points" values="
+                            200,100 300,150 300,200 200,150; 
+                            200,100 300,150 300,200 200,150; 
+                            200,100 300,150 350,125 250,75; 
+                            200,100 300,150 300,100 200,50; 
+                            200,100 300,150 250,175 150,125; 
+                            200,100 300,150 250,175 150,125" keyTimes="0; 0.18; 0.23; 0.28; 0.33; 1" dur="4s"
+                            repeatCount="indefinite" />
+                        <animate attributeName="fill" values="#9E6730; #9E6730; #FFC887; #D9944C; #EAAA6A; #EAAA6A"
+                            keyTimes="0; 0.18; 0.23; 0.28; 0.33; 1" dur="4s" repeatCount="indefinite" />
+                    </polygon>
+
+                    <!-- Front Walls Outside -->
+                    <polygon points="100,250 200,300 200,200 100,150" fill="#DE9A4E" />
+                    <polygon points="300,250 200,300 200,200 300,150" fill="#CA8134" />
+                    <polygon points="100,250 200,300 200,290 100,240" fill="rgba(255,255,255,0.15)" />
+
+                    <!-- Flap 4 (Outer Front-Left) -->
+                    <!-- keyTimes: 0; 0.33; 0.38; 0.43; 0.48; 1 -->
+                    <polygon id="flap4">
+                        <animate attributeName="points" values="
+                            100,150 200,200 200,250 100,200;
+                            100,150 200,200 200,250 100,200;
+                            100,150 200,200 150,225 50,175;
+                            100,150 200,200 200,150 100,100;
+                            100,150 200,200 250,175 150,125;
+                            100,150 200,200 250,175 150,125" keyTimes="0; 0.33; 0.38; 0.43; 0.48; 1" dur="4s"
+                            repeatCount="indefinite" />
+                        <animate attributeName="fill" values="#D9944C; #D9944C; #FFF0CA; #D9944C; #FFC887; #FFC887"
+                            keyTimes="0; 0.33; 0.38; 0.43; 0.48; 1" dur="4s" repeatCount="indefinite" />
+                    </polygon>
+
+                    <!-- Flap 3 (Outer Front-Right) -->
+                    <polygon id="flap3">
+                        <animate attributeName="points" values="
+                            300,150 200,200 200,250 300,200;
+                            300,150 200,200 200,250 300,200;
+                            300,150 200,200 250,225 350,175;
+                            300,150 200,200 200,150 300,100;
+                            300,150 200,200 150,175 250,125;
+                            300,150 200,200 150,175 250,125" keyTimes="0; 0.33; 0.38; 0.43; 0.48; 1" dur="4s"
+                            repeatCount="indefinite" />
+                        <animate attributeName="fill" values="#C9833A; #C9833A; #FFF0CA; #EAAA6A; #FFD49A; #FFD49A"
+                            keyTimes="0; 0.33; 0.38; 0.43; 0.48; 1" dur="4s" repeatCount="indefinite" />
+                    </polygon>
+
+                    <!-- Sealing Tape -->
+                    <polygon fill="#B08B62">
+                        <animate attributeName="points" values="
+                            140,170 160,180 160,180 140,170;
+                            140,170 160,180 160,180 140,170;
+                            140,170 160,180 260,130 240,120;
+                            140,170 160,180 260,130 240,120" keyTimes="0; 0.48; 0.53; 1" dur="4s"
+                            repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0; 0; 0.95; 0.95" keyTimes="0; 0.48; 0.49; 1" dur="4s"
+                            repeatCount="indefinite" />
+                    </polygon>
+
+                    <polygon fill="url(#tapeGrad)">
+                        <animate attributeName="points" values="
+                            140,170 160,180 160,180 140,170;
+                            140,170 160,180 160,180 140,170;
+                            140,170 160,180 260,130 240,120;
+                            140,170 160,180 260,130 240,120" keyTimes="0; 0.48; 0.53; 1" dur="4s"
+                            repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0; 0; 1; 1" keyTimes="0; 0.48; 0.49; 1" dur="4s"
+                            repeatCount="indefinite" />
+                    </polygon>
+                </g>
+            </g>
+
+            <!-- Checkmark Shadow -->
+            <ellipse class="check-shadow" cx="300" cy="370" rx="60" ry="30" fill="#000" />
+
+            <!-- Checkmark Confirmed -->
+            <g class="check-wrapper">
+                <circle cx="300" cy="280" r="100" fill="url(#checkGrad)"
+                    filter="drop-shadow(0 20px 30px rgba(33, 234, 124, 0.4))" />
+                <path d="M 255 285 L 285 315 L 350 245" fill="none" stroke="#fff" stroke-width="18"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+
+            <!-- Burst Particles -->
+            <circle class="particle p1" cx="0" cy="0" r="16" fill="#21EA7C" />
+            <circle class="particle p2" cx="0" cy="0" r="12" fill="#21EA7C" />
+            <circle class="particle p3" cx="0" cy="0" r="20" fill="#21EA7C" />
+            <circle class="particle p4" cx="0" cy="0" r="14" fill="#21EA7C" />
+            <circle class="particle p5" cx="0" cy="0" r="10" fill="#21EA7C" />
+
+        </svg>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.checkout-top {
+    width: 100%;
+    /* max-width is handled by container */
+    height: 137px;
+    background: var(--bg);
+    /* --panel */
+    border-radius: 0 0 25px 25px;
+    position: relative;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 2px;
+}
+
+.checkout-title {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: 500;
+    font-size: 15.3px;
+    line-height: 10px;
+    letter-spacing: 0px;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+    white-space: nowrap;
+    margin-top: -2px;
+}
+
+.back-btn {
+    position: absolute;
+    top: 20px;
+    left: 12px;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* Контейнер кнопок */
+.time-buttons {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    display: flex;
+    gap: 8px;
+}
+
+.time-btn {
+    height: 56px;
+    border-radius: 15px;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0 11px;
+    /* Отступы как в твоем HTML */
+    cursor: pointer;
+    border: 2px solid #2D2D2B;
+    /* --stroke-dark */
+    transition: all 0.2s ease;
+    outline: none;
+    flex: 1;
+    /* Убираем стандартный синий контур браузера */
+}
+
+/* Эффект при НАВЕДЕНИИ (hover) — слабый зеленый */
+.time-btn:hover {
+    border-color: rgba(33, 234, 124, 0.4);
+}
+
+/* Активное состояние (уже нажата) — яркий зеленый */
+.time-btn.active {
+    border-color: rgba(33, 234, 124, 0.85);
+
+}
+
+.btn-title {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 13px;
+    /* Фиксируем высоту строки */
+    letter-spacing: 0.2px;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+    /* Запрещаем перенос текста */
+}
+
+.btn-sub {
+    margin-top: 7px;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 10px;
+    letter-spacing: -0.4px;
+    color: rgba(255, 255, 255, 0.40);
+    /* --sub */
+    white-space: nowrap;
+    /* Запрещаем перенос текста */
+}

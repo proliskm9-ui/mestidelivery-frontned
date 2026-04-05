@@ -1,0 +1,30 @@
+{
+    "name": "mestigo-frontend",
+    "private": true,
+    "version": "0.1.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@pbe/react-yandex-maps": "^1.2.5",
+        "@react-three/drei": "^9.108.0",
+        "@react-three/fiber": "^8.16.8",
+        "liquid-glass-react": "^1.1.1",
+        "lucide-react": "^0.563.0",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "react-router-dom": "^7.13.0",
+        "three": "^0.165.0"
+    },
+    "devDependencies": {
+        "@types/react": "^18.3.3",
+        "@types/react-dom": "^18.3.0",
+        "@types/three": "^0.165.0",
+        "@vitejs/plugin-react": "^4.3.1",
+        "typescript": "^5.4.5",
+        "vite": "^5.3.1"
+    }
+}

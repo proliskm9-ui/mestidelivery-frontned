@@ -1,0 +1,73 @@
+/* FooterBlock.css — закрепленный футер с инфой слева и кнопкой справа */
+
+.fixed-footer {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom)) 16px;
+  z-index: 100;
+  box-sizing: border-box;
+  background: #0A0A0A;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin: 0 auto;
+}
+
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.footer-amount {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  color: #21EA7C;
+  /* Зеленый цвет суммы */
+  line-height: 1;
+}
+
+.footer-time-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-left: -2px;
+}
+
+.footer-time-icon {
+  width: 19px;
+  height: 19px;
+  object-fit: contain;
+  opacity: 0.6;
+}
+
+.footer-pay-btn {
+  width: 235px;
+  height: 56px;
+  border: none;
+  border-radius: 16px;
+  background: #21EA7C;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: #000;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-pay-btn:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}

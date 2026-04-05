@@ -1,0 +1,233 @@
+/* PaymentBlock.css — glassmorphism */
+
+.payment-card {
+  box-sizing: border-box;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px;
+  margin-bottom: 24px;
+  padding: 24px;
+  font-family: 'Inter', sans-serif;
+}
+
+.payment-title {
+  margin: 0;
+  font-weight: 800;
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+}
+
+.payment-content {
+  margin-top: 24px;
+}
+
+/* Контейнер кнопок */
+.payment-buttons {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.payment-buttons::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari and Opera */
+}
+
+/* Кнопка способа оплаты */
+.payment-btn {
+  flex: 0 0 calc(50% - 5px);
+  min-width: 170px;
+  height: 105px;
+  background: #1F1F1E;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  cursor: pointer;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.payment-btn:hover {
+  border-color: rgba(33, 234, 124, 0.4);
+}
+
+.payment-btn.active {
+  border-color: rgba(33, 234, 124, 0.85);
+}
+
+.payment-btn-icon-cash {
+  width: 26px;
+  height: 24px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.payment-btn-icon-card {
+  width: 25px;
+  height: 25px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.payment-btn-icon-crypto {
+  width: 26px;
+  height: 26px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: -3px;
+  margin-left: -1px;
+}
+
+.payment-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: filter 0.2s ease;
+}
+
+.payment-btn-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.payment-btn-text {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: normal;
+  letter-spacing: -0.3px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.payment-btn-logo {
+  width: 21px;
+  height: 21px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  filter: brightness(0.85);
+}
+
+.payment-btn-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Строка "Промокоды" */
+.promo-row {
+  margin-top: 5px;
+  padding-top: 0;
+  padding-bottom: 18px;
+  cursor: pointer;
+  height: 66px;
+  /* Такая же высота как у полей адреса */
+  position: static;
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Разделительная черта как телефонная */
+.promo-line {
+  width: calc(100% - 44px);
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.08);
+  margin-left: 44px;
+  margin-top: -5px;
+}
+
+.promo-row-inner {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding-left: 2px;
+  padding-right: 0;
+}
+
+/* Линия разделитель */
+.payment-content .line-separator {
+  width: calc(100% - 40px);
+  border-bottom: 0.3px solid rgba(255, 255, 255, 0.12);
+  margin: 14px 0 16px 40px;
+}
+
+.promo-text-container {
+  display: flex;
+  flex-direction: column;
+  margin-left: 19px;
+  /* Сдвинуто еще на 1px вправо */
+  gap: 8px;
+}
+
+.promo-label {
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.40);
+  margin-bottom: 0;
+}
+
+.promo-text {
+  color: rgba(255, 255, 255, 0.40);
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1;
+  letter-spacing: 0.2px;
+  transition: color 0.2s ease;
+  margin-bottom: 0px;
+}
+
+.promo-text.active {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.promo-icon-placeholder {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.promo-icon-placeholder img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.promo-arrow {
+  width: 10px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-right: 0px;
+}
+
+.promo-arrow svg {
+  width: 6px;
+  height: 10px;
+  color: #21EA7C;
+}

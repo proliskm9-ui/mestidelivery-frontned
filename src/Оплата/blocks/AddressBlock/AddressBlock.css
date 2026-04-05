@@ -1,0 +1,258 @@
+/* AddressBlock.css — glassmorphism + без плейсхолдеров */
+
+.delivery-card {
+  box-sizing: border-box;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px;
+  margin-bottom: 24px;
+  padding: 24px;
+  font-family: 'Inter', sans-serif;
+}
+
+.delivery-title {
+  margin: 0;
+  font-weight: 800;
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.delivery-content {
+  margin-top: 14px;
+}
+
+/* --- ИКОНКИ (26px) --- */
+.icon-fixed {
+  width: 25px;
+  height: 27px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 18px;
+  flex-shrink: 0;
+}
+
+.icon-fixed img,
+.icon-fixed svg {
+  width: 25px;
+  height: 27px;
+  object-fit: contain;
+  margin-top: 6px;
+}
+
+/* --- ТИП ПОМЕЩЕНИЯ --- */
+.place-type-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+  cursor: pointer;
+  margin-top: 0;
+  /* Убрал отступ, чтобы не складывался с .delivery-content и давал ровно 14px */
+}
+
+.place-type-row .arrow-right {
+  display: flex;
+}
+
+.place-text-col {
+  display: flex;
+  flex-direction: column;
+  margin-top: 6px;
+}
+
+.place-title {
+  margin: 0;
+  font-weight: 500;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.place-subtitle {
+  margin: 0.5px 0 0 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.40);
+}
+
+/* --- ЛИНИИ --- */
+.divider-line {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.08);
+  width: 100%;
+}
+
+.divider-line.indented {
+  margin-left: 44px;
+  width: calc(100% - 44px);
+  margin-top: -5px;
+}
+
+.divider-line.full-width {
+  width: calc(100% - 44px);
+  margin-left: 44px;
+  margin-top: 10px;
+}
+
+.phone-line {
+  width: calc(100% - 44px);
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.08);
+  margin-left: 44px;
+  margin-top: -5px;
+}
+
+/* --- СЕТКА ИНПУТОВ --- */
+.fields-grid {
+  margin-top: -5px;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.grid-row {
+  display: flex;
+  gap: 25px;
+  background: transparent;
+}
+
+.input-cell {
+  position: relative;
+  flex: 1;
+  height: 66px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  cursor: text;
+  margin-top: 0px;
+}
+
+.input-cell.full-width {
+  width: 100%;
+}
+
+.input-transparent {
+  width: 100%;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  padding: 0;
+  margin-top: 36px;
+  margin-bottom: 14px;
+  font-size: 16px;
+  line-height: normal;
+  color: rgba(255, 255, 255, 0.85);
+  caret-color: #21EA7C;
+  z-index: 2;
+  font-family: inherit;
+}
+
+/* Убираем плейсхолдер полностью */
+.input-transparent::placeholder {
+  opacity: 0 !important;
+  color: transparent !important;
+}
+
+.input-transparent:focus::placeholder {
+  opacity: 0 !important;
+  color: transparent !important;
+}
+
+/* --- FLOATING LABEL --- */
+.floating-label {
+  position: absolute;
+  left: 0;
+  top: 25px;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.40);
+  pointer-events: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.input-transparent:focus~.floating-label,
+.input-cell.has-value .floating-label {
+  top: 16px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.40);
+}
+
+.bottom-border {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.08);
+  margin-bottom: 2px;
+}
+
+/* --- ИНПУТЫ С ИКОНКАМИ (Комментарий и Телефон) --- */
+.icon-input-row {
+  display: flex;
+  align-items: center;
+  height: 66px;
+  position: relative;
+  cursor: text;
+}
+
+.icon-input-row .icon-fixed {
+  align-items: flex-start;
+  padding-top: 4px;
+}
+
+.icon-input-row .icon-fixed img,
+.icon-input-row .icon-fixed svg {
+  margin-top: 0;
+}
+
+.icon-input-row .input-cell {
+  flex: 1;
+  width: auto;
+  margin-top: 0;
+  height: 100%;
+  justify-content: flex-start;
+  padding-bottom: 0px;
+  box-sizing: border-box;
+}
+
+.icon-input-row .input-cell .input-transparent {
+  margin-top: 32px;
+  margin-bottom: 18px;
+}
+
+.icon-input-row .floating-label {
+  top: 25px;
+}
+
+.icon-input-row .input-transparent:focus~.floating-label,
+.icon-input-row .input-cell.has-value .floating-label {
+  top: 12px;
+}
+
+/* Фикс размера шрифта для телефонного инпута */
+.phone-row .input-transparent {
+  font-size: 16px !important;
+}
+
+/* Стрелка справа */
+.arrow-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 10px;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.arrow-right svg {
+  width: 6px;
+  height: 10px;
+  color: #21EA7C;
+}

@@ -1,0 +1,401 @@
+/* Login.css - Adapted from AuthTemplate for Mestigo */
+
+.login-page {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 80px);
+    /* Adjust for navbar if visible, but App hides navbar on login. So 100vh is safer */
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #000000;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Animated Blobs Background - MESTIGO EDITION (Green) */
+.auth-blobs {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.auth-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.4;
+    animation: blob-float 25s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+}
+
+.blob-1 {
+    top: -20%;
+    left: -10%;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, #15803d, transparent 70%);
+    /* Green-700 */
+    animation-duration: 30s;
+}
+
+.blob-2 {
+    bottom: -20%;
+    right: -10%;
+    width: 70vw;
+    height: 70vw;
+    background: radial-gradient(circle, #21EA7C, transparent 70%);
+    /* Brand Green */
+    animation-duration: 35s;
+    animation-delay: -5s;
+}
+
+.blob-3 {
+    top: 30%;
+    left: 30%;
+    width: 50vw;
+    height: 50vw;
+    background: radial-gradient(circle, #14532d, transparent 70%);
+    /* Green-900 */
+    animation-duration: 40s;
+    animation-delay: -10s;
+    opacity: 0.25;
+}
+
+@keyframes blob-float {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    100% {
+        transform: translate(40px, 60px) scale(1.15);
+    }
+}
+
+.auth-bg-noise {
+    position: fixed;
+    inset: 0;
+    opacity: 0.05;
+    z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    pointer-events: none;
+}
+
+/* Container */
+.auth-container {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+    max-width: 440px;
+    margin: auto;
+    padding: 40px 16px;
+    animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.auth-container.auth-container-wide {
+    max-width: 740px;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 40px, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+/* Logo */
+.auth-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+}
+
+.auth-logo::before {
+    content: '';
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(33, 234, 124, 0.2), transparent 70%);
+    /* Green glow */
+    filter: blur(20px);
+    z-index: -1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.auth-logo img {
+    height: 80px;
+    /* Adjusted height for Mestigo logo */
+    width: auto;
+    filter: drop-shadow(0 0 20px rgba(33, 234, 124, 0.3));
+}
+
+/* Auth Card */
+.auth-card {
+    position: relative;
+    width: 100%;
+    border-radius: 32px;
+    background: #0a0a0a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 30px 60px -10px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+}
+
+.auth-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 32px;
+    padding: 1px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.15), transparent 40%, transparent 60%, rgba(255, 255, 255, 0.05));
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.auth-card-content {
+    padding: 40px;
+    position: relative;
+    z-index: 10;
+    color: #fff;
+}
+
+.auth-card-content h1 {
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 8px;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 32px;
+    font-size: 14px;
+}
+
+/* Form inputs */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.auth-form.registration-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.auth-form.registration-grid .full-width {
+    grid-column: 1 / -1;
+}
+
+.auth-input-group {
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s ease;
+}
+
+.auth-input-group:hover {
+    border-color: rgba(33, 234, 124, 0.3);
+    /* Green tint */
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.auth-input-group:focus-within {
+    border-color: #21EA7C;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 20px rgba(33, 234, 124, 0.1);
+}
+
+/* Thermal/Gradient Layer on Input */
+.auth-input-group::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(350px circle at var(--input-x) var(--input-y),
+            rgba(33, 234, 124, 0.15),
+            transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.auth-input-group:hover::before {
+    opacity: 1;
+}
+
+.auth-input-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.3);
+    pointer-events: none;
+    z-index: 2;
+    transition: color 0.2s;
+}
+
+.auth-input-group:focus-within .auth-input-icon {
+    color: #21EA7C;
+}
+
+.auth-input-group input {
+    width: 100%;
+    padding: 18px 20px 18px 54px;
+    background: transparent !important;
+    border: none;
+    border-radius: 0;
+    color: #fff;
+    font-size: 16px;
+    font-family: inherit;
+    outline: none;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.auth-password-toggle {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    padding: 4px;
+    z-index: 2;
+}
+
+.auth-password-toggle:hover {
+    color: #fff;
+}
+
+.auth-error {
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    color: #f87171;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Submit Button */
+.auth-submit-btn {
+    width: 100%;
+    padding: 18px;
+    margin-top: 10px;
+    background: #21EA7C;
+    /* Brand Green */
+    color: #000;
+    border: none;
+    border-radius: 18px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s;
+}
+
+.auth-submit-btn:hover:not(:disabled) {
+    background: #00ff66;
+    transform: scale(0.99);
+    box-shadow: 0 0 20px rgba(33, 234, 124, 0.4);
+}
+
+.auth-submit-btn:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.5);
+    cursor: not-allowed;
+}
+
+/* Switch */
+.auth-switch-btn {
+    width: 100%;
+    padding: 16px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 16px;
+}
+
+.auth-switch-btn:hover {
+    color: #fff;
+}
+
+.auth-footer {
+    margin-top: 30px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.15);
+    text-align: center;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .auth-container {
+        width: 100%;
+        padding: 20px;
+    }
+
+    .auth-form.registration-grid {
+        display: flex;
+        flex-direction: column;
+    }
+}

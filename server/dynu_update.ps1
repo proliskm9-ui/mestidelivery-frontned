@@ -10,7 +10,7 @@
 
 # Ваши данные Dynu
 $ApiKey = "ВАШ_API_KEY"              # API Key из Dynu
-$Hostname = "mestigoapi.dynu.net"    # Ваш hostname на Dynu
+$Hostname = "mestigo.loseyourip.com"    # Ваш hostname на Dynu
 
 # =============================================================
 

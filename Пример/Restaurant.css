@@ -1,0 +1,543 @@
+/* Restaurant.css - based on Menu.css from template */
+
+.restaurant-page-container {
+    background-color: #000000;
+    /* Template background */
+    min-height: 100vh;
+    color: white;
+    padding-bottom: 120px;
+    padding-top: 0;
+}
+
+/* Hero Section */
+.restaurant-hero {
+    height: 280px;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, #191917 0%, rgba(0, 0, 0, 0.2) 60%, rgba(0, 0, 0, 0.5) 100%);
+}
+
+.back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.fav-hero-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, color 0.2s;
+}
+
+.fav-hero-btn:active {
+    transform: scale(0.9);
+}
+
+.hero-content {
+    position: absolute;
+    bottom: 30px;
+    left: 20px;
+    right: 20px;
+    z-index: 2;
+}
+
+.hero-content h1 {
+    margin: 0 0 8px 0;
+    font-size: 2.2rem;
+    font-weight: 800;
+}
+
+.hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Categories Sticky Strip */
+.categories-strip {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 10px 16px;
+    scrollbar-width: none;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.categories-strip::-webkit-scrollbar {
+    display: none;
+}
+
+.category-item {
+    cursor: pointer;
+    position: relative;
+    padding-bottom: 5px;
+}
+
+.category-name {
+    font-size: 17px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+    padding: 0 5px;
+    transition: color 0.2s;
+}
+
+.category-item.active .category-name {
+    color: #fff;
+    font-weight: 700;
+}
+
+.category-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #21EA7C;
+}
+
+/* Menu Grid */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 columns */
+    gap: 15px 12px;
+    padding: 20px 16px;
+}
+
+/* Dish Card Styles - Matching Template */
+.dish-card {
+    width: 100%;
+}
+
+.dish-photo {
+    position: relative;
+    width: 100%;
+    padding-top: 100%;
+    /* Square Aspect Ratio */
+    border-radius: 25px;
+    overflow: hidden;
+    background: #2f2f2f;
+}
+
+.dish-photo img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Controls inside photo */
+.dish-controls {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    display: flex;
+    justify-content: flex-end;
+    height: 40px;
+    z-index: 5;
+}
+
+.quantity-counter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    width: 100%;
+    background: rgba(33, 234, 124, 1);
+    border-radius: 20px;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+    overflow: hidden;
+}
+
+.quantity-counter.collapsed {
+    width: 40px;
+    margin-left: auto;
+    background: white;
+    /* Plus button is white when collapsed usually? Or green? Template says 'plus' */
+    background: #fff;
+}
+
+/* Icons for buttons */
+.qty-btn {
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.quantity-counter.collapsed .qty-minus,
+.quantity-counter.collapsed .qty-value {
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+}
+
+/* Plus/Minus CSS Icons */
+.qty-btn::before,
+.qty-btn::after {
+    content: '';
+    position: absolute;
+    background: #000;
+    border-radius: 1px;
+}
+
+/* Active state (green bg) -> white text */
+.quantity-counter:not(.collapsed) .qty-btn::before,
+.quantity-counter:not(.collapsed) .qty-btn::after {
+    background: #fff;
+}
+
+/* Collapsed state (white bg) -> black plus */
+.quantity-counter.collapsed .qty-btn::before,
+.quantity-counter.collapsed .qty-btn::after {
+    background: #000;
+}
+
+.qty-minus::before {
+    width: 12px;
+    height: 2px;
+}
+
+.qty-plus::before {
+    width: 14px;
+    height: 2px;
+}
+
+.qty-plus::after {
+    width: 2px;
+    height: 14px;
+}
+
+.qty-value {
+    font-weight: 600;
+    font-size: 16px;
+    color: #FFFFFF;
+    text-align: center;
+    flex: 1;
+}
+
+/* Text Info */
+.dish-text {
+    margin-top: 9px;
+    padding-left: 5px;
+}
+
+.dish-price {
+    font-weight: 500;
+    font-size: 16px;
+    color: rgba(33, 234, 124, 0.85);
+}
+
+.dish-title {
+    margin-top: 6px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.80);
+    line-height: 1.2;
+}
+
+.dish-meta {
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.30);
+}
+
+
+.dish-dot {
+    width: 1px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.30);
+    margin: 0 4px;
+}
+
+/* PC Improvements */
+.pc-sort-bar {
+    display: none;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 10px 16px;
+    background: #191917;
+    margin-top: 10px;
+}
+
+.sort-select {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-left: 10px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+@media (min-width: 1024px) {
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        /* Smaller cards */
+        gap: 24px;
+        padding: 40px 10%;
+        /* More side padding */
+    }
+
+    .dish-card {
+        transition: transform 0.2s;
+    }
+
+    .dish-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .dish-photo {
+        border-radius: 20px;
+        /* Slightly more rounded */
+    }
+
+    .restaurant-hero {
+        height: 350px;
+        /* Taller hero on PC */
+        border-radius: 0 0 40px 40px;
+    }
+
+    .pc-sort-bar {
+        display: flex;
+        padding: 20px 10%;
+    }
+}
+
+/* Dish Detail Modal */
+.dish-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+    /* Bottom sheet on mobile */
+    justify-content: center;
+    animation: fadeInModal 0.3s ease;
+}
+
+.dish-modal-content {
+    width: 100%;
+    max-width: 500px;
+    background: #111;
+    border-radius: 30px 30px 0 0;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    padding-bottom: 40px;
+    animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInModal {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUpModal {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.modal-hero-img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.modal-dish-name {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0;
+    max-width: 70%;
+}
+
+.modal-dish-price {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.modal-description {
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.composition-block h3,
+.kbju-section h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: white;
+}
+
+.composition-text {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    line-height: 1.4;
+    margin-bottom: 24px;
+}
+
+.kbju-grid-modal {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.kbju-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+}
+
+.kbju-val {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.kbju-lab {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+}
+
+.modal-add-btn {
+    width: 100%;
+    background: var(--primary);
+    color: black;
+    border: none;
+    padding: 16px;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.modal-add-btn:active {
+    transform: scale(0.98);
+}
+
+/* PC Specific Modal */
+@media (min-width: 1024px) {
+    .dish-modal-overlay {
+        align-items: center;
+    }
+
+    .dish-modal-content {
+        border-radius: 24px;
+        animation: scaleInModal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+}
+
+@keyframes scaleInModal {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

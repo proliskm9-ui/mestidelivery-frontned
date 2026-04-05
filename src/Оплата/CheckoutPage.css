@@ -1,0 +1,48 @@
+/* Стили для мобильного оформления заказа (Оплата) */
+/* Все стили заскоупены под .mobile-checkout-wrapper чтобы не влиять на остальное приложение */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.mobile-checkout-wrapper .page {
+  width: 393px;
+  max-width: 100%;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: #0A0A0A;
+  color: rgba(255, 255, 255, 0.85);
+  font-family: 'Inter', sans-serif;
+  position: relative;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
+}
+
+/* Полностью скрываем системный скроллбар, когда открыта страница оформления */
+html:has(.mobile-checkout-wrapper)::-webkit-scrollbar,
+body:has(.mobile-checkout-wrapper)::-webkit-scrollbar,
+.mobile-checkout-wrapper::-webkit-scrollbar,
+.mobile-checkout-wrapper *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  -webkit-appearance: none;
+}
+
+html:has(.mobile-checkout-wrapper),
+body:has(.mobile-checkout-wrapper),
+.mobile-checkout-wrapper,
+.mobile-checkout-wrapper * {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+.mobile-checkout-wrapper .checkout-content {
+  width: 393px;
+  max-width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
+  gap: 5px;
+}

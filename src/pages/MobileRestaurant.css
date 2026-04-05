@@ -1,0 +1,840 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* MobileRestaurant.css - Redesigned V2 Block-by-Block */
+
+.mobile-restaurant-page {
+    background-color: #0A0A0A;
+    min-height: 100vh;
+    color: white;
+    padding-bottom: 120px;
+    padding-top: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* === Compact Sticky Header (appears on scroll) === */
+.v2-compact-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: rgba(10, 10, 10, 0.65);
+    backdrop-filter: blur(25px) saturate(200%) contrast(1.2) brightness(0.7);
+    -webkit-backdrop-filter: blur(25px) saturate(200%) contrast(1.2) brightness(0.7);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0 0 24px 24px;
+    padding: max(17px, calc(9px + env(safe-area-inset-top, 0px))) 16px 0 16px;
+    transform: translateY(-100%);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.v2-compact-header.visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.v2-compact-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0;
+    position: relative;
+    height: 44px;
+}
+
+.v2-compact-title-wrapper {
+    position: absolute;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.v2-compact-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase !important;
+    letter-spacing: normal !important;
+    font-family: 'Inter', sans-serif !important;
+    max-width: 50%;
+    /* avoid overlap with buttons */
+    pointer-events: auto;
+}
+
+.v2-compact-nav-right {
+    display: flex;
+    gap: 8px;
+    /* Reduced gap from 15px to 8px as requested */
+    position: relative;
+    z-index: 2;
+}
+
+.v2-compact-nav>.v2-nav-btn {
+    position: relative;
+    z-index: 2;
+}
+
+.v2-compact-categories {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 12px 0 10px 0;
+    scrollbar-width: none;
+}
+
+.v2-compact-categories::-webkit-scrollbar {
+    display: none;
+}
+
+.v2-compact-categories .category-item {
+    cursor: pointer;
+    position: relative;
+    padding-bottom: 5px;
+}
+
+.v2-compact-categories .category-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+    padding: 0 5px;
+    transition: color 0.2s;
+}
+
+.v2-compact-categories .category-item.active .category-name {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+}
+
+.v2-compact-categories .category-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 4px;
+    right: 4px;
+    height: 1.6px;
+    background: #21EA7C;
+}
+
+/* --- Block 1: Header Structure (Liquid Glass) --- */
+.v2-header-block {
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 0 0 28px 28px;
+    padding: max(22px, calc(14px + env(safe-area-inset-top, 0px))) 16px 24px 16px;
+    position: relative;
+    z-index: 100;
+    margin-bottom: 5px;
+}
+
+/* --- Block 2: Menu Block (Liquid Glass) --- */
+.v2-menu-block {
+    background: rgba(255, 255, 255, 0.04);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 28px 28px 0 0;
+    padding: 0;
+    margin-top: 0;
+    position: relative;
+    z-index: 90;
+    overflow: hidden;
+}
+
+.v2-nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.v2-nav-right {
+    display: flex;
+    gap: 15px;
+}
+
+.v2-nav-btn {
+    background: rgba(255, 255, 255, 0.05);
+    /* Match cart style .mc-back-btn */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.2s, background 0.2s;
+    color: #21EA7C;
+    /* Match cart green color */
+    outline: none;
+}
+
+/* Enlarge only the buttons in the main header to match cart style */
+.v2-header-block .v2-nav-btn {
+    width: 44px;
+    /* Same as cart .mc-back-btn */
+    height: 44px;
+}
+
+.v2-nav-btn:active {
+    transform: scale(0.92);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.v2-title-section {
+    margin-bottom: 25px;
+}
+
+.v2-header-title {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0;
+    color: white;
+    letter-spacing: -0.5px;
+}
+
+.v2-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.v2-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.v2-meta-row>div:nth-child(3) {
+    gap: 5px;
+}
+
+.v2-meta-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.v2-meta-val {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.1;
+    opacity: 0.9;
+}
+
+.v2-meta-sub {
+    font-size: 13px;
+    color: #888;
+    margin-top: 2px;
+}
+
+.v2-meta-divider {
+    width: 1px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Spacing handled by row gap */
+
+.v2-menu-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* --- Menu Content Styles --- */
+
+.mobile-restaurant-page .categories-strip {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 20px 16px 12px 16px;
+    scrollbar-width: none;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: transparent;
+}
+
+.mobile-restaurant-page .category-item {
+    cursor: pointer;
+    position: relative;
+    padding-bottom: 5px;
+}
+
+.mobile-restaurant-page .category-name {
+    font-size: 17px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+    padding: 0 5px;
+    transition: color 0.2s;
+}
+
+.mobile-restaurant-page .category-item.active .category-name {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+}
+
+.mobile-restaurant-page .category-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 4px;
+    right: 4px;
+    height: 1.6px;
+    background: #21EA7C;
+}
+
+.mobile-restaurant-page .products-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px 12px;
+    padding: 0 16px 20px;
+}
+
+.mobile-restaurant-page .products-all-sections {
+    padding: 0;
+}
+
+.mobile-restaurant-page .category-section {
+    padding-top: 10px;
+}
+
+.mobile-restaurant-page .category-section-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    margin: 0;
+    padding: 10px 16px 16px 16px;
+    letter-spacing: -0.3px;
+}
+
+.mobile-restaurant-page .dish-card {
+    width: 100%;
+}
+
+.mobile-restaurant-page .dish-photo {
+    position: relative;
+    width: 100%;
+    padding-top: 100%;
+    border-radius: 25px;
+    overflow: hidden;
+    background: #2f2f2f;
+}
+
+.mobile-restaurant-page .dish-photo img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mobile-restaurant-page .dish-controls {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    display: flex;
+    justify-content: flex-end;
+    height: 40px;
+    z-index: 5;
+}
+
+.mobile-restaurant-page .quantity-counter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    width: 100%;
+    background: rgba(33, 234, 124, 1);
+    border-radius: 20px;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+    overflow: hidden;
+}
+
+.mobile-restaurant-page .quantity-counter.collapsed {
+    width: 40px;
+    margin-left: auto;
+    background: #21EA7C;
+}
+
+.mobile-restaurant-page .qty-btn {
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.mobile-restaurant-page .quantity-counter.collapsed .qty-minus,
+.mobile-restaurant-page .quantity-counter.collapsed .qty-value {
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+}
+
+.mobile-restaurant-page .qty-btn::before,
+.mobile-restaurant-page .qty-btn::after {
+    content: '';
+    position: absolute;
+    background: #000;
+    border-radius: 1px;
+}
+
+.mobile-restaurant-page .quantity-counter:not(.collapsed) .qty-btn::before,
+.mobile-restaurant-page .quantity-counter:not(.collapsed) .qty-btn::after {
+    background: #000;
+}
+
+.mobile-restaurant-page .quantity-counter.collapsed .qty-btn::before,
+.mobile-restaurant-page .quantity-counter.collapsed .qty-btn::after {
+    background: #000;
+}
+
+.mobile-restaurant-page .qty-minus::before {
+    width: 14px;
+    height: 2px;
+}
+
+.mobile-restaurant-page .qty-plus::before {
+    width: 14px;
+    height: 2px;
+}
+
+.mobile-restaurant-page .qty-plus::after {
+    width: 2px;
+    height: 14px;
+}
+
+.mobile-restaurant-page .qty-value {
+    font-weight: 600;
+    font-size: 17px;
+    color: #000000;
+    text-align: center;
+    flex: 1;
+}
+
+.mobile-restaurant-page .dish-text {
+    margin-top: 9px;
+    padding-left: 5px;
+}
+
+.mobile-restaurant-page .dish-price {
+    font-weight: 600;
+    font-size: 17px;
+    color: #21EA7C;
+}
+
+.mobile-restaurant-page .dish-title {
+    margin-top: 6px;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.80);
+    line-height: 1.2;
+}
+
+.mobile-restaurant-page .dish-meta {
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+/* Separator dot handled in JSX */
+
+.mobile-restaurant-page .dish-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    animation: fadeInModal 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.mobile-restaurant-page .dish-modal-content {
+    width: 100%;
+    max-width: 500px;
+    background: #0e0e0e;
+    border-radius: 32px 32px 0 0;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    animation: slideUpModal 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    font-family: 'Inter', sans-serif;
+}
+
+.mobile-restaurant-page .modal-top {
+    position: relative;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.mobile-restaurant-page .modal-hero-img {
+    width: 100%;
+    height: 340px;
+    object-fit: cover;
+    border-radius: 32px 32px 0 0;
+}
+
+.mobile-restaurant-page .modal-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.mobile-restaurant-page .modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.mobile-restaurant-page .modal-description {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.5;
+    margin-bottom: 32px;
+}
+
+.mobile-restaurant-page .kbju-section-v2 {
+    margin-bottom: 32px;
+}
+
+.mobile-restaurant-page .section-label-v3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.mobile-restaurant-page .kbju-grid-modal {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.mobile-restaurant-page .kbju-item-circle {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+}
+
+.mobile-restaurant-page .kbju-val-circle {
+    font-size: 15px;
+    font-weight: 700;
+    color: #21EA7C;
+}
+
+.mobile-restaurant-page .kbju-lab-circle {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.mobile-restaurant-page .modal-footer-v3 {
+    background: #1c1c1c;
+    padding: 16px 24px calc(16px + env(safe-area-inset-bottom)) 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
+}
+
+.mobile-restaurant-page .footer-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 16px;
+}
+
+.mobile-restaurant-page .footer-dish-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    text-transform: none !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+.mobile-restaurant-page .footer-dish-weight {
+    font-size: 15px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.4);
+    margin-left: 6px;
+}
+
+.mobile-restaurant-page .footer-dish-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #21EA7C;
+}
+
+.mobile-restaurant-page .footer-actions-row {
+    display: flex;
+    gap: 12px;
+}
+
+.mobile-restaurant-page .modal-qty-selector {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    padding: 2px;
+    min-width: 110px;
+    justify-content: space-between;
+}
+
+.mobile-restaurant-page .modal-qty-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 26px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.mobile-restaurant-page .modal-qty-btn:disabled {
+    opacity: 0.3;
+}
+
+.mobile-restaurant-page .modal-qty-val {
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    min-width: 20px;
+    text-align: center;
+}
+
+.mobile-restaurant-page .modal-main-add-btn {
+    flex: 1;
+    background: #21EA7C;
+    color: black;
+    border: none;
+    border-radius: 18px;
+    font-size: 17px;
+    font-weight: 700;
+    height: 48px;
+    cursor: pointer;
+}
+
+.mobile-restaurant-page .modal-main-add-btn:active {
+    transform: scale(0.98);
+}
+
+/* === Search (inline) === */
+
+.v2-search-empty {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 15px;
+    padding: 60px 20px;
+}
+
+.v2-search-bar {
+    gap: 12px;
+}
+
+.v2-search-bar.v2-nav-bar {
+    margin-bottom: 40px;
+}
+
+.v2-search-field {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 0 16px;
+    height: 44px;
+}
+
+.v2-search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    font-size: 16px;
+    font-weight: 400;
+    caret-color: #21EA7C;
+    padding: 0;
+}
+
+.v2-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.v2-search-clear {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.v2-search-clear:active {
+    opacity: 0.7;
+}
+
+/* === Info Bottom Sheet === */
+
+.v2-info-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    animation: v2-fade-in 0.3s ease;
+}
+
+.v2-info-sheet {
+    background: #1c1c1c;
+    border-radius: 24px 24px 0 0;
+    padding: 12px 20px calc(30px + env(safe-area-inset-bottom)) 20px;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: v2-slide-up 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.v2-sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    margin: 0 auto 24px auto;
+}
+
+.v2-sheet-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 24px;
+    letter-spacing: -0.5px;
+}
+
+.v2-sheet-section {
+    margin-bottom: 20px;
+}
+
+.v2-sheet-address {
+    font-size: 16px;
+    color: white;
+    line-height: 1.5;
+    opacity: 0.95;
+    border-bottom: 1px dotted rgba(255, 255, 255, 0.3);
+    display: inline;
+}
+
+.v2-sheet-tags {
+    font-size: 15px;
+    color: #888;
+    line-height: 1.4;
+    margin-top: 12px;
+}
+
+.v2-sheet-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 24px 0;
+}
+
+.v2-sheet-legal {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    line-height: 1.6;
+}
+
+.v2-sheet-legal p {
+    margin-bottom: 10px;
+}
+
+@keyframes v2-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes v2-slide-up {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}

@@ -1,0 +1,236 @@
+/* GlassBottomPanel.css */
+
+.glass-panel-container {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 600px;
+    z-index: 999;
+    pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+    .glass-panel-container {
+        display: none !important;
+    }
+}
+
+/* Common Panel Base - Matte Glass */
+.glass-panel-content {
+    background: rgba(30, 30, 30, 0.6);
+    /* Semi-transparent dark */
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px 24px 0 0;
+    padding: 16px;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+    pointer-events: auto;
+    /* Re-enable clicks */
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Empty State (Delivery Banner) */
+.glass-panel-empty {
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Active State (Cart Panel) */
+.glass-panel-active {
+    padding-top: 24px;
+    padding-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Internal Elements */
+.panel-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    margin-bottom: 14px;
+    /* Увеличили на 4px по просьбе */
+}
+
+.panel-icon-left {
+    position: absolute;
+    left: 0;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.85;
+    transform: translateY(2px);
+}
+
+.panel-icon-right {
+    position: absolute;
+    right: 0;
+    color: rgba(255, 255, 255, 0.65);
+    cursor: pointer;
+    transform: translateY(2px);
+}
+
+.panel-center-text {
+    text-align: center;
+}
+
+.delivery-text {
+    font-size: 15px;
+    color: #21EA7C;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+}
+
+.delivery-sub {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.45);
+    margin-top: 2px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+}
+
+.panel-btn-next {
+    margin-top: 0;
+    width: 100%;
+    height: 56px;
+    background: rgba(33, 234, 124, 1);
+    border: none;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #000;
+    cursor: pointer;
+    transition: transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.panel-btn-next:active {
+    transform: scale(0.98);
+}
+
+/* Modal Content Styles */
+.section-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.section-p {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.5;
+    margin-bottom: 4px;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Redesigned Modal Styles */
+.v2-modal-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 24px 24px 9px 24px;
+    margin-bottom: 16px;
+}
+
+.v2-partner-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 9px;
+    font-size: 17px;
+    font-weight: 500;
+    color: white;
+}
+
+.partner-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    /* Make it white */
+    margin-left: -5px;
+}
+
+.v2-price-desc {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 15px;
+    font-family: 'Inter', sans-serif;
+}
+
+.v2-info-row-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.v2-info-row-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.info-label {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: 'Inter', sans-serif;
+}
+
+.info-value {
+    font-size: 16px;
+    color: #21EA7C;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+}
+
+.section-title-alt {
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 20px 0;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+}
+
+.v2-sheet-legal-alt {
+    padding: 16px 4px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.35);
+    line-height: 1.6;
+    font-family: 'Inter', sans-serif;
+}
+
+.v2-sheet-legal-alt p {
+    margin: 0;
+}
+
+/* Ensure overlay behavior */
+.v2-info-overlay {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.v2-sheet-title.compact {
+    font-size: 22px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: -0.3px;
+}

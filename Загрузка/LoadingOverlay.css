@@ -1,0 +1,156 @@
+/* Внешний фон (ПК центр) */
+.loading-viewport{
+  position: fixed;
+  inset: 0;
+  background: #0b0b0c;
+  display: grid;
+  place-items: center;
+  z-index: 999999;
+}
+
+/* Экран мини-апки */
+.loading-phone{
+  width: 393px;
+  height: 852px;
+  background: #0f0f12;
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* На телефоне — фуллскрин */
+@media (max-width: 420px){
+  .loading-viewport{
+    background: #0f0f12;
+    place-items: stretch;
+  }
+  .loading-phone{
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+}
+
+/* Лого */
+.loading-logo{
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: 200px;
+  height: auto;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Масштаб сцены */
+:root{
+  --scene-scale: 2;
+  --village-bg-x: -80px; /* сдвиг village-bg влево */
+}
+
+/* Сцена (подняли выше целиком) */
+.scene{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 20px;      /* ✅ всё выше (было 0) */
+  height: 55%;
+  overflow: hidden;
+}
+
+/* Общие слои */
+.layer{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* Порядок появления:
+   1) village FG
+   2) village BG
+   3) mountains FG
+   4) mountains BG
+*/
+
+/* 1) Дома передний план */
+.layer-village-fg{
+  transform: translateY(190px) scale(var(--scene-scale));
+  animation: villageInFG 900ms ease-out 120ms forwards;
+}
+
+/* 2) Дома задний план (левее + чуть ниже) */
+.layer-village-bg{
+  transform: translateX(var(--village-bg-x)) translateY(185px) scale(var(--scene-scale)); /* ✅ старт ниже */
+  animation: villageInBG 920ms ease-out 240ms forwards;
+}
+
+/* 3) Горы передний план */
+.layer-mountains-fg{
+  transform: translateY(120px) scale(var(--scene-scale));
+  animation: mountainsInFG 950ms ease-out 380ms forwards;
+}
+
+/* 4) Горы задний план */
+.layer-mountains-bg{
+  transform: translateY(110px) scale(var(--scene-scale));
+  animation: mountainsInBG 980ms ease-out 540ms forwards;
+}
+
+/* Финальные позиции */
+
+/* Дома FG */
+@keyframes villageInFG{
+  to{
+    opacity: 1;
+    transform: translateY(48px) scale(var(--scene-scale));
+  }
+}
+
+/* ✅ Дома BG на 5px ниже (было 47px -> стало 52px) + сохраняем сдвиг влево */
+@keyframes villageInBG{
+  to{
+    opacity: 1;
+    transform: translateX(var(--village-bg-x)) translateY(67px) scale(var(--scene-scale));
+  }
+}
+
+/* ✅ Горы ещё выше (подняли сильнее) */
+@keyframes mountainsInFG{
+  to{
+    opacity: 1;
+    transform: translateY(-65px) scale(var(--scene-scale));
+  }
+}
+@keyframes mountainsInBG{
+  to{
+    opacity: 1;
+    transform: translateY(-70px) scale(var(--scene-scale));
+  }
+}
+
+/* Скрытие */
+.loading-viewport.loading-hide{
+  animation: loadingOut 420ms ease forwards;
+}
+@keyframes loadingOut{
+  to{ opacity: 0; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .layer{
+    animation: none !important;
+    opacity: 1 !important;
+    transform: translateY(0) scale(var(--scene-scale)) !important;
+  }
+  .loading-viewport.loading-hide{
+    animation: none !important;
+    opacity: 0;
+  }
+}

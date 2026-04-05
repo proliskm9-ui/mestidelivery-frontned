@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARTEM | Digital Artist & Designer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;500;800&family=Syncopate:wght@400;700&display=swap');
+
+        :root {
+            --bg: #050505;
+            --text: #e0e0e0;
+            --accent: #ccff00; /* Лайм - сейчас тренд */
+            --font-main: 'Manrope', sans-serif;
+            --font-display: 'Syncopate', sans-serif;
+            --cursor-size: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none; /* Скрываем системный курсор */
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        /* --- ШУМ (GRAIN OVERLAY) --- */
+        .noise {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.05;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIj48ZmlsdGVyIGlkPSJnoiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjY1IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2cpIiBvcGFjaXR5PSIxIi8+PC9zdmc+');
+        }
+
+        /* --- КУРСОР --- */
+        .cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: var(--cursor-size);
+            height: var(--cursor-size);
+            border: 1px solid #fff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            mix-blend-mode: difference; /* Ключевой момент для видимости везде */
+            transition: width 0.3s, height 0.3s, background-color 0.3s;
+        }
+
+        .cursor.hovered {
+            width: 80px;
+            height: 80px;
+            background-color: #fff;
+            mix-blend-mode: difference;
+            border: none;
+        }
+
+        /* --- UI ЭЛЕМЕНТЫ --- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 2rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            mix-blend-mode: exclusion;
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-size: 1.2rem;
+        }
+
+        .menu-link {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        .menu-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px; left: 0; width: 0; height: 1px;
+            background: #fff;
+            transition: width 0.3s ease;
+        }
+
+        .menu-link:hover::after {
+            width: 100%;
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Бегущая строка */
+        .marquee-container {
+            position: absolute;
+            top: 40%;
+            left: 0;
+            width: 100%;
+            transform: rotate(-5deg);
+            opacity: 0.3;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .marquee-content {
+            display: inline-block;
+            font-family: var(--font-display);
+            font-size: 10vw;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.3);
+            animation: marquee 20s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 8vw, 8rem);
+            line-height: 0.9;
+            text-transform: uppercase;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .hero-title span {
+            display: block;
+            color: transparent;
+            -webkit-text-stroke: 1px #fff;
+            transition: color 0.5s;
+        }
+
+        .hero-title span.filled {
+            color: #fff;
+            -webkit-text-stroke: 0px;
+        }
+
+        .hero-sub {
+            position: absolute;
+            bottom: 3rem;
+            left: 4rem;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            max-width: 300px;
+            line-height: 1.5;
+        }
+
+        /* --- WORKS SECTION (Masonry-ish) --- */
+        .section {
+            padding: 8rem 4rem;
+        }
+
+        .section-header {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 4rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-header::before {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 2px;
+            background: var(--accent);
+        }
+
+        .works-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 4rem;
+        }
+
+        .work-item {
+            position: relative;
+        }
+
+        .work-image-wrapper {
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .work-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
+            filter: grayscale(100%);
+        }
+
+        .work-item:hover .work-image {
+            transform: scale(1.1);
+            filter: grayscale(0%);
+        }
+
+        /* Эффект шторки при наведении */
+        .work-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--accent);
+            transform: translateY(100%);
+            transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+            mix-blend-mode: difference;
+            z-index: 2;
+        }
+
+        .work-item:hover .work-overlay {
+            transform: translateY(0);
+        }
+
+        .work-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 1rem;
+        }
+
+        .work-title {
+            font-size: 1.5rem;
+            font-weight: 300;
+        }
+
+        .work-tags {
+            font-size: 0.8rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- ABOUT & SKILLS (Parallax) --- */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+        }
+
+        .big-text {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            line-height: 1.2;
+            font-weight: 300;
+        }
+
+        .big-text strong {
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .skills-list {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .skill-tag {
+            padding: 0.5rem 1.5rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .skill-tag:hover {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        /* --- CONTACT --- */
+        .contact-section {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .magnetic-btn {
+            position: relative;
+            display: inline-block;
+            padding: 2rem 4rem;
+            font-size: 2rem;
+            font-family: var(--font-display);
+            color: #fff;
+            text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: transparent;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+
+        .magnetic-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+            z-index: -1;
+        }
+
+        .magnetic-btn:hover {
+            color: #000;
+            border-color: #fff;
+        }
+
+        .magnetic-btn:hover::before {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        /* --- REVEAL ANIMATION UTILS --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 1s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            padding: 2rem 4rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* --- СТИЛИ ДЛЯ МОДАЛКИ --- */
+        .project-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .project-modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 1000px;
+            position: relative;
+        }
+
+        .modal-title {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #fff;
+        }
+
+        .modal-desc {
+            margin-top: 1.5rem;
+            font-size: 1.1rem;
+            color: #aaa;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: -60px; right: 0;
+            background: transparent;
+            border: 1px solid #fff;
+            color: #fff;
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .overlay-content h3 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .case-btn {
+            padding: 0.8rem 1.5rem;
+            background: transparent;
+            border: 1px solid #fff;
+            color: #fff;
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .case-btn:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        /* --- СРАВНИТЕЛЬНЫЙ СЛАЙДЕР (Before/After) --- */
+        .comparison-slider {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .compare-after, .compare-before {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden;
+        }
+
+        /* Нижний слой полностью видим */
+        .compare-after img {
+            width: 100%; height: 100%; object-fit: cover;
+            display: block;
+        }
+
+        /* Верхний слой обрезается */
+        .compare-before {
+            width: 50%; /* Начальное положение */
+            border-right: 2px solid var(--accent);
+            z-index: 2;
+        }
+
+        .compare-before img {
+            width: 100vw; /* Ширина картинки должна быть равна ширине экрана, чтобы не сжималась */
+            max-width: 1000px; /* Ограничим по ширине контента */
+            height: 100%;
+            object-fit: cover;
+            /* Важно: чтобы картинка оставалась на месте при обрезке контейнера */
+            position: absolute;
+            top: 0; left: 0;
+        }
+
+        /* Ручка слайдера */
+        .handle {
+            position: absolute;
+            top: 0; bottom: 0; left: 50%;
+            width: 40px;
+            transform: translateX(-50%);
+            z-index: 10;
+            cursor: ew-resize;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .handle-circle {
+            width: 30px; height: 30px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--accent);
+        }
+
+        .handle-line {
+            position: absolute;
+            width: 2px; height: 100%;
+            background: var(--accent);
+        }
+
+        .label {
+            position: absolute;
+            bottom: 20px;
+            padding: 5px 10px;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 4px;
+        }
+        .label-before { right: 20px; }
+        .label-after { left: 20px; }
+
+        @media (max-width: 768px) {
+            .works-grid { grid-template-columns: 1fr; }
+            .about-grid { grid-template-columns: 1fr; }
+            nav { padding: 1.5rem; }
+            .section { padding: 4rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Шум -->
+    <div class="noise"></div>
+
+    <!-- Курсор -->
+    <div class="cursor" id="cursor"></div>
+
+    <nav>
+        <div class="logo magnetic">Artem.Design</div>
+        <a href="#contact" class="menu-link magnetic">Связаться</a>
+    </nav>
+
+    <!-- Hero -->
+    <header class="hero">
+        <div class="marquee-container">
+            <div class="marquee-content">
+                HYPERREALISM • 3D EXPERIENCE • WEBGL • CREATIVE DEV • HYPERREALISM • 3D EXPERIENCE • WEBGL • CREATIVE DEV • 
+            </div>
+        </div>
+
+        <h1 class="hero-title">
+            <span class="reveal">Digital</span>
+            <span class="reveal filled">Reality</span>
+            <span class="reveal">Architect</span>
+        </h1>
+
+        <div class="hero-sub reveal">
+            Создаю цифровые продукты, которые стирают грань между вебом и физическим миром. Призы Awwwards & FWA.
+        </div>
+    </header>
+
+    <main>
+        <!-- Selected Works -->
+        <section class="section" id="work">
+            <div class="section-header reveal">Избранные Проекты</div>
+            <div class="works-grid">
+                
+                <div class="work-item reveal" onclick="openModal('modal-1')" style="cursor: pointer;">
+                    <div class="work-image-wrapper">
+                        <!-- Абстрактное фото для стиля -->
+                        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop" alt="Project 1" class="work-image">
+                        <div class="work-overlay"></div>
+                    </div>
+                    <div class="work-info">
+                        <h3 class="work-title">Neon Genesis</h3>
+                        <span class="work-tags">WebGL / Three.js</span>
+                    </div>
+                </div>
+
+                <div class="work-item reveal" onclick="openModal('modal-2')" style="cursor: pointer;">
+                    <div class="work-image-wrapper">
+                        <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1000&auto=format&fit=crop" alt="Project 2" class="work-image">
+                        <div class="work-overlay"></div>
+                    </div>
+                    <div class="work-info">
+                        <h3 class="work-title">Retro Future</h3>
+                        <span class="work-tags">Branding / UI</span>
+                    </div>
+                </div>
+
+                <div class="work-item reveal" onclick="openModal('modal-3')" style="cursor: pointer;">
+                    <div class="work-image-wrapper">
+                        <img src="https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=1000&auto=format&fit=crop" alt="Project 3" class="work-image">
+                        <div class="work-overlay"></div>
+                    </div>
+                    <div class="work-info">
+                        <h3 class="work-title">Cyber Core</h3>
+                        <span class="work-tags">Interaction / GSAP</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- About -->
+        <section class="section" id="about">
+            <div class="section-header reveal">Подход</div>
+            <div class="about-grid">
+                <div class="reveal">
+                    <p class="big-text">
+                        Я не просто верстаю сайты. Я строю <strong>иммерсивные миры</strong>. Каждый пиксель работает на эмоцию, каждая анимация имеет смысл.
+                    </p>
+                </div>
+                <div class="reveal">
+                    <p style="margin-bottom: 2rem; opacity: 0.7; line-height: 1.6;">
+                        Специализируюсь на создании высоконагруженных интерфейсов с упором на микро-взаимодействия и 3D-графику. Моя цель — заставить пользователя задержаться и почувствовать.
+                    </p>
+                    <ul class="skills-list">
+                        <li class="skill-tag">HTML/CSS/JS</li>
+                        <li class="skill-tag">WebGL</li>
+                        <li class="skill-tag">Three.js</li>
+                        <li class="skill-tag">React</li>
+                        <li class="skill-tag">GSAP Animation</li>
+                        <li class="skill-tag">Blender</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact -->
+        <section class="section contact-section" id="contact">
+            <div class="reveal">
+                <p style="text-transform: uppercase; letter-spacing: 3px; margin-bottom: 2rem; color: var(--accent);">Готовы начать проект?</p>
+                <a href="mailto:hello@artem.design" class="magnetic-btn">ОТПРАВИТЬ EMAIL</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div>© 2024 Artem Design</div>
+        <div>based in Moscow / Remote</div>
+    </footer>
+
+    <!-- Модальные окна для проектов -->
+    <div class="project-modal" id="modal-1">
+        <div class="modal-content">
+            <button class="close-modal">×</button>
+            <h2 class="modal-title">Neon Genesis</h2>
+            <div class="modal-desc">
+                Иммерсивный WebGL-проект, созданный с использованием Three.js. Интерактивная 3D-среда с неоновой эстетикой и плавными переходами.
+            </div>
+            <div style="margin-top: 2rem;">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop" alt="Neon Genesis" style="width: 100%; border-radius: 8px;">
+            </div>
+            <div style="margin-top: 2rem;">
+                <a href="#" class="case-btn">Посмотреть кейс</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="project-modal" id="modal-2">
+        <div class="modal-content">
+            <button class="close-modal">×</button>
+            <h2 class="modal-title">Retro Future</h2>
+            <div class="modal-desc">
+                Брендинг и UI-дизайн в стиле ретрофутуризма. Комбинация винтажных элементов с современными технологиями.
+            </div>
+            <div style="margin-top: 2rem;">
+                <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1000&auto=format&fit=crop" alt="Retro Future" style="width: 100%; border-radius: 8px;">
+            </div>
+            <div style="margin-top: 2rem;">
+                <a href="#" class="case-btn">Посмотреть кейс</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="project-modal" id="modal-3">
+        <div class="modal-content">
+            <button class="close-modal">×</button>
+            <h2 class="modal-title">Cyber Core</h2>
+            <div class="modal-desc">
+                Интерактивный проект с использованием GSAP для создания сложных анимаций и микро-взаимодействий.
+            </div>
+            <div style="margin-top: 2rem;">
+                <div class="comparison-slider">
+                    <div class="compare-after">
+                        <img src="https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=1000&auto=format&fit=crop" alt="After">
+                        <div class="label label-after">После</div>
+                    </div>
+                    <div class="compare-before">
+                        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop" alt="Before">
+                        <div class="label label-before">До</div>
+                    </div>
+                    <div class="handle">
+                        <div class="handle-line"></div>
+                        <div class="handle-circle"></div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 2rem;">
+                <a href="#" class="case-btn">Посмотреть кейс</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CUSTOM CURSOR ---
+        const cursor = document.getElementById('cursor');
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        // Эффект увеличения курсора при наведении на интерактивные элементы
+        const interactiveElements = document.querySelectorAll('a, button, .work-item, .skill-tag');
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+
+        // --- 2. MAGNETIC BUTTONS ---
+        const magnetics = document.querySelectorAll('.magnetic');
+        
+        magnetics.forEach((magnetic) => {
+            magnetic.addEventListener('mousemove', (e) => {
+                const rect = magnetic.getBoundingClientRect();
+                // Считываем координаты центра элемента
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                
+                // Сила притяжения (меньше число = сильнее притяжение)
+                magnetic.style.transform = `translate(${x * 0.3}px, ${y * 0.5}px)`;
+            });
+
+            magnetic.addEventListener('mouseleave', () => {
+                magnetic.style.transform = 'translate(0px, 0px)';
+            });
+        });
+
+        // --- 3. SCROLL REVEAL (Intersection Observer) ---
+        const revealElements = document.querySelectorAll('.reveal');
+
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    // Можно отключать наблюдение после появления, если нужно один раз
+                    // revealObserver.unobserve(entry.target); 
+                }
+            });
+        }, {
+            threshold: 0.15, // Элемент должен появиться на 15%
+            rootMargin: "0px 0px -50px 0px"
+        });
+
+        revealElements.forEach(el => revealObserver.observe(el));
+
+        // --- 4. SMOOTH PARALLAX FOR IMAGES (Опционально для плавности) ---
+        window.addEventListener('scroll', () => {
+            const scrolled = window.scrollY;
+            const heroTitle = document.querySelector('.hero-title');
+            if(heroTitle) {
+                // Заголовок движется медленнее скролла
+                heroTitle.style.transform = `translateY(${scrolled * 0.4}px)`;
+            }
+        });
+
+        // --- 5. MODAL LOGIC ---
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Блокируем скролл страницы
+            }
+        }
+
+        function closeModal(modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Закрытие модальных окон
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const modal = e.target.closest('.project-modal');
+                if (modal) {
+                    closeModal(modal);
+                }
+            });
+        });
+
+        // Закрытие по клику вне контента
+        document.querySelectorAll('.project-modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal(modal);
+                }
+            });
+        });
+
+        // Закрытие по Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.project-modal.active').forEach(modal => {
+                    closeModal(modal);
+                });
+            }
+        });
+
+        // --- 6. BEFORE/AFTER SLIDER LOGIC ---
+        document.querySelectorAll('.comparison-slider').forEach(slider => {
+            const beforeLayer = slider.querySelector('.compare-before');
+            const handle = slider.querySelector('.handle');
+            if (!beforeLayer || !handle) return;
+            
+            let isDown = false;
+
+            function moveSlider(e) {
+                if (!isDown) return;
+                
+                const rect = slider.getBoundingClientRect();
+                // Получаем X позицию мыши относительно слайдера
+                let x = (e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0)) - rect.left;
+                
+                // Ограничиваем в пределах слайдера
+                if (x < 0) x = 0;
+                if (x > rect.width) x = rect.width;
+
+                const percent = (x / rect.width) * 100;
+
+                // Двигаем верхний слой
+                beforeLayer.style.width = percent + '%';
+                
+                // Двигаем ручку
+                handle.style.left = percent + '%';
+            }
+
+            // Мышь
+            handle.addEventListener('mousedown', () => isDown = true);
+            window.addEventListener('mouseup', () => isDown = false);
+            slider.addEventListener('mousemove', moveSlider);
+
+            // Тач (для телефонов)
+            handle.addEventListener('touchstart', () => isDown = true);
+            window.addEventListener('touchend', () => isDown = false);
+            slider.addEventListener('touchmove', moveSlider);
+        });
+
+    </script>
+</body>
+</html>

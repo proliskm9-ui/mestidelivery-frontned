@@ -1,0 +1,215 @@
+@keyframes ptFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* --- OVERLAY (Фон) --- */
+.pt-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 200;
+  opacity: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.pt-overlay.active {
+  animation: ptFadeIn 0.3s ease forwards;
+}
+
+@keyframes ptSlideUp {
+  from {
+    transform: translateX(-50%) translateY(100%);
+  }
+
+  to {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* --- BOTTOM SHEET (Само окно) --- */
+.pt-bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 393px;
+  background: #191917;
+  border-radius: 25px 25px 0 0;
+  padding: 24px 16px 20px 16px;
+  z-index: 201;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+.pt-bottom-sheet.active {
+  animation: ptSlideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+/* --- HEADER --- */
+.pt-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.pt-title {
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.85);
+  /* var(--text) */
+  margin: 0;
+}
+
+.pt-subtitle {
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.60);
+  margin-top: 12px;
+  margin-bottom: 0;
+}
+
+.pt-close-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: #21EA7C;
+  /* var(--green) */
+}
+
+.pt-close-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* --- ОПЦИИ (Карточки) --- */
+.place-option {
+  width: 100%;
+  /* Занимает всю ширину контейнера */
+  height: 61px;
+  display: flex;
+  align-items: center;
+  padding: 17px 14px 17px 14px;
+  cursor: pointer;
+  background: #1F1F1E;
+  border-radius: 15px;
+  border: 1px solid #2D2D2B;
+  margin-bottom: 10px;
+  position: relative;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.place-option:last-of-type {
+  margin-bottom: 0;
+}
+
+/* Активное состояние */
+.place-option.active {
+  border: 1px solid transparent;
+  /* Убираем видимую границу */
+  box-shadow:
+    inset 0 0 3px 0 rgba(45, 45, 43, 0.20),
+    0 0 7px 0 rgba(59, 180, 74, 0.25);
+  background: #1F1F1E;
+  /* Сохраняем фон */
+}
+
+/* Иконка слева */
+.place-option-icon {
+  width: 25px;
+  height: 25px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 17px;
+  color: #21EA7C;
+  /* var(--green) */
+}
+
+.place-option-icon svg,
+.place-option-icon img {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+}
+
+/* Текст */
+.place-option-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.place-option-title {
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+.place-option-sub {
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.40);
+  margin: 0;
+}
+
+/* Стрелка справа */
+.place-option-arrow {
+  width: 6px;
+  height: 10px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.40);
+  /* var(--sub) */
+}
+
+.place-option-arrow svg {
+  width: 6px;
+  height: 10px;
+}
+
+/* --- КНОПКА ГОТОВО --- */
+.pt-confirm-btn {
+  width: 100%;
+  height: 56px;
+  background: #21EA7C;
+  /* var(--green) */
+  border: none;
+  border-radius: 16px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.2px;
+  color: #161616;
+  cursor: pointer;
+  margin-top: 34px;
+  /* Отступ как в исходнике */
+  box-shadow: 0px 4px 5px 0px rgba(59, 180, 74, 0.20);
+}
