@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /* Global Font Definition */
 @font-face {
   font-family: 'Montserrat';
@@ -197,4 +199,96 @@ button.allRestaurantFavorite:active,
 button.ric-fav-btn:active,
 button.fav-hero-btn:active {
   transform: none !important;
+}
+
+/* --- GLOBAL PREMIUM MODAL STYLES --- */
+
+.premium-modal-overlay-global {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 12000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: fadeInOverlayGlobal 0.3s ease forwards;
+}
+
+.premium-modal-content-global {
+    background: radial-gradient(120% 120% at 50% 0%, rgba(30, 30, 30, 0.9) 0%, rgba(10, 10, 10, 0.95) 100%);
+    border-radius: 40px;
+    width: 100%;
+    /* max-width should be set per modal */
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.05);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    position: relative;
+    animation: premiumScaleUpGlobal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes fadeInOverlayGlobal {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes premiumScaleUpGlobal {
+    from { opacity: 0; transform: scale(0.9) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* --- APPLY PREMIUM AESTHETIC TO ALL MODALS WITHOUT BREAKING LAYOUT --- */
+.bento-modal-overlay,
+.dish-modal-overlay,
+.v2-info-overlay,
+.time-modal-overlay,
+.promo-modal-overlay,
+.place-modal-overlay,
+.tip-modal-overlay,
+.comment-modal-overlay,
+.phone-modal-overlay,
+.rating-modal-overlay,
+.map-modal-overlay,
+.modal-overlay {
+    background: rgba(0, 0, 0, 0.7) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.bento-modal,
+.dish-modal-content,
+.v2-info-sheet,
+.time-modal-content,
+.promo-modal-content,
+.place-modal-content,
+.tip-modal-content,
+.comment-modal-content,
+.phone-modal-content,
+.rating-modal-content,
+.map-modal-content,
+.premium-address-modal,
+.modal-content {
+    background: radial-gradient(120% 120% at 50% 0%, rgba(30, 30, 30, 0.9) 0%, rgba(10, 10, 10, 0.95) 100%) !important;
+    border: none !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+    backdrop-filter: blur(40px) !important;
+    -webkit-backdrop-filter: blur(40px) !important;
+}
+
+/* --- FIX iOS SAFARI KEYBOARD BUG ---
+   On iOS, fixed elements with backdrop-filter fail to move up when the keyboard appears. 
+   We remove the blur for modals that contain text inputs. */
+.tip-modal-content,
+.promo-modal-content,
+.comment-modal-content,
+.phone-modal-content {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: radial-gradient(120% 120% at 50% 0%, rgba(30, 30, 30, 1) 0%, rgba(10, 10, 10, 1) 100%) !important;
 }

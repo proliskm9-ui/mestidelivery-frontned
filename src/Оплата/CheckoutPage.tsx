@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import './CheckoutPage.css';
+import { useLanguage } from '../translations/LanguageContext';
 
 // === БЛОКИ ===
 import HeaderBlock from './blocks/HeaderBlock/HeaderBlock';
 import AddressBlock, { AddressData } from './blocks/AddressBlock/AddressBlock';
-import PaymentBlock from './blocks/PaymentBlock/PaymentBlock';
 import TipsBlock from './blocks/TipsBlock/TipsBlock';
 import FooterBlock from './blocks/FooterBlock/FooterBlock';
 
@@ -15,6 +15,7 @@ import PromoCodeModal from './modals/PromoCodeModal/PromoCodeModal';
 import CustomTipModal from './modals/CustomTipModal/CustomTipModal';
 import CommentModal from './modals/CommentModal/CommentModal';
 import PhoneModal from './modals/PhoneModal/PhoneModal';
+import MapModal from './modals/MapModal/MapModal';
 
 // === ТИПЫ ===
 type DeliveryType = 'standard' | 'scheduled';
@@ -36,6 +37,7 @@ interface ModalState {
   customTip: boolean;
   comment: boolean;
   phone: boolean;
+  map: boolean;
 }
 
 export interface CheckoutOrderData {
@@ -68,6 +70,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
   cutleryCount,
   initialAddress
 }) => {
+  const { t } = useLanguage();
   // Load saved address from prop or localStorage
   const savedAddressRaw = localStorage.getItem('user_address');
   const savedAddress = initialAddress || (savedAddressRaw ? (() => { try { return JSON.parse(savedAddressRaw); } catch { return null; } })() : null);
@@ -104,7 +107,8 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
     promo: false,
     customTip: false,
     comment: false,
-    phone: false
+    phone: false,
+    map: false,
   });
 
   // Хелпер для открытия/закрытия
@@ -172,7 +176,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
       });
     } else {
       console.log('Данные заказа:', orderData);
-      alert(`Оплатить: ${totalAmount.toFixed(2)} ₾`);
+      alert(`${t('checkout.mobile_pay')}: ${totalAmount.toFixed(2)} ₾`);
     }
   };
 
@@ -203,16 +207,9 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
             address={orderData.address}
             updateAddress={updateAddress}
             onOpenPlaceModal={() => toggleModal('place', true)}
+            onOpenMapModal={() => toggleModal('map', true)}
             onEditComment={() => toggleModal('comment', true)}
             onEditPhone={() => toggleModal('phone', true)}
-          />
-
-          {/* --- 3. ОПЛАТА --- */}
-          <PaymentBlock
-            paymentMethod={orderData.payment}
-            setPaymentMethod={(method: PaymentMethod) => updateOrder('payment', method)}
-            promoCode={orderData.promoCode}
-            onOpenPromo={() => toggleModal('promo', true)}
           />
 
           {/* --- 4. ЧАЕВЫЕ --- */}
@@ -222,14 +219,13 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
             onOpenCustomTip={() => toggleModal('customTip', true)}
           />
 
-        </div>
+          {/* --- 5. ФУТЕР --- */}
+          <FooterBlock
+            totalAmount={totalAmount}
+            onPay={handlePay}
+          />
 
-        {/* --- 5. ФУТЕР --- */}
-        <FooterBlock
-          totalAmount={totalAmount}
-          deliveryTime={orderData.deliveryType === 'standard' ? '25-30 мин' : (orderData.scheduledTime || '25-30 мин')}
-          onPay={handlePay}
-        />
+        </div>
 
         {/* ================= ВСЕ МОДАЛКИ ================= */}
 
@@ -290,6 +286,19 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
             onClose={() => toggleModal('phone', false)}
             currentValue={orderData.address.phone}
             onSave={(val: string) => updateAddress('phone', val)}
+          />
+        )}
+
+        {/* 7. Карта */}
+        {modals.map && (
+          <MapModal
+            isOpen={modals.map}
+            onClose={() => toggleModal('map', false)}
+            onConfirm={(loc) => {
+              updateAddress('geo', loc);
+              toggleModal('map', false);
+            }}
+            initialGeo={orderData.address.geo}
           />
         )}
 

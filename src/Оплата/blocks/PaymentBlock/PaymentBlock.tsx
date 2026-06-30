@@ -1,5 +1,6 @@
 import React from 'react';
 import './PaymentBlock.css';
+import { useLanguage } from '../../../translations/LanguageContext';
 
 import cashGreenIcon from '../../assets/banknote1.png';
 import cashGrayIcon from '../../assets/banknote2.png';
@@ -20,10 +21,11 @@ const PaymentBlock: React.FC<PaymentBlockProps> = ({
   onOpenPromo,
   promoCode
 }) => {
+  const { t } = useLanguage();
 
   return (
     <section className="payment-card">
-      <h2 className="payment-title">Способ оплаты</h2>
+      <h2 className="payment-title">{t('checkout.payment_method_title')}</h2>
 
       <div className="payment-content">
 
@@ -40,7 +42,7 @@ const PaymentBlock: React.FC<PaymentBlockProps> = ({
               <img src={paymentMethod === 'cash' ? cashGreenIcon : cashGrayIcon} alt="Cash" />
             </div>
             <div className="payment-btn-bottom">
-              <span className="payment-btn-text">Наличные курьеру</span>
+              <span className="payment-btn-text">{t('checkout.cash_courier')}</span>
             </div>
           </button>
 
@@ -53,7 +55,7 @@ const PaymentBlock: React.FC<PaymentBlockProps> = ({
               <img src={paymentMethod === 'card' ? cardGreenIcon : cardGrayIcon} alt="Card" />
             </div>
             <div className="payment-btn-bottom">
-              <span className="payment-btn-text">Карта RUS/EU</span>
+              <span className="payment-btn-text">{t('checkout.card_rus_eu')}</span>
               <div className="payment-btn-logo">
                 <img src="/Assets/apple-touch-icon.png" alt="Card" />
               </div>
@@ -76,7 +78,7 @@ const PaymentBlock: React.FC<PaymentBlockProps> = ({
               />
             </div>
             <div className="payment-btn-bottom">
-              <span className="payment-btn-text">Криптовалюта</span>
+              <span className="payment-btn-text">{t('checkout.crypto')}</span>
               <div className="payment-btn-logo">
                 <img src="/Assets/apple-touch-icon.png" alt="Card" />
               </div>
@@ -93,9 +95,9 @@ const PaymentBlock: React.FC<PaymentBlockProps> = ({
 
             {/* Контейнер для текста и лейбла */}
             <div className="promo-text-container">
-              {promoCode && <span className="promo-label">Промокод</span>}
+              {promoCode && <span className="promo-label">{t('checkout.promo_code')}</span>}
               <span className={`promo-text ${promoCode ? 'active' : ''}`}>
-                {promoCode ? `#${promoCode}` : 'Промокоды'}
+                {promoCode ? `#${promoCode}` : t('checkout.promo_codes')}
               </span>
             </div>
 

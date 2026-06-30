@@ -76,11 +76,11 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
     const getStatusLabel = (status?: string): { label: string, class: string } => {
         const s = status?.toLowerCase() || 'delivered';
         switch (s) {
-            case 'pending': return { label: 'Ожидание', class: 'pending' };
-            case 'preparing': return { label: 'Готовится', class: 'pending' };
-            case 'delivering': return { label: 'В пути', class: 'pending' };
-            case 'cancelled': return { label: 'Отменен', class: 'cancelled' };
-            default: return { label: 'Доставлен', class: 'delivered' };
+            case 'pending': return { label: t('status.pending'), class: 'pending' };
+            case 'preparing': return { label: t('status.preparing'), class: 'pending' };
+            case 'delivering': return { label: t('status.delivering'), class: 'pending' };
+            case 'cancelled': return { label: t('status.cancelled'), class: 'cancelled' };
+            default: return { label: t('status.delivered'), class: 'delivered' };
         }
     };
     const [avatarModal, setAvatarModal] = useState(false);
@@ -149,7 +149,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                         <input className="bento-input" value={userAddress?.house || ''} onChange={e => onUpdateAddress?.({ ...userAddress, house: e.target.value })} />
                     </div>
                     <div className="bento-input-group">
-                        <label>{t('checkout.entrance') || 'Подъезд'}</label>
+                        <label>{t('map.entrance')}</label>
                         <input className="bento-input" value={userAddress?.entrance || ''} onChange={e => onUpdateAddress?.({ ...userAddress, entrance: e.target.value })} />
                     </div>
                     <div className="bento-input-group">
@@ -171,7 +171,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
                 {orderHistory.map((order, i) => {
                     const statusInfo = getStatusLabel(order.status);
-                    const orderName = order.restaurant_name || `Заказ #${order.id}`;
+                    const orderName = order.restaurant_name || `${t('common.order')} #${order.id}`;
                     const orderAddress = order.address || '';
                     return (
                         <div key={order.id || i} className="mini-order-item" style={{ marginBottom: 0, cursor: 'pointer' }} onClick={() => onOrderClick?.(order.id)}>
@@ -206,10 +206,10 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                     <div className="edit-overlay-btn" style={{ borderRadius: '50%' }}><IconEdit /></div>
                 </div>
                 <div className="main-user-info">
-                    <h2>{userProfile?.name || 'Пользователь'}</h2>
+                    <h2>{userProfile?.name || t('profile.user_fallback')}</h2>
                     <p>{userProfile?.phone || t('profile.phone')}</p>
                     <div className="points-pill">
-                        <span>{userProfile?.points || 0} {t('profile.points_label') || 'баллов'}</span>
+                        <span>{userProfile?.points || 0} {t('profile.points_label')}</span>
                     </div>
                 </div>
                 <button
@@ -238,7 +238,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                     ) : (
                         orderHistory.slice(0, 2).map((order, i) => {
                             const statusInfo = getStatusLabel(order.status);
-                            const orderName = order.restaurant_name || `Заказ #${order.id}`;
+                            const orderName = order.restaurant_name || `${t('common.order')} #${order.id}`;
                             const orderAddress = order.address || '';
                             return (
                                 <div key={order.id || i} className="mini-order-item" onClick={() => onOrderClick?.(order.id)}>
@@ -291,7 +291,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
         <div className="profile-page-wrapper">
             <div className="profile-container">
                 <header className="profile-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                    <h1>{view === 'dashboard' ? 'Профиль' : t('profile.title')}</h1>
+                    <h1>{t('profile.title')}</h1>
                     {view === 'dashboard' && (
                         <button
                             onClick={onBack}

@@ -12,12 +12,12 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
     useEffect(() => {
         // Automatically start the hide animation after the sequence completes
         // Total sequence is roughly 1500ms (max delay 540ms + max duration 980ms)
-        // We hold it for a total of 2500ms before fading out
+        // Hold for 1200ms total before fading out
         const t = setTimeout(() => {
             if (ref.current) {
                 ref.current.classList.add("loading-hide");
             }
-        }, 2800);
+        }, 1200);
 
         return () => clearTimeout(t);
     }, []);

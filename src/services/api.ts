@@ -14,6 +14,10 @@ export interface Restaurant {
     longitude?: number;
     address?: string;
     promo?: string;
+    poster_api_token?: string;
+    spot_id?: string;
+    poster_token?: string;
+    poster_spot_id?: number;
 }
 
 export interface Product {
@@ -30,6 +34,8 @@ export interface Product {
     fats?: string;
     carbs?: string;
     ingredients?: string;
+    is_available?: boolean;
+    external_id?: string;
 }
 
 export interface Category {
@@ -49,14 +55,65 @@ export interface Store {
 const API_URL = (import.meta as any).env.VITE_API_URL || '';
 const API_BASE = `${API_URL}/api`;
 
-function resolveImageUrl(path: string): string {
-    if (path && path.startsWith('/uploads/')) {
-        return `${API_URL}${path}`;
+export function resolveImageUrl(path: string): string {
+    if (!path) return '';
+    // SEC-04: Prevent Path Traversal attempts
+    if (path.includes('..') || path.includes('%2e%2e') || path.includes('%2E%2E')) {
+        return '';
     }
-    return path;
+    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+        return path;
+    }
+    const safePath = path.replace(/^\/?(uploads\/)?/, '');
+    return `${API_URL}/uploads/${safePath}`;
 }
 
-const cache: Record<string, any> = {};
+// PERF-03 & PERF-04: Robust, expiring caching (TTL and eviction storage)
+class TTLStorage {
+    private store = new Map<string, { value: any; expiry: number }>();
+    private maxEntries = 80;
+    private defaultTtlMs = 3 * 60 * 1000; // 3 minutes standard TTL
+
+    get(key: string): any {
+        const item = this.store.get(key);
+        if (!item) return undefined;
+        if (Date.now() > item.expiry) {
+            this.store.delete(key);
+            return undefined;
+        }
+        return item.value;
+    }
+
+    set(key: string, value: any, ttlMs = this.defaultTtlMs): void {
+        if (this.store.size >= this.maxEntries) {
+            // Evict oldest entry (First-In, First-Out)
+            const oldestKey = this.store.keys().next().value;
+            if (oldestKey) this.store.delete(oldestKey);
+        }
+        this.store.set(key, { value, expiry: Date.now() + ttlMs });
+    }
+
+    has(key: string): boolean {
+        return this.get(key) !== undefined;
+    }
+}
+
+const ttlCache = new TTLStorage();
+
+// Proxy wrapper to maintain backwards compatibility with bracket notation (e.g. cache[key])
+const cache = new Proxy({} as Record<string, any>, {
+    get(_, prop: string) {
+        return ttlCache.get(prop);
+    },
+    set(_, prop: string, value: any) {
+        ttlCache.set(prop, value);
+        return true;
+    },
+    has(_, prop: string) {
+        return ttlCache.has(prop);
+    }
+});
+
 export { cache as restaurantCache };
 
 export const api = {
@@ -69,7 +126,7 @@ export const api = {
             return data;
         } catch (error) {
             console.error(error);
-            return []; // Fallback to empty
+            throw error;
         }
     },
     createStore: async (store: Omit<Store, 'id'>): Promise<Store> => {
@@ -108,7 +165,7 @@ export const api = {
             return data;
         } catch (error) {
             console.error(error);
-            return [];
+            throw error;
         }
     },
     createRestaurant: async (restaurant: Omit<Restaurant, 'id'>): Promise<Restaurant> => {
@@ -153,10 +210,19 @@ export const api = {
     getProducts: async (restaurantId: string): Promise<Product[]> => {
         if (cache[`prods_${restaurantId}`]) return cache[`prods_${restaurantId}`];
         try {
-            const res = await fetch(`${API_BASE}/products/?restaurant_id=${restaurantId}`);
+            const res = await fetch(`${API_BASE}/products/?restaurant_id=${restaurantId}&limit=1000`);
             if (!res.ok) throw new Error('Failed to fetch products');
             const data = await res.json();
             data.forEach((p: Product) => { p.img = resolveImageUrl(p.img); });
+            
+            // Sort chronologically (oldest first)
+            data.sort((a: Product, b: Product) => {
+                const tsA = parseInt(a.id.replace('prod-', '')) || 0;
+                const tsB = parseInt(b.id.replace('prod-', '')) || 0;
+                if (tsA && tsB) return tsA - tsB;
+                return a.id.localeCompare(b.id);
+            });
+
             cache[`prods_${restaurantId}`] = data;
             return data;
         } catch (error) {
@@ -216,6 +282,10 @@ export const api = {
         const res = await fetch(`${API_BASE}/profile/me`, {
             headers: api.getHeaders()
         });
+        if (res.status === 401) {
+            localStorage.removeItem('token');
+            throw new Error('Unauthorized');
+        }
         if (!res.ok) throw new Error('Failed to fetch profile');
         return await res.json();
     },
@@ -226,6 +296,10 @@ export const api = {
             headers: api.getHeaders(),
             body: JSON.stringify(updates)
         });
+        if (res.status === 401) {
+            localStorage.removeItem('token');
+            throw new Error('Unauthorized');
+        }
         if (!res.ok) throw new Error('Failed to update profile');
         return await res.json();
     },
@@ -234,12 +308,16 @@ export const api = {
         const res = await fetch(`${API_BASE}/profile/orders`, {
             headers: api.getHeaders()
         });
+        if (res.status === 401) {
+            localStorage.removeItem('token');
+            throw new Error('Unauthorized');
+        }
         if (!res.ok) throw new Error('Failed to fetch order history');
         return await res.json();
     },
 
     trackOrder: async (orderId: number) => {
-        const res = await fetch(`${API_BASE}/orders/track/${orderId}`, {
+        const res = await fetch(`${API_BASE}/orders/${orderId}`, {
             headers: api.getHeaders()
         });
         if (!res.ok) throw new Error('Failed to track order');
@@ -265,14 +343,15 @@ export const api = {
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
-        // Add Telegram init data if present
+        // Add Telegram init data if present (only for non-partner apps)
         try {
-            if ((window as any).Telegram?.WebApp?.initData) {
+            const isPartnerApp = window.location.pathname.startsWith('/partners');
+            if (!isPartnerApp && (window as any).Telegram?.WebApp?.initData) {
                 headers['X-Telegram-Init-Data'] = (window as any).Telegram.WebApp.initData;
             }
         } catch { }
 
-        const res = await fetch(`${API_BASE}/orders/`, {
+        const res = await fetch(`${API_BASE}/orders`, {
             method: 'POST',
             headers,
             body: JSON.stringify(data)
@@ -281,7 +360,8 @@ export const api = {
             const err = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
             throw new Error(err.detail || 'Failed to create order');
         }
-        return await res.json();
+        const result = await res.json();
+        return { ...result, id: result.order_id || result.id };
     },
 
     getActiveOrder: async (userId: string) => {
@@ -309,5 +389,15 @@ export const api = {
         } catch {
             return null;
         }
+    },
+
+    updateOrderStatus: async (orderId: number, status: string) => {
+        const res = await fetch(`${API_BASE}/orders/${orderId}/status`, {
+            method: 'PATCH',
+            headers: api.getHeaders(),
+            body: JSON.stringify({ status })
+        });
+        if (!res.ok) throw new Error('Failed to update order status');
+        return await res.json();
     }
 };

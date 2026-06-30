@@ -1,0 +1,125 @@
+/* --- MapModal.css --- */
+.mm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.mm-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mm-bottom-sheet {
+  background: radial-gradient(120% 120% at 50% 0%, rgba(30, 30, 30, 0.9) 0%, rgba(10, 10, 10, 0.95) 100%);
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+  border-radius: 24px 24px 0 0;
+  padding: 32px 24px 40px 24px;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.mm-bottom-sheet.active {
+  transform: translateY(0);
+}
+
+.mm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.mm-title {
+  margin: 0;
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
+}
+
+.mm-subtitle {
+  margin: 12px 0 0 0;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.60);
+}
+
+.mm-map-container {
+  position: relative;
+  overflow: hidden;
+  height: 235px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mm-detect-btn {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 12px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  color: #000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.1s, opacity 0.2s;
+}
+
+.mm-detect-btn:active {
+  transform: scale(0.95);
+}
+
+.mm-detect-btn.is-detecting {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.mm-confirm-btn {
+  width: 100%;
+  height: 56px;
+  background: #21EA7C;
+  border: none;
+  border-radius: 16px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 17px;
+  color: #000;
+  cursor: pointer;
+  box-shadow: 0px 4px 5px 0px rgba(59, 180, 74, 0.20);
+  transition: opacity 0.2s;
+}
+
+.mm-confirm-btn:disabled {
+  background: #2D2D2B;
+  color: rgba(255, 255, 255, 0.40);
+  box-shadow: none;
+  cursor: default;
+}

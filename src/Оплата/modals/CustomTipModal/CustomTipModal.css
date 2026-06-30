@@ -1,6 +1,6 @@
 /* CustomTipModal.css */
 
-/* --- OVERLAY (Фон) --- */
+/* --- OVERLAY --- */
 .ct-overlay {
   position: fixed;
   top: 0;
@@ -25,10 +25,12 @@
 /* --- BOTTOM SHEET --- */
 .ct-bottom-sheet {
   position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%) translateY(100%);
-  width: 393px;
+  bottom: -100%;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  transform: none;
+  width: 100%; max-width: 393px;
   background: #191917;
   border-radius: 25px 25px 0 0;
   padding: 24px 16px 24px 16px;
@@ -38,7 +40,8 @@
 }
 
 .ct-bottom-sheet.active {
-  transform: translateX(-50%) translateY(0);
+  bottom: 0;
+  transform: none;
   animation: ct-slide-up 0.4s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
@@ -66,9 +69,10 @@
   color: rgba(255, 255, 255, 0.60);
 }
 
-/* --- ПОЛЕ ВВОДА --- */
+/* --- INPUT --- */
 .ct-input-wrapper {
-  background: #2D2D2B;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 15px;
   padding: 16px;
   margin-bottom: 0;
@@ -78,6 +82,11 @@
   justify-content: center;
   box-sizing: border-box;
   transition: all 0.2s ease;
+}
+
+.ct-input-wrapper:focus-within {
+  border-color: #21EA7C;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .ct-input-wrapper.has-value {
@@ -150,6 +159,7 @@
   color: rgba(255, 255, 255, 0.85);
   padding: 0;
   text-align: left;
+  transform: translateZ(0); /* FIX FOR IOS CURSOR DETACHMENT */
 }
 
 .ct-input-wrapper:not(.has-value) .ct-input {
@@ -171,7 +181,7 @@
   font-weight: 400;
 }
 
-/* --- КНОПКА ПРИМЕНИТЬ --- */
+/* --- BUTTON --- */
 .ct-confirm-btn {
   width: 100%;
   height: 56px;
@@ -199,7 +209,6 @@
   from {
     opacity: 0;
   }
-
   to {
     opacity: 1;
   }
@@ -207,10 +216,10 @@
 
 @keyframes ct-slide-up {
   from {
-    transform: translateX(-50%) translateY(100%);
+    bottom: -100%;
   }
 
   to {
-    transform: translateX(-50%) translateY(0);
+    bottom: 0;
   }
 }

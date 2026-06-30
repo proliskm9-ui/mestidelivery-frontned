@@ -1,0 +1,16 @@
+{
+  "count": 240,
+  "desktop": {
+    "dir": "desktop",
+    "width": 1280,
+    "height": 720
+  },
+  "mobile": {
+    "dir": "mobile",
+    "width": 854,
+    "height": 480
+  },
+  "poster": "poster.webp",
+  "pad": 4,
+  "ext": "webp"
+}

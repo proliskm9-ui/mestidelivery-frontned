@@ -1,5 +1,6 @@
 import React from 'react';
 import { Restaurant } from '../../services/api';
+import { useLanguage, formatDuration } from '../../translations/LanguageContext';
 
 interface RestaurantCardProps {
     item: Restaurant;
@@ -10,6 +11,7 @@ interface RestaurantCardProps {
 }
 
 const RestaurantCard: React.FC<RestaurantCardProps> = ({ item, onClick, isVertical, isFavorite, onToggleFavorite }) => {
+    const { language } = useLanguage();
     return (
         <div className={`rest-card ${isVertical ? 'rest-card-vertical' : ''}`} onClick={onClick}>
             <div className="rest-img" style={{
@@ -53,7 +55,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ item, onClick, isVertic
                 <div className="rest-sub" style={{ marginTop: '-4px', display: 'flex', alignItems: 'center' }}>
                     <img src="/Assets/ChatGPT Image 23 нояб. 2025 г., 09_04_55 1.png" alt="Person" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
                     <div className="rest-meta-content">
-                        <span>{item.delivery || '25-35 мин'}</span>
+                        <span>{formatDuration(item.delivery || '25-35 мин', language)}</span>
                     </div>
                 </div>
                 {item.promo && (

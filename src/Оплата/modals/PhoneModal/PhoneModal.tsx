@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../CommentModal/CommentModal.css'; // Используем общие стили
+import { useLanguage } from '../../../translations/LanguageContext';
 
 interface PhoneModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface PhoneModalProps {
 }
 
 const PhoneModal: React.FC<PhoneModalProps> = ({ isOpen, onClose, currentValue, onSave }) => {
+  const { t } = useLanguage();
   const [val, setVal] = useState<string>('');
 
   useEffect(() => {
@@ -74,12 +76,12 @@ const PhoneModal: React.FC<PhoneModalProps> = ({ isOpen, onClose, currentValue, 
 
   return (
     <>
-      <div className="cm-overlay active" onClick={onClose}></div>
-      <div className="cm-bottom-sheet active">
+      <div className="cm-overlay active phone-modal-overlay" onClick={onClose}>
+      <div className="cm-bottom-sheet active phone-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="cm-header">
           <div>
-            <h2 className="cm-title">Телефон</h2>
-            <p className="cm-subtitle">{val || 'Не указан'}</p>
+            <h2 className="cm-title">{t('checkout.phone')}</h2>
+            <p className="cm-subtitle">{val || t('checkout.not_specified')}</p>
           </div>
           <button className="cm-close-btn" onClick={onClose}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -90,11 +92,11 @@ const PhoneModal: React.FC<PhoneModalProps> = ({ isOpen, onClose, currentValue, 
         </div>
 
         <div className={`cm-input-wrapper ${val ? 'has-value' : ''}`}>
-          <label className="cm-input-label">Телефон получателя</label>
+          <label className="cm-input-label">{t('checkout.phone_recipient')}</label>
           <input
             type="tel"
             className="cm-input"
-            placeholder="+7 (999) 000-00-00"
+            placeholder={t('checkout.phone_ph')}
             value={val}
             onChange={handleChange}
             maxLength={20}
@@ -105,8 +107,9 @@ const PhoneModal: React.FC<PhoneModalProps> = ({ isOpen, onClose, currentValue, 
           className="cm-confirm-btn"
           onClick={() => { onSave(val); onClose(); }}
         >
-          Сохранить
+          {t('common.save')}
         </button>
+      </div>
       </div>
     </>
   );

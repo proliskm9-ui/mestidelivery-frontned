@@ -20,7 +20,7 @@
 
 /* Header */
 .status-header {
-    background: rgba(10, 10, 10, 0.85);
+    background: transparent;
     padding: calc(16px + env(safe-area-inset-top)) 24px 16px;
     display: flex;
     align-items: center;
@@ -28,30 +28,31 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: none;
 }
 
 .back-btn-status {
     position: absolute;
     left: 20px;
     top: calc(16px + env(safe-area-inset-top));
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: var(--card-bg);
-    border: 1px solid var(--border-light);
-    color: white;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #21EA7C;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
 }
 
 .back-btn-status:active {
-    transform: scale(0.95);
+    transform: scale(0.92);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .header-title-block {
@@ -93,44 +94,19 @@
     text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* Horizontal Progress Scroll */
+/* Horizontal Progress Scroll - REMOVED BLACK VIGNETTE AND STYLIZED */
 .status-scroll-container {
     position: relative;
-    margin: 40px 0;
-    height: 200px;
-    /* Increased height for larger circles */
-}
-
-/* Vignette Effect */
-.status-scroll-container::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 80px;
-    background: linear-gradient(to right, #000 0%, transparent 100%);
-    z-index: 10;
-    pointer-events: none;
-}
-
-.status-scroll-container::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 80px;
-    background: linear-gradient(to left, #000 0%, transparent 100%);
-    z-index: 10;
-    pointer-events: none;
+    margin: 10px 0 0 0;
+    height: 220px;
 }
 
 .steps-track {
     display: flex;
     gap: 20px;
     overflow-x: auto;
-    padding: 0 50%;
+    padding: 10px 50%;
+    box-sizing: border-box;
     /* Center start */
     scroll-behavior: smooth;
     scrollbar-width: none;
@@ -179,23 +155,41 @@
     /* Increased from 64px */
     height: 90px;
     border-radius: 50%;
-    background: #0a0a0a;
+    background: rgba(255, 255, 255, 0.05); /* Premium Glassmorphism */
     border: 1px solid rgba(255, 255, 255, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
+    margin-bottom: 0px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
     transition: all 0.3s;
     color: #666;
     position: relative;
     z-index: 2;
+    box-sizing: border-box; /* Crucial for absolute centering! */
+}
+
+/* Standardized icon sizes for perfect visual balance */
+:root {
+    --icon-base: 36px;
+    --icon-active: 40px;
 }
 
 /* SVG styling inside circle */
 .icon-circle svg {
-    width: 40px;
-    height: 40px;
+    width: var(--icon-base);
+    height: var(--icon-base);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Visually balance ChefHat since its shape has less mass */
+.icon-circle svg.lucide-chef-hat {
+    transform: scale(1.15);
+}
+
+.step-item.active .icon-circle svg {
+    width: var(--icon-active);
+    height: var(--icon-active);
 }
 
 .step-item.active .icon-circle {
@@ -204,39 +198,64 @@
     border: 3px solid var(--primary);
     color: var(--primary);
     box-shadow: 0 0 50px var(--primary-glow), inset 0 0 20px rgba(33, 234, 124, 0.1);
+    box-sizing: border-box;
+}
+
+/* Centered DOM Ring Elements (Centering via symmetric offsets) */
+.active-ring-dashed {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    border-radius: 50%;
+    border: 2px dashed rgba(33, 234, 124, 0.4);
+    animation: spinPremiumStatus 10s linear infinite;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+.active-ring-solid {
+    position: absolute;
+    top: -14px;
+    left: -14px;
+    right: -14px;
+    bottom: -14px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: #21ea7c;
+    animation: spinPremiumStatusFast 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+@keyframes spinPremiumStatusFast {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes spinPremiumStatus {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .step-item.completed .icon-circle {
-    background: #000;
+    background: rgba(33, 234, 124, 0.1); /* Beautiful premium green transparent circle */
     border-color: var(--primary);
     color: var(--primary);
     box-shadow: 0 0 15px rgba(33, 234, 124, 0.2);
 }
 
 .step-label {
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    text-align: center;
-    white-space: nowrap;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.4s;
-    color: var(--text-muted);
+    display: none !important;
 }
 
 .step-item.active .step-label {
-    opacity: 1;
-    transform: translateY(0);
-    color: #fff;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    display: none !important;
 }
 
 .step-item.completed .step-label {
-    opacity: 0.5;
-    transform: translateY(0);
-    color: var(--primary);
+    display: none !important;
 }
 
 /* Info Cards */
@@ -476,5 +495,216 @@
     padding: 12px;
     width: 100%;
     cursor: pointer;
+}
+
+
+/* Page Layout for Order Status */
+.page-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding-bottom: 0 !important;
+}
+
+.os-block-top {
+    flex: none;
+    background: rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 0 0 28px 28px;
+    padding-bottom: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    margin-bottom: 5px;
+}
+
+.os-block-bottom {
+    background: rgba(255, 255, 255, 0.07);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 28px 28px 0 0;
+    padding-top: 24px;
+    padding-bottom: 40px;
+    flex: 1;
+}
+
+/* --- Receipt Card & Status Styles copied from OrderDetails.css --- */
+.od-section-label {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 8px 0 0 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.od-items-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 4px 0;
+    overflow: hidden;
+    margin-bottom: 16px;
+    margin-top: 12px;
+}
+
+.od-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.od-item-row:last-child {
+    border-bottom: none;
+}
+
+.od-item-name {
+    font-size: 15px;
+    color: #fff;
+    flex: 1;
+}
+
+.od-item-qty {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-left: 6px;
+}
+
+.od-item-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    margin-left: 16px;
+}
+
+.od-cost-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 0;
+    overflow: hidden;
+    margin-top: 12px;
+}
+
+.od-cost-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.od-cost-row:last-child {
+    border-bottom: none;
+}
+
+.od-cost-row.total {
+    font-size: 17px;
+    font-weight: 800;
+    color: #fff;
+    padding: 16px 20px;
+}
+
+.od-cost-row.total .od-cost-value {
+    color: #21EA7C;
+    font-size: 18px;
+}
+
+.od-cost-value {
+    font-weight: 700;
+    color: #fff;
+}
+
+.od-details-btn {
+    width: 100%;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    margin-top: 8px;
+    margin-bottom: 0px;
+}
+
+.od-details-btn:active {
+    transform: scale(0.98);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.od-status-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    margin-top: 12px;
+}
+
+.od-status-label {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.od-status-badge {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.od-status-badge.delivered {
+    color: #21EA7C;
+    background: rgba(33, 234, 124, 0.12);
+}
+
+.od-status-badge.pending {
+    color: #FFD60A;
+    background: rgba(255, 214, 10, 0.12);
+}
+
+.od-status-badge.cancelled {
+    color: #FF453A;
+    background: rgba(255, 69, 58, 0.12);
+}
+
+.primary-status-label h1 {
+    text-shadow: 0 0 20px rgba(33, 234, 124, 0.3);
+    color: #21ea7c;
+    background: none;
+    -webkit-text-fill-color: #21ea7c;
+}
+
+.prm-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(255, 152, 0, 0.08);
+    border: 1px solid rgba(255, 152, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    box-shadow: 0 0 30px rgba(255, 152, 0, 0.15);
+}
+
+.prm-icon-wrapper svg {
+    filter: drop-shadow(0 0 8px rgba(255, 152, 0, 0.4));
 }
 

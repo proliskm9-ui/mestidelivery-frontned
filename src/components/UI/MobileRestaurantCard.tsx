@@ -1,6 +1,7 @@
 import React from 'react';
 import './MobileRestaurantCard.css';
 import { Restaurant, Store } from '../../services/api';
+import { useLanguage, formatDuration } from '../../translations/LanguageContext';
 
 interface MobileRestaurantCardProps {
     item: Restaurant | Store;
@@ -10,6 +11,7 @@ interface MobileRestaurantCardProps {
 }
 
 const MobileRestaurantCard: React.FC<MobileRestaurantCardProps> = ({ item, onClick, isFavorite, onToggleFavorite }) => {
+    const { language } = useLanguage();
     return (
         <div className="allRestaurantCard" onClick={onClick}>
             <div className="allRestaurantPreview" style={{ backgroundImage: `url("${item.img || '/Assets/default-restaurant.png'}")` }}>
@@ -31,7 +33,7 @@ const MobileRestaurantCard: React.FC<MobileRestaurantCardProps> = ({ item, onCli
                 </div>
                 <div className="allRestaurantDelivery">
                     <img src="/Assets/ChatGPT Image 23 нояб. 2025 г., 09_04_55 1.png" alt="Person" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
-                    {(item as Restaurant).delivery || '25–30 мин'}
+                    {formatDuration((item as Restaurant).delivery || '25–30 мин', language)}
                     {'promo' in item && (item as any).promo && (
                         <span style={{ marginLeft: '10px', color: '#FDC505', fontSize: '12px' }}>
                             {(item as any).promo}

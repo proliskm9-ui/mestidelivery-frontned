@@ -337,16 +337,16 @@ export function AdminCourier() {
 
 const GlobalStyles = () => (
     <style>{`
-        /* --- COURIER PAGE STYLES --- */
+        /* --- YANDEX-STYLE COURIER SCREEN --- */
         .courier-list-screen {
             padding: 24px;
             max-width: 600px;
             margin: 0 auto;
-            color: #fff;
+            color: #000;
             min-height: 100vh;
             font-family: 'Montserrat', sans-serif;
             padding-bottom: 80px; 
-            background: transparent; /* Parent admin-layout handles bg */
+            background: #F5F6F8;
         }
         
         @media (max-width: 768px) {
@@ -359,25 +359,29 @@ const GlobalStyles = () => (
         /* Header */
         .c-header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 30px;
         }
-        .c-title { font-size: 28px; font-weight: 800; margin: 0; line-height: 1; text-transform: uppercase; }
-        .c-subtitle { color: rgba(255,255,255,0.5); font-size: 14px; margin-top: 4px; }
+        .c-title { font-size: 32px; font-weight: 800; margin: 0; line-height: 1; letter-spacing: -1px; }
+        .c-subtitle { color: #7A7A7A; font-size: 15px; margin-top: 6px; font-weight: 500; }
 
         .status-toggle {
-            display: flex; align-items: center; gap: 8px;
-            padding: 8px 16px;
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 18px;
             border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.05);
-            color: #fff;
-            font-weight: 600;
+            border: none;
+            background: #FFF;
+            color: #000;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
         }
-        .status-toggle.on { background: rgba(33, 234, 124, 0.15); border-color: rgba(33, 234, 124, 0.5); color: #21EA7C; }
-        .status-toggle.off { background: rgba(255, 59, 48, 0.15); border-color: rgba(255, 59, 48, 0.5); color: #FF3B30; }
-        .toggle-indicator { width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+        .status-toggle:active { transform: scale(0.96); }
+        .status-toggle.on { background: #FFF; color: #000; border: 2px solid #FCE000; }
+        .status-toggle.off { background: #FFF; color: #000; border: 2px solid transparent; }
+        .toggle-indicator { width: 10px; height: 10px; border-radius: 50%; }
+        .status-toggle.on .toggle-indicator { background: #FCE000; box-shadow: 0 0 8px rgba(252, 224, 0, 0.6); }
+        .status-toggle.off .toggle-indicator { background: #FF3B30; }
 
         /* Stats */
         .c-stats-row {
@@ -385,127 +389,128 @@ const GlobalStyles = () => (
             margin-bottom: 32px;
         }
         .c-stat-card {
-            background: rgba(20, 20, 20, 0.6);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 12px;
+            background: #FFF;
+            border-radius: 20px;
+            padding: 16px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
-        .stat-label { font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.5); letter-spacing: 0.5px; margin-bottom: 4px; }
-        .stat-value { font-size: 18px; font-weight: 700; color: #fff; }
-        .stat-value.money { color: #21EA7C; text-shadow: 0 0 10px rgba(33, 234, 124, 0.3); }
-        .stat-value.ok { color: #21EA7C; }
+        .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #7A7A7A; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .stat-value { font-size: 20px; font-weight: 800; color: #000; }
+        .stat-value.money { color: #000; }
+        .stat-value.ok { color: #15803d; }
         .stat-value.err { color: #FF3B30; }
 
         /* Tabs */
         .c-tabs {
-            display: flex; gap: 8px; margin-bottom: 20px;
-            background: rgba(255,255,255,0.05);
-            padding: 4px; border-radius: 14px;
+            display: flex; gap: 8px; margin-bottom: 24px;
+            background: #E8E9ED;
+            padding: 6px; border-radius: 16px;
         }
         .c-tab {
             flex: 1;
             background: transparent; border: none;
-            color: rgba(255,255,255,0.6);
-            padding: 10px 0;
-            border-radius: 10px;
-            font-family: inherit; font-size: 14px; font-weight: 600;
+            color: #7A7A7A;
+            padding: 12px 0;
+            border-radius: 12px;
+            font-family: inherit; font-size: 14px; font-weight: 700;
             cursor: pointer; position: relative;
             transition: all 0.2s;
         }
         .c-tab.active {
-            background: #21EA7C;
+            background: #FFF;
             color: #000;
-            box-shadow: 0 2px 10px rgba(33, 234, 124, 0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         .tab-badge {
-            background: #fff; color: #000;
-            font-size: 10px; padding: 1px 5px; border-radius: 10px;
+            background: #FF3B30; color: #FFF;
+            font-size: 11px; padding: 2px 6px; border-radius: 10px;
             margin-left: 6px; vertical-align: middle;
         }
-        .tab-badge.dot { padding: 4px; border-radius: 50%; width: 8px; height: 8px; background: #FF3B30; color: transparent; }
+        .tab-badge.dot { padding: 4px; border-radius: 50%; width: 8px; height: 8px; color: transparent; }
 
         /* Orders Grid */
         .orders-grid { display: flex; flex-direction: column; gap: 16px; }
         
         .empty-state {
-            text-align: center; padding: 40px 20px;
-            color: rgba(255,255,255,0.3);
-            border: 2px dashed rgba(255,255,255,0.1);
-            border-radius: 20px;
+            text-align: center; padding: 60px 20px;
+            color: #7A7A7A;
+            background: #FFF;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
-        .empty-icon { font-size: 48px; display: block; margin-bottom: 16px; opacity: 0.5; }
+        .empty-icon { font-size: 48px; display: block; margin-bottom: 16px; opacity: 1; }
 
         /* Order Card */
         .order-card {
-            background: #111;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 20px;
+            background: #FFF;
+            border-radius: 24px;
+            padding: 24px;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.04);
             transition: transform 0.2s;
         }
         .order-card:active { transform: scale(0.98); }
         
         .card-header {
             display: flex; justify-content: space-between; align-items: flex-start;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
-        .rest-info { display: flex; align-items: center; gap: 10px; }
-        .rest-icon { width: 36px; height: 36px; background: rgba(33, 234, 124, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #21EA7C; }
-        .rest-name { font-weight: 700; font-size: 16px; }
+        .rest-info { display: flex; align-items: center; gap: 12px; }
+        .rest-icon { width: 44px; height: 44px; background: #F5F6F8; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .rest-name { font-weight: 800; font-size: 18px; color: #000; }
         
         .dist-badge {
-            background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 8px; font-size: 12px; color: #aaa;
+            background: #F5F6F8; padding: 6px 10px; border-radius: 10px; font-size: 13px; color: #000; font-weight: 700;
         }
 
-        .card-body { position: relative; margin-bottom: 20px; padding-left: 12px; }
-        .loc-row { display: flex; gap: 16px; margin-bottom: 16px; position: relative; }
+        .card-body { position: relative; margin-bottom: 24px; padding-left: 14px; }
+        .loc-row { display: flex; gap: 16px; margin-bottom: 20px; position: relative; }
         .line-indicator {
-            position: absolute; left: 5px; top: 8px; bottom: 8px; width: 2px;
-            background: linear-gradient(to bottom, #21EA7C 0%, #aaa 100%);
+            position: absolute; left: 5px; top: 12px; bottom: 12px; width: 2px;
+            background: #E8E9ED;
         }
-        .loc-points { display: flex; flex-direction: column; gap: 16px; width: 100%; }
-        .point { font-size: 14px; color: #ddd; padding-left: 20px; position: relative; }
-        .point::before { content: ''; position: absolute; left: 0; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: #111; border: 2px solid #21EA7C; z-index: 1; }
-        .point.client::before { border-color: #fff; }
-        .addr-sub { font-size: 11px; color: #666; margin-top: 2px; }
+        .loc-points { display: flex; flex-direction: column; gap: 20px; width: 100%; }
+        .point { font-size: 16px; color: #000; font-weight: 700; padding-left: 20px; position: relative; }
+        .point::before { content: ''; position: absolute; left: -1px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: #FCE000; border: 3px solid #FFF; z-index: 1; box-shadow: 0 0 0 1px #E8E9ED; }
+        .point.client::before { background: #000; }
+        .addr-sub { font-size: 13px; color: #7A7A7A; margin-top: 4px; font-weight: 500; }
 
         .price-row {
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(33, 234, 124, 0.05); padding: 12px; border-radius: 12px;
+            background: #F8F9FB; padding: 16px; border-radius: 16px;
         }
-        .income-val { color: #21EA7C; font-weight: 800; font-size: 16px; }
+        .price-row span { color: #7A7A7A; font-weight: 600; }
+        .income-val { color: #000 !important; font-weight: 800; font-size: 20px; }
 
         .take-btn {
-            width: 100%; padding: 16px;
-            background: #21EA7C; color: #000;
-            border: none; border-radius: 14px;
-            font-weight: 700; font-size: 16px; text-transform: uppercase;
-            letter-spacing: 1px; cursor: pointer;
-            box-shadow: 0 4px 20px rgba(33, 234, 124, 0.3);
+            width: 100%; padding: 18px;
+            background: #FCE000; color: #000;
+            border: none; border-radius: 16px;
+            font-weight: 800; font-size: 16px; text-transform: uppercase;
+            letter-spacing: 0.5px; cursor: pointer;
             transition: all 0.2s;
         }
-        .take-btn:active { transform: scale(0.95); opacity: 0.9; }
+        .take-btn:active { transform: scale(0.96); }
 
         /* History Card */
         .history-card {
-            background : rgba(255,255,255,0.03);
-            border-radius: 16px; padding: 16px;
-            display: flex; flex-direction: column; gap: 8px;
+            background : #FFF;
+            border-radius: 20px; padding: 20px;
+            display: flex; flex-direction: column; gap: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
-        .h-top { display: flex; justify-content: space-between; opacity: 0.5; font-size: 12px; }
+        .h-top { display: flex; justify-content: space-between; color: #7A7A7A; font-size: 13px; font-weight: 600; }
         .h-body { display: flex; justify-content: space-between; align-items: center; }
-        .h-address { font-weight: 500; font-size: 14px; max-width: 70%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .h-price { color: #21EA7C; font-weight: 700; }
+        .h-address { font-weight: 700; font-size: 16px; max-width: 70%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #000; }
+        .h-price { color: #000; font-weight: 800; font-size: 16px; }
 
         /* --- ACTIVE MAP VIEW --- */
         .courier-active-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 5000;
+            background: #E8E9ED; z-index: 5000;
             display: flex; flex-direction: column;
         }
         .courier-map-full { flex: 1; position: relative; }
@@ -515,69 +520,65 @@ const GlobalStyles = () => (
             position: absolute; top: 20px; left: 20px; z-index: 10;
         }
         .icon-btn-glass {
-            width: 44px; height: 44px; border-radius: 12px;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #fff; display: flex; align-items: center; justify-content: center;
+            width: 48px; height: 48px; border-radius: 16px;
+            background: #FFF; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: none;
+            color: #000; display: flex; align-items: center; justify-content: center;
             cursor: pointer;
         }
 
         .courier-bottom-sheet {
-            background: rgba(20, 20, 20, 0.85);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255,255,255,0.1);
-            border-radius: 24px 24px 0 0;
-            padding: 8px 24px 32px 24px;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+            background: #FFF;
+            border-radius: 32px 32px 0 0;
+            padding: 12px 24px 32px 24px;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
             animation: slideUp 0.3s ease-out;
-            max-height: 50vh; overflow-y: auto;
+            max-height: 55vh; overflow-y: auto;
         }
-        .sheet-handle-bar { display: flex; justify-content: center; padding: 8px 0 20px 0; }
-        .sheet-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; }
+        .sheet-handle-bar { display: flex; justify-content: center; padding: 8px 0 24px 0; }
+        .sheet-handle { width: 48px; height: 6px; background: #E8E9ED; border-radius: 3px; }
 
         .sheet-header {
             display: flex; justify-content: space-between; align-items: flex-start;
             margin-bottom: 24px;
         }
-        .order-id { font-size: 22px; margin: 0; color: #fff; }
-        .order-status-text { color: #aaa; margin: 4px 0 0 0; font-size: 14px; }
+        .order-id { font-size: 26px; margin: 0; color: #000; font-weight: 800; letter-spacing: -0.5px; }
+        .order-status-text { color: #7A7A7A; margin: 6px 0 0 0; font-size: 15px; font-weight: 600; }
         .sheet-price-badge {
-            background: #21EA7C; color: #000; font-weight: 800;
-            padding: 6px 12px; border-radius: 10px; font-size: 18px;
+            background: #FCE000; color: #000; font-weight: 800;
+            padding: 8px 16px; border-radius: 14px; font-size: 18px;
         }
 
         .sheet-address-box, .sheet-customer-box {
             display: flex; align-items: center; gap: 16px;
-            background: rgba(255,255,255,0.05); padding: 16px;
-            border-radius: 16px; margin-bottom: 12px;
+            background: #F5F6F8; padding: 20px;
+            border-radius: 20px; margin-bottom: 12px;
         }
         .address-icon, .customer-avatar {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: rgba(255,255,255,0.1);
-            display: flex; align-items: center; justify-content: center; font-size: 20px;
+            font-size: 24px;
         }
         .address-text, .customer-info { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-        .address-label { font-size: 11px; text-transform: uppercase; color: #aaa; }
-        .address-val { font-size: 15px; font-weight: 500; }
-        .c-name { font-weight: 600; }
-        .c-phone { font-size: 13px; color: #aaa; }
+        .address-label { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #7A7A7A; }
+        .address-val { font-size: 16px; font-weight: 700; color: #000; }
+        .c-name { font-weight: 800; color: #000; font-size: 16px; }
+        .c-phone { font-size: 14px; color: #7A7A7A; font-weight: 500; }
 
         .call-btn {
-            width: 40px; height: 40px; border-radius: 50%; background: #21EA7C;
+            width: 48px; height: 48px; border-radius: 16px; background: #E8E9ED;
             display: flex; align-items: center; justify-content: center; font-size: 20px;
-            text-decoration: none; color: #000; box-shadow: 0 4px 10px rgba(33,234,124,0.3);
+            text-decoration: none; color: #000;
         }
 
         .sheet-actions {
             display: flex; gap: 12px; margin-top: 24px;
         }
         .sheet-btn {
-            flex: 1; padding: 16px; border: none; border-radius: 14px;
-            font-weight: 700; font-size: 16px; cursor: pointer;
-            transition: transform 0.2s;
+            flex: 1; padding: 18px; border: none; border-radius: 16px;
+            font-weight: 800; font-size: 16px; cursor: pointer;
+            transition: transform 0.15s;
         }
-        .sheet-btn.primary { background: #21EA7C; color: #000; box-shadow: 0 4px 15px rgba(33,234,124,0.3); }
-        .sheet-btn.secondary { background: rgba(255,255,255,0.1); color: #fff; }
+        .sheet-btn.primary { background: #FCE000; color: #000; }
+        .sheet-btn.secondary { background: #E8E9ED; color: #000; }
         .sheet-btn:active { transform: scale(0.96); }
 
         @keyframes slideUp {

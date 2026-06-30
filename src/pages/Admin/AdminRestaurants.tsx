@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { adminApi, Restaurant } from '../../services/adminService';
-import AddressSelector from '../../components/Map/AddressSelector';
-import { EditIcon, TrashIcon, PlusIcon, RefreshIcon } from '../../components/icons/StatusIcons';
+import { adminApi } from '../../services/adminService';
+import { Restaurant } from '../../services/api';
+import RestaurantEditModal from './RestaurantEditModal';
+import { EditIcon, TrashIcon, RefreshIcon } from '../../components/icons/StatusIcons';
+import FullPageLoader from '../../components/UI/FullPageLoader';
 import './AdminStyles.css';
 
 declare global {
@@ -15,7 +17,6 @@ export function AdminRestaurants() {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editRestaurant, setEditRestaurant] = useState<Partial<Restaurant> | null>(null);
-    const [showMapSelector, setShowMapSelector] = useState(false);
 
     const load = async () => {
         setLoading(true);
@@ -31,55 +32,62 @@ export function AdminRestaurants() {
 
     useEffect(() => { load(); }, []);
 
-    const handleSave = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!editRestaurant || !editRestaurant.name) return;
+    const handleSave = async (data: Partial<Restaurant>) => {
+        if (!data.name) return;
 
         try {
-            if (editRestaurant.id) {
-                await adminApi.put(`/restaurants/${editRestaurant.id}`, editRestaurant);
+            if (data.id) {
+                console.log('[DEBUG] PUT payload:', JSON.stringify({
+                    id: data.id,
+                    poster_token: data.poster_token,
+                    poster_spot_id: data.poster_spot_id
+                }));
+                const result = await adminApi.put<Restaurant>(`/restaurants/${data.id}`, data);
+                console.log('[DEBUG] PUT response:', JSON.stringify({
+                    poster_token: (result as any)?.poster_token,
+                    poster_spot_id: (result as any)?.poster_spot_id
+                }));
             } else {
                 const newId = `rest-${Date.now()}`;
                 const payload = {
-                    ...editRestaurant,
+                    ...data,
                     id: newId,
-                    name: editRestaurant.name!,
-                    img: editRestaurant.img || '',
-                    rating: editRestaurant.rating || '4.5',
-                    delivery: editRestaurant.delivery || '30-45 min',
-                    screen: (editRestaurant as any).screen || 'restaurant-default'
+                    name: data.name!,
+                    img: data.img || '',
+                    rating: data.rating || '5.0',
+                    delivery: data.delivery || '30-45 min',
+                    screen: (data as any).screen || 'restaurant-default'
                 };
                 await adminApi.post('/restaurants/', payload);
             }
             setIsModalOpen(false);
             setEditRestaurant(null);
             load();
-        } catch (error) {
-            alert('Failed to save restaurant');
+        } catch (error: any) {
+            console.error('[DEBUG] Save error:', error?.message, error);
+            alert('Не удалось сохранить ресторан: ' + (error?.message || 'Неизвестная ошибка'));
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this restaurant?')) return;
+        if (!confirm('Вы уверены, что хотите удалить этот ресторан?')) return;
         try {
             await adminApi.delete(`/restaurants/${id}`);
             load();
         } catch (e: any) {
             const msg = e.message || '';
-            // Check if error is due to existing products
             if (msg.includes("Restaurant has products")) {
-                if (confirm('Restaurant has products attached. Delete restaurant AND all its products?')) {
+                if (confirm('У ресторана есть привязанные товары. Удалить ресторан И все его товары?')) {
                     try {
-                        // Pass param in URL manually
                         await adminApi.delete(`/restaurants/${id}?delete_products=true`);
                         load();
                         return;
                     } catch (retryErr: any) {
-                        alert('Failed to delete: ' + retryErr.message);
+                        alert('Ошибка удаления: ' + retryErr.message);
                     }
                 }
             } else {
-                alert('Failed to delete: ' + msg);
+                alert('Ошибка удаления: ' + msg);
             }
         }
     };
@@ -90,35 +98,38 @@ export function AdminRestaurants() {
     };
 
     const openNew = () => {
-        setEditRestaurant({ name: '', rating: '5.0', delivery: '30 min', img: '' }); // screen field might be missing in type
+        setEditRestaurant({ name: '', rating: '5.0', delivery: '30-40 мин', img: '' });
         setIsModalOpen(true);
     };
 
-    if (loading) return <div className="admin-loading">Loading...</div>;
+    if (loading) return <FullPageLoader text="Загрузка списка ресторанов..." />;
 
     return (
         <div className="admin-page">
-            <div className="page-header">
-                <h1 className="page-title">Restaurants Management</h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '36px' }}>
+                <div>
+                    <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 6px 0', letterSpacing: '-1px', textTransform: 'uppercase' }}>Рестораны</h1>
+                    <p style={{ color: 'var(--admin-text-muted)', margin: 0, fontSize: '1.05rem', fontWeight: 500 }}>Управление заведениями, адресами и параметрами доставки.</p>
+                </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <button className="admin-btn" onClick={load}>
+                    <button className="admin-btn" onClick={load} title="Обновить">
                         <RefreshIcon size={18} />
                     </button>
                     <button className="admin-btn admin-btn-primary" onClick={openNew}>
-                        <PlusIcon size={18} style={{ marginRight: 8 }} /> New Restaurant
+                        Добавить
                     </button>
                 </div>
             </div>
 
-            <div className="admin-card admin-table-container">
+            <div className="admin-table-premium">
                 <table className="admin-table">
                     <thead>
                         <tr>
-                            <th>Preview</th>
-                            <th>Name</th>
-                            <th>Rating</th>
-                            <th>Delivery</th>
-                            <th>Actions</th>
+                            <th>Логотип</th>
+                            <th>Название</th>
+                            <th>Рейтинг</th>
+                            <th>Доставка</th>
+                            <th style={{ textAlign: 'right' }}>Действия</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -126,18 +137,39 @@ export function AdminRestaurants() {
                             <tr key={r.id}>
                                 <td>
                                     {r.img ? <img src={r.img} alt="" className="item-img" /> : (
-                                        <div className="item-img" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#222' }}>{r.name[0]}</div>
+                                        <div className="item-img" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'rgba(255,255,255,0.05)', fontWeight: 700, color: 'var(--admin-primary)' }}>
+                                            {r.name[0]?.toUpperCase()}
+                                        </div>
                                     )}
                                 </td>
-                                <td>{r.name}</td>
-                                <td><span style={{ color: '#FFD700' }}>★</span> {r.rating}</td>
-                                <td>{r.delivery}</td>
-                                <td>
-                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                        <button className="admin-btn" onClick={() => openEdit(r)}>
+                                 <td style={{ fontWeight: 600 }}>
+                                     <div>{r.name}</div>
+                                     {r.poster_token && r.poster_spot_id ? (
+                                         <div style={{ 
+                                             display: 'inline-flex', 
+                                             alignItems: 'center', 
+                                             gap: '4px', 
+                                             fontSize: '0.72rem', 
+                                             color: '#21EA7C', 
+                                             background: 'rgba(33, 234, 124, 0.06)',
+                                             padding: '2px 8px',
+                                             borderRadius: '6px',
+                                             marginTop: '4px',
+                                             fontWeight: 600,
+                                             border: '1px solid rgba(33, 234, 124, 0.15)'
+                                         }}>
+                                             <span style={{ fontSize: '0.78rem' }}>🔌</span> Poster активен
+                                         </div>
+                                     ) : null}
+                                 </td>
+                                 <td><span style={{ color: '#FFD700' }}>★</span> {r.rating}</td>
+                                <td style={{ color: 'var(--admin-text-muted)', fontWeight: 600 }}>{r.delivery}</td>
+                                <td style={{ textAlign: 'right' }}>
+                                    <div className="admin-action-btns-gap" style={{ justifyContent: 'flex-end' }}>
+                                        <button className="btn-action-glass btn-edit" onClick={() => openEdit(r)} title="Редактировать">
                                             <EditIcon size={16} />
                                         </button>
-                                        <button className="admin-btn admin-btn-danger" onClick={() => handleDelete(r.id)}>
+                                        <button className="btn-action-glass btn-delete" onClick={() => handleDelete(r.id)} title="Удалить">
                                             <TrashIcon size={16} />
                                         </button>
                                     </div>
@@ -146,145 +178,18 @@ export function AdminRestaurants() {
                         ))}
                     </tbody>
                 </table>
-                {restaurants.length === 0 && <div style={{ padding: 20, textAlign: 'center', color: '#666' }}>No restaurants found</div>}
+                {restaurants.length === 0 && <div className="admin-empty-msg">Рестораны не найдены</div>}
             </div>
 
-            {isModalOpen && editRestaurant && (
-                <div className="admin-modal-overlay" onClick={() => setIsModalOpen(false)}>
-                    <div className="admin-modal" onClick={e => e.stopPropagation()}>
-                        <h2 style={{ marginTop: 0, marginBottom: 20 }}>{editRestaurant.id ? 'Edit Restaurant' : 'New Restaurant'}</h2>
-                        <form onSubmit={handleSave}>
-                            <div className="form-group">
-                                <label className="form-label">Name</label>
-                                <input
-                                    className="admin-input"
-                                    value={editRestaurant.name || ''}
-                                    onChange={e => setEditRestaurant({ ...editRestaurant, name: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Rating (e.g. 4.8)</label>
-                                <input
-                                    className="admin-input"
-                                    value={editRestaurant.rating || ''}
-                                    onChange={e => setEditRestaurant({ ...editRestaurant, rating: e.target.value })}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Delivery (e.g. 20-30 min)</label>
-                                <input
-                                    className="admin-input"
-                                    value={editRestaurant.delivery || ''}
-                                    onChange={e => setEditRestaurant({ ...editRestaurant, delivery: e.target.value })}
-                                />
-                            </div>
-                            <div className="form-group" style={{ display: 'flex', gap: '10px' }}>
-                                <div style={{ flex: 1 }}>
-                                    <label className="form-label">Address</label>
-                                    <div style={{ display: 'flex', gap: '5px' }}>
-                                        <input
-                                            className="admin-input"
-                                            placeholder="Enter address or select on map"
-                                            value={editRestaurant.address || ''}
-                                            onChange={e => setEditRestaurant({ ...editRestaurant, address: e.target.value })}
-                                            onBlur={() => { }}
-                                        />
-                                        <button
-                                            type="button"
-                                            className="admin-btn"
-                                            style={{ padding: '0 10px' }}
-                                            onClick={() => setShowMapSelector(true)}
-                                        >
-                                            🗺️
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="form-group" style={{ display: 'flex', gap: '10px' }}>
-                                <div style={{ flex: 1 }}>
-                                    <label className="form-label">Latitude</label>
-                                    <input
-                                        className="admin-input"
-                                        type="number"
-                                        step="any"
-                                        readOnly
-                                        style={{ background: '#333', color: '#888' }}
-                                        value={editRestaurant.latitude || ''}
-                                    />
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                    <label className="form-label">Longitude</label>
-                                    <input
-                                        className="admin-input"
-                                        type="number"
-                                        step="any"
-                                        readOnly
-                                        style={{ background: '#333', color: '#888' }}
-                                        value={editRestaurant.longitude || ''}
-                                    />
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Image</label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                                    {editRestaurant.img && (
-                                        <img src={editRestaurant.img} alt="Preview" style={{ width: 60, height: 60, borderRadius: 8, objectFit: 'cover', background: '#333' }} />
-                                    )}
-                                    <div style={{ flex: 1 }}>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="admin-input"
-                                            style={{ padding: '8px' }}
-                                            onChange={async (e) => {
-                                                if (e.target.files?.[0]) {
-                                                    try {
-                                                        const res = await adminApi.upload(e.target.files[0]);
-                                                        if (res.success) {
-                                                            setEditRestaurant(prev => prev ? ({ ...prev, img: res.url }) : null);
-                                                        }
-                                                    } catch (err) {
-                                                        alert('Upload failed');
-                                                    }
-                                                }
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                                <input
-                                    className="admin-input"
-                                    value={editRestaurant.img || ''}
-                                    onChange={e => setEditRestaurant({ ...editRestaurant, img: e.target.value })}
-                                    placeholder="Or paste direct image URL"
-                                />
-                            </div>
-
-                            <div className="modal-actions">
-                                <button type="button" className="admin-btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                                <button type="submit" className="admin-btn admin-btn-primary">Save</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {showMapSelector && (
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 9999 }}>
-                    <AddressSelector
-                        onClose={() => setShowMapSelector(false)}
-                        onSelect={(data) => {
-                            setEditRestaurant(prev => prev ? ({
-                                ...prev,
-                                address: data.address, // Full formatted address
-                                latitude: data.coords[0],
-                                longitude: data.coords[1]
-                            }) : null);
-                            setShowMapSelector(false);
-                        }}
-                    />
-                </div>
-            )}
+            <RestaurantEditModal
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setEditRestaurant(null);
+                }}
+                restaurant={editRestaurant}
+                onSave={handleSave}
+            />
         </div>
     );
 }

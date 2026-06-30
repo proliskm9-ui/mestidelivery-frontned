@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { adminApi, adminAuth, type Product, type Restaurant } from '../../services/adminService';
-import { EditIcon, TrashIcon, PlusIcon, RefreshIcon } from '../../components/icons/StatusIcons';
+import { EditIcon, TrashIcon, RefreshIcon } from '../../components/icons/StatusIcons';
+import FullPageLoader from '../../components/UI/FullPageLoader';
 import './AdminStyles.css';
 
 /* ─── Simple SVG Icons ─────────────────────────── */
@@ -16,6 +17,29 @@ const InfoIcon = () => (
 const CopyIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
 );
+const MenuListIcon = () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"></line>
+        <line x1="8" y1="12" x2="21" y2="12"></line>
+        <line x1="8" y1="18" x2="21" y2="18"></line>
+        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+    </svg>
+);
+const GridIcon = () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
+    </svg>
+);
+const LariIcon = () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
+);
 
 export function AdminProducts() {
     const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -24,13 +48,40 @@ export function AdminProducts() {
     const [loading, setLoading] = useState(true);
     const [productsLoading, setProductsLoading] = useState(false);
 
+    // Inline editing state
+    const [editingCell, setEditingCell] = useState<{ id: string, field: keyof Product } | null>(null);
+
     // Restaurant selector
     const [selectorOpen, setSelectorOpen] = useState(false);
+
+    // ... (rest of imports/state)
+
+    const handleInlineUpdate = async (product: Product, field: keyof Product, newValue: any) => {
+        if (product[field] === newValue) {
+            setEditingCell(null);
+            return;
+        }
+        
+        try {
+            const updatedProduct = { ...product, [field]: newValue };
+            
+            // Fix types for strict backend
+            if (updatedProduct.calories !== undefined) updatedProduct.calories = String(updatedProduct.calories);
+            if (updatedProduct.weight !== undefined) updatedProduct.weight = String(updatedProduct.weight);
+
+            await adminApi.put(`/products/${product.id}`, updatedProduct);
+            setProducts(prev => prev.map(p => p.id === product.id ? updatedProduct : p));
+        } catch (err: any) {
+            alert('Ошибка при сохранении: ' + (err.message || ''));
+        }
+        setEditingCell(null);
+    };
     const [searchTerm, setSearchTerm] = useState('');
 
     // Product modal
     const [editProduct, setEditProduct] = useState<Partial<Product> | null>(null);
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+    const [isDrink, setIsDrink] = useState(false);
 
     // Restaurant info panel
     const [showRestaurantInfo, setShowRestaurantInfo] = useState(false);
@@ -55,7 +106,7 @@ export function AdminProducts() {
 
             // Auto-select first restaurant or user's restaurant
             if (data.length > 0) {
-                const userRest = user?.restaurant_id ? data.find(r => r.id === user.restaurant_id) : null;
+                const userRest = user?.restaurant_id ? data.find(r => String(r.id) === String(user.restaurant_id)) : null;
                 const target = userRest || data[0];
                 setSelectedRestaurant(target);
                 setEditRestaurant({ ...target });
@@ -71,8 +122,18 @@ export function AdminProducts() {
     const loadProducts = async (restaurantId: string) => {
         setProductsLoading(true);
         try {
-            const allProducts = await adminApi.get<Product[]>('/products/admin');
-            const filtered = allProducts.filter(p => p.restaurant_id === restaurantId);
+            // Bypass cache to ensure we get all items
+            const allProducts = await adminApi.get<Product[]>(`/products/?restaurant_id=${restaurantId}&limit=1000&_t=${Date.now()}`, true);
+            const filtered = allProducts;
+            
+            // Sort chronologically (oldest first)
+            filtered.sort((a, b) => {
+                const tsA = parseInt(a.id.replace('prod-', '')) || 0;
+                const tsB = parseInt(b.id.replace('prod-', '')) || 0;
+                if (tsA && tsB) return tsA - tsB;
+                return a.id.localeCompare(b.id);
+            });
+
             setProducts(filtered);
         } catch (err) {
             console.error('Failed to load products:', err);
@@ -108,17 +169,19 @@ export function AdminProducts() {
             ...editProduct,
             id: productId,
             name: editProduct.name,
-            price: Number(editProduct.price),
+            price: Number(editProduct.price) || 0,
             restaurant_id: selectedRestaurant.id,
             img: editProduct.img || '',
             category: editProduct.category || 'main',
             description: editProduct.description || '',
-            weight: editProduct.weight || '0г',
-            calories: editProduct.calories || '0',
-            proteins: editProduct.proteins || '0',
-            fats: editProduct.fats || '0',
-            carbs: editProduct.carbs || '0',
-            ingredients: editProduct.ingredients || ''
+            weight: String(editProduct.weight || (isDrink ? '0.2 L' : '0г')),
+            calories: String(editProduct.calories || '0'),
+            proteins: String(editProduct.proteins || '0'),
+            fats: String(editProduct.fats || '0'),
+            carbs: String(editProduct.carbs || '0'),
+            ingredients: editProduct.ingredients || '',
+            is_available: editProduct.is_available ?? true,
+            external_id: editProduct.external_id || ''
         };
 
         try {
@@ -152,11 +215,15 @@ export function AdminProducts() {
             name: `${p.name} (копия)`
         });
         setIsProductModalOpen(true);
+        const w = p.weight?.toLowerCase() || '';
+        setIsDrink(w.includes('l') || w.includes('л') || w.includes('мл') || w.includes('ml'));
     };
 
     const openEditProduct = (p: Product) => {
         setEditProduct({ ...p });
         setIsProductModalOpen(true);
+        const w = p.weight?.toLowerCase() || '';
+        setIsDrink(w.includes('l') || w.includes('л') || w.includes('мл') || w.includes('ml'));
     };
 
     const openNewProduct = () => {
@@ -167,6 +234,7 @@ export function AdminProducts() {
             category: 'main'
         });
         setIsProductModalOpen(true);
+        setIsDrink(false);
     };
 
     // ─── Restaurant Info Save ───
@@ -196,37 +264,25 @@ export function AdminProducts() {
     const avgPrice = products.length > 0 ? (products.reduce((a, p) => a + p.price, 0) / products.length).toFixed(2) : '0';
     const categoriesCount = new Set(products.map(p => p.category || 'main')).size;
 
-    if (loading) return <div className="admin-loading">Загрузка...</div>;
+    if (loading) return <FullPageLoader text="Загрузка..." />;
 
     return (
         <div className="admin-page">
             {/* ─── Restaurant Selector Bar ─── */}
             <div className="page-header" style={{ flexWrap: 'wrap', gap: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: '250px' }}>
+                <div style={{ display: 'flex', alignItems: 'stretch', gap: '12px', flex: 1, minWidth: '250px' }}>
                     {/* Restaurant Dropdown */}
-                    <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
+                    <div style={{ position: 'relative', flex: 1, maxWidth: '400px', display: 'flex', flexDirection: 'column' }}>
                         <button
-                            className="admin-btn"
+                            className="restaurant-selector-btn"
                             onClick={() => setSelectorOpen(!selectorOpen)}
-                            style={{
-                                width: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                gap: '12px',
-                                padding: '10px 16px',
-                                fontSize: '15px',
-                                fontWeight: 600,
-                                borderRadius: '14px',
-                                background: 'rgba(255,255,255,0.06)',
-                                border: '1px solid rgba(255,255,255,0.1)'
-                            }}
+                            style={{ flex: 1 }}
                         >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 {selectedRestaurant?.img ? (
                                     <img src={selectedRestaurant.img} alt="" style={{ width: 28, height: 28, borderRadius: 8, objectFit: 'cover' }} />
                                 ) : (
-                                    <div style={{ width: 28, height: 28, borderRadius: 8, background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>
+                                    <div className="item-img-premium-fallback" style={{ width: 28, height: 28, borderRadius: 8, fontSize: 14, boxShadow: 'none' }}>
                                         {selectedRestaurant?.name?.[0] || '?'}
                                     </div>
                                 )}
@@ -241,21 +297,7 @@ export function AdminProducts() {
                         {selectorOpen && (
                             <>
                                 <div style={{ position: 'fixed', inset: 0, zIndex: 99 }} onClick={() => { setSelectorOpen(false); setSearchTerm(''); }} />
-                                <div style={{
-                                    position: 'absolute',
-                                    top: 'calc(100% + 6px)',
-                                    left: 0,
-                                    right: 0,
-                                    zIndex: 100,
-                                    background: 'rgba(25, 25, 30, 0.98)',
-                                    backdropFilter: 'blur(20px)',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    borderRadius: '16px',
-                                    padding: '8px',
-                                    maxHeight: '340px',
-                                    overflowY: 'auto',
-                                    boxShadow: '0 16px 48px rgba(0,0,0,0.5)'
-                                }}>
+                                <div className="restaurant-dropdown-panel">
                                     {/* Search */}
                                     <div style={{ position: 'relative', marginBottom: '6px' }}>
                                         <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#666' }}>
@@ -270,37 +312,28 @@ export function AdminProducts() {
                                             style={{ paddingLeft: '38px', borderRadius: '12px', fontSize: '14px' }}
                                         />
                                     </div>
-                                    {filteredRestaurants.map(r => (
-                                        <div
-                                            key={r.id}
-                                            onClick={() => selectRestaurant(r)}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '12px',
-                                                padding: '10px 12px',
-                                                borderRadius: '12px',
-                                                cursor: 'pointer',
-                                                transition: 'background 0.15s',
-                                                background: selectedRestaurant?.id === r.id ? 'rgba(33,234,124,0.1)' : 'transparent',
-                                                border: selectedRestaurant?.id === r.id ? '1px solid rgba(33,234,124,0.3)' : '1px solid transparent'
-                                            }}
-                                            onMouseEnter={e => (e.currentTarget.style.background = selectedRestaurant?.id === r.id ? 'rgba(33,234,124,0.15)' : 'rgba(255,255,255,0.05)')}
-                                            onMouseLeave={e => (e.currentTarget.style.background = selectedRestaurant?.id === r.id ? 'rgba(33,234,124,0.1)' : 'transparent')}
-                                        >
-                                            {r.img ? (
-                                                <img src={r.img} alt="" style={{ width: 36, height: 36, borderRadius: 10, objectFit: 'cover' }} />
-                                            ) : (
-                                                <div style={{ width: 36, height: 36, borderRadius: 10, background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
-                                                    {r.name[0]}
+                                    {filteredRestaurants.map(r => {
+                                        const isActive = selectedRestaurant?.id === r.id;
+                                        return (
+                                            <div
+                                                key={r.id}
+                                                onClick={() => selectRestaurant(r)}
+                                                className={`restaurant-dropdown-item ${isActive ? 'active' : ''}`}
+                                            >
+                                                {r.img ? (
+                                                    <img src={r.img} alt="" style={{ width: 36, height: 36, borderRadius: 10, objectFit: 'cover' }} />
+                                                ) : (
+                                                    <div className="item-img-premium-fallback" style={{ width: 36, height: 36, borderRadius: 10, fontSize: 16, boxShadow: 'none' }}>
+                                                        {r.name[0]}
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <div style={{ fontWeight: 600, fontSize: '14px' }}>{r.name}</div>
+                                                    <div style={{ fontSize: '12px', color: '#888' }}>★ {r.rating} · {r.delivery}</div>
                                                 </div>
-                                            )}
-                                            <div>
-                                                <div style={{ fontWeight: 600, fontSize: '14px' }}>{r.name}</div>
-                                                <div style={{ fontSize: '12px', color: '#888' }}>★ {r.rating} · {r.delivery}</div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                     {filteredRestaurants.length === 0 && (
                                         <div style={{ textAlign: 'center', padding: '16px', color: '#666', fontSize: '14px' }}>
                                             Ничего не найдено
@@ -314,22 +347,22 @@ export function AdminProducts() {
                     {/* Restaurant Info button */}
                     {selectedRestaurant && (
                         <button
-                            className="admin-btn"
+                            className="restaurant-selector-btn"
                             onClick={() => { setEditRestaurant({ ...selectedRestaurant }); setShowRestaurantInfo(!showRestaurantInfo); }}
                             title="Информация о ресторане"
-                            style={{ borderRadius: '12px', padding: '10px 14px' }}
+                            style={{ width: 'auto', padding: '0 18px', justifyContent: 'center' }}
                         >
                             <InfoIcon />
                         </button>
                     )}
                 </div>
 
-                <div className="header-actions">
+                <div style={{ display: 'flex', gap: '10px' }}>
                     <button className="admin-btn" onClick={() => selectedRestaurant && loadProducts(selectedRestaurant.id)} title="Обновить">
                         <RefreshIcon size={18} />
                     </button>
                     <button className="admin-btn admin-btn-primary" onClick={openNewProduct} disabled={!selectedRestaurant}>
-                        <PlusIcon size={18} style={{ marginRight: 8 }} /> Добавить блюдо
+                        Добавить блюдо
                     </button>
                 </div>
             </div>
@@ -400,18 +433,33 @@ export function AdminProducts() {
 
             {/* ─── Quick Stats ─── */}
             {selectedRestaurant && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px', marginBottom: '20px' }}>
-                    <div className="admin-card" style={{ padding: '16px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '24px', fontWeight: 800, color: '#21EA7C' }}>{totalItems}</div>
-                        <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>Позиций в меню</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '28px' }}>
+                    <div className="product-stat-card">
+                        <div className="product-stat-info">
+                            <div className="product-stat-value">{totalItems}</div>
+                            <div className="product-stat-label">Позиций в меню</div>
+                        </div>
+                        <div className="product-stat-icon-wrapper">
+                            <MenuListIcon />
+                        </div>
                     </div>
-                    <div className="admin-card" style={{ padding: '16px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '24px', fontWeight: 800, color: '#21EA7C' }}>{categoriesCount}</div>
-                        <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>Категорий</div>
+                    <div className="product-stat-card">
+                        <div className="product-stat-info">
+                            <div className="product-stat-value">{categoriesCount}</div>
+                            <div className="product-stat-label">Категорий</div>
+                        </div>
+                        <div className="product-stat-icon-wrapper">
+                            <GridIcon />
+                        </div>
                     </div>
-                    <div className="admin-card" style={{ padding: '16px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '24px', fontWeight: 800, color: '#21EA7C' }}>{avgPrice} ₾</div>
-                        <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>Средняя цена</div>
+                    <div className="product-stat-card">
+                        <div className="product-stat-info">
+                            <div className="product-stat-value">{avgPrice} ₾</div>
+                            <div className="product-stat-label">Средняя цена</div>
+                        </div>
+                        <div className="product-stat-icon-wrapper">
+                            <LariIcon />
+                        </div>
                     </div>
                 </div>
             )}
@@ -444,9 +492,9 @@ export function AdminProducts() {
             {/* ─── Products Table ─── */}
             {selectedRestaurant ? (
                 productsLoading ? (
-                    <div className="admin-loading">Загрузка меню...</div>
+                    <FullPageLoader text="Загрузка меню..." />
                 ) : (
-                    <div className="admin-card admin-table-container">
+                    <div className="admin-table-premium">
                         <table className="admin-table">
                             <thead>
                                 <tr>
@@ -461,15 +509,62 @@ export function AdminProducts() {
                                 {filteredProducts.map(p => (
                                     <tr key={p.id}>
                                         <td>
-                                            {p.img ? <img src={p.img} alt="" className="item-img" /> : (
-                                                <div className="item-img flex-center" style={{ background: '#222' }}>{p.name[0]}</div>
+                                            {p.img ? (
+                                                <img src={p.img} alt="" className="item-img" />
+                                            ) : (
+                                                <div className="item-img-premium-fallback">
+                                                    {p.name[0]?.toUpperCase() || '?'}
+                                                </div>
                                             )}
                                         </td>
                                         <td>
-                                            <div className="product-name-cell">{p.name}</div>
-                                            <div className="product-desc-cell">{p.description}</div>
+                                            <div className="product-name-cell">
+                                                {editingCell?.id === p.id && editingCell?.field === 'name' ? (
+                                                    <input
+                                                        autoFocus
+                                                        className="inline-edit-input-premium"
+                                                        defaultValue={p.name}
+                                                        onBlur={(e) => handleInlineUpdate(p, 'name', e.target.value)}
+                                                        onKeyDown={(e) => e.key === 'Enter' && handleInlineUpdate(p, 'name', e.currentTarget.value)}
+                                                    />
+                                                ) : (
+                                                    <div className="editable-text-wrapper" onClick={() => setEditingCell({ id: p.id, field: 'name' })}>
+                                                        <span className="editable-text">
+                                                            {p.name}
+                                                        </span>
+                                                        <span className="edit-pencil-icon">
+                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="product-desc-cell" style={{ fontSize: '0.85em', color: '#888', marginTop: '4px' }}>{p.description}</div>
                                         </td>
-                                        <td style={{ color: '#21EA7C', whiteSpace: 'nowrap', fontWeight: 700 }}>{p.price} ₾</td>
+                                        <td className="inline-edit-cell" style={{ color: '#21EA7C', whiteSpace: 'nowrap', fontWeight: 700 }}>
+                                            {editingCell?.id === p.id && editingCell?.field === 'price' ? (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    <input
+                                                        autoFocus
+                                                        type="number"
+                                                        step="0.01"
+                                                        className="inline-edit-input-premium"
+                                                        style={{ width: '80px', borderColor: '#21EA7C' }}
+                                                        defaultValue={p.price}
+                                                        onBlur={(e) => handleInlineUpdate(p, 'price', Number(e.target.value))}
+                                                        onKeyDown={(e) => e.key === 'Enter' && handleInlineUpdate(p, 'price', Number(e.currentTarget.value))}
+                                                    /> ₾
+                                                </div>
+                                            ) : (
+                                                <div className="editable-text-wrapper" onClick={() => setEditingCell({ id: p.id, field: 'price' })}>
+                                                    <span className="editable-text" style={{ borderBottomColor: 'rgba(33,234,124,0.3)' }}>
+                                                        {p.price} ₾
+                                                    </span>
+                                                    <span className="edit-pencil-icon">
+                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </td>
                                         <td className="mobile-hide">
                                             <span style={{
                                                 background: 'rgba(255,255,255,0.06)',
@@ -479,14 +574,14 @@ export function AdminProducts() {
                                             }}>{p.category || 'main'}</span>
                                         </td>
                                         <td>
-                                            <div className="admin-action-btns">
-                                                <button className="admin-btn" onClick={() => openEditProduct(p)} title="Редактировать">
+                                            <div className="admin-action-btns-gap">
+                                                <button className="btn-action-glass btn-edit" onClick={() => openEditProduct(p)} title="Редактировать">
                                                     <EditIcon size={16} />
                                                 </button>
-                                                <button className="admin-btn" onClick={() => handleDuplicateProduct(p)} title="Дублировать">
+                                                <button className="btn-action-glass btn-duplicate" onClick={() => handleDuplicateProduct(p)} title="Дублировать">
                                                     <CopyIcon />
                                                 </button>
-                                                <button className="admin-btn admin-btn-danger" onClick={() => handleDeleteProduct(p.id)} title="Удалить">
+                                                <button className="btn-action-glass btn-delete" onClick={() => handleDeleteProduct(p.id)} title="Удалить">
                                                     <TrashIcon size={16} />
                                                 </button>
                                             </div>
@@ -502,7 +597,7 @@ export function AdminProducts() {
                                     {categoryFilter !== 'all' ? 'Нет позиций в этой категории' : 'Меню пока пустое'}
                                 </div>
                                 <button className="admin-btn admin-btn-primary" style={{ marginTop: '16px' }} onClick={openNewProduct}>
-                                    <PlusIcon size={16} style={{ marginRight: 6 }} /> Добавить первое блюдо
+                                    Добавить первое блюдо
                                 </button>
                             </div>
                         )}
@@ -520,17 +615,20 @@ export function AdminProducts() {
             {isProductModalOpen && editProduct && (
                 <div className="admin-modal-overlay" onClick={() => setIsProductModalOpen(false)}>
                     <div className="admin-modal" onClick={e => e.stopPropagation()}>
-                        <h2 className="modal-title">
-                            {editProduct.id ? 'Редактировать блюдо' : 'Новое блюдо'}
-                            {selectedRestaurant && (
-                                <span style={{ fontSize: '13px', fontWeight: 400, color: '#888', display: 'block', marginTop: '4px' }}>
-                                    {selectedRestaurant.name}
-                                </span>
-                            )}
-                        </h2>
+                        <div className="modal-header">
+                            <h2 className="modal-title">
+                                {editProduct.id ? 'Редактировать блюдо' : 'Новое блюдо'}
+                                {selectedRestaurant && (
+                                    <span style={{ fontSize: '13px', fontWeight: 400, color: '#888', display: 'block', marginTop: '4px' }}>
+                                        {selectedRestaurant.name}
+                                    </span>
+                                )}
+                            </h2>
+                            <button className="modal-close" onClick={() => setIsProductModalOpen(false)}>×</button>
+                        </div>
 
-                        <form onSubmit={handleSaveProduct} className="admin-form">
-                            <div className="modal-scroll-area" style={{ maxHeight: '70vh', overflowY: 'auto', paddingRight: '10px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <form onSubmit={handleSaveProduct} className="admin-form" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+                            <div className="modal-scroll-area">
 
                                 {/* Section 1: Base Info */}
                                 <div className="admin-edit-section">
@@ -574,11 +672,38 @@ export function AdminProducts() {
                                             </datalist>
                                         </div>
                                     </div>
+                                    <div className="form-group" style={{ marginTop: '16px', marginBottom: 0 }}>
+                                        <label className="form-label">Poster ID товара (external_id)</label>
+                                        <input
+                                            className="admin-input"
+                                            placeholder="Например: 123"
+                                            value={editProduct.external_id || ''}
+                                            onChange={e => setEditProduct({ ...editProduct, external_id: e.target.value })}
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Section 2: Description & Nutrition */}
                                 <div className="admin-edit-section">
-                                    <h3 className="section-subtitle">Описание и КБЖУ</h3>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                                        <h3 className="section-subtitle" style={{ margin: 0 }}>Описание и КБЖУ</h3>
+                                        <div className="premium-drawer-tabs">
+                                            <button 
+                                                type="button"
+                                                onClick={() => setIsDrink(false)}
+                                                className={`premium-drawer-tab-btn ${!isDrink ? 'active' : ''}`}
+                                            >
+                                                🍽️ Блюдо
+                                            </button>
+                                            <button 
+                                                type="button"
+                                                onClick={() => setIsDrink(true)}
+                                                className={`premium-drawer-tab-btn ${isDrink ? 'active' : ''}`}
+                                            >
+                                                🥤 Напиток
+                                            </button>
+                                        </div>
+                                    </div>
                                     <div className="form-group">
                                         <label className="form-label">Описание</label>
                                         <textarea
@@ -603,8 +728,8 @@ export function AdminProducts() {
 
                                     <div className="kbju-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
                                         <div className="form-group">
-                                            <label className="form-label">Вес</label>
-                                            <input className="admin-input" placeholder="300г" value={editProduct.weight || ''} onChange={e => setEditProduct({ ...editProduct, weight: e.target.value })} />
+                                            <label className="form-label">{isDrink ? 'Объем' : 'Вес'}</label>
+                                            <input className="admin-input" placeholder={isDrink ? '0.2 L' : '300г'} value={editProduct.weight || ''} onChange={e => setEditProduct({ ...editProduct, weight: e.target.value })} />
                                         </div>
                                         <div className="form-group">
                                             <label className="form-label">Ккал</label>

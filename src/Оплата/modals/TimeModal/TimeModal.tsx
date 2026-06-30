@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './TimeModal.css';
+import { useLanguage } from '../../../translations/LanguageContext';
 
 interface TimeModalProps {
   isOpen: boolean;
@@ -9,7 +10,7 @@ interface TimeModalProps {
 }
 
 const TimeModal: React.FC<TimeModalProps> = ({ isOpen, onClose, currentTime, onSelect }) => {
-
+  const { t } = useLanguage();
   const [localSelection, setLocalSelection] = useState<string | null>(currentTime);
 
   useEffect(() => {
@@ -61,14 +62,13 @@ const TimeModal: React.FC<TimeModalProps> = ({ isOpen, onClose, currentTime, onS
 
   return (
     <>
-      <div className="tm-overlay active" onClick={handleFinalize}></div>
-
-      <div className="tm-bottom-sheet active">
+      <div className="tm-overlay active time-modal-overlay" onClick={handleFinalize}>
+        <div className="tm-bottom-sheet active time-modal-content" onClick={e => e.stopPropagation()}>
         <div className="tm-header">
           <div>
-            <h2 className="tm-title">Выбор времени</h2>
+            <h2 className="tm-title">{t('checkout.choose_time_title')}</h2>
             <p className="tm-subtitle">
-              Текущий: {localSelection || '—'}
+              {t('checkout.current_selection')} {localSelection || '—'}
             </p>
           </div>
         </div>
@@ -87,8 +87,9 @@ const TimeModal: React.FC<TimeModalProps> = ({ isOpen, onClose, currentTime, onS
         </div>
 
         <button className="tm-confirm-btn" onClick={handleFinalize}>
-          Готово
+          {t('common.done')}
         </button>
+      </div>
       </div>
     </>
   );

@@ -3,6 +3,8 @@ import { api, Restaurant, Store } from '../services/api';
 import { useLanguage } from '../translations/LanguageContext';
 import RestaurantCard from '../components/UI/RestaurantCard';
 import StoreCard from '../components/UI/StoreCard';
+import FullPageLoader from '../components/UI/FullPageLoader';
+import NetworkErrorState from '../components/UI/NetworkErrorState';
 import '../components/UI/Header.css';
 
 interface FavoritesPageProps {
@@ -17,6 +19,7 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
     const [allRestaurants, setAllRestaurants] = useState<Restaurant[]>([]);
     const [allStores, setAllStores] = useState<Store[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isNetworkError, setIsNetworkError] = useState(false);
     const [searchQuery] = useState('');
     const [activeTab, setActiveTab] = useState<'restaurants' | 'stores'>('restaurants');
 
@@ -29,8 +32,10 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
                 ]);
                 setAllRestaurants(rests);
                 setAllStores(strs);
+                setIsNetworkError(false);
             } catch (error) {
                 console.error("Failed to load data", error);
+                setIsNetworkError(true);
             } finally {
                 setLoading(false);
             }
@@ -50,7 +55,8 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
 
     const totalFavoritesCount = favorites.length;
 
-    if (loading) return <div style={{ color: 'white', padding: '40px', textAlign: 'center' }}>{t('common.loading')}</div>;
+    if (loading) return <FullPageLoader text={t('common.loading') as string} />;
+    if (isNetworkError) return <NetworkErrorState />;
 
     if (totalFavoritesCount === 0) {
         return (
@@ -84,11 +90,11 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
                 <img src="/Assets/избранное.png" alt="Empty" style={{ width: '280px', height: '195px', marginBottom: '24px', objectFit: 'contain' }} />
 
                 <h2 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '16px', lineHeight: '22px', color: '#FFFFFF', margin: '0 0 8px 0', opacity: 1, textTransform: 'none', letterSpacing: 'normal' }}>
-                    Нажимайте на сердечки,
+                    {t('favorites.empty_subtitle')}
                 </h2>
                 <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '14px', lineHeight: '22px', color: '#B5B5B5', margin: '0 0 0 0', opacity: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <span style={{ whiteSpace: 'nowrap' }}>чтобы сохранять любимые места</span>
-                    <span style={{ whiteSpace: 'nowrap' }}>и возвращаться к ним в любое время.</span>
+                    <span style={{ whiteSpace: 'nowrap' }}>{t('favorites.empty_desc_1')}</span>
+                    <span style={{ whiteSpace: 'nowrap' }}>{t('favorites.empty_desc_2')}</span>
                 </div>
 
                 <button
@@ -125,7 +131,7 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
                     onTouchStart={(e) => { e.currentTarget.style.transform = 'scale(0.95)'; }}
                     onTouchEnd={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
                 >
-                    Перейти к ресторанам
+                    {t('cart.go_to_restaurants')}
                 </button>
             </div>
         );
@@ -190,13 +196,13 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
                         className={`fav-segment-btn ${activeTab === 'restaurants' ? 'active' : ''}`}
                         onClick={() => setActiveTab('restaurants')}
                     >
-                        Рестораны
+                        {t('favorites.restaurants')}
                     </button>
                     <button
                         className={`fav-segment-btn ${activeTab === 'stores' ? 'active' : ''}`}
                         onClick={() => setActiveTab('stores')}
                     >
-                        Магазины
+                        {t('favorites.stores')}
                     </button>
                 </div>
             </div>
@@ -239,10 +245,10 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
                         </div>
                         <div style={{ fontSize: '1rem', fontWeight: 600, color: '#888' }}>
                             {searchQuery
-                                ? 'По вашему запросу ничего не найдено'
+                                ? t('favorites.no_results')
                                 : activeTab === 'restaurants'
-                                    ? 'Нет ресторанов в избранном'
-                                    : 'Нет магазинов в избранном'
+                                    ? t('favorites.no_restaurants')
+                                    : t('favorites.no_stores')
                             }
                         </div>
                     </div>

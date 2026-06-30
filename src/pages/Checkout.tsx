@@ -71,8 +71,8 @@ interface CheckoutPageProps {
 }
 
 const CheckoutPage: React.FC<CheckoutPageProps> = ({
-    onBack, totalAmount, onOrderPlaced, initialAddress, restaurantId,
-    /* cartItems, */ comment: restaurantComment, cutleryCount
+    onBack, totalAmount: _totalAmount, onOrderPlaced, initialAddress, restaurantId,
+    cartItems, comment: restaurantComment, cutleryCount
 }) => {
     const { t } = useLanguage();
     const [deliveryType, setDeliveryType] = useState<'standard' | 'scheduled'>('standard');
@@ -94,8 +94,10 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
         phone: initialAddress?.phone || savedPhone || ''
     });
 
+    const subtotal = cartItems?.reduce((sum: number, item: any) => sum + (Number(item.product.price) * item.quantity), 0) || 0;
     const deliveryFee = 5.00;
-    const finalTotal = totalAmount + deliveryFee;
+    const serviceFee = subtotal > 0 ? Math.max(0.99, Math.min(2.00, subtotal * 0.06)) : 0;
+    const finalTotal = subtotal + deliveryFee + serviceFee;
 
     const handleUpdateAddress = (field: string, value: string) => {
         setAddress((prev: any) => ({ ...prev, [field]: value }));
@@ -302,7 +304,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                                 <div className="summary-details">
                                     <div className="summary-line">
                                         <span>{t('cart.items')}</span>
-                                        <span>{totalAmount.toFixed(2)} ₾</span>
+                                        <span>{subtotal.toFixed(2)} ₾</span>
                                     </div>
                                     <div className="summary-line">
                                         <span>{t('cart.delivery')}</span>
@@ -310,7 +312,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                                     </div>
                                     <div className="summary-line">
                                         <span>{t('cart.service')}</span>
-                                        <span>0.00 ₾</span>
+                                        <span>{serviceFee.toFixed(2)} ₾</span>
                                     </div>
                                 </div>
 

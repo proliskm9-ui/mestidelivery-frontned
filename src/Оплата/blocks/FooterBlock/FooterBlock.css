@@ -1,15 +1,18 @@
 /* FooterBlock.css — закрепленный футер с инфой слева и кнопкой справа */
 
 .fixed-footer {
-  position: sticky;
-  bottom: 0;
   width: 100%;
   max-width: 100%;
-  padding: 14px 16px calc(14px + env(safe-area-inset-bottom)) 16px;
-  z-index: 100;
+  padding: 16px 20px calc(16px + env(safe-area-inset-bottom)) 20px;
   box-sizing: border-box;
-  background: #0A0A0A;
+  background: rgba(255, 255, 255, 0.05);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: none;
+  border-left: none;
+  border-right: none;
+  border-radius: 20px 20px 0 0;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -26,28 +29,24 @@
 .footer-amount {
   font-family: 'Inter', sans-serif;
   font-weight: 700;
-  font-size: 24px;
+  font-size: 20px;
   color: #21EA7C;
-  /* Зеленый цвет суммы */
   line-height: 1;
+  white-space: nowrap;
 }
 
-.footer-time-row {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.footer-amount.small-text {
+  font-size: 18px;
+}
+
+.footer-label {
   font-family: 'Inter', sans-serif;
   font-weight: 500;
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.45);
-  margin-left: -2px;
-}
-
-.footer-time-icon {
-  width: 19px;
-  height: 19px;
-  object-fit: contain;
-  opacity: 0.6;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
 }
 
 .footer-pay-btn {

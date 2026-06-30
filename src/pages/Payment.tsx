@@ -2,6 +2,7 @@ import React, { useState, useRef, useMemo } from 'react';
 import './Payment.css';
 import { api, restaurantCache } from '../services/api';
 import IsometricBoxLoader from '../components/UI/IsometricBoxLoader';
+import { useLanguage } from '../translations/LanguageContext';
 
 // Enhanced SVG Icons
 const IconBack = () => (
@@ -42,6 +43,7 @@ interface PaymentPageProps {
 }
 
 const PaymentPage: React.FC<PaymentPageProps> = ({ onBack, totalAmount, orderData, cartItems, onPaymentComplete }) => {
+    const { t } = useLanguage();
     const [submitting, setSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [processingMethod, setProcessingMethod] = useState<string | null>(null);
@@ -86,10 +88,10 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onBack, totalAmount, orderDat
                 restaurant_name: restaurantCache[`rest_${restaurantId}`]?.name || '',
                 items: items,
                 total: totalAmount,
-                customer_name: addr.customerName || localStorage.getItem('user_name') || 'Клиент',
+                customer_name: addr.customerName || localStorage.getItem('user_name') || t('checkout.customer_fallback'),
                 phone: addr.phone || '',
                 address: fullAddress,
-                comment: (orderData?.restaurantComment || '') + ` [Оплата: ${method === 'cash' ? 'Наличные' : (method === 'card' ? 'Карта' : 'Crypto')}]`,
+                comment: (orderData?.restaurantComment || '') + ` [Оплата: ${method === 'cash' ? 'Cash' : (method === 'card' ? 'Card' : 'Crypto')}]`,
                 courier_comment: addr.comment || '',
                 cutlery_count: orderData?.cutleryCount || 0,
                 apartment: addr.apartment || '',
@@ -137,13 +139,13 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onBack, totalAmount, orderDat
                 
                 onPaymentComplete(method, result.id);
             } else {
-                alert('Ошибка создания заказа');
+                alert(t('checkout.order_creation_error'));
                 setSubmitting(false);
                 setIsSuccess(false);
             }
         } catch (e: any) {
             console.error('Order creation error:', e);
-            alert('Ошибка: ' + (e.message || 'Не удалось создать заказ'));
+            alert(t('common.error') + ': ' + (e.message || t('checkout.order_failed')));
             setSubmitting(false);
             setIsSuccess(false);
         }
@@ -153,15 +155,15 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onBack, totalAmount, orderDat
         <div className="page-transition-wrapper">
             <div className="payment-page-container">
                 <header className="payment-header">
-                    <button className="back-circle-btn" onClick={onBack} aria-label="Назад" disabled={submitting}>
+                    <button className="back-circle-btn" onClick={onBack} aria-label={t('common.back')} disabled={submitting}>
                         <IconBack />
                     </button>
-                    <h1>Оплата</h1>
+                    <h1>{t('checkout.payment_page_title')}</h1>
                 </header>
 
                 <div className="payment-content">
                     <div className="amount-summary">
-                        <span className="label">Сумма к оплате</span>
+                        <span className="label">{t('checkout.total_with_delivery')}</span>
                         <h2 className="value">{totalAmount.toFixed(2)} ₾</h2>
                     </div>
 
@@ -169,8 +171,8 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onBack, totalAmount, orderDat
                         <div className="payment-loading-fullscreen">
                             <div className="mestigo-loading-container">
                                 <IsometricBoxLoader isSuccess={isSuccess} />
-                                <h2>{processingMethod === 'crypto' || processingMethod === 'card' ? 'Обрабатываем платеж...' : 'Формируем заказ...'}</h2>
-                                <p>Это займет всего пару секунд</p>
+                                <h2>{processingMethod === 'crypto' || processingMethod === 'card' ? t('checkout.processing_payment') : t('checkout.placing_order')}</h2>
+                                <p>{t('checkout.wait_seconds')}</p>
                             </div>
                         </div>
                     ) : (
@@ -180,7 +182,7 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onBack, totalAmount, orderDat
                                     <IconCrypto />
                                 </div>
                                 <div className="method-info">
-                                    <h3>Криптовалюта</h3>
+                                    <h3>{t('checkout.crypto')}</h3>
                                     <p>Crypto Pay (USDT, TON, BTC)</p>
                                 </div>
                                 <div className="arrow">→</div>
@@ -191,8 +193,8 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onBack, totalAmount, orderDat
                                     <IconCard />
                                 </div>
                                 <div className="method-info">
-                                    <h3>Банковская карта</h3>
-                                    <p>Оплата через Tribute (SBP/Stars)</p>
+                                    <h3>{t('checkout.card_eu')}</h3>
+                                    <p>{t('checkout.tribute_desc')}</p>
                                 </div>
                                 <div className="arrow">→</div>
                             </div>
@@ -202,8 +204,8 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onBack, totalAmount, orderDat
                                     <IconCash />
                                 </div>
                                 <div className="method-info">
-                                    <h3>Наличными</h3>
-                                    <p>Оплата курьеру при получении</p>
+                                    <h3>{t('checkout.cash')}</h3>
+                                    <p>{t('checkout.cash_courier_desc')}</p>
                                 </div>
                                 <div className="arrow">→</div>
                             </div>
@@ -211,7 +213,7 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onBack, totalAmount, orderDat
                     )}
 
                     <footer className="payment-footer">
-                        <p>Безопасные платежи через Telegram API</p>
+                        <p>{t('checkout.safe_payments_desc')}</p>
                     </footer>
                 </div>
             </div>

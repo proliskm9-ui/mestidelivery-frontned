@@ -80,8 +80,8 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
             const d = new Date(raw);
             if (isNaN(d.getTime())) return '';
             const day = d.getDate();
-            const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
-            const dow = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
+            const months = t('calendar.months') as unknown as string[];
+            const dow = t('calendar.dow') as unknown as string[];
             return `${day} ${months[d.getMonth()]}, ${dow[d.getDay()]}`;
         } catch { return ''; }
     };
@@ -89,11 +89,11 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
     const getStatusLabel = (status?: string): { label: string, class: string } => {
         const s = status?.toLowerCase() || 'delivered';
         switch (s) {
-            case 'pending': return { label: 'Ожидание', class: 'pending' };
-            case 'preparing': return { label: 'Готовится', class: 'pending' };
-            case 'delivering': return { label: 'В пути', class: 'pending' };
-            case 'cancelled': return { label: 'Отменен', class: 'cancelled' };
-            default: return { label: 'Доставлен', class: 'delivered' };
+            case 'pending': return { label: t('status.pending'), class: 'pending' };
+            case 'preparing': return { label: t('status.preparing'), class: 'pending' };
+            case 'delivering': return { label: t('status.delivering'), class: 'pending' };
+            case 'cancelled': return { label: t('status.cancelled'), class: 'cancelled' };
+            default: return { label: t('status.delivered'), class: 'delivered' };
         }
     };
     const [editAddress, setEditAddress] = useState({ street: '', house: '', apartment: '', entrance: '' });
@@ -137,7 +137,7 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                         <div className="mp-avatar-edit-icon"><IconEdit /></div>
                     </div>
                     <div className="mp-user-info">
-                        <h2 className="mp-user-name">{userProfile?.name || 'Пользователь'}</h2>
+                        <h2 className="mp-user-name">{userProfile?.name || t('profile.user_fallback')}</h2>
                         <p className="mp-user-phone">{userProfile?.phone || t('profile.phone')}</p>
                         <div className="mp-points-pill">
                             <span>{userProfile?.points || 0} {t('profile.points_label') || 'баллов'}</span>
@@ -150,18 +150,20 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
             <div className="liquid-card mp-action-list" style={{ padding: '8px' }}>
                 <a className="mp-action-item" onClick={openPersonal}>
                     <div className="mp-action-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2">
+<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                     </div>
                     <div className="mp-action-text">
                         <h3 className="mp-action-title">{t('profile.personal_data')}</h3>
-                        <p className="mp-action-subtitle">Имя, телефон</p>
+                        <p className="mp-action-subtitle">{t('profile.info_name_phone')}</p>
                     </div>
                     <div className="mp-action-chevron"><IconChevron /></div>
                 </a>
 
                 <a className="mp-action-item" onClick={openAddresses}>
                     <div className="mp-action-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2">
+<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                     </div>
                     <div className="mp-action-text">
                         <h3 className="mp-action-title">{t('profile.addresses')}</h3>
@@ -172,11 +174,13 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
 
                 <a className="mp-action-item" href="https://t.me/MestigoSupport_Bot" target="_blank" rel="noopener noreferrer">
                     <div className="mp-action-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
+                        </svg>
                     </div>
                     <div className="mp-action-text">
                         <h3 className="mp-action-title">{t('profile.support')}</h3>
-                        <p className="mp-action-subtitle">Помощь, вопросы</p>
+                        <p className="mp-action-subtitle">{t('profile.info_support')}</p>
                     </div>
                     <div className="mp-action-chevron"><IconChevron /></div>
                 </a>
@@ -201,12 +205,15 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                     <div>
                         {orderHistory.slice(0, 2).map((order, i) => {
                             const statusInfo = getStatusLabel(order.status);
-                            const orderName = order.restaurant_name || `Заказ #${order.id}`;
+                            const orderName = order.restaurant_name || `${t('common.order')} #${order.id}`;
                             const orderAddress = order.address || (order.address?.street ? `${order.address.street}, ${order.address.house}` : '');
                             return (
                                 <div key={order.id || i} className="mp-order-item" onClick={() => onOrderClick?.(order.id)}>
                                     <div className="mp-order-main">
-                                        <h4 className="mp-order-name">{orderName}, {formatTime(order)}</h4>
+                                        <h4 className="mp-order-name">
+                                            <span className="mp-order-title-text">{orderName}</span>
+                                            <span className="mp-order-title-time">, {formatTime(order)}</span>
+                                        </h4>
                                         <span className="mp-order-meta">{orderAddress || '—'}</span>
                                     </div>
                                     <div className="mp-order-side">
@@ -238,22 +245,22 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                 <div style={{ width: 44 }}></div> {/* Spacer */}
             </div>
             <div className="mp-subview-content">
-                <div className="mp-input-group">
-                    <label className="mp-input-label">{t('profile.name')}</label>
+                <div className={`mp-ct-input-wrapper ${editProfile.name ? 'has-value' : ''}`}>
+                    <span className="mp-ct-input-label">{t('profile.name')}</span>
                     <input
-                        className="mp-input"
+                        className="mp-ct-input"
                         value={editProfile.name}
                         onChange={e => setEditProfile({ ...editProfile, name: e.target.value })}
-                        placeholder="Ваше имя"
+                        placeholder={editProfile.name ? '' : t('profile.name') as string}
                     />
                 </div>
-                <div className="mp-input-group">
-                    <label className="mp-input-label">{t('profile.phone')}</label>
+                <div className={`mp-ct-input-wrapper ${editProfile.phone ? 'has-value' : ''}`}>
+                    <span className="mp-ct-input-label">{t('profile.phone')}</span>
                     <input
-                        className="mp-input"
+                        className="mp-ct-input"
                         value={editProfile.phone}
                         onChange={e => setEditProfile({ ...editProfile, phone: e.target.value })}
-                        placeholder="+995"
+                        placeholder={editProfile.phone ? '' : t('profile.phone') as string}
                     />
                 </div>
                 <button className="mp-save-btn" onClick={handleSavePersonal}>
@@ -274,41 +281,41 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                 <div style={{ width: 44 }}></div>
             </div>
             <div className="mp-subview-content">
-                <div className="mp-input-group">
-                    <label className="mp-input-label">{t('profile.street')}</label>
+                <div className={`mp-ct-input-wrapper ${editAddress.street ? 'has-value' : ''}`}>
+                    <span className="mp-ct-input-label">{t('profile.street')}</span>
                     <input
-                        className="mp-input"
+                        className="mp-ct-input"
                         value={editAddress.street}
                         onChange={e => setEditAddress({ ...editAddress, street: e.target.value })}
-                        placeholder="Улица"
+                        placeholder={editAddress.street ? '' : t('profile.street') as string}
                     />
                 </div>
                 <div style={{ display: 'flex', gap: '15px' }}>
-                    <div className="mp-input-group" style={{ flex: 1 }}>
-                        <label className="mp-input-label">{t('profile.house')}</label>
+                    <div className={`mp-ct-input-wrapper ${editAddress.house ? 'has-value' : ''}`} style={{ flex: 1 }}>
+                        <span className="mp-ct-input-label">{t('profile.house')}</span>
                         <input
-                            className="mp-input"
+                            className="mp-ct-input"
                             value={editAddress.house}
                             onChange={e => setEditAddress({ ...editAddress, house: e.target.value })}
-                            placeholder="Дом"
+                            placeholder={editAddress.house ? '' : t('profile.house') as string}
                         />
                     </div>
-                    <div className="mp-input-group" style={{ flex: 1 }}>
-                        <label className="mp-input-label">{t('checkout.entrance') || 'Подъезд'}</label>
+                      <div className={`mp-ct-input-wrapper ${editAddress.entrance ? 'has-value' : ''}`} style={{ flex: 1 }}>
+                          <span className="mp-ct-input-label">{t('map.entrance')}</span>
+                          <input
+                              className="mp-ct-input"
+                              value={editAddress.entrance || ''}
+                              onChange={e => setEditAddress({ ...editAddress, entrance: e.target.value })}
+                              placeholder={editAddress.entrance ? '' : t('map.entrance') as string}
+                          />
+                      </div>
+                    <div className={`mp-ct-input-wrapper ${editAddress.apartment ? 'has-value' : ''}`} style={{ flex: 1 }}>
+                        <span className="mp-ct-input-label">{t('profile.apartment')}</span>
                         <input
-                            className="mp-input"
-                            value={editAddress.entrance || ''}
-                            onChange={e => setEditAddress({ ...editAddress, entrance: e.target.value })}
-                            placeholder="Под."
-                        />
-                    </div>
-                    <div className="mp-input-group" style={{ flex: 1 }}>
-                        <label className="mp-input-label">{t('profile.apartment')}</label>
-                        <input
-                            className="mp-input"
+                            className="mp-ct-input"
                             value={editAddress.apartment}
                             onChange={e => setEditAddress({ ...editAddress, apartment: e.target.value })}
-                            placeholder="Кв."
+                            placeholder={editAddress.apartment ? '' : t('profile.apartment') as string}
                         />
                     </div>
                 </div>
@@ -338,7 +345,7 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                     <div className="mp-orders-list">
                         {orderHistory.map((order, i) => {
                             const statusInfo = getStatusLabel(order.status);
-                            const orderName = order.restaurant_name || `Заказ #${order.id}`;
+                             const orderName = order.restaurant_name || `${t('common.order')} #${order.id}`;
                             const orderAddress = order.address || '';
 
                             // Date grouping logic
@@ -357,7 +364,10 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                                             <img src="/Assets/general-green.png" alt="MestiGo" style={{ objectFit: 'contain', padding: '6px' }} />
                                         </div>
                                         <div className="mp-order-main">
-                                            <h4 className="mp-order-name">{orderName}, {formatTime(order)}</h4>
+                                            <h4 className="mp-order-name">
+                                                <span className="mp-order-title-text">{orderName}</span>
+                                                <span className="mp-order-title-time">, {formatTime(order)}</span>
+                                            </h4>
                                             <span className="mp-order-meta">{orderAddress || '—'}</span>
                                         </div>
                                         <div className="mp-order-side">
@@ -384,7 +394,7 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                         <div className="mp-back-btn" onClick={onBack}>
                             <IconArrowLeft />
                         </div>
-                        <h1 className="mp-title">Профиль</h1>
+                        <h1 className="mp-title">{t('profile.title')}</h1>
                         <div style={{ width: 44 }}></div>
                     </header>
                     {renderDashboard()}

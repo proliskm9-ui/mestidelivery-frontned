@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../../translations/LanguageContext';
 import './FastTravelBlock.css';
 
 interface FastTravelBlockProps {
@@ -6,6 +7,7 @@ interface FastTravelBlockProps {
 }
 
 const FastTravelBlock: React.FC<FastTravelBlockProps> = ({ onNavigate }) => {
+    const { t } = useLanguage();
     return (
         <div className="cardsBlock mobile-only">
             {/* Restaurants */}
@@ -20,7 +22,7 @@ const FastTravelBlock: React.FC<FastTravelBlockProps> = ({ onNavigate }) => {
                 className="card--img1"
                 alt="Restaurants"
             />
-            <div className="cardLabel cardLabel--restaurants">Рестораны</div>
+            <div className="cardLabel cardLabel--restaurants">{t('menu.restaurants')}</div>
 
             {/* Shops */}
             <div
@@ -34,7 +36,7 @@ const FastTravelBlock: React.FC<FastTravelBlockProps> = ({ onNavigate }) => {
                 className="card--img2"
                 alt="Shops"
             />
-            <div className="cardLabel cardLabel--shops">Магазины</div>
+            <div className="cardLabel cardLabel--shops">{t('menu.stores')}</div>
 
             {/* Promos */}
             <div
@@ -48,7 +50,7 @@ const FastTravelBlock: React.FC<FastTravelBlockProps> = ({ onNavigate }) => {
                 className="card--img3"
                 alt="Promos"
             />
-            <div className="cardLabel cardLabel--promos">Акции</div>
+            <div className="cardLabel cardLabel--promos">{t('menu.promotions')}</div>
         </div>
     );
 };

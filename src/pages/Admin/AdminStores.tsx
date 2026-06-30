@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { adminApi } from '../../services/adminService';
 import { Store } from '../../services/api';
-import { EditIcon, TrashIcon, PlusIcon, RefreshIcon } from '../../components/icons/StatusIcons';
+import { EditIcon, TrashIcon, RefreshIcon } from '../../components/icons/StatusIcons';
+import FullPageLoader from '../../components/UI/FullPageLoader';
 import './AdminStyles.css';
 
 export function AdminStores() {
@@ -13,7 +14,6 @@ export function AdminStores() {
     const loadStores = async () => {
         setLoading(true);
         try {
-            // Using adminApi to ensure Auth headers are sent
             const data = await adminApi.get<Store[]>('/stores/');
             setStores(data);
         } catch (error) {
@@ -48,17 +48,17 @@ export function AdminStores() {
             setEditStore(null);
             loadStores();
         } catch (error) {
-            alert('Failed to save store');
+            alert('Не удалось сохранить магазин');
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Are you sure you want to delete this store?')) return;
+        if (!window.confirm('Вы уверены, что хотите удалить этот магазин?')) return;
         try {
             await adminApi.delete(`/stores/${id}`);
             loadStores();
         } catch (error) {
-            alert('Failed to delete store');
+            alert('Ошибка удаления магазина');
         }
     };
 
@@ -68,139 +68,156 @@ export function AdminStores() {
     };
 
     const openNew = () => {
-        setEditStore({ name: '', delivery: '30-40 min', sort_order: 0, img: '' });
+        setEditStore({ name: '', delivery: '30-40 мин', sort_order: 0, img: '' });
         setIsModalOpen(true);
     };
 
+    if (loading) return <FullPageLoader text="Загрузка списка магазинов..." />;
+
     return (
         <div className="admin-page">
-            <div className="page-header">
-                <h1 className="page-title">Stores Management</h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '36px' }}>
+                <div>
+                    <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 6px 0', letterSpacing: '-1px', textTransform: 'uppercase' }}>Магазины</h1>
+                    <p style={{ color: 'var(--admin-text-muted)', margin: 0, fontSize: '1.05rem', fontWeight: 500 }}>Управление партнерскими магазинами, параметрами доставки и сортировкой.</p>
+                </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <button className="admin-btn" onClick={loadStores}>
+                    <button className="admin-btn" onClick={loadStores} title="Обновить">
                         <RefreshIcon size={18} />
                     </button>
                     <button className="admin-btn admin-btn-primary" onClick={openNew}>
-                        <PlusIcon size={18} style={{ marginRight: 8 }} /> Add Store
+                        Добавить
                     </button>
                 </div>
             </div>
 
-            {loading ? (
-                <div className="admin-card">Loading...</div>
-            ) : (
-                <div className="admin-card admin-table-container">
-                    <table className="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Image</th>
-                                <th>Name</th>
-                                <th>Delivery</th>
-                                <th>Sort</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {stores.map(store => (
-                                <tr key={store.id}>
-                                    <td>
-                                        {store.img ? (
-                                            <img src={store.img} alt="" className="item-img" />
-                                        ) : (
-                                            <div className="item-img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{store.name[0]}</div>
-                                        )}
-                                    </td>
-                                    <td>{store.name}</td>
-                                    <td>{store.delivery}</td>
-                                    <td>{store.sort_order}</td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '8px' }}>
-                                            <button className="admin-btn" onClick={() => openEdit(store)}>
-                                                <EditIcon size={16} />
-                                            </button>
-                                            <button className="admin-btn admin-btn-danger" onClick={() => handleDelete(store.id)}>
-                                                <TrashIcon size={16} />
-                                            </button>
+            <div className="admin-table-premium">
+                <table className="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Логотип</th>
+                            <th>Название</th>
+                            <th>Доставка</th>
+                            <th>Сортировка</th>
+                            <th style={{ textAlign: 'right' }}>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {stores.map(store => (
+                            <tr key={store.id}>
+                                <td>
+                                    {store.img ? (
+                                        <img src={store.img} alt="" className="item-img" />
+                                    ) : (
+                                        <div className="item-img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', fontWeight: 700, color: 'var(--admin-primary)' }}>
+                                            {store.name[0]?.toUpperCase()}
                                         </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                    {stores.length === 0 && <div style={{ padding: 20, textAlign: 'center', color: '#666' }}>No stores found</div>}
-                </div>
-            )}
+                                    )}
+                                </td>
+                                <td style={{ fontWeight: 600 }}>{store.name}</td>
+                                <td style={{ color: 'var(--admin-text-muted)', fontWeight: 600 }}>{store.delivery}</td>
+                                <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{store.sort_order}</td>
+                                <td style={{ textAlign: 'right' }}>
+                                    <div className="admin-action-btns-gap" style={{ justifyContent: 'flex-end' }}>
+                                        <button className="btn-action-glass btn-edit" onClick={() => openEdit(store)} title="Редактировать">
+                                            <EditIcon size={16} />
+                                        </button>
+                                        <button className="btn-action-glass btn-delete" onClick={() => handleDelete(store.id)} title="Удалить">
+                                            <TrashIcon size={16} />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+                {stores.length === 0 && <div className="admin-empty-msg">Магазины не найдены</div>}
+            </div>
 
             {isModalOpen && editStore && (
                 <div className="admin-modal-overlay" onClick={() => setIsModalOpen(false)}>
                     <div className="admin-modal" onClick={e => e.stopPropagation()}>
-                        <h2 style={{ marginTop: 0, marginBottom: 20 }}>{editStore.id ? 'Edit Store' : 'New Store'}</h2>
-                        <form onSubmit={handleSave}>
-                            <div className="form-group">
-                                <label className="form-label">Name</label>
-                                <input
-                                    className="admin-input"
-                                    value={editStore.name || ''}
-                                    onChange={e => setEditStore({ ...editStore, name: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Delivery Time</label>
-                                <input
-                                    className="admin-input"
-                                    value={editStore.delivery || ''}
-                                    onChange={e => setEditStore({ ...editStore, delivery: e.target.value })}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Sort Order</label>
-                                <input
-                                    type="number"
-                                    className="admin-input"
-                                    value={editStore.sort_order || 0}
-                                    onChange={e => setEditStore({ ...editStore, sort_order: parseInt(e.target.value) })}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Image</label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                                    {editStore.img && (
-                                        <img src={editStore.img} alt="Preview" style={{ width: 60, height: 60, borderRadius: 8, objectFit: 'cover', background: '#333' }} />
-                                    )}
-                                    <div style={{ flex: 1 }}>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="admin-input"
-                                            style={{ padding: '8px' }}
-                                            onChange={async (e) => {
-                                                if (e.target.files?.[0]) {
-                                                    try {
-                                                        // Show loading indicator or toast could be added here
-                                                        const res = await adminApi.upload(e.target.files[0]);
-                                                        if (res.success) {
-                                                            setEditStore(prev => prev ? ({ ...prev, img: res.url }) : null);
-                                                        }
-                                                    } catch (err) {
-                                                        alert('Upload failed');
-                                                    }
-                                                }
-                                            }}
-                                        />
-                                    </div>
+                        <div className="modal-header">
+                            <h2 className="modal-title">{editStore.id ? 'Редактировать магазин' : 'Новый магазин'}</h2>
+                            <button className="modal-close" onClick={() => setIsModalOpen(false)}>×</button>
+                        </div>
+                        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+                            <div className="modal-scroll-area">
+                                
+                                <div className="section-subtitle">Основная информация</div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Название</label>
+                                    <input
+                                        className="admin-input"
+                                        value={editStore.name || ''}
+                                        onChange={e => setEditStore({ ...editStore, name: e.target.value })}
+                                        placeholder="Например: Супермаркет Гудвилл"
+                                        required
+                                    />
                                 </div>
-                                <input
-                                    className="admin-input"
-                                    value={editStore.img || ''}
-                                    onChange={e => setEditStore({ ...editStore, img: e.target.value })}
-                                    placeholder="Or paste direct image URL"
-                                />
+                                <div className="form-group">
+                                    <label className="form-label">Время доставки</label>
+                                    <input
+                                        className="admin-input"
+                                        value={editStore.delivery || ''}
+                                        onChange={e => setEditStore({ ...editStore, delivery: e.target.value })}
+                                        placeholder="30-40 мин"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Порядок сортировки</label>
+                                    <input
+                                        type="number"
+                                        className="admin-input"
+                                        value={editStore.sort_order || 0}
+                                        onChange={e => setEditStore({ ...editStore, sort_order: parseInt(e.target.value) || 0 })}
+                                    />
+                                </div>
+
+                                <div className="section-subtitle">Изображение магазина</div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Изображение</label>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px' }}>
+                                        {editStore.img ? (
+                                            <img src={editStore.img} alt="Preview" style={{ width: 64, height: 64, borderRadius: 12, objectFit: 'cover', background: '#333' }} />
+                                        ) : (
+                                            <div style={{ width: 64, height: 64, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', fontSize: '0.8rem', color: 'var(--admin-text-muted)' }}>Нет фото</div>
+                                        )}
+                                        <div style={{ flex: 1 }}>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="admin-input"
+                                                style={{ padding: '10px' }}
+                                                onChange={async (e) => {
+                                                    if (e.target.files?.[0]) {
+                                                        try {
+                                                            const res = await adminApi.upload(e.target.files[0]);
+                                                            if (res.success) {
+                                                                setEditStore(prev => prev ? ({ ...prev, img: res.url }) : null);
+                                                            }
+                                                        } catch (err) {
+                                                            alert('Ошибка загрузки фото');
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <input
+                                        className="admin-input"
+                                        value={editStore.img || ''}
+                                        onChange={e => setEditStore({ ...editStore, img: e.target.value })}
+                                        placeholder="Или вставьте прямую ссылку на изображение"
+                                    />
+                                </div>
                             </div>
 
                             <div className="modal-actions">
-                                <button type="button" className="admin-btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                                <button type="submit" className="admin-btn admin-btn-primary">Save</button>
+                                <button type="button" className="admin-btn" onClick={() => setIsModalOpen(false)}>Отмена</button>
+                                <button type="submit" className="admin-btn admin-btn-primary">Сохранить</button>
                             </div>
                         </form>
                     </div>

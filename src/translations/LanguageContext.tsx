@@ -52,3 +52,25 @@ export const useLanguage = () => {
     }
     return context;
 };
+
+export function formatDuration(text: string | undefined, lang: Language): string {
+    if (!text) return '';
+    const cleanText = text.toString();
+    if (lang === 'ka') {
+        return cleanText
+            .replace(/мин/g, 'წთ')
+            .replace(/сек/g, 'წმ')
+            .replace(/ч/g, 'სთ')
+            .replace(/до/ig, 'მდე')
+            .replace(/от/ig, '-დან');
+    }
+    if (lang === 'en') {
+        return cleanText
+            .replace(/мин/g, 'min')
+            .replace(/сек/g, 'sec')
+            .replace(/ч/g, 'h')
+            .replace(/до/ig, 'up to')
+            .replace(/от/ig, 'from');
+    }
+    return cleanText;
+}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './Login.css';
+import { useLanguage } from '../translations/LanguageContext';
 
 interface LoginPageProps {
     onLogin: (token: string) => void;
@@ -16,6 +17,7 @@ const IconLoader = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="n
 
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+    const { t } = useLanguage();
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -48,7 +50,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             : { email, password };
 
         try {
-            const API_URL = (import.meta as any).env.VITE_API_URL || 'https://mestiapi.ddns.net:3001';
+            const API_URL = (import.meta as any).env.VITE_API_URL || '';
 
             const res = await fetch(`${API_URL}${endpoint}`, {
                 method: 'POST',
@@ -59,7 +61,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.detail || 'Authentication failed');
+                throw new Error(data.detail || t('auth.error_auth'));
             }
 
             if (data.token) {
@@ -96,9 +98,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 {/* Auth Card */}
                 <div className="auth-card">
                     <div className="auth-card-content">
-                        <h1>{isLogin ? 'Welcome Back' : 'Join Mestigo'}</h1>
+                        <h1>{isLogin ? t('auth.welcome_back') : t('auth.join_mestigo')}</h1>
                         <p className="auth-subtitle">
-                            {isLogin ? 'Sign in to manage your orders' : 'Create an account to start ordering'}
+                            {isLogin ? t('auth.sign_in_desc') : t('auth.register_desc')}
                         </p>
 
                         <form onSubmit={handleSubmit} className={`auth-form ${!isLogin ? 'registration-grid' : ''}`}>
@@ -109,7 +111,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                                         <span className="auth-input-icon"><IconUser /></span>
                                         <input
                                             type="text"
-                                            placeholder="Full Name"
+                                            placeholder={t('auth.full_name')}
                                             value={fullName}
                                             onChange={(e) => setFullName(e.target.value)}
                                             required
@@ -119,7 +121,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                                         <span className="auth-input-icon"><IconPhone /></span>
                                         <input
                                             type="tel"
-                                            placeholder="Phone Number"
+                                            placeholder={t('auth.phone_number')}
                                             value={phone}
                                             onChange={(e) => setPhone(e.target.value)}
                                             required
@@ -132,7 +134,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                                 <span className="auth-input-icon"><IconMail /></span>
                                 <input
                                     type="email"
-                                    placeholder="Email Address"
+                                    placeholder={t('auth.email_address')}
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
@@ -143,7 +145,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                                 <span className="auth-input-icon"><IconLock /></span>
                                 <input
                                     type={showPassword ? 'text' : 'password'}
-                                    placeholder="Password"
+                                    placeholder={t('auth.password')}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
@@ -164,7 +166,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                                 className="auth-submit-btn full-width"
                                 disabled={loading}
                             >
-                                {loading ? <IconLoader /> : (isLogin ? 'Sign In' : 'Create Account')}
+                                {loading ? <IconLoader /> : (isLogin ? t('auth.sign_in') : t('auth.create_account'))}
                             </button>
                         </form>
 
@@ -175,13 +177,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                                 setError('');
                             }}
                         >
-                            {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
+                            {isLogin ? t('auth.dont_have_account') : t('auth.already_have_account')}
                         </button>
                     </div>
                 </div>
 
                 <div className="auth-footer">
-                    By continuing, you agree to our Terms of Service & Privacy Policy.
+                    {t('auth.terms_privacy')}
                 </div>
             </div>
         </div>

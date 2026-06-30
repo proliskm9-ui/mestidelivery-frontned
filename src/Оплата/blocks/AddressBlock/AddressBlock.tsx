@@ -1,5 +1,6 @@
 import React from 'react';
 import './AddressBlock.css';
+import { useLanguage } from '../../../translations/LanguageContext';
 
 // Импорт иконок
 import commentIcon from '../../assets/speech-bubble 1.png';
@@ -115,6 +116,7 @@ interface AddressBlockProps {
   address: Partial<AddressData>;
   updateAddress: (field: string, value: string) => void;
   onOpenPlaceModal: () => void;
+  onOpenMapModal?: () => void;
   onEditComment?: () => void;
   onEditPhone?: () => void;
 }
@@ -122,8 +124,10 @@ interface AddressBlockProps {
 const AddressBlock: React.FC<AddressBlockProps> = ({
   address,
   updateAddress,
-  onOpenPlaceModal
+  onOpenPlaceModal,
+  onOpenMapModal
 }) => {
+  const { t } = useLanguage();
   const [isCommentFocused, setIsCommentFocused] = React.useState<boolean>(false);
   const safeAddress = address || {};
   const currentType = safeAddress.type || 'home';
@@ -176,7 +180,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
 
   return (
     <section className="delivery-card">
-      <h2 className="delivery-title">Куда доставить?</h2>
+      <h2 className="delivery-title">{t('checkout.where_to_deliver')}</h2>
 
       <div className="delivery-content">
 
@@ -184,7 +188,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
         <div className="place-type-row" onClick={onOpenPlaceModal}>
           <div className="icon-fixed">
             {currentType === 'home' && (
-              <img src="/Assets/home.png" alt="Дом / Квартира" />
+              <img src="/Assets/home.png" alt={t('checkout.place_home')} />
             )}
             {currentType === 'hotel' && (
               <svg viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -202,11 +206,11 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
           </div>
           <div className="place-text-col">
             <p className="place-title">
-              {currentType === 'home' && 'Дом / Квартира'}
-              {currentType === 'hotel' && 'Отель / Гэстхаус'}
-              {currentType === 'map' && 'Точка на карте'}
+              {currentType === 'home' && t('checkout.place_home')}
+              {currentType === 'hotel' && t('checkout.address_hotel_guest')}
+              {currentType === 'map' && t('checkout.address_point_map')}
             </p>
-            <p className="place-subtitle">Выбрать тип помещения</p>
+            <p className="place-subtitle">{t('checkout.select_premise')}</p>
           </div>
         </div>
 
@@ -225,7 +229,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
                     value={safeAddress.street || ''}
                     onChange={(e) => updateAddress('street', e.target.value)}
                   />
-                  <label className="floating-label">Улица</label>
+                  <label className="floating-label">{t('checkout.street')}</label>
                   <div className="bottom-border"></div>
                 </div>
 
@@ -235,7 +239,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
                     value={safeAddress.house || ''}
                     onChange={(e) => updateAddress('house', e.target.value)}
                   />
-                  <label className="floating-label">Дом</label>
+                  <label className="floating-label">{t('checkout.house')}</label>
                   <div className="bottom-border"></div>
                 </div>
               </div>
@@ -247,7 +251,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
                     value={safeAddress.apartment || ''}
                     onChange={(e) => updateAddress('apartment', e.target.value)}
                   />
-                  <label className="floating-label">Кв/офис</label>
+                  <label className="floating-label">{t('profile.apartment')}</label>
                   <div className="bottom-border"></div>
                 </div>
 
@@ -257,7 +261,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
                     value={safeAddress.floor || ''}
                     onChange={(e) => updateAddress('floor', e.target.value)}
                   />
-                  <label className="floating-label">Этаж</label>
+                  <label className="floating-label">{t('map.floor')}</label>
                   <div className="bottom-border"></div>
                 </div>
               </div>
@@ -274,7 +278,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
                     value={safeAddress.hotelName || ''}
                     onChange={(e) => updateAddress('hotelName', e.target.value)}
                   />
-                  <label className="floating-label">Название отеля</label>
+                  <label className="floating-label">{t('checkout.hotel_name')}</label>
                   <div className="bottom-border"></div>
                 </div>
               </div>
@@ -285,7 +289,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
                     value={safeAddress.room || ''}
                     onChange={(e) => updateAddress('room', e.target.value)}
                   />
-                  <label className="floating-label">Номер комнаты</label>
+                  <label className="floating-label">{t('checkout.room_number')}</label>
                   <div className="bottom-border"></div>
                 </div>
                 <div className={getCellClass(safeAddress.deliveryNote)} onClick={handleCellClick}>
@@ -294,7 +298,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
                     value={safeAddress.deliveryNote || ''}
                     onChange={(e) => updateAddress('deliveryNote', e.target.value)}
                   />
-                  <label className="floating-label">Как передать</label>
+                  <label className="floating-label">{t('checkout.how_to_deliver')}</label>
                   <div className="bottom-border"></div>
                 </div>
               </div>
@@ -305,14 +309,14 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
           {currentType === 'map' && (
             <>
               <div className="grid-row">
-                <div className={getCellClass(safeAddress.geo, 'full-width')} onClick={handleCellClick}>
+                <div className={getCellClass(safeAddress.geo, 'full-width')} onClick={onOpenMapModal || handleCellClick}>
                   <input
                     className="input-transparent"
                     value={safeAddress.geo || ''}
                     readOnly
                     style={{ cursor: 'pointer' }}
                   />
-                  <label className="floating-label">Определить местоположение</label>
+                  <label className="floating-label">{t('checkout.determine_location')}</label>
                   <div className="bottom-border"></div>
                 </div>
               </div>
@@ -323,7 +327,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
                     value={safeAddress.landmark || ''}
                     onChange={(e) => updateAddress('landmark', e.target.value)}
                   />
-                  <label className="floating-label">Ориентир</label>
+                  <label className="floating-label">{t('checkout.landmark')}</label>
                   <div className="bottom-border"></div>
                 </div>
                 <div className={getCellClass(safeAddress.deliveryNote)} onClick={handleCellClick}>
@@ -332,7 +336,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
                     value={safeAddress.deliveryNote || ''}
                     onChange={(e) => updateAddress('deliveryNote', e.target.value)}
                   />
-                  <label className="floating-label">Как передать</label>
+                  <label className="floating-label">{t('checkout.how_to_deliver')}</label>
                   <div className="bottom-border"></div>
                 </div>
               </div>
@@ -355,7 +359,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
               onBlur={() => setIsCommentFocused(false)}
             />
             <label className="floating-label">
-              {(isCommentFocused || safeAddress.comment) ? 'Комментарий к заказу' : 'Добавить комментарий'}
+              {(isCommentFocused || safeAddress.comment) ? t('checkout.comment_to_order') : t('checkout.add_comment')}
             </label>
           </div>
 
@@ -380,7 +384,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
               type="tel"
               inputMode="tel"
             />
-            <label className="floating-label">Телефон получателя</label>
+            <label className="floating-label">{t('checkout.phone_recipient')}</label>
           </div>
 
           <div className="arrow-right">

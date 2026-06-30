@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api, Product, Restaurant } from '../services/api';
+import FullPageLoader from '../components/UI/FullPageLoader';
+import NetworkErrorState from '../components/UI/NetworkErrorState';
+import { useLanguage } from '../translations/LanguageContext';
 import './Restaurant.css';
 import './MobileRestaurant.css';
 
@@ -26,12 +29,29 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     onClearCart, 
     onNavigateToCart 
 }) => {
+    const { t } = useLanguage();
+
+    const formatWeight = (w?: string | number) => {
+        if (w == null || w === '') return null;
+        const str = String(w).trim();
+        // If it already has letters (except Russian/Georgian suffixes), keep as is
+        if (/[a-zA-Z]/.test(str)) return str;
+        return `${str} ${t('restaurant.grams')}`;
+    };
+
+    const formatCalories = (c?: string | number) => {
+        if (c == null || c === '') return null;
+        const str = String(c).trim();
+        if (/[a-zA-Z]/.test(str)) return str;
+        return `${str} ${t('restaurant.kcal')}`;
+    };
 
     const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<string[]>([]);
     const [activeCategory, setActiveCategory] = useState('All');
     const [loading, setLoading] = useState(true);
+    const [isNetworkError, setIsNetworkError] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -87,8 +107,10 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                 setProducts(prodData);
                 setCategories(['Что нового', 'Выбор пользователей', 'Акции', ...cats]); // Used mainly for desktop
                 setActiveCategory(cats[0] || 'All');
+                setIsNetworkError(false);
             } catch (err) {
                 console.error(err);
+                setIsNetworkError(true);
             } finally {
                 setLoading(false);
             }
@@ -146,8 +168,31 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
         return () => observer.disconnect();
     }, [isMobile, products]);
 
-    if (loading) return <div style={{ color: 'white', padding: '100px', textAlign: 'center' }}>Loading Menu...</div>;
-    if (!restaurant) return <div style={{ color: 'white', padding: '100px', textAlign: 'center' }}>Restaurant not found.</div>;
+    const getCategoryDisplayName = (cat: string) => {
+        if (cat === 'Что нового') return t('restaurant.what_new');
+        if (cat === 'Выбор пользователей') return t('restaurant.user_choice');
+        if (cat === 'Акции') return t('restaurant.promotions');
+        
+        // Translate database categories
+        const lowerCat = cat.toLowerCase();
+        if (lowerCat === 'супы' || lowerCat === 'soups') return t('categories.soups');
+        if (lowerCat === 'бургеры' || lowerCat === 'burgers') return t('categories.burgers');
+        if (lowerCat === 'пицца' || lowerCat === 'pizza') return t('categories.pizza');
+        if (lowerCat === 'шаурма' || lowerCat === 'shawarma') return t('categories.shawarma');
+        if (lowerCat === 'сэндвичи' || lowerCat === 'sandwiches') return t('categories.sandwiches');
+        if (lowerCat === 'выпечка' || lowerCat === 'bakery') return t('categories.bakery');
+        if (lowerCat === 'блины' || lowerCat === 'pancakes') return t('categories.pancakes');
+        if (lowerCat === 'десерты' || lowerCat === 'desserts') return t('categories.desserts');
+        if (lowerCat === 'шашлык' || lowerCat === 'bbq') return t('categories.bbq');
+        if (lowerCat === 'паста' || lowerCat === 'pasta') return t('categories.pasta');
+        if (lowerCat === 'кофе' || lowerCat === 'coffee') return t('categories.coffee');
+        if (lowerCat === 'ქართული' || lowerCat === 'грузинская' || lowerCat === 'georgian') return t('categories.georgian');
+        
+        return cat;
+    };
+
+    if (loading) return <FullPageLoader text={t('common.loading') as string} />;
+    if (isNetworkError || !restaurant) return <NetworkErrorState />;
 
     // ----- DESKTOP RENDER -----
     if (!isMobile) {
@@ -155,7 +200,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
             if (items.length === 0) return null;
             return (
                 <div className="menu-section" key={title}>
-                    <h2 className="ms-title">{title}</h2>
+                    <h2 className="ms-title">{getCategoryDisplayName(title)}</h2>
                     <div className="menu-grid">
                         {items.map(product => {
                             const count = getQuantity(product.id);
@@ -164,13 +209,13 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                     <div className="dcn-image">
                                         <img src={product.img || '/Assets/default-food.png'} alt={product.name} />
                                     </div>
-                                    <div className="dcn-price">{product.price.toFixed(0)} ₽</div>
+                                    <div className="dcn-price">{product.price.toFixed(0)} ₾</div>
                                     <div className="dcn-title">{product.name}</div>
                                     <button className="dcn-add-btn" onClick={(e) => {
                                         e.stopPropagation();
                                         onAddToCart(product);
                                     }}>
-                                        {count > 0 ? `Добавлено (${count})` : 'Добавить'}
+                                        {count > 0 ? `${t('restaurant.added')} (${count})` : t('restaurant.add')}
                                     </button>
                                 </div>
                             )
@@ -205,15 +250,15 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                 {restaurant.category || "Кофе, детское меню, блины, салаты, завтраки, десерты, пицца"}
                             </div>
                             <div className="ric-actions">
-                                <button className="ric-btn ric-btn-primary">Заказать</button>
-                                <button className="ric-btn ric-btn-secondary">Сходить</button>
+                                <button className="ric-btn ric-btn-primary">{t('restaurant.order')}</button>
+                                <button className="ric-btn ric-btn-secondary">{t('restaurant.visit')}</button>
                                 <div className="ric-meta">
                                     <div className="ric-meta-item">
                                         <span style={{ color: '#FCD535' }}>★</span> {restaurant.rating}
                                     </div>
                                     <div className="ric-meta-item">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                                        20-25 мин
+                                        {restaurant.delivery || '20-25 мин'}
                                     </div>
                                     <div className="ric-meta-item info-icon">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
@@ -225,14 +270,14 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                         <div className="menu-nav-sticky">
                             {categories.map(cat => (
                                 <div key={cat} className={`mn-item ${activeCategory === cat ? 'active' : ''}`} onClick={() => setActiveCategory(cat)}>
-                                    {cat}
+                                    {getCategoryDisplayName(cat)}
                                 </div>
                             ))}
                         </div>
 
                         {activeCategory === 'Выбор пользователей' || activeCategory === 'Что нового' || activeCategory === 'Акции' ? (
                             <div className="menu-section">
-                                <h2 className="ms-title">{activeCategory}</h2>
+                                <h2 className="ms-title">{getCategoryDisplayName(activeCategory)}</h2>
                                 <div className="menu-grid">
                                     {products.length > 0 ? products.map(product => {
                                         const count = getQuantity(product.id);
@@ -241,17 +286,17 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                                 <div className="dcn-image">
                                                     <img src={product.img || '/Assets/default-food.png'} alt={product.name} />
                                                 </div>
-                                                <div className="dcn-price">{product.price.toFixed(0)} ₽</div>
+                                                <div className="dcn-price">{product.price.toFixed(0)} ₾</div>
                                                 <div className="dcn-title">{product.name}</div>
                                                 <button className="dcn-add-btn" onClick={(e) => {
                                                     e.stopPropagation();
                                                     onAddToCart(product);
                                                 }}>
-                                                    {count > 0 ? `Добавлено (${count})` : 'Добавить'}
+                                                    {count > 0 ? `${t('restaurant.added')} (${count})` : t('restaurant.add')}
                                                 </button>
                                             </div>
                                         )
-                                    }) : <div className="no-items">В этой категории пока нет блюд</div>}
+                                    }) : <div className="no-items">{t('restaurant.no_items_in_category')}</div>}
                                 </div>
                             </div>
                         ) : (
@@ -262,7 +307,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                     <div className="rest-sidebar">
                         <div className="cart-widget">
                             <div className="cw-header-row">
-                                <div className="cw-title">Корзина</div>
+                                <div className="cw-title">{t('restaurant.cart')}</div>
                                 {cart.length > 0 && (
                                     <button className="cw-trash-btn" onClick={onClearCart}>
                                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -276,7 +321,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                     <svg className="cw-empty-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                                         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" />
                                     </svg>
-                                    <span>В вашей корзине пока пусто</span>
+                                    <span>{t('restaurant.cart_empty')}</span>
                                 </div>
                             ) : (
                                 <div className="cw-items">
@@ -286,7 +331,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                             <div className="cw-item-info">
                                                 <div className="cw-item-name">{item.product.name}</div>
                                                 <div className="cw-item-price-row">
-                                                    <span className="cw-item-price-val">{item.product.price} ₽</span>
+                                                    <span className="cw-item-price-val">{item.product.price} ₾</span>
                                                 </div>
                                             </div>
                                             <div className="cw-item-counter">
@@ -296,14 +341,14 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                             </div>
                                         </div>
                                     ))}
-                                    <button className="cw-checkout-btn" onClick={onNavigateToCart}>Верно, к оплате</button>
+                                    <button className="cw-checkout-btn" onClick={onNavigateToCart}>{t('restaurant.proceed_to_payment')}</button>
                                 </div>
                             )}
                             <div className="cw-bottom-info">
                                 <div className="cw-info-mini-badge">📦</div>
                                 <div className="cw-info-text">
-                                    <div>Самовывоз - 18 мин. Подробные условия</div>
-                                    <div className="cw-info-sub">Российская Федерация, Санкт-Петербург...</div>
+                                    <div>{t('restaurant.pickup_info')}</div>
+                                    <div className="cw-info-sub">{restaurant.address || ''}</div>
                                 </div>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginLeft: 'auto' }}><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
                             </div>
@@ -323,9 +368,9 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             <div className="modal-body">
                                 <div className="modal-header-row">
                                     <h2 className="modal-dish-name">{selectedProduct.name}</h2>
-                                    <span className="modal-dish-price">{selectedProduct.price.toFixed(0)} ₽</span>
+                                    <span className="modal-dish-price">{selectedProduct.price.toFixed(0)} ₾</span>
                                 </div>
-                                <p className="modal-description">{selectedProduct.description || 'Вкусное блюдо.'}</p>
+                                <p className="modal-description">{selectedProduct.description || ''}</p>
                                 <button className="modal-add-btn" onClick={() => {
                                     onAddToCart(selectedProduct);
                                     if (getQuantity(selectedProduct.id) === 0) {
@@ -333,7 +378,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                     }
                                     setSelectedProduct(null);
                                 }}>
-                                    Добавить за {selectedProduct.price.toFixed(0)} ₽
+                                    {t('restaurant.add')} • {selectedProduct.price.toFixed(0)} ₾
                                 </button>
                             </div>
                         </div>
@@ -361,7 +406,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     }
 
     return (
-        <div className="mobile-restaurant-page">
+        <div className={`mobile-restaurant-page ${cart.length > 0 ? 'has-cart' : ''}`}>
             {/* === Compact Sticky Header (appears on scroll) === */}
             <div className={`v2-compact-header ${isScrolled ? 'visible' : ''}`}>
                 {/* Nav row OR Search bar */}
@@ -376,7 +421,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             <input
                                 className="v2-search-input"
                                 type="text"
-                                placeholder={`Поиск в ${restaurant.name}`}
+                                placeholder={t('restaurant.search_placeholder').replace('{name}', restaurant.name)}
                                 value={mobileSearchQuery}
                                 onChange={(e) => setMobileSearchQuery(e.target.value)}
                                 autoFocus={isScrolled}
@@ -425,7 +470,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             className={`category-item ${activeCategory === cat ? 'active' : ''}`}
                             onClick={() => scrollToCategory(cat)}
                         >
-                            <span className="category-name">{cat}</span>
+                            <span className="category-name">{getCategoryDisplayName(cat)}</span>
                         </div>
                     ))}
                 </div>
@@ -445,7 +490,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             <input
                                 className="v2-search-input"
                                 type="text"
-                                placeholder={`Поиск в ${restaurant.name}`}
+                                placeholder={t('restaurant.search_placeholder').replace('{name}', restaurant.name)}
                                 value={mobileSearchQuery}
                                 onChange={(e) => setMobileSearchQuery(e.target.value)}
                                 autoFocus={!isScrolled}
@@ -496,7 +541,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                         />
                         <div className="v2-meta-text">
                             <span className="v2-meta-val" style={{ color: '#21EA7C' }}>{restaurant.rating}</span>
-                            <span className="v2-meta-sub">919 оценок</span>
+                            <span className="v2-meta-sub">919 {t('restaurant.reviews_count')}</span>
                         </div>
                     </div>
                     <div className="v2-meta-divider" />
@@ -508,7 +553,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                         />
                         <div className="v2-meta-text">
                             <span className="v2-meta-val" style={{ color: '#21EA7C' }}>{restaurant.delivery || '20-30 мин'}</span>
-                            <span className="v2-meta-sub">Доставка</span>
+                            <span className="v2-meta-sub">{t('restaurant.delivery')}</span>
                         </div>
                     </div>
                     <div className="v2-meta-divider" />
@@ -544,9 +589,8 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             <div className="v2-sheet-divider" />
 
                             <div className="v2-sheet-legal">
-                                <p>Исполнитель (продавец): ООО "{restaurant.name}", 0177, Грузия, г. Тбилиси, Казбеги, дом 25, ИНН 405234567, рег. номер 1027700251754</p>
-                                <p>Информация о потребительских свойствах продукции доступна в ресторане и на сайте.</p>
-                                <p>Режим работы: с 08:00 до 23:00</p>
+                                <p>{t('restaurant.seller_info_legal').replace('{name}', restaurant.name)}</p>
+                                <p>{t('restaurant.seller_info_hours')}</p>
                             </div>
                         </div>
                     </div>
@@ -562,13 +606,13 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             className={`category-item ${activeCategory === cat ? 'active' : ''}`}
                             onClick={() => scrollToCategory(cat)}
                         >
-                            <span className="category-name">{cat}</span>
+                            <span className="category-name">{getCategoryDisplayName(cat)}</span>
                         </div>
                     ))}
                 </div>
 
                 {mobileSearchQuery.trim() && filteredProducts.length === 0 ? (
-                    <div className="v2-search-empty">Ничего не найдено</div>
+                    <div className="v2-search-empty">{t('restaurant.search_empty')}</div>
                 ) : (
                     <div className="products-all-sections">
                         {filteredCategories.map((cat, catIndex) => (
@@ -579,7 +623,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                 data-category={cat}
                                 ref={(el) => { sectionRefs.current[cat] = el; }}
                             >
-                                {catIndex > 0 && <h2 className="category-section-title">{cat}</h2>}
+                                {catIndex > 0 && <h2 className="category-section-title">{getCategoryDisplayName(cat)}</h2>}
                                 <div className="products-grid">
                                     {filteredByCategory[cat].map(product => {
                                         const count = getQuantity(product.id);
@@ -613,9 +657,9 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                                     <div className="dish-price">{product.price.toFixed(2)} GEL</div>
                                                     <div className="dish-title">{product.name}</div>
                                                     <div className="dish-meta">
-                                                        <span>{product.weight}{product.weight && ' г.'}</span>
-                                                        {product.weight && product.calories && <span style={{ margin: '0 4px' }}>·</span>}
-                                                        <span>{product.calories}{product.calories && ' ккал'}</span>
+                                                        {formatWeight(product.weight) && <span>{formatWeight(product.weight)}</span>}
+                                                        {formatWeight(product.weight) && formatCalories(product.calories) && <span style={{ margin: '0 4px' }}>·</span>}
+                                                        {formatCalories(product.calories) && <span>{formatCalories(product.calories)}</span>}
                                                     </div>
                                                 </div>
                                             </div>
@@ -641,26 +685,26 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                         </div>
 
                         <div className="modal-body">
-                            <p className="modal-description">{selectedProduct.description || 'Вкусное блюдо, приготовленное из свежих ингредиентов.'}</p>
+                            <p className="modal-description">{selectedProduct.description || ''}</p>
 
                             <div className="kbju-section-v2">
-                                <h3 className="section-label-v3">КБЖУ</h3>
+                                <h3 className="section-label-v3">{t('restaurant.kbju')}</h3>
                                 <div className="kbju-grid-modal">
                                     <div className="kbju-item-circle">
-                                        <span className="kbju-val-circle">{selectedProduct.calories || '—'}</span>
-                                        <span className="kbju-lab-circle">ккал</span>
+                                        <span className="kbju-val-circle">{selectedProduct.calories != null && selectedProduct.calories !== '' ? selectedProduct.calories : '—'}</span>
+                                        <span className="kbju-lab-circle">{t('restaurant.kcal')}</span>
                                     </div>
                                     <div className="kbju-item-circle">
-                                        <span className="kbju-val-circle">{selectedProduct.proteins || '—'}</span>
-                                        <span className="kbju-lab-circle">белки</span>
+                                        <span className="kbju-val-circle">{selectedProduct.proteins != null && selectedProduct.proteins !== '' ? selectedProduct.proteins : '—'}</span>
+                                        <span className="kbju-lab-circle">{t('restaurant.proteins')}</span>
                                     </div>
                                     <div className="kbju-item-circle">
-                                        <span className="kbju-val-circle">{selectedProduct.fats || '—'}</span>
-                                        <span className="kbju-lab-circle">жиры</span>
+                                        <span className="kbju-val-circle">{selectedProduct.fats != null && selectedProduct.fats !== '' ? selectedProduct.fats : '—'}</span>
+                                        <span className="kbju-lab-circle">{t('restaurant.fats')}</span>
                                     </div>
                                     <div className="kbju-item-circle">
-                                        <span className="kbju-val-circle">{selectedProduct.carbs || '—'}</span>
-                                        <span className="kbju-lab-circle">угли</span>
+                                        <span className="kbju-val-circle">{selectedProduct.carbs != null && selectedProduct.carbs !== '' ? selectedProduct.carbs : '—'}</span>
+                                        <span className="kbju-lab-circle">{t('restaurant.carbs')}</span>
                                     </div>
                                 </div>
                             </div>
@@ -670,7 +714,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             <div className="footer-info-row">
                                 <h2 className="footer-dish-name">
                                     {selectedProduct.name}
-                                    <span className="footer-dish-weight">{selectedProduct.weight}{selectedProduct.weight && ' г'}</span>
+                                    {formatWeight(selectedProduct.weight) && <span className="footer-dish-weight">{formatWeight(selectedProduct.weight)}</span>}
                                 </h2>
                                 <span className="footer-dish-price">{selectedProduct.price.toFixed(0)} GEL</span>
                             </div>
@@ -695,7 +739,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                     if (getQuantity(selectedProduct.id) === 0) onAddToCart(selectedProduct);
                                     setSelectedProduct(null);
                                 }}>
-                                    Добавить
+                                    {t('restaurant.add')}
                                 </button>
                             </div>
                         </div>

@@ -1,4 +1,14 @@
 import { CSSProperties } from 'react';
+import Lottie from 'lottie-react';
+import pendingAnim from './yz1kzmqz.json';
+import confirmedAnim from './th88dwb2.json';
+import preparingAnim from './Coocked.json';
+import readyAnim from './an0x334e.json';
+import deliveringAnim from './2nezvskc.json';
+import deliveredAnim from './prooved.json';
+import cancelledAnim from './new.json';
+import waitPayAnim from './wait_pay.json';
+
 type IconProps = { size?: number; className?: string; style?: CSSProperties };
 
 // Order Status Icons
@@ -64,6 +74,16 @@ export function CancelIcon({ size = 24, className = '' }: IconProps) {
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
             <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
             <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+    );
+}
+
+export function WalletIcon({ size = 24, className = '', style }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} style={style}>
+            <rect x="2" y="6" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="2" />
+            <path d="M2 10h20" stroke="currentColor" strokeWidth="2" />
+            <circle cx="17" cy="15" r="1.5" fill="currentColor" />
         </svg>
     );
 }
@@ -218,4 +238,40 @@ export function BellIcon({ size = 24, className = '' }: IconProps) {
             <path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         </svg>
     );
+}
+
+// ==========================================
+// Animated Lottie Icons (Correctly Mapped Status Icons)
+// ==========================================
+
+export function AnimatedClockIcon({ size = 24, className = '', style }: IconProps) {
+    return <Lottie animationData={pendingAnim} loop={true} className={className} style={{ width: size, height: size, ...style }} />;
+}
+
+export function AnimatedCheckIcon({ size = 24, className = '', style }: IconProps) {
+    return <Lottie animationData={confirmedAnim} loop={true} className={className} style={{ width: size, height: size, ...style }} />;
+}
+
+export function AnimatedChefIcon({ size = 24, className = '', style }: IconProps) {
+    return <Lottie animationData={preparingAnim} loop={true} className={className} style={{ width: size, height: size, ...style }} />;
+}
+
+export function AnimatedPackageIcon({ size = 24, className = '', style }: IconProps) {
+    return <Lottie animationData={readyAnim} loop={true} className={className} style={{ width: size, height: size, ...style }} />;
+}
+
+export function AnimatedDeliveryIcon({ size = 24, className = '', style }: IconProps) {
+    return <Lottie animationData={deliveringAnim} loop={true} className={className} style={{ width: size, height: size, ...style }} />;
+}
+
+export function AnimatedHomeIcon({ size = 24, className = '', style }: IconProps) {
+    return <Lottie animationData={deliveredAnim} loop={true} className={className} style={{ width: size, height: size, ...style }} />;
+}
+
+export function AnimatedCancelIcon({ size = 24, className = '', style }: IconProps) {
+    return <Lottie animationData={cancelledAnim} loop={true} className={className} style={{ width: size, height: size, ...style }} />;
+}
+
+export function AnimatedWalletIcon({ size = 24, className = '', style }: IconProps) {
+    return <Lottie animationData={waitPayAnim} loop={true} className={className} style={{ width: size, height: size, ...style }} />;
 }

@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import './OrderDetails.css';
 import { api, restaurantCache } from '../services/api';
+import FullPageLoader from '../components/UI/FullPageLoader';
+import NetworkErrorState from '../components/UI/NetworkErrorState';
+import { useLanguage } from '../translations/LanguageContext';
 
 // SVG Icons
 const IconBack = () => (
@@ -53,8 +56,10 @@ interface OrderDetailsProps {
 }
 
 const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
+    const { t } = useLanguage();
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [isNetworkError, setIsNetworkError] = useState(false);
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
 
@@ -83,8 +88,10 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                     if (cached) data.restaurant_name = cached.name;
                 }
                 setOrder(data);
+                setIsNetworkError(false);
             } catch (err) {
                 console.error('Failed to fetch order details:', err);
+                setIsNetworkError(true);
             } finally {
                 setLoading(false);
             }
@@ -121,8 +128,8 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
             const d = new Date(raw);
             if (isNaN(d.getTime())) return '—';
             const day = d.getDate().toString().padStart(2, '0');
-            const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
-            const month = months[d.getMonth()];
+            const months = t('calendar.months') as unknown as string[];
+            const month = months[d.getMonth()] || '';
             const hours = d.getHours().toString().padStart(2, '0');
             const mins = d.getMinutes().toString().padStart(2, '0');
             return `${day} ${month}, ${hours}:${mins}`;
@@ -132,12 +139,12 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
     const getStatusInfo = (status?: string): { label: string; cls: string } => {
         const s = status?.toLowerCase() || 'delivered';
         switch (s) {
-            case 'pending': return { label: 'Ожидание', cls: 'pending' };
-            case 'confirmed': return { label: 'Подтверждён', cls: 'pending' };
-            case 'preparing': return { label: 'Готовится', cls: 'pending' };
-            case 'delivering': return { label: 'В пути', cls: 'pending' };
-            case 'cancelled': return { label: 'Отменён', cls: 'cancelled' };
-            default: return { label: 'Доставлен', cls: 'delivered' };
+            case 'pending': return { label: t('status.pending'), cls: 'pending' };
+            case 'confirmed': return { label: t('status.confirmed'), cls: 'pending' };
+            case 'preparing': return { label: t('status.preparing'), cls: 'pending' };
+            case 'delivering': return { label: t('status.delivering'), cls: 'pending' };
+            case 'cancelled': return { label: t('status.cancelled'), cls: 'cancelled' };
+            default: return { label: t('status.delivered'), cls: 'delivered' };
         }
     };
 
@@ -171,18 +178,16 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
     };
 
     if (loading) {
+        return <FullPageLoader text={t('order.loading_data')} />;
+    }
+
+    if (isNetworkError) {
         return (
-            <div className="od-page">
-                <div className="od-bg-glow" />
+            <div className="od-page" style={{ display: 'flex', flexDirection: 'column' }}>
                 <div className="od-header">
                     <button className="od-back-btn" onClick={onBack}><IconBack /></button>
-                    <span className="od-header-title">Загрузка...</span>
-                    <div className="od-header-spacer" />
                 </div>
-                <div className="od-loading">
-                    <div className="od-loading-spinner" />
-                    <span>Загружаем данные заказа</span>
-                </div>
+                <NetworkErrorState />
             </div>
         );
     }
@@ -193,7 +198,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                 <div className="od-bg-glow" />
                 <div className="od-header">
                     <button className="od-back-btn" onClick={onBack}><IconBack /></button>
-                    <span className="od-header-title">Заказ не найден</span>
+                    <span className="od-header-title">{t('order.not_found')}</span>
                     <div className="od-header-spacer" />
                 </div>
             </div>
@@ -202,12 +207,17 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
 
     const items = parseItems(order.items);
     const statusInfo = getStatusInfo(order.status);
-    const restName = order.restaurant_name || `Заказ #${order.id}`;
+    const restName = order.restaurant_name || `${t('common.order')} #${order.id}`;
     const dateStr = formatDate(order.created_at || order.date);
     const address = order.address || '—';
     const comment = order.comment?.replace(/\[Оплата:.*?\]/g, '').trim();
     const itemsTotal = items.reduce((s, i) => s + (i.price * i.quantity), 0);
-    const deliveryFee = order.total > itemsTotal ? +(order.total - itemsTotal).toFixed(2) : 0;
+    const serviceFee = itemsTotal > 0 ? +(Math.max(0.99, Math.min(2.00, itemsTotal * 0.06)).toFixed(2)) : 0;
+    const hasServiceFee = order.total >= (itemsTotal + serviceFee);
+    const calculatedServiceFee = hasServiceFee ? serviceFee : 0;
+    const deliveryFee = order.total > (itemsTotal + calculatedServiceFee) 
+        ? +(order.total - itemsTotal - calculatedServiceFee).toFixed(2) 
+        : 0;
 
     return (
         <div className="od-page">
@@ -232,7 +242,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                     rel="noopener noreferrer"
                 >
                     <IconHelp />
-                    Помощь
+                    {t('order.help')}
                 </a>
 
                 {/* Address */}
@@ -250,7 +260,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                 )}
 
                 {/* Items */}
-                <h3 className="od-section-label">Состав заказа</h3>
+                <h3 className="od-section-label">{t('order.items_structure')}</h3>
                 <div className="od-items-card">
                     {items.map((item, i) => (
                         <div className="od-item-row" key={i}>
@@ -263,36 +273,38 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                     ))}
                     {deliveryFee > 0 && (
                         <div className="od-item-row">
-                            <span className="od-item-name">Доставка</span>
+                            <span className="od-item-name">{t('order.delivery')}</span>
                             <span className="od-item-price">{deliveryFee.toFixed(2)} ₾</span>
                         </div>
                     )}
                 </div>
 
                 {/* Cost Summary */}
-                <h3 className="od-section-label">Стоимость</h3>
+                <h3 className="od-section-label">{t('order.cost')}</h3>
                 <div className="od-cost-card">
-                    {deliveryFee > 0 && (
+                    <div className="od-cost-row">
+                        <span>{t('order.goods')}</span>
+                        <span className="od-cost-value">{itemsTotal.toFixed(2)} ₾</span>
+                    </div>
+                    <div className="od-cost-row">
+                        <span>{t('order.delivery')}</span>
+                        <span className="od-cost-value">{deliveryFee > 0 ? `${deliveryFee.toFixed(2)} ₾` : t('favorites.free')}</span>
+                    </div>
+                    {calculatedServiceFee > 0 && (
                         <div className="od-cost-row">
-                            <span>Товары</span>
-                            <span className="od-cost-value">{itemsTotal.toFixed(2)} ₾</span>
-                        </div>
-                    )}
-                    {deliveryFee > 0 && (
-                        <div className="od-cost-row">
-                            <span>Доставка</span>
-                            <span className="od-cost-value">{deliveryFee.toFixed(2)} ₾</span>
+                            <span>{t('order.service_fee')}</span>
+                            <span className="od-cost-value">{calculatedServiceFee.toFixed(2)} ₾</span>
                         </div>
                     )}
                     <div className="od-cost-row total">
-                        <span>Итого</span>
+                        <span>{t('order.total')}</span>
                         <span className="od-cost-value">{order.total?.toFixed(2)} ₾</span>
                     </div>
                 </div>
 
                 {/* Status */}
                 <div className="od-status-section">
-                    <span className="od-status-label">Статус заказа</span>
+                    <span className="od-status-label">{t('order.status')}</span>
                     <span className={`od-status-badge ${statusInfo.cls}`}>{statusInfo.label}</span>
                 </div>
 
@@ -301,7 +313,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                     <div className="od-rating-card">
                         {ratingSubmitted || order.rating ? (
                             <div className="od-rating-submitted">
-                                <span className="od-rating-title">Оценка заказа</span>
+                                <span className="od-rating-title">{t('order.rating_title')}</span>
                                 <div className="od-stars">
                                     {[1, 2, 3, 4, 5].map((star) => (
                                         <div key={star} className={`od-star ${(order.rating || rating) >= star ? 'active' : ''}`} style={{ cursor: 'default' }}>
@@ -309,7 +321,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                                         </div>
                                     ))}
                                 </div>
-                                <span className="od-rating-submitted-text">Спасибо за вашу оценку!</span>
+                                <span className="od-rating-submitted-text">{t('order.thanks_rating')}</span>
 
                             </div>
                         ) : (
@@ -334,7 +346,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                                 }}
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-                                Оценить заказ
+                                {t('order.rate_order')}
                             </button>
                         )}
                     </div>
@@ -349,8 +361,8 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="rgba(245, 158, 11, 0.2)"></path>
                             </svg>
                         </div>
-                        <h2 className="pam-title" style={{ fontSize: '24px', marginBottom: '8px' }}>Заказ доставлен!</h2>
-                        <p className="pam-subtitle" style={{ marginBottom: '24px', color: '#888' }}>Пожалуйста, оцените работу нашего сервиса и качество блюд.</p>
+                        <h2 className="pam-title" style={{ fontSize: '24px', marginBottom: '8px' }}>{t('order.delivered_title')}</h2>
+                        <p className="pam-subtitle" style={{ marginBottom: '24px', color: '#888' }}>{t('order.delivered_subtitle')}</p>
                         
                         <div className="stars-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}>
                             {[1, 2, 3, 4, 5].map((star) => (
@@ -382,7 +394,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                                 onClick={() => setShowRatingModal(false)}
                                 style={{ background: '#3A3A3C', color: '#fff', flex: 1 }}
                             >
-                                Позже
+                                {t('order.later')}
                             </button>
                             <button
                                 className="pam-save-btn ct-confirm-btn"
@@ -396,7 +408,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                                     cursor: rating > 0 ? 'pointer' : 'not-allowed'
                                 }}
                             >
-                                {isSubmittingRating ? 'Отправка...' : 'Оценить'}
+                                {isSubmittingRating ? t('order.sending') : t('order.rate')}
                             </button>
                         </div>
                     </div>

@@ -38,16 +38,16 @@ const LiquidNavBar: React.FC<{ activePage: string; onNavigate: (page: string) =>
     return (
         <div className={`matte-glass-navbar-container ${isVisible ? 'navbar-visible' : 'navbar-hidden'}`}>
             <nav className="matte-glass-navbar">
-                <div className="nav-item" onClick={() => onNavigate('menu')}>
+                <div className="liquid-nav-item" onClick={() => onNavigate('menu')}>
                     <NavIcon icon="menu-main" active={activePage === 'menu'} />
                 </div>
-                <div className="nav-item" onClick={() => onNavigate('favorites')}>
+                <div className="liquid-nav-item" onClick={() => onNavigate('favorites')}>
                     <NavIcon icon="favorites" active={activePage === 'favorites'} />
                 </div>
-                <div className="nav-item" onClick={() => onNavigate('cart')}>
+                <div className="liquid-nav-item" onClick={() => onNavigate('cart')}>
                     <NavIcon icon="cart" active={activePage === 'cart'} />
                 </div>
-                <div className="nav-item" onClick={() => onNavigate('profile')}>
+                <div className="liquid-nav-item" onClick={() => onNavigate('profile')}>
                     <NavIcon icon="profile" active={activePage === 'profile'} />
                 </div>
             </nav>

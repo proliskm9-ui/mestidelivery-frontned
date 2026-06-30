@@ -1,28 +1,35 @@
 import { useState, useEffect } from 'react';
-import { adminAuth } from '../../services/adminService';
+import { adminAuth, adminApi } from '../../services/adminService';
 import { type AdminPage } from './AdminSidebar';
 import { AdminLogin } from './AdminLogin';
 import { AdminSidebar, MobileNav } from './AdminSidebar';
 import { AdminDashboard } from './AdminDashboard';
 import { AdminOrders } from './AdminOrders';
 import { AdminProducts } from './AdminProducts';
+import { AdminStoreProducts } from './AdminStoreProducts';
 import { AdminStores } from './AdminStores';
 import { AdminUsers } from './AdminUsers';
 import { AdminCourier } from './AdminCourier';
 import { AdminRestaurants } from './AdminRestaurants';
 import AdminPartners from './AdminPartners';
+import { AdminCategories } from './AdminCategories';
+import { AdminWebhooks } from './AdminWebhooks';
 import './AdminStyles.css';
 
 export function AdminPanel() {
-    const [activePage, setActivePage] = useState<AdminPage>('dashboard');
+    const [activePage, setActivePage] = useState<AdminPage | string>('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isAuth, setIsAuth] = useState(adminAuth.isAuthenticated());
 
     const user = adminAuth.getUser();
 
-    // Effect to re-check auth on mount
+    // Effect to re-check auth on mount and trigger preload
     useEffect(() => {
-        setIsAuth(adminAuth.isAuthenticated());
+        const authed = adminAuth.isAuthenticated();
+        setIsAuth(authed);
+        if (authed) {
+            adminApi.preload();
+        }
     }, []);
 
     // Redirect couriers on load
@@ -36,6 +43,16 @@ export function AdminPanel() {
     useEffect(() => {
         setIsSidebarOpen(false);
     }, [activePage]);
+
+    // Listen for custom navigation events (e.g. from Dashboard cards)
+    useEffect(() => {
+        const handleNavigate = (e: Event) => {
+            const page = (e as CustomEvent).detail as AdminPage;
+            if (page) setActivePage(page);
+        };
+        window.addEventListener('navigateAdmin', handleNavigate);
+        return () => window.removeEventListener('navigateAdmin', handleNavigate);
+    }, []);
 
     if (!isAuth) {
         return <AdminLogin onLogin={() => setIsAuth(true)} />;
@@ -66,11 +83,14 @@ export function AdminPanel() {
                 {activePage === 'dashboard' && <AdminDashboard />}
                 {activePage === 'orders' && <AdminOrders />}
                 {activePage === 'products' && <AdminProducts />}
+                {activePage === 'store_products' && <AdminStoreProducts />}
                 {activePage === 'stores' && <AdminStores />}
                 {activePage === 'restaurants' && <AdminRestaurants />}
+                {activePage === 'categories' && <AdminCategories />}
                 {activePage === 'users' && <AdminUsers />}
                 {activePage === 'courier' && <AdminCourier />}
                 {activePage === 'partners' && <AdminPartners />}
+                {activePage === 'webhooks' && <AdminWebhooks />}
             </main>
         </div>
     );

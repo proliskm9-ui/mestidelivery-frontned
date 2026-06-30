@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './CustomTipModal.css';
+import { useLanguage } from '../../../translations/LanguageContext';
 
 interface CustomTipModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface CustomTipModalProps {
 }
 
 const CustomTipModal: React.FC<CustomTipModalProps> = ({ isOpen, onClose, currentTip, onApply }) => {
+  const { t } = useLanguage();
   const [inputValue, setInputValue] = useState<string>('');
 
   useEffect(() => {
@@ -40,20 +42,19 @@ const CustomTipModal: React.FC<CustomTipModalProps> = ({ isOpen, onClose, curren
 
   return (
     <>
-      <div className="ct-overlay active" onClick={onClose}></div>
-
-      <div className="ct-bottom-sheet active" onClick={(e) => e.stopPropagation()}>
+      <div className="ct-overlay active tip-modal-overlay" onClick={onClose}>
+        <div className="ct-bottom-sheet active tip-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="ct-header">
           <div>
-            <h2 className="ct-title">Выбор суммы</h2>
+            <h2 className="ct-title">{t('checkout.select_amount')}</h2>
             <p className="ct-subtitle">
-              Текущий: {inputValue ? `${parseFloat(inputValue).toFixed(2)} ₾` : (currentTip > 0 ? `${currentTip.toFixed(2)} ₾` : 'Без чаевых')}
+              {t('checkout.current_selection')} {inputValue ? `${parseFloat(inputValue).toFixed(2)} ₾` : (currentTip > 0 ? `${currentTip.toFixed(2)} ₾` : t('checkout.no_tips'))}
             </p>
           </div>
         </div>
 
         <div className={`ct-input-wrapper ${inputValue ? 'has-value' : ''}`}>
-          <label className="ct-input-label">Чаевые</label>
+          <label className="ct-input-label">{t('checkout.tips_title')}</label>
           <div className="ct-input-container">
             <div className="ct-input-wrapper-inner">
               <div className="ct-input-mirror-container">
@@ -62,13 +63,12 @@ const CustomTipModal: React.FC<CustomTipModalProps> = ({ isOpen, onClose, curren
                   type="text"
                   inputMode="numeric"
                   className="ct-input"
-                  placeholder={inputValue ? '' : 'Введите сумму'}
+                  placeholder={inputValue ? '' : t('checkout.enter_amount')}
                   value={inputValue}
                   onChange={handleChange}
                   onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                     if (e.key === 'Enter') handleApply();
                   }}
-                  autoFocus
                 />
               </div>
               {inputValue && <span className="ct-input-suffix">.00₾</span>}
@@ -81,8 +81,9 @@ const CustomTipModal: React.FC<CustomTipModalProps> = ({ isOpen, onClose, curren
           onClick={handleApply}
           disabled={!inputValue || parseFloat(inputValue) <= 0}
         >
-          Применить
+          {t('menu.apply')}
         </button>
+      </div>
       </div>
     </>
   );

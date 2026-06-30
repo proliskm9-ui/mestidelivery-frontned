@@ -49,11 +49,18 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
 
     // Recommendations State
     const [recommendations, setRecommendations] = useState<Product[]>([]);
+    const [showMinOrderModal, setShowMinOrderModal] = useState(false);
 
     // Calculate totals
-    const subtotal = initialCartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+    const subtotal = initialCartItems.reduce((sum, item) => sum + (Number(item.product.price) * item.quantity), 0);
     const deliveryFee = 5.00; // Fixed for now
-    const total = subtotal + deliveryFee;
+    
+    let serviceFee = 0;
+    if (subtotal > 0) {
+        serviceFee = Math.max(0.99, Math.min(2.00, subtotal * 0.06));
+    }
+
+    const total = subtotal + deliveryFee + serviceFee;
     const totalItems = initialCartItems.reduce((sum, item) => sum + item.quantity, 0);
 
     // Sync cutlery with items logic
@@ -90,6 +97,10 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
     }
 
     const handleCheckoutClick = () => {
+        if (subtotal < 50) {
+            setShowMinOrderModal(true);
+            return;
+        }
         if (onCheckout) {
             onCheckout({ comment, cutlery: cutleryCount });
         }
@@ -128,11 +139,11 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                     <img src="/Assets/корзина.png" alt="Empty" style={{ width: '280px', height: '195px', marginBottom: '24px', objectFit: 'contain' }} />
 
                     <h2 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '16px', lineHeight: '22px', color: '#FFFFFF', margin: '0 0 8px 0', opacity: 1, textTransform: 'none', letterSpacing: 'normal' }}>
-                        Похоже, тут ничего нет.
+                        {t('cart.empty_subtitle')}
                     </h2>
                     <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '14px', lineHeight: '22px', color: '#B5B5B5', margin: '0 0 0 0', opacity: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <span style={{ whiteSpace: 'nowrap' }}>У нас большой выбор ресторанов и магазинов,</span>
-                        <span style={{ whiteSpace: 'nowrap' }}>выбирайте и заказывайте из понравившихся.</span>
+                        <span style={{ whiteSpace: 'nowrap' }}>{t('cart.empty_desc_1')}</span>
+                        <span style={{ whiteSpace: 'nowrap' }}>{t('cart.empty_desc_2')}</span>
                     </div>
 
                     <button
@@ -169,7 +180,7 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                         onTouchStart={(e) => { e.currentTarget.style.transform = 'scale(0.95)'; }}
                         onTouchEnd={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
                     >
-                        Перейти к ресторанам
+                        {t('cart.go_to_restaurants')}
                     </button>
                 </div>
             </div>
@@ -210,7 +221,7 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                                     <div className="item-details">
                                         <div className="item-main-info">
                                             <h3>{product.name}</h3>
-                                            <p>{product.weight || '350г'}</p>
+                                            <p>{product.weight || `350 ${t('restaurant.grams')}`}</p>
                                         </div>
                                         <div className="item-pricing">
                                             {(product.price * quantity).toFixed(2)} ₾
@@ -232,12 +243,12 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
 
                         {/* Redesigned Sleek Extras */}
                         <div className="cart-extras-section">
-                            <h3 className="extras-title">{t('cart.extras') || 'Дополнения'}</h3>
+                            <h3 className="extras-title">{t('cart.extras')}</h3>
 
                             <div className="sleek-extra-row">
                                 <div className="sleek-extra-left">
                                     <IconCutlery />
-                                    <span>{t('cart.cutlery') || 'Приборы'}</span>
+                                    <span>{t('cart.cutlery')}</span>
                                 </div>
                                 <div className="sleek-qty-selector">
                                     <button onClick={() => setCutleryCount(curr => Math.max(0, curr - 1))}>−</button>
@@ -250,7 +261,7 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                                 <div className="sleek-extra-row comment-toggle" onClick={() => setIsCommentOpen(!isCommentOpen)}>
                                     <div className="sleek-extra-left">
                                         <IconComment />
-                                        <span>{t('cart.comment') || 'Комментарий к заказу'}</span>
+                                        <span>{t('cart.comment')}</span>
                                     </div>
                                     <span className="arrow-indicator">{isCommentOpen ? '▲' : '▼'}</span>
                                 </div>
@@ -269,7 +280,7 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                         {/* Recommendations Section */}
                         {recommendations.length > 0 && (
                             <div className="cart-recommendations-section">
-                                <h3 className="extras-title">{t('cart.recommendations') || 'Рекомендуем к заказу'}</h3>
+                                <h3 className="extras-title">{t('cart.recs_title')}</h3>
                                 <div className="recommendations-scroll">
                                     {recommendations.map(prod => (
                                         <div key={prod.id} className="rec-card">
@@ -281,7 +292,7 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                                                 <div className="rec-price">{prod.price.toFixed(0)} ₾</div>
                                             </div>
                                             <button className="rec-add-btn" onClick={() => onAddToCart && onAddToCart(prod)}>
-                                                + Добавить
+                                                {t('cart.add_btn')}
                                             </button>
                                         </div>
                                     ))}
@@ -308,7 +319,7 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                                 </div>
                                 <div className="summary-line service">
                                     <span>{t('cart.service')}</span>
-                                    <span>0.00 ₾</span>
+                                    <span>{serviceFee.toFixed(2)} ₾</span>
                                 </div>
                             </div>
 
@@ -347,6 +358,37 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                     </button>
                 </div>
             </div>
+
+            {/* Min Order Modal */}
+            {showMinOrderModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowMinOrderModal(false)}>
+                    <div style={{ background: '#1c1c1e', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '400px', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+                        <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px', color: '#fff', letterSpacing: '-0.5px' }}>{t('checkout.min_order_title')}</h2>
+                        <p style={{ fontSize: '15px', color: '#8e8e93', marginBottom: '24px', lineHeight: 1.4 }}>
+                            {t('checkout.min_order_desc').split('{diff}').map((part, index, arr) => (
+                                <React.Fragment key={index}>
+                                    {part}
+                                    {index < arr.length - 1 && <strong style={{ color: '#fff' }}>{(50 - subtotal).toFixed(2)} GEL</strong>}
+                                </React.Fragment>
+                            ))}
+                        </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <button 
+                                onClick={() => { setShowMinOrderModal(false); onBack(); }}
+                                className="panel-btn-next"
+                            >
+                                {t('cart.go_to_restaurant')}
+                            </button>
+                            <button 
+                                onClick={() => setShowMinOrderModal(false)}
+                                style={{ background: '#2c2c2e', color: '#fff', border: 'none', padding: '16px', borderRadius: '12px', fontSize: '16px', fontWeight: 600, width: '100%', cursor: 'pointer' }}
+                            >
+                                {t('checkout.got_it')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

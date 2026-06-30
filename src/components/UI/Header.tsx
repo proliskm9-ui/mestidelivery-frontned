@@ -49,7 +49,7 @@ const Header: React.FC<HeaderProps> = (props) => {
         onLogoClick
     } = props;
     
-    const { language, setLanguage } = useLanguage();
+    const { language, setLanguage, t } = useLanguage();
     const [langOpen, setLangOpen] = useState(false);
     const [mapOpen, setMapOpen] = useState(false);
     const [referralModalOpen, setReferralModalOpen] = useState(false);
@@ -57,7 +57,6 @@ const Header: React.FC<HeaderProps> = (props) => {
     const [shareCopied, setShareCopied] = useState(false);
     const [isDetectingLocation, setIsDetectingLocation] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
-    const [hasScrolled, setHasScrolled] = useState(false);
     const [isDesktop, setIsDesktop] = useState(false);
 
     useEffect(() => {
@@ -84,16 +83,24 @@ const Header: React.FC<HeaderProps> = (props) => {
     }, [mapOpen, userAddress]);
 
     useEffect(() => {
+        let ticking = false;
         const handleScroll = () => {
-            const scrolled = window.scrollY > 20;
-            if (scrolled !== isScrolled) {
-                setIsScrolled(scrolled);
-                setHasScrolled(true);
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const scrollY = window.scrollY;
+                    setIsScrolled(prev => {
+                        if (!prev && scrollY > 80) return true;
+                        if (prev && scrollY < 20) return false;
+                        return prev;
+                    });
+                    ticking = false;
+                });
+                ticking = true;
             }
         };
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [isScrolled]);
+    }, []);
 
     const handleSaveAddress = () => {
         onUpdateAddress?.({
@@ -162,7 +169,8 @@ const Header: React.FC<HeaderProps> = (props) => {
 
     return (
         <>
-            <header className={`custom-header ${isScrolled ? 'header-scrolled' : (hasScrolled ? 'header-unscrolled' : '')}`}>
+            {/* === Main header — fixed, slides up on scroll === */}
+            <header className={`custom-header${isScrolled ? ' header-scrolled' : ''}`}>
                 <div className="header-container">
                     <div className="header-content">
                         {!hideLogo && (
@@ -178,11 +186,11 @@ const Header: React.FC<HeaderProps> = (props) => {
                             {showSearch && setSearchQuery && (
                                 <div className="search-pill">
                                     <div className="search-icon">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                                     </div>
                                     <input
                                         type="text"
-                                        placeholder={searchPlaceholder || "Искать в mestigo"}
+                                        placeholder={searchPlaceholder || t('common.search_placeholder')}
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                     />
@@ -194,11 +202,11 @@ const Header: React.FC<HeaderProps> = (props) => {
                             <div className="address-pill" onClick={() => setMapOpen(true)}>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#21EA7C' }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                                 <div className="ap-text">
-                                    <span className="ap-title">Местия <SmallArrowIcon style={{ marginLeft: '4px', transform: 'rotate(90deg)' }} /></span>
+                                    <span className="ap-title">{t('common.mestia')} <SmallArrowIcon style={{ marginLeft: '4px', transform: 'rotate(90deg)' }} /></span>
                                     <span className="ap-subtitle">
                                         {(userAddress?.street || userAddress?.house)
                                             ? `${userAddress.street}${userAddress.house ? `, ${userAddress.house}` : ''}`
-                                            : 'Укажите адрес доставки'}
+                                            : t('map.title')}
                                     </span>
                                 </div>
                             </div>
@@ -207,7 +215,6 @@ const Header: React.FC<HeaderProps> = (props) => {
                                 <div className="lang-container" style={{ position: 'relative' }}>
                                     <button className="lang-btn" onClick={() => setLangOpen(!langOpen)}>
                                         <img src={currentLang.flag} alt={currentLang.name} className="lang-flag" style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover' }} />
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'none' }}><path d="M6 9l6 6 6-6"></path></svg>
                                     </button>
                                     {langOpen && (
                                         <>
@@ -240,14 +247,35 @@ const Header: React.FC<HeaderProps> = (props) => {
                 {onOrderClick && <HeaderOrderStatus onNavigate={onOrderClick} />}
             </header>
 
+            {/* === Compact sticky header — slides in from top on scroll (mobile only) === */}
+            <div className={`menu-compact-header ${isScrolled ? 'visible' : ''}`}>
+                <div className="mch-search-row">
+                    {showSearch && setSearchQuery && (
+                        <div className="mch-search-pill">
+                            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input
+                                type="text"
+                                placeholder={searchPlaceholder || t('common.search_placeholder')}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                    )}
+                    <button className="lang-btn mch-lang-btn" onClick={() => setLangOpen(!langOpen)}>
+                        <img src={currentLang.flag} alt={currentLang.name} style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover' }} />
+                    </button>
+                </div>
+                {onOrderClick && <HeaderOrderStatus onNavigate={onOrderClick} />}
+            </div>
+
             {mapOpen && (
                 <>
                     <div className="modal-overlay pam-overlay" onClick={() => setMapOpen(false)}></div>
                     <div className="premium-address-modal" onClick={e => e.stopPropagation()}>
                         <div className="pam-header">
                             <div>
-                                <h3 className="pam-title">г. Местия</h3>
-                                <p className="pam-subtitle">Укажите адрес доставки</p>
+                                <h3 className="pam-title">{t('common.mestia')}</h3>
+                                <p className="pam-subtitle">{t('map.title')}</p>
                             </div>
                         </div>
 
@@ -271,26 +299,28 @@ const Header: React.FC<HeaderProps> = (props) => {
                                 style={{ position: 'absolute', bottom: '15px', right: '15px', zIndex: 10, background: 'rgba(255,255,255,0.95)', border: 'none', borderRadius: '12px', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '13px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                             >
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
-                                <span>{isDetectingLocation ? '...' : 'Где я?'}</span>
+                                <span>{isDetectingLocation ? '...' : t('map.where_am_i')}</span>
                             </button>
                         </div>
 
                         <div className="address-fields-mini am-fields-v2">
                             <div className="side-by-side">
-                                <div className={`pam-input-group ${tempStreet ? 'has-value' : ''}`}>
-                                    <label>Улица</label>
+                                <div className={`pam-ct-input-wrapper ${tempStreet ? 'has-value' : ''}`}>
+                                    <span className="pam-ct-input-label">{t('checkout.street')}</span>
                                     <input
                                         type="text"
-                                        placeholder="Улица"
+                                        className="pam-ct-input"
+                                        placeholder={tempStreet ? '' : t('checkout.street')}
                                         value={tempStreet}
                                         onChange={e => setTempStreet(e.target.value)}
                                     />
                                 </div>
-                                <div className={`pam-input-group ${tempHouse ? 'has-value' : ''}`}>
-                                    <label>Дом</label>
+                                <div className={`pam-ct-input-wrapper ${tempHouse ? 'has-value' : ''}`}>
+                                    <span className="pam-ct-input-label">{t('checkout.house')}</span>
                                     <input
                                         type="text"
-                                        placeholder="Дом"
+                                        className="pam-ct-input"
+                                        placeholder={tempHouse ? '' : t('checkout.house')}
                                         value={tempHouse}
                                         onChange={e => setTempHouse(e.target.value)}
                                     />
@@ -298,20 +328,22 @@ const Header: React.FC<HeaderProps> = (props) => {
                             </div>
 
                             <div className="side-by-side">
-                                <div className={`pam-input-group ${tempApartment ? 'has-value' : ''}`}>
-                                    <label>Кв. / Офис</label>
+                                <div className={`pam-ct-input-wrapper ${tempApartment ? 'has-value' : ''}`}>
+                                    <span className="pam-ct-input-label">{t('checkout.apartment')}</span>
                                     <input
                                         type="text"
-                                        placeholder="Кв. / Офис"
+                                        className="pam-ct-input"
+                                        placeholder={tempApartment ? '' : t('checkout.apartment')}
                                         value={tempApartment}
                                         onChange={e => setTempApartment(e.target.value)}
                                     />
                                 </div>
-                                <div className={`pam-input-group ${tempEntrance ? 'has-value' : ''}`}>
-                                    <label>Подъезд</label>
+                                <div className={`pam-ct-input-wrapper ${tempEntrance ? 'has-value' : ''}`}>
+                                    <span className="pam-ct-input-label">{t('map.entrance')}</span>
                                     <input
                                         type="text"
-                                        placeholder="Подъезд"
+                                        className="pam-ct-input"
+                                        placeholder={tempEntrance ? '' : t('map.entrance')}
                                         value={tempEntrance}
                                         onChange={e => setTempEntrance(e.target.value)}
                                     />
@@ -324,7 +356,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                             onClick={handleSaveAddress}
                             disabled={!tempStreet || !tempHouse}
                         >
-                            Подтвердить адрес
+                            {t('map.confirm')}
                         </button>
                     </div>
                 </>

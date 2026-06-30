@@ -1,5 +1,6 @@
 import React from 'react';
 import { Store } from '../../services/api';
+import { useLanguage, formatDuration } from '../../translations/LanguageContext';
 
 interface StoreCardProps {
     item: Store;
@@ -9,6 +10,7 @@ interface StoreCardProps {
 }
 
 const StoreCard: React.FC<StoreCardProps> = ({ item, onClick, isFavorite, onToggleFavorite }) => {
+    const { language } = useLanguage();
     return (
         <div className="store-card" onClick={onClick}>
             <div className="store-bg" style={{
@@ -43,7 +45,7 @@ const StoreCard: React.FC<StoreCardProps> = ({ item, onClick, isFavorite, onTogg
                 )}
             </div>
             <div className="store-name" style={{ marginTop: '0px', lineHeight: '1.2', fontWeight: 700, fontSize: '1.2rem' }}>{item.name}</div>
-            <div className="store-meta" style={{ marginTop: '0px', color: '#21EA7C', fontSize: '0.85rem' }}>{item.delivery}</div>
+            <div className="store-meta" style={{ marginTop: '0px', color: '#21EA7C', fontSize: '0.85rem' }}>{formatDuration(item.delivery, language)}</div>
         </div>
     );
 };

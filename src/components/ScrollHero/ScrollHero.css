@@ -1,0 +1,433 @@
+/* =========================================================================
+   Scroll Hero — all animation driven by direct JS DOM writes.
+   No @property, no CSS custom property transitions needed.
+   ========================================================================= */
+
+/* ── Scroll track: creates 400vh of scroll space ─────────────────────── */
+.sh-track {
+    position: relative;
+    width: 100%;
+    height: 400vh;
+    /* IMPORTANT: do NOT add overflow:hidden here — it kills sticky! */
+}
+
+/* ── Sticky viewport panel ───────────────────────────────────────────── */
+.sh-sticky {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    background: #070707;
+    color: #fff;
+    font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+    --mx: 50%;
+    --my: 40%;
+}
+
+/* ── Background layers ───────────────────────────────────────────────── */
+.sh-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sh-poster {
+    z-index: 0;
+}
+
+.sh-canvas {
+    z-index: 1;
+    display: block;
+}
+
+.sh-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background:
+        linear-gradient(180deg,
+            rgba(7,7,7,0.70) 0%,
+            rgba(7,7,7,0.20) 25%,
+            rgba(7,7,7,0.20) 65%,
+            rgba(7,7,7,0.88) 100%
+        );
+}
+
+.sh-vignette {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    box-shadow: inset 0 0 200px 60px rgba(0,0,0,0.7);
+}
+
+.sh-glow {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: radial-gradient(
+        30vw 30vw at var(--mx) var(--my),
+        rgba(33,234,124,0.15),
+        rgba(33,234,124,0.04) 40%,
+        transparent 65%
+    );
+    mix-blend-mode: screen;
+}
+
+.sh-grain {
+    position: absolute;
+    inset: -60%;
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0.04;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: shGrain 0.5s steps(2) infinite;
+}
+@keyframes shGrain {
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    50%  { transform: translate(-4%, 3%) rotate(0.5deg); }
+    100% { transform: translate(3%, -2%) rotate(-0.5deg); }
+}
+
+/* ── Center intro text ───────────────────────────────────────────────── */
+.sh-center {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 6vw 4vh;
+    /* opacity and transform written by JS directly */
+    will-change: opacity, transform;
+}
+
+.sh-eyebrow {
+    font-size: clamp(0.65rem, 1vw, 0.82rem);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: shIn 0.9s cubic-bezier(0.16,1,0.3,1) 0.15s forwards;
+}
+
+.sh-title {
+    margin: 0 0 24px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 900;
+    font-size: clamp(2.8rem, 9.5vw, 8rem);
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    gap: 0.05em;
+}
+
+.sh-title-solid {
+    color: #21EA7C;
+    text-shadow: 0 14px 50px rgba(33,234,124,0.4);
+    opacity: 0;
+    animation: shIn 1s cubic-bezier(0.16,1,0.3,1) 0.28s forwards;
+}
+
+.sh-title-outline {
+    color: transparent;
+    -webkit-text-stroke: 2px rgba(255,255,255,0.90);
+    opacity: 0;
+    animation: shIn 1s cubic-bezier(0.16,1,0.3,1) 0.42s forwards;
+}
+
+.sh-subtitle {
+    max-width: 520px;
+    margin: 0 auto 36px;
+    font-size: clamp(0.95rem, 1.35vw, 1.14rem);
+    line-height: 1.6;
+    color: rgba(255,255,255,0.82);
+    font-weight: 400;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.65);
+    opacity: 0;
+    animation: shIn 1s cubic-bezier(0.16,1,0.3,1) 0.56s forwards;
+}
+
+@keyframes shIn {
+    from { opacity: 0; transform: translateY(36px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── CTA buttons ─────────────────────────────────────────────────────── */
+.sh-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 36px;
+    border: none;
+    border-radius: 100px;
+    background: #21EA7C;
+    color: #04130a;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 0.98rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 12px 40px rgba(33,234,124,0.45);
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s ease;
+    opacity: 0;
+    animation: shIn 1s cubic-bezier(0.16,1,0.3,1) 0.70s forwards;
+}
+.sh-cta svg { transition: transform 0.35s cubic-bezier(0.16,1,0.3,1); }
+.sh-cta:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 20px 56px rgba(33,234,124,0.55); }
+.sh-cta:hover svg { transform: translateX(5px); }
+
+.sh-cta--ghost {
+    background: transparent;
+    color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.65);
+    box-shadow: none;
+    animation: none;
+    opacity: 1;
+}
+.sh-cta--ghost:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
+
+/* ── Chapter overlays ────────────────────────────────────────────────── */
+.sh-chapter {
+    position: absolute;
+    top: 50%;
+    z-index: 7;
+    width: min(44vw, 540px);
+    display: flex;
+    flex-direction: column;
+    /* opacity and transform written by JS */
+    will-change: opacity, transform;
+    pointer-events: none;
+}
+
+.sh-chapter--right {
+    right: 5vw;
+    text-align: right;
+    align-items: flex-end;
+}
+
+.sh-chapter--left {
+    left: 5vw;
+    text-align: left;
+    align-items: flex-start;
+}
+
+.sh-ch-kicker {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    /* opacity written by JS */
+    will-change: opacity;
+}
+.sh-chapter--right .sh-ch-kicker { flex-direction: row-reverse; }
+
+.sh-ch-kick-line { width: 44px; height: 1px; background: #21EA7C; flex-shrink: 0; }
+.sh-ch-kick-num  { font-size: 0.8rem; font-weight: 800; color: #21EA7C; letter-spacing: 0.22em; }
+.sh-ch-kick-sep  { font-size: 0.76rem; font-weight: 600; color: rgba(255,255,255,0.35); }
+
+.sh-ch-title {
+    margin: 0 0 18px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 900;
+    font-size: clamp(3.2rem, 8.5vw, 7.5rem);
+    line-height: 0.88;
+    letter-spacing: -0.035em;
+    text-transform: uppercase;
+}
+
+/* Mask wipe: inner slides up as visibility increases */
+.sh-mask { display: block; overflow: hidden; padding-bottom: 0.1em; }
+.sh-mask-inner {
+    display: block;
+    color: #fff;
+    text-shadow: 0 16px 48px rgba(0,0,0,0.7);
+    /* transform written by JS: translateY(110%) → translateY(0) */
+    will-change: transform;
+}
+
+.sh-chapter--left .sh-mask-inner {
+    color: transparent;
+    -webkit-text-stroke: 2px rgba(255,255,255,0.88);
+    text-shadow: none;
+}
+
+.sh-ch-desc {
+    margin: 0 0 28px;
+    font-size: clamp(0.98rem, 1.4vw, 1.18rem);
+    line-height: 1.55;
+    color: rgba(255,255,255,0.92);
+    max-width: 360px;
+    font-weight: 400;
+    text-shadow: 0 2px 16px rgba(0,0,0,0.8);
+    /* opacity written by JS */
+    will-change: opacity;
+}
+
+.sh-chapter--right .sh-ch-desc { text-align: right; }
+.sh-chapter .sh-cta { margin-top: 6px; animation: none; opacity: 1; }
+
+/* ── Scroll hint ─────────────────────────────────────────────────────── */
+.sh-hint {
+    position: absolute;
+    bottom: 5vh;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.68rem;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    /* opacity written by JS */
+    will-change: opacity;
+    pointer-events: none;
+}
+
+.sh-hint-line {
+    width: 1px;
+    height: 44px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.7), transparent);
+    position: relative;
+    overflow: hidden;
+}
+.sh-hint-line::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: #21EA7C;
+    animation: hintDrop 1.6s ease-in-out infinite;
+}
+@keyframes hintDrop {
+    0%   { top: -50%; opacity: 0; }
+    30%  { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+}
+
+/* ── Right progress rail ─────────────────────────────────────────────── */
+.sh-rail {
+    position: absolute;
+    right: 2.5vw;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 8;
+    pointer-events: none;
+}
+
+.sh-rail-track {
+    position: relative;
+    width: 2px;
+    height: 36vh;
+    background: rgba(255,255,255,0.12);
+    border-radius: 2px;
+}
+
+.sh-rail-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 0%;       /* updated by JS */
+    background: linear-gradient(to bottom, #21EA7C, rgba(33,234,124,0.35));
+    border-radius: 2px;
+    transition: height 0.1s linear;
+}
+
+.sh-rail-dot {
+    position: absolute;
+    left: 50%;
+    top: 0%;          /* updated by JS */
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #21EA7C;
+    box-shadow: 0 0 0 3px rgba(33,234,124,0.2), 0 0 16px rgba(33,234,124,0.9);
+}
+
+/* ── Loading bar ─────────────────────────────────────────────────────── */
+.sh-loader {
+    position: absolute;
+    bottom: 3vh;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: min(240px, 48vw);
+}
+
+.sh-loader-track {
+    width: 100%;
+    height: 2px;
+    background: rgba(255,255,255,0.14);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.sh-loader-fill {
+    height: 100%;
+    background: #21EA7C;
+    box-shadow: 0 0 10px rgba(33,234,124,0.8);
+    transition: width 0.15s linear;
+}
+
+.sh-loader-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.42);
+    font-family: 'Outfit', monospace;
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .sh-track { height: 320vh; }
+    .sh-center { padding: 0 7vw 6vh; }
+    .sh-title { font-size: clamp(2.1rem, 12vw, 3.6rem); }
+    .sh-subtitle { font-size: 0.98rem; max-width: 82vw; margin-bottom: 30px; }
+    .sh-cta { padding: 14px 30px; font-size: 0.92rem; }
+
+    .sh-chapter { width: 82vw; }
+    .sh-chapter--right { right: 6vw; }
+    .sh-chapter--left  { left: 6vw; }
+    .sh-ch-title { font-size: clamp(2.2rem, 12vw, 3.6rem); line-height: 0.95; }
+    .sh-ch-desc { font-size: 0.95rem; max-width: 80vw; margin-bottom: 22px; }
+    .sh-mask { padding-bottom: 0.12em; }
+    .sh-rail { display: none; }
+    .sh-hint { bottom: 3vh; }
+    .sh-loader { width: min(200px, 56vw); }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .sh-grain, .sh-hint-line::after { animation: none; }
+    .sh-eyebrow, .sh-title-solid, .sh-title-outline,
+    .sh-subtitle, .sh-cta {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}

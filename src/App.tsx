@@ -1,27 +1,30 @@
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState, useEffect, lazy } from 'react';
 import './App.css';
 import { api, restaurantCache } from './services/api';
-import HomePage from './pages/Home';
-import MenuPage from './pages/Menu';
 import LiquidNavBar from './components/UI/LiquidNavBar';
-import LoginPage from './pages/Login'; // Import Login
-// @ts-ignore
-import { AdminPanel } from './pages/Admin/AdminPanel'; // Import Admin Panel
-
-import RestaurantPage from './pages/Restaurant';
-import CartPage from './pages/Cart';
-import CheckoutPage from './pages/Checkout';
-import PaymentPage from './pages/Payment';
-import MobilePaymentPage from './Оплата/PaymentPage';
-import MobileCheckoutPage from './Оплата/CheckoutPage';
-import type { CheckoutOrderData } from './Оплата/CheckoutPage';
-import FavoritesPage from './pages/Favorites';
-import ProfilePage from './pages/Profile';
-import OrderStatus from './pages/OrderStatus';
-import OrderDetails from './pages/OrderDetails';
-import MobileCart from './pages/MobileCart';
-import GlassBottomPanel from './components/UI/GlassBottomPanel';
 import LoadingScreen from './components/UI/LoadingScreen';
+
+// --- Lazy-loaded pages (loaded only when navigated to) ---
+const HomePage = lazy(() => import('./pages/Home'));
+const MenuPage = lazy(() => import('./pages/Menu'));
+const LoginPage = lazy(() => import('./pages/Login'));
+// @ts-ignore
+const AdminPanel = lazy(() => import('./pages/Admin/AdminPanel').then(m => ({ default: m.AdminPanel })));
+const PartnerApp = lazy(() => import('./pages/PartnerApp/PartnerMain'));
+const RestaurantPage = lazy(() => import('./pages/Restaurant'));
+const CartPage = lazy(() => import('./pages/Cart'));
+const CheckoutPage = lazy(() => import('./pages/Checkout'));
+const PaymentPage = lazy(() => import('./pages/Payment'));
+const MobilePaymentPage = lazy(() => import('./Оплата/PaymentPage'));
+const MobileCheckoutPage = lazy(() => import('./Оплата/CheckoutPage'));
+const FavoritesPage = lazy(() => import('./pages/Favorites'));
+const ProfilePage = lazy(() => import('./pages/Profile'));
+const OrderStatus = lazy(() => import('./pages/OrderStatus'));
+const OrderDetails = lazy(() => import('./pages/OrderDetails'));
+const MobileCart = lazy(() => import('./pages/MobileCart'));
+const GlassBottomPanel = lazy(() => import('./components/UI/GlassBottomPanel'));
+
+import type { CheckoutOrderData } from './Оплата/CheckoutPage';
 
 const DEFAULT_AVATARS = [
     '/Assets/photo_2026-02-11_23-14-10.jpg',
@@ -43,6 +46,7 @@ function AppContent() {
     // Basic navigation state - If auth, go to menu, else home
     // Check for admin route
     const [currentPage, setCurrentPage] = useState(() => {
+        if (window.location.pathname.startsWith('/partners')) return 'partner';
         if (window.location.pathname === '/admin') return 'admin';
         return token ? 'menu' : 'home';
     });
@@ -59,10 +63,23 @@ function AppContent() {
         }
     }, [token, currentPage]);
 
+    const handleNavigate = (page: string) => {
+        const protectedRoutes = ['profile', 'favorites', 'cart', 'checkout', 'payment', 'order_status', 'order_details'];
+        if (!token && protectedRoutes.includes(page)) {
+            setCurrentPage('login');
+        } else {
+            setCurrentPage(page);
+        }
+    };
+
     const [selectedRestaurantId, setSelectedRestaurantId] = useState<string | null>(null);
-    // Cart State: Array of { product, quantity }
     const [cart, setCart] = useState<{ product: any, quantity: number }[]>([]);
+    const [pendingProductToAdd, setPendingProductToAdd] = useState<any>(null);
     const [pendingOrderData, setPendingOrderData] = useState<any>(null);
+
+    const cartSubtotal = cart.reduce((a: number, b: { quantity: number; product: any }) => a + (Number(b.product.price) * b.quantity), 0);
+    const cartServiceFee = cartSubtotal > 0 ? Math.max(0.99, Math.min(2.00, cartSubtotal * 0.06)) : 0;
+    const cartTotalAmount = cartSubtotal + 5.00 + cartServiceFee;
 
     // Global Address State (Fetched from Profile)
     const [userAddress, setUserAddress] = useState<any>(() => {
@@ -164,8 +181,12 @@ function AppContent() {
                         setUserAddress(data.address);
                         localStorage.setItem('user_address', JSON.stringify(data.address));
                     }
-                } catch (error) {
-                    console.error("Failed to fetch profile", error);
+                } catch (error: any) {
+                    if (error.message === 'Unauthorized') {
+                        setToken(null);
+                    } else {
+                        console.error("Failed to fetch profile", error);
+                    }
                 }
 
                 // Fetch order history independently (so profile errors don't block it)
@@ -191,8 +212,12 @@ function AppContent() {
                         return o;
                     });
                     setOrderHistory(enriched);
-                } catch (error) {
-                    console.error("Failed to fetch order history", error);
+                } catch (error: any) {
+                    if (error.message === 'Unauthorized') {
+                        setToken(null);
+                    } else {
+                        console.error("Failed to fetch order history", error);
+                    }
                 }
             };
             fetchProfile();
@@ -210,6 +235,17 @@ function AppContent() {
     };
 
     const handleAddToCart = (product: any) => {
+        if (!token) {
+            setCurrentPage('login');
+            return;
+        }
+        
+        // Cross-restaurant check
+        if (cart.length > 0 && cart[0].product.restaurant_id !== product.restaurant_id) {
+            setPendingProductToAdd(product);
+            return;
+        }
+
         setCart(prev => {
             const existingItem = prev.find(item => item.product.id === product.id);
             if (existingItem) {
@@ -227,6 +263,10 @@ function AppContent() {
     const [favorites, setFavorites] = useState<string[]>([]);
 
     const handleToggleFavorite = (restaurantId: string) => {
+        if (!token) {
+            setCurrentPage('login');
+            return;
+        }
         setFavorites(prev =>
             prev.includes(restaurantId)
                 ? prev.filter(id => id !== restaurantId)
@@ -270,6 +310,14 @@ function AppContent() {
         );
     }
 
+    if (currentPage === 'partner') {
+        return (
+            <Suspense fallback={<div style={{ color: 'white' }}>Loading Partner App...</div>}>
+                <PartnerApp />
+            </Suspense>
+        );
+    }
+
 
     return (
         <Suspense fallback={<div style={{ color: 'white', textAlign: 'center', marginTop: '20%' }}>Loading...</div>}>
@@ -303,14 +351,7 @@ function AppContent() {
                 <main style={{ minHeight: 'calc(100vh - 80px)' }}>
                     {currentPage === 'home' && (
                         <HomePage
-                            onNavigate={(page) => {
-                                // Intercept 'menu' navigation from Home (Order Now) to force Login
-                                if (page === 'menu' && !token) {
-                                    setCurrentPage('login');
-                                } else {
-                                    setCurrentPage(page);
-                                }
-                            }}
+                            onNavigate={handleNavigate}
                         />
                     )}
 
@@ -326,10 +367,10 @@ function AppContent() {
                             userAddress={userAddress}
                             onUpdateAddress={handleUpdateAddress}
                             userProfile={userProfile}
-                            onProfileClick={() => setCurrentPage('profile')}
-                            onOrderClick={(id) => { setSelectedOrderId(id); setCurrentPage('order_status'); }}
+                            onProfileClick={() => handleNavigate('profile')}
+                            onOrderClick={(id) => { setSelectedOrderId(id); handleNavigate('order_status'); }}
                             onLogout={handleLogout}
-                            onNavigate={setCurrentPage}
+                            onNavigate={handleNavigate}
                         />
                     )}
 
@@ -389,7 +430,14 @@ function AppContent() {
                             <div style={{ position: 'relative', zIndex: 1, minHeight: '100%' }}>
                                 {window.innerWidth <= 1024 ? (
                                     <MobileCart
-                                        onBack={() => setCurrentPage('menu')}
+                                        onBack={() => {
+                                            if (cart.length > 0) {
+                                                setSelectedRestaurantId(cart[0].product.restaurant_id);
+                                                setCurrentPage('restaurant');
+                                            } else {
+                                                setCurrentPage('menu');
+                                            }
+                                        }}
                                         initialCartItems={cart}
                                         onClearCart={() => setCart([])}
                                         onUpdateQuantity={(pid: string, delta: number) => setCart(prev => prev.map(item => item.product.id === pid ? { ...item, quantity: item.quantity + delta } : item).filter(i => i.quantity > 0))}
@@ -401,7 +449,14 @@ function AppContent() {
                                     />
                                 ) : (
                                     <CartPage
-                                        onBack={() => setCurrentPage('menu')}
+                                        onBack={() => {
+                                            if (cart.length > 0) {
+                                                setSelectedRestaurantId(cart[0].product.restaurant_id);
+                                                setCurrentPage('restaurant');
+                                            } else {
+                                                setCurrentPage('menu');
+                                            }
+                                        }}
                                         initialCartItems={cart}
                                         onClearCart={() => setCart([])}
                                         onUpdateQuantity={(pid: string, delta: number) => setCart(prev => prev.map(item => item.product.id === pid ? { ...item, quantity: item.quantity + delta } : item).filter(i => i.quantity > 0))}
@@ -421,7 +476,7 @@ function AppContent() {
                             <div className="no-scrollbar" style={{ height: '100%', overflowY: 'auto' }}>
                                 {window.innerWidth <= 1024 ? (
                                     <MobileCheckoutPage
-                                        totalAmount={cart.reduce((a: number, b: { quantity: number; product: any }) => a + (b.product.price * b.quantity), 0) + 5.00}
+                                        totalAmount={cartTotalAmount}
                                         cartItems={cart}
                                         comment={checkoutExtras.comment}
                                         cutleryCount={checkoutExtras.cutlery}
@@ -439,7 +494,7 @@ function AppContent() {
                                 ) : (
                                     <CheckoutPage
                                         onBack={() => setCurrentPage('cart')}
-                                        totalAmount={cart.reduce((a: number, b: { quantity: number; product: any }) => a + (b.product.price * b.quantity), 0) + 5.00}
+                                        totalAmount={cartTotalAmount}
                                         comment={checkoutExtras.comment}
                                         cutleryCount={checkoutExtras.cutlery}
                                         onOrderPlaced={(data) => {
@@ -520,7 +575,14 @@ function AppContent() {
 
                     {currentPage === 'order_status' && selectedOrderId && (
                         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 5000, overflowY: 'auto', background: 'var(--bg)' }}>
-                            <OrderStatus orderId={selectedOrderId} onBack={() => setCurrentPage('menu')} />
+                            <OrderStatus 
+                                orderId={selectedOrderId} 
+                                onBack={() => setCurrentPage('menu')} 
+                                onViewDetails={(id) => {
+                                    setSelectedOrderId(id);
+                                    setCurrentPage('order_details');
+                                }}
+                            />
                         </div>
                     )}
 
@@ -533,23 +595,45 @@ function AppContent() {
                         <GlassBottomPanel
                             totalItems={cart.reduce((a, b) => a + b.quantity, 0)}
                             totalPrice={cart.reduce((a, b) => a + (b.product.price * b.quantity), 0)}
-                            deliveryTime={selectedRestaurantId ? restaurantCache[`rest_${selectedRestaurantId}`]?.delivery : undefined}
+                            deliveryTime="Доставка 5₾"
                             onNext={() => setCurrentPage('cart')}
                             buttonText="Далее"
                             showPriceInButton={false}
-                            priceLabel="Доставка 5.00₾"
+                            priceLabel={`${cart.reduce((a, b) => a + (b.product.price * b.quantity), 0).toFixed(0)} GEL`}
                         />
                     )}
                 </main>
 
-                {/* Bottom Navigation - Liquid Glass Type - Hidden on Cart, Checkout, Restaurant AND User Request Home AND Login AND Admin */}
-                {!['cart', 'checkout', 'restaurant', 'home', 'login', 'admin', 'profile', 'favorites'].includes(currentPage) && (
-                    <LiquidNavBar activePage={currentPage} onNavigate={setCurrentPage} />
+                {/* Bottom Navigation - Hidden on Cart, Checkout, Restaurant, Home, Login, Admin, Favorites, Profile, Order Details */}
+                {!['cart', 'checkout', 'restaurant', 'home', 'login', 'admin', 'favorites', 'profile', 'order_details'].includes(currentPage) && (
+                    <LiquidNavBar activePage={currentPage} onNavigate={handleNavigate} />
                 )}
             </div>
+
+            {/* Cross-restaurant warning modal */}
+            {pendingProductToAdd && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setPendingProductToAdd(null)}>
+                    <div style={{ background: 'radial-gradient(120% 120% at 50% 0%, rgb(40, 40, 40) 0%, rgb(15, 15, 15) 100%)', borderTop: '1px solid rgba(255, 255, 255, 0.08)', boxShadow: '0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1)', padding: '36px 24px 14px 24px', borderRadius: '28px', width: '90%', maxWidth: '400px', position: 'relative', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+                        <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px', color: '#fff', letterSpacing: '-0.5px', marginTop: 0 }}>КОРЗИНА ИЗ ДРУГОГО РЕСТОРАНА</h2>
+                        <p style={{ fontSize: '15px', color: '#8e8e93', marginBottom: '40px', lineHeight: 1.4 }}>
+                            У вас уже есть блюда в корзине из другого ресторана. Чтобы заказать блюда из нового места, сначала очистите текущую корзину.
+                        </p>
+                        <button 
+                            onClick={() => {
+                                setCart([{ product: pendingProductToAdd, quantity: 1 }]);
+                                setPendingProductToAdd(null);
+                            }}
+                            className="panel-btn-next"
+                            style={{ background: 'rgba(255, 59, 48, 0.1)', color: '#FF453A', border: '1px solid rgba(255, 59, 48, 0.2)', borderRadius: '16px', fontWeight: 700, height: '56px', fontSize: '16px', width: '100%' }}
+                        >
+                            Очистить корзину
+                        </button>
+                    </div>
+                </div>
+            )}
         </Suspense>
     );
-}
+};
 
 function App() {
     return (

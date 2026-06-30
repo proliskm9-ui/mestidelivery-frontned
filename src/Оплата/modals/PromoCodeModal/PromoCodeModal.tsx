@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './PromoCodeModal.css';
+import { useLanguage } from '../../../translations/LanguageContext';
 
 interface PromoCodeModalProps {
   isOpen: boolean;
@@ -9,15 +10,13 @@ interface PromoCodeModalProps {
 }
 
 const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ isOpen, onClose, currentCode, onApply }) => {
+  const { t } = useLanguage();
   const [inputValue, setInputValue] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
       setInputValue(currentCode || '');
-      setTimeout(() => {
-        if (inputRef.current) inputRef.current.focus();
-      }, 100);
     }
   }, [isOpen, currentCode]);
 
@@ -39,26 +38,25 @@ const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ isOpen, onClose, curren
 
   return (
     <>
-      <div className="pc-overlay active" onClick={onClose}></div>
-
-      <div className="pc-bottom-sheet active" onClick={(e) => e.stopPropagation()}>
+      <div className="pc-overlay active promo-modal-overlay" onClick={onClose}>
+        <div className="pc-bottom-sheet active promo-modal-content" onClick={(e) => e.stopPropagation()}>
 
         <div className="pc-header">
           <div>
-            <h2 className="pc-title">Промокоды</h2>
+            <h2 className="pc-title">{t('checkout.promo_codes')}</h2>
             <p className="pc-subtitle">
-              Текущий: {currentCode ? `#${currentCode}` : '—'}
+              {t('checkout.current_selection')} {currentCode ? `#${currentCode}` : '—'}
             </p>
           </div>
         </div>
 
         <div className={`pc-input-wrapper ${inputValue ? 'has-value' : ''}`}>
-          <label className="pc-input-label">Промокод</label>
+          <label className="pc-input-label">{t('checkout.promo_code')}</label>
           <input
             ref={inputRef}
             type="text"
             className="pc-input"
-            placeholder={inputValue ? '' : 'Введите промокод'}
+            placeholder={inputValue ? '' : t('checkout.promo_placeholder')}
             value={inputValue}
             onChange={handleChange}
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -72,9 +70,10 @@ const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ isOpen, onClose, curren
           onClick={handleApply}
           disabled={isButtonDisabled}
         >
-          Применить
+          {t('checkout.promo_apply')}
         </button>
 
+      </div>
       </div>
     </>
   );

@@ -1,18 +1,26 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { api } from '../services/api';
+import FullPageLoader from '../components/UI/FullPageLoader';
+import NetworkErrorState from '../components/UI/NetworkErrorState';
 import './OrderStatus.css';
 import { useLanguage } from '../translations/LanguageContext';
+import {
+    Clock,
+    ClipboardCheck,
+    ChefHat,
+    ShoppingBag,
+    Bike,
+    MapPin,
+    CheckCircle
+} from 'lucide-react';
 
-// SVG Icons
-const IconClock = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>);
-const IconCheckFull = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>);
-const IconChef = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z" /><line x1="6" y1="17" x2="18" y2="17" /></svg>);
-const IconBag = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>);
-const IconBike = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="5.5" cy="17.5" r="2.5" /><circle cx="18.5" cy="17.5" r="2.5" /><path d="M15 6h-5a2 2 0 1 0 0 4h3l3.5 3.5" /><path d="M5.5 15h13" /></svg>);
-const IconHome = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>);
-const IconBox = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>);
-const IconChevronLeft = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>);
+const IconChevronLeft = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12" />
+        <polyline points="12 19 5 12 12 5" />
+    </svg>
+);
 
 const IconStar = ({ filled = false, onClick }: { filled?: boolean; onClick?: () => void }) => (
     <svg width="100%" height="100%" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth={filled ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round" onClick={onClick}>
@@ -23,12 +31,14 @@ const IconStar = ({ filled = false, onClick }: { filled?: boolean; onClick?: () 
 interface Props {
     orderId: number;
     onBack: () => void;
+    onViewDetails?: (orderId: number) => void;
 }
 
-const OrderStatus: React.FC<Props> = ({ orderId, onBack }) => {
+const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
     const { t } = useLanguage();
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [isNetworkError, setIsNetworkError] = useState(false);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     const [showRatingModal, setShowRatingModal] = useState(false);
@@ -52,12 +62,12 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack }) => {
     const [ratingSubmitted, setRatingSubmitted] = useState(false);
 
     const STATUS_STEPS = useMemo(() => [
-        { key: 'pending', label: t('status.pending'), icon: <IconClock /> },
-        { key: 'confirmed', label: t('status.confirmed'), icon: <IconCheckFull /> },
-        { key: 'preparing', label: t('status.preparing'), icon: <IconChef /> },
-        { key: 'ready', label: t('status.ready'), icon: <IconBag /> },
-        { key: 'delivering', label: t('status.delivering'), icon: <IconBike /> },
-        { key: 'delivered', label: t('status.delivered'), icon: <IconHome /> },
+        { key: 'pending', label: t('status.pending'), icon: <Clock strokeWidth={1.5} /> },
+        { key: 'confirmed', label: t('status.confirmed'), icon: <ClipboardCheck strokeWidth={1.5} /> },
+        { key: 'preparing', label: t('status.preparing'), icon: <ChefHat strokeWidth={1.5} /> },
+        { key: 'ready', label: t('status.ready'), icon: <ShoppingBag strokeWidth={1.5} /> },
+        { key: 'delivering', label: t('status.delivering'), icon: <Bike strokeWidth={1.5} /> },
+        { key: 'delivered', label: t('status.delivered'), icon: <MapPin strokeWidth={1.5} /> },
     ], [t]);
 
     useEffect(() => {
@@ -65,8 +75,10 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack }) => {
             try {
                 const data = await api.trackOrder(orderId);
                 setOrder(data);
+                setIsNetworkError(false);
             } catch (error) {
                 console.error("Order fetch failed", error);
+                setIsNetworkError(true);
             } finally {
                 setLoading(false);
             }
@@ -115,7 +127,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack }) => {
     }, [orderId]);
 
     // Determine current step index
-    const currentStepIndex = order ? STATUS_STEPS.findIndex(s => s.key === order.status) : 0;
+    const currentStepIndex = order ? STATUS_STEPS.findIndex(s => s.key === order.status || (order.status === 'pending_payment' && s.key === 'pending')) : 0;
     const activeStepIndex = currentStepIndex === -1 ? 0 : currentStepIndex;
 
     // Scroll active step into view
@@ -144,71 +156,143 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack }) => {
         }
     };
 
-    if (loading) return <div className="order-status-page" style={{ paddingTop: 100, textAlign: 'center' }}>{t('common.loading')}</div>;
+    if (loading) return <FullPageLoader text={t('common.loading') as string} />;
+    
+    if (isNetworkError) {
+        return (
+            <div className="order-status-page" style={{ display: 'flex', flexDirection: 'column' }}>
+                <header className="os-header" style={{ position: 'relative' }}>
+                    <div className="os-back-btn" onClick={onBack}>
+                        <IconChevronLeft />
+                    </div>
+                </header>
+                <NetworkErrorState />
+            </div>
+        );
+    }
+
     if (!order) return <div className="order-status-page" style={{ paddingTop: 100, textAlign: 'center' }}>Order not found</div>;
 
     const currentStatusLabel = STATUS_STEPS[activeStepIndex]?.label || order.status;
 
+    // Parse items — API may return string or array
+    const parseItems = (items: any): { name: string; price: number; quantity: number }[] => {
+        if (!items) return [];
+        if (Array.isArray(items)) return items;
+        try {
+            const parsed = JSON.parse(items);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    };
+
+    const items = parseItems(order.items);
+    const itemsTotal = items.reduce((s, i) => s + (i.price * i.quantity), 0);
+    const serviceFee = itemsTotal > 0 ? +(Math.max(0.99, Math.min(2.00, itemsTotal * 0.06)).toFixed(2)) : 0;
+    const hasServiceFee = order.total >= (itemsTotal + serviceFee);
+    const calculatedServiceFee = hasServiceFee ? serviceFee : 0;
+    const deliveryFee = order.total > (itemsTotal + calculatedServiceFee) 
+        ? +(order.total - itemsTotal - calculatedServiceFee).toFixed(2) 
+        : 0;
+
+
+
     return (
-        <div className="order-status-page">
-            <header className="status-header">
-                <button className="back-btn-status" onClick={onBack}>
-                    <IconChevronLeft />
-                </button>
-                <div className="header-title-block">
-                    <h2>{t('common.order')} #{order.id}</h2>
-                    <p>{t('status.est_time')}</p>
-                </div>
-            </header>
+        <div className="order-status-page page-layout">
+            <div className="os-block-top">
+                <header className="status-header">
+                    <button className="back-btn-status" onClick={onBack}>
+                        <IconChevronLeft />
+                    </button>
+                    <div className="header-title-block">
+                        <h2>{t('common.order')} #{order.id}</h2>
+                        <p>{t('status.est_time')}</p>
+                    </div>
+                </header>
 
-            <div className="primary-status-label">
-                <h1>{currentStatusLabel}</h1>
+                <div className="primary-status-label">
+                    <h1>{currentStatusLabel}</h1>
+                </div>
+
+                <div className="status-scroll-container">
+                    <div className="steps-track" ref={scrollContainerRef}>
+                        <div className="progress-line-bg" style={{ display: 'none' }} />
+                        {STATUS_STEPS.map((step, index) => {
+                            const isActive = index === activeStepIndex;
+                            const isCompleted = index < activeStepIndex;
+                            const stepClass = `step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`;
+                            return (
+                                <div className={stepClass} key={step.key} ref={el => stepsRef.current[index] = el}>
+                                    <div className="icon-circle">
+                                        {isActive && <div className="active-ring-dashed" />}
+                                        {isActive && <div className="active-ring-solid" />}
+                                        {isActive ? step.icon : (isCompleted ? <CheckCircle strokeWidth={1.5} /> : step.icon)}
+                                    </div>
+                                    <span className="step-label">{step.label}</span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
             </div>
 
-            <div className="status-scroll-container">
-                <div className="steps-track" ref={scrollContainerRef}>
-                    <div className="progress-line-bg" style={{ display: 'none' }} />
-                    {STATUS_STEPS.map((step, index) => {
-                        const isActive = index === activeStepIndex;
-                        const isCompleted = index < activeStepIndex;
-                        const stepClass = `step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`;
-                        return (
-                            <div className={stepClass} key={step.key} ref={el => stepsRef.current[index] = el}>
-                                <div className="icon-circle">
-                                    {isActive ? step.icon : (isCompleted ? <IconCheckFull /> : step.icon)}
-                                </div>
-                                <span className="step-label">{step.label}</span>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-            <div className="info-section">
-                <div className="info-card">
-                    <div className="card-title"><IconBox /> {t('status.order_items')}</div>
-                    <div className="items-list">
-                        {order.items.map((item: any, i: number) => (
-                            <div className="item-row" key={i}>
-                                <div className="item-name">
-                                    <span className="item-qty">{item.quantity}x</span>
-                                    <span>{item.name}</span>
-                                </div>
-                                <span>{(item.price * item.quantity).toFixed(2)} ₾</span>
+            <div className="os-block-bottom">
+                <div className="info-section">
+                    {/* Items */}
+                    <h3 className="od-section-label">{t('order.items_structure')}</h3>
+                    <div className="od-items-card">
+                        {items.map((item, i) => (
+                            <div className="od-item-row" key={i}>
+                                <span className="od-item-name">
+                                    {item.name}
+                                    <span className="od-item-qty"> {item.quantity}x</span>
+                                </span>
+                                <span className="od-item-price">{(item.price * item.quantity).toFixed(2)} ₾</span>
                             </div>
                         ))}
+                        {deliveryFee > 0 && (
+                            <div className="od-item-row">
+                                <span className="od-item-name">{t('order.delivery')}</span>
+                                <span className="od-item-price">{deliveryFee.toFixed(2)} ₾</span>
+                            </div>
+                        )}
                     </div>
-                    <div className="total-row">
-                        <span>{t('common.total')}</span>
-                        <span className="total-price">{order.total} ₾</span>
+
+                    {/* Cost Summary */}
+                    <h3 className="od-section-label">{t('order.cost')}</h3>
+                    <div className="od-cost-card">
+                        <div className="od-cost-row">
+                            <span>{t('order.goods')}</span>
+                            <span className="od-cost-value">{itemsTotal.toFixed(2)} ₾</span>
+                        </div>
+                        <div className="od-cost-row">
+                            <span>{t('order.delivery')}</span>
+                            <span className="od-cost-value">{deliveryFee > 0 ? `${deliveryFee.toFixed(2)} ₾` : t('favorites.free')}</span>
+                        </div>
+                        {calculatedServiceFee > 0 && (
+                            <div className="od-cost-row">
+                                <span>{t('order.service_fee')}</span>
+                                <span className="od-cost-value">{calculatedServiceFee.toFixed(2)} ₾</span>
+                            </div>
+                        )}
+                        <div className="od-cost-row total">
+                            <span>{t('order.total')}</span>
+                            <span className="od-cost-value">{order.total?.toFixed(2)} ₾</span>
+                        </div>
                     </div>
-                </div>
+
+                    {/* Detailed Info Button */}
+                    <button className="od-details-btn" onClick={() => onViewDetails?.(order.id)}>
+                        {t('order.detailed_info')}
+                    </button>
 
                 {/* Rating Section (only if delivered) */}
                 {order.status === 'delivered' && (
                     <div className="os-rating-card">
                         {ratingSubmitted || order.rating ? (
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                                <span style={{ fontWeight: 'bold' }}>Оценка заказа</span>
+                                <span style={{ fontWeight: 'bold' }}>{t('order.evaluation')}</span>
                                 <div className="os-stars">
                                     {[1, 2, 3, 4, 5].map((star) => (
                                         <div key={star} className={`os-star ${(order.rating || rating) >= star ? 'active' : ''}`} style={{ cursor: 'default' }}>
@@ -216,7 +300,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack }) => {
                                         </div>
                                     ))}
                                 </div>
-                                <span style={{ color: '#21EA7C', fontSize: '14px' }}>Спасибо за вашу оценку!</span>
+                                <span style={{ color: '#21EA7C', fontSize: '14px' }}>{t('order.rating_thank_you')}</span>
 
                             </div>
                         ) : (
@@ -240,7 +324,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack }) => {
                                 }}
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-                                Оценить заказ
+                                {t('order.rating_btn')}
                             </button>
                         )}
                     </div>
@@ -248,15 +332,15 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack }) => {
             </div>
 
             {showRatingModal && createPortal(
-                <div className="rating-modal-overlay" onClick={() => setShowRatingModal(false)}>
-                    <div className="rating-modal-content" onClick={e => e.stopPropagation()}>
+                <div className="premium-modal-overlay-global" onClick={() => setShowRatingModal(false)}>
+                    <div className="premium-modal-content-global" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px', padding: '40px 24px 32px' }}>
                         <div style={{ marginBottom: '16px' }}>
                             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="icon-star-sparkle">
                                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="rgba(245, 158, 11, 0.2)"></path>
                             </svg>
                         </div>
-                        <h2 className="pam-title" style={{ fontSize: '24px', marginBottom: '8px' }}>Заказ доставлен!</h2>
-                        <p className="pam-subtitle" style={{ marginBottom: '24px', color: '#888' }}>Пожалуйста, оцените работу нашего сервиса и качество блюд.</p>
+                        <h2 className="pam-title" style={{ fontSize: '24px', marginBottom: '8px' }}>{t('order.delivered_title')}</h2>
+                        <p className="pam-subtitle" style={{ marginBottom: '24px', color: '#888' }}>{t('order.delivered_subtitle')}</p>
                         
                         <div className="stars-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}>
                             {[1, 2, 3, 4, 5].map((star) => (
@@ -265,6 +349,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack }) => {
                                     type="button"
                                     className="star-btn"
                                     onClick={() => setRating(star)}
+                                    onTouchStart={() => setRating(star)}
                                     onMouseEnter={() => setHoverRating(star)}
                                     onMouseLeave={() => setHoverRating(0)}
                                     style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0', transition: 'transform 0.2s' }}
@@ -288,7 +373,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack }) => {
                                 onClick={() => setShowRatingModal(false)}
                                 style={{ background: '#3A3A3C', color: '#fff', flex: 1 }}
                             >
-                                Позже
+                                {t('order.later_btn')}
                             </button>
                             <button
                                 className="pam-save-btn ct-confirm-btn"
@@ -302,13 +387,14 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack }) => {
                                     cursor: rating > 0 ? 'pointer' : 'not-allowed'
                                 }}
                             >
-                                {isSubmittingRating ? 'Отправка...' : 'Оценить'}
+                                {isSubmittingRating ? t('menu.order_status_rating.submit_loading') : t('order.submit_rating')}
                             </button>
                         </div>
                     </div>
                 </div>,
                 document.body
             )}
+            </div>
         </div>
     );
 };

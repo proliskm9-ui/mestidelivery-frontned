@@ -1,5 +1,6 @@
 import React from 'react';
 import './PlaceTypeModal.css';
+import { useLanguage } from '../../../translations/LanguageContext';
 
 type PlaceType = 'home' | 'hotel' | 'map';
 
@@ -11,13 +12,14 @@ interface PlaceTypeModalProps {
 }
 
 const PlaceTypeModal: React.FC<PlaceTypeModalProps> = ({ isOpen, onClose, selectedType, onSelectType }) => {
+  const { t } = useLanguage();
 
   const getTitle = (type: PlaceType): string => {
     switch (type) {
-      case 'home': return 'Дом / Квартира';
-      case 'hotel': return 'Отель / Гэстхаус';
-      case 'map': return 'Точка на карте';
-      default: return 'Не выбрано';
+      case 'home': return t('checkout.place_home');
+      case 'hotel': return t('checkout.address_hotel_guest');
+      case 'map': return t('checkout.address_point_map');
+      default: return t('checkout.not_chosen');
     }
   };
 
@@ -25,14 +27,13 @@ const PlaceTypeModal: React.FC<PlaceTypeModalProps> = ({ isOpen, onClose, select
 
   return (
     <>
-      <div className="pt-overlay active" onClick={onClose}></div>
-
-      <div className="pt-bottom-sheet active" onClick={(e) => e.stopPropagation()}>
+      <div className="pt-overlay active place-modal-overlay" onClick={onClose}>
+        <div className="pt-bottom-sheet active place-modal-content" onClick={(e) => e.stopPropagation()}>
 
         <div className="pt-header">
           <div>
-            <h2 className="pt-title">Выбор помещения</h2>
-            <p className="pt-subtitle">Текущий: {getTitle(selectedType)}</p>
+            <h2 className="pt-title">{t('checkout.select_premise')}</h2>
+            <p className="pt-subtitle">{t('checkout.current_selection')} {getTitle(selectedType)}</p>
           </div>
         </div>
 
@@ -48,8 +49,8 @@ const PlaceTypeModal: React.FC<PlaceTypeModalProps> = ({ isOpen, onClose, select
             </svg>
           </div>
           <div className="place-option-text">
-            <div className="place-option-title">Дом / Квартира</div>
-            <div className="place-option-sub">Адрес, подъезд, этаж</div>
+            <div className="place-option-title">{t('checkout.place_home')}</div>
+            <div className="place-option-sub">{t('checkout.place_home_desc')}</div>
           </div>
           <div className="place-option-arrow">
             <svg width="6" height="10" viewBox="0 0 6 10" fill="none">
@@ -71,8 +72,8 @@ const PlaceTypeModal: React.FC<PlaceTypeModalProps> = ({ isOpen, onClose, select
             </svg>
           </div>
           <div className="place-option-text">
-            <div className="place-option-title">Отель / Гэстхаус</div>
-            <div className="place-option-sub">Поиск по названию</div>
+            <div className="place-option-title">{t('checkout.address_hotel_guest')}</div>
+            <div className="place-option-sub">{t('checkout.place_hotel_desc')}</div>
           </div>
           <div className="place-option-arrow">
             <svg width="6" height="10" viewBox="0 0 6 10" fill="none">
@@ -93,8 +94,8 @@ const PlaceTypeModal: React.FC<PlaceTypeModalProps> = ({ isOpen, onClose, select
             </svg>
           </div>
           <div className="place-option-text">
-            <div className="place-option-title">Точка на карте</div>
-            <div className="place-option-sub">Если адрес неизвестен</div>
+            <div className="place-option-title">{t('checkout.address_point_map')}</div>
+            <div className="place-option-sub">{t('checkout.place_map_desc')}</div>
           </div>
           <div className="place-option-arrow">
             <svg width="6" height="10" viewBox="0 0 6 10" fill="none">
@@ -104,9 +105,10 @@ const PlaceTypeModal: React.FC<PlaceTypeModalProps> = ({ isOpen, onClose, select
         </div>
 
         <button className="pt-confirm-btn" onClick={onClose}>
-          Готово
+          {t('common.done')}
         </button>
 
+      </div>
       </div>
     </>
   );

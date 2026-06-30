@@ -8,14 +8,13 @@ export class TrackingSocket {
     connect() {
         if (this.ws) return;
 
-        // Replace http/https with ws/wss
-        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
         // Extract host
         const urlObj = new URL(baseUrl);
         const protocol = urlObj.protocol === 'https:' ? 'wss:' : 'ws:';
         const host = urlObj.host;
 
-        const wsUrl = `${protocol}//${host}/ws/tracking/${this.orderId}`;
+        const wsUrl = `${protocol}//${host}/api/ws/tracking/${this.orderId}`;
 
         console.log('Connecting WS:', wsUrl);
 

@@ -7,6 +7,7 @@ import Header from '../components/UI/Header';
 import FastTravelBlock from '../components/UI/FastTravelBlock';
 import PromoBanner from '../components/UI/PromoBanner';
 import MobileRestaurantCard from '../components/UI/MobileRestaurantCard';
+import NetworkErrorState from '../components/UI/NetworkErrorState';
 
 const CATEGORY_ICONS = [
     { key: 'fast_food', img: '/Assets/Ellipse 18.png', label: 'Фастфуд' },
@@ -24,7 +25,7 @@ const CATEGORY_ICONS = [
     { key: 'pancakes', img: '/Assets/Ellipse 25.png', label: 'Блины' },
     { key: 'desserts', img: '/Assets/Ellipse 26.png', label: 'Десерты' },
     { key: 'bbq', img: '/Assets/Ellipse 28.png', label: 'Шашлык' },
-    { key: 'soup', img: '/Assets/Ellipse 30.png', label: 'Супы' },
+    { key: 'soups', img: '/Assets/Ellipse 30.png', label: 'Супы' },
     { key: 'coffee', img: '/Assets/Ellipse 29.png', label: 'Кофе' },
 ];
 
@@ -104,6 +105,7 @@ const MenuPage: React.FC<{
     const [fastDeliveryFilter, setFastDeliveryFilter] = useState(false);
     const [promoFilter, setPromoFilter] = useState(false);
     const [taggedRestaurants, setTaggedRestaurants] = useState<any[]>([]);
+    const [isNetworkError, setIsNetworkError] = useState(false);
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -173,8 +175,10 @@ const MenuPage: React.FC<{
                 setRestaurants(rests);
                 setTaggedRestaurants(labeledRests);
                 setStores(mappedStores);
+                setIsNetworkError(false);
             } catch (error) {
                 console.error("Failed to load data", error);
+                setIsNetworkError(true);
             }
         };
         fetchData();
@@ -224,9 +228,9 @@ const MenuPage: React.FC<{
         ["Дом Кубдари", "BBQ Garden", "Dom Kubdari"].includes(r.name) || r.name.toLowerCase().includes('sunset')
     ).sort((a, b) => {
         const getIndex = (name: string) => {
-            if (name.toLowerCase().includes('sunset')) return 0;
+            if (name.includes('BBQ')) return 0;
             if (name.includes('Кубдари') || name.includes('Kubdari')) return 1;
-            if (name.includes('BBQ')) return 2;
+            if (name.toLowerCase().includes('sunset')) return 2;
             return 3;
         };
         return getIndex(a.name) - getIndex(b.name);
@@ -276,7 +280,7 @@ const MenuPage: React.FC<{
                                     <img src={cat.img} alt={cat.key} />
                                 </div>
                                 <span className={`cat-label ${isActive ? 'active' : ''}`} style={{ color: isActive ? '#000000' : '#fff' }}>
-                                    {cat.label || t(`categories.${cat.key}` as any)}
+                                    {t(`categories.${cat.key}` as any)}
                                 </span>
                             </div>
                         );
@@ -304,19 +308,19 @@ const MenuPage: React.FC<{
                     setShowRatingModal(!showRatingModal);
                     if (showFilterModal) setShowFilterModal(false);
                 }}>
-                    <StarIcon isActive={ratingFilter !== null} /> <span>Рейтинг</span> <ChevronDownIcon isActive={ratingFilter !== null} />
+                    <StarIcon isActive={ratingFilter !== null} /> <span>{t('menu.rating')}</span> <ChevronDownIcon isActive={ratingFilter !== null} />
                 </button>
                 <button
                     className={`filter-pill rocket-pill ${fastDeliveryFilter ? 'active' : ''}`}
                     onClick={() => setFastDeliveryFilter(!fastDeliveryFilter)}
                 >
-                    <RocketIcon isActive={fastDeliveryFilter} /> <span style={{ marginLeft: '-9px' }}>До 30 мин</span>
+                    <RocketIcon isActive={fastDeliveryFilter} /> <span style={{ marginLeft: '-9px' }}>{t('menu.under_30_min')}</span>
                 </button>
                 <button
                     className={`filter-pill ${promoFilter ? 'active' : ''}`}
                     onClick={() => setPromoFilter(!promoFilter)}
                 >
-                    <PercentIcon isActive={promoFilter} /> <span>Акции</span>
+                    <PercentIcon isActive={promoFilter} /> <span>{t('menu.promotions')}</span>
                 </button>
             </div>
             {showFilterModal && (
@@ -327,10 +331,14 @@ const MenuPage: React.FC<{
                         borderRadius: '16px', padding: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
                         zIndex: 100, border: '1px solid #3A3A3C'
                     }}>
-                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 16px 0', color: 'white' }}>Сортировать</h3>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 16px 0', color: 'white' }}>{t('menu.sort_by')}</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                             {(['default', 'rating', 'delivery'] as const).map((id) => {
-                                const labels = { default: 'По умолчанию', rating: 'С высоким рейтингом', delivery: 'Быстрая доставка' };
+                                const labels = { 
+                                    default: t('menu.sort_options.default'), 
+                                    rating: t('menu.sort_options.rating'), 
+                                    delivery: t('menu.sort_options.delivery') 
+                                };
                                 return (
                                     <div key={id} onClick={() => setSortOption(id)} style={{
                                         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -355,7 +363,7 @@ const MenuPage: React.FC<{
                             marginTop: '20px', width: '100%', padding: '14px', background: '#21EA7C', color: 'black', border: 'none',
                             borderRadius: '12px', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', transition: 'filter 0.2s'
                         }} onClick={() => setShowFilterModal(false)} onMouseEnter={(e) => e.currentTarget.style.filter = 'brightness(1.1)'} onMouseLeave={(e) => e.currentTarget.style.filter = 'brightness(1)'}>
-                            Показать результаты
+                            {t('menu.show_results')}
                         </button>
                     </div>
                 </>
@@ -369,11 +377,11 @@ const MenuPage: React.FC<{
                         borderRadius: '16px', padding: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
                         zIndex: 100, border: '1px solid #3A3A3C'
                     }}>
-                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 16px 0', color: 'white' }}>Рейтинг</h3>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 16px 0', color: 'white' }}>{t('menu.rating')}</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                             {([null, 4.9, 4.7, 4.5] as const).map((val) => {
                                 const isActive = ratingFilter === val;
-                                const label = val === null ? 'По умолчанию' : `Не ниже ${val}`;
+                                const label = val === null ? t('menu.sort_options.default') : `${t('menu.not_lower_than')} ${val}`;
                                 return (
                                     <div key={val || 'any'} onClick={() => setRatingFilter(val)} style={{
                                         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -398,7 +406,7 @@ const MenuPage: React.FC<{
                             marginTop: '20px', width: '100%', padding: '14px', background: '#21EA7C', color: 'black', border: 'none',
                             borderRadius: '12px', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', transition: 'filter 0.2s'
                         }} onClick={() => setShowRatingModal(false)} onMouseEnter={(e) => e.currentTarget.style.filter = 'brightness(1.1)'} onMouseLeave={(e) => e.currentTarget.style.filter = 'brightness(1)'}>
-                            Применить
+                            {t('menu.apply')}
                         </button>
                     </div>
                 </>
@@ -425,8 +433,8 @@ const MenuPage: React.FC<{
             {activeCategories.length > 0 && items.length === 0 && (
                 <div style={{ padding: '60px 20px', textAlign: 'center', color: '#888' }}>
                     <img src="/Assets/избранное.png" alt="Empty" style={{ width: '200px', height: 'auto', opacity: 0.5, marginBottom: '20px' }} />
-                    <h3>В этой категории пока пусто</h3>
-                    <p>Попробуйте выбрать другую</p>
+                    <h3>{t('menu.category_empty')}</h3>
+                    <p>{t('menu.try_another')}</p>
                 </div>
             )}
         </>
@@ -446,7 +454,7 @@ const MenuPage: React.FC<{
                 onLogout={onLogout}
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
-                showSearch={activeCollection?.title !== 'Продукты'}
+                showSearch={activeCollection?.title !== t('menu.stores') && activeCollection?.title !== 'Продукты'}
                 onNavigate={onNavigate}
             />
 
@@ -498,7 +506,10 @@ const MenuPage: React.FC<{
                                 fontFamily: 'Inter, sans-serif',
                                 textTransform: 'uppercase'
                             }}>
-                                {activeCollection.title}
+                                {activeCollection.title === 'Рестораны' ? t('menu.restaurants') : 
+                                 activeCollection.title === 'Акции' ? t('menu.promotions') : 
+                                 activeCollection.title === 'Продукты' || activeCollection.title === t('menu.stores') ? t('menu.stores') : 
+                                 activeCollection.title}
                             </h1>
                             <div style={{ width: '44px' }}></div>
                         </header>
@@ -530,7 +541,7 @@ const MenuPage: React.FC<{
                                     </svg>
                                     <input
                                         type="text"
-                                        placeholder="Искать магазин, товар.."
+                                        placeholder={t('menu.search_stores_placeholder')}
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         style={{ width: '100%', fontSize: '1.1rem', fontWeight: 500, background: 'transparent', border: 'none', color: 'white', outline: 'none' }}
@@ -539,9 +550,9 @@ const MenuPage: React.FC<{
 
                                 <section className="section popular-stores-collection" id="worth-trying-section">
                                     <div className="section-header">
-                                        <h2>Популярные магазины</h2>
-                                        <button className="see-all" onClick={() => setActiveCollection({ title: 'Популярное', items: filteredStores, type: 'store', isMobileSource: true })}>
-                                            <span>Все</span>
+                                        <h2>{t('menu.popular_stores')}</h2>
+                                        <button className="see-all" onClick={() => setActiveCollection({ title: t('menu.popular_stores'), items: filteredStores, type: 'store', isMobileSource: true })}>
+                                            <span>{t('menu.all')}</span>
                                             <span><SmallArrowIcon /></span>
                                         </button>
                                     </div>
@@ -572,6 +583,8 @@ const MenuPage: React.FC<{
                             </div>
                         )}
                     </div>
+                ) : isNetworkError && restaurants.length === 0 ? (
+                    <NetworkErrorState />
                 ) : (
                     <div className="content-pad">
                         <PromoBanner onFirstBannerClick={() => {
@@ -585,14 +598,14 @@ const MenuPage: React.FC<{
                         <FastTravelBlock onNavigate={(tab) => {
                             if (tab === 'shops') {
                                 setActiveCollection({
-                                    title: 'Продукты',
+                                    title: t('menu.stores'),
                                     items: stores,
                                     type: 'store',
                                     isMobileSource: true
                                 });
                             } else if (tab === 'restaurants') {
                                 setActiveCollection({
-                                    title: 'Рестораны',
+                                    title: t('menu.restaurants'),
                                     items: taggedRestaurants,
                                     type: 'restaurant',
                                     isMobileSource: true
@@ -600,10 +613,10 @@ const MenuPage: React.FC<{
                             } else if (tab === 'promos') {
                                 const promoItems = taggedRestaurants
                                     .filter(i => !['dom kubdari', 'дом кубдари'].includes(i.name.toLowerCase()))
-                                    .map(i => ({ ...i, promo: '-10₾ на первый заказ' }));
+                                    .map(i => ({ ...i, promo: t('menu.promo_first_order') }));
 
                                 setActiveCollection({
-                                    title: 'Акции',
+                                    title: t('menu.promotions'),
                                     items: promoItems,
                                     type: 'restaurant',
                                     isMobileSource: true
@@ -623,7 +636,7 @@ const MenuPage: React.FC<{
                                     .map((item, index) => (
                                         <RestaurantCard
                                             key={`promo-${item.id}-${index}`}
-                                            item={{ ...item, promo: '-500₽ на первый заказ' }}
+                                            item={{ ...item, promo: t('menu.promo_first_order') }}
                                             onClick={() => onRestaurantClick(item.id)}
                                             isFavorite={favorites.includes(item.id)}
                                             onToggleFavorite={() => onToggleFavorite && onToggleFavorite(item.id)}
@@ -636,8 +649,8 @@ const MenuPage: React.FC<{
                         {/* Stores */}
                         <section className="section desktop-only" id="stores-section">
                             <div className="section-header">
-                                <h2>Продукты</h2>
-                                <button className="see-all" onClick={() => setActiveCollection({ title: 'Продукты', items: filteredStores, type: 'store', isMobileSource: true })}>
+                                <h2>{t('menu.stores')}</h2>
+                                <button className="see-all" onClick={() => setActiveCollection({ title: t('menu.stores'), items: filteredStores, type: 'store', isMobileSource: true })}>
                                     <span>{t('menu.all')}</span>
                                     <span><SmallArrowIcon /></span>
                                 </button>
@@ -905,7 +918,7 @@ const MenuPage: React.FC<{
                     .cat-scroll-btn {
                         display: none !important;
                     }
-                    .content-pad { padding: 16px; padding-bottom: 100px; }
+                    .content-pad { padding: 16px; padding-top: calc(160px + env(safe-area-inset-top, 0px)); padding-bottom: 100px; }
                     .categories-layout {
                         gap: 10px; margin: 20px 0;
                     }

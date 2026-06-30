@@ -71,6 +71,7 @@
 
 .pc-search-icon, .pc-search-icon svg {
     color: #21EA7C;
+    transform: translateY(1px);
 }
 
 .pc-search-pill input {

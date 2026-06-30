@@ -1,5 +1,6 @@
 import React from 'react';
 import './HeaderBlock.css';
+import { useLanguage } from '../../../translations/LanguageContext';
 
 interface HeaderBlockProps {
   deliveryType: 'standard' | 'scheduled';
@@ -11,6 +12,7 @@ interface HeaderBlockProps {
 }
 
 const HeaderBlock: React.FC<HeaderBlockProps> = ({ deliveryType, setDeliveryType, scheduledTime, setScheduledTime, onOpenTimeModal, onBack }) => {
+  const { t } = useLanguage();
   return (
     <section className="checkout-top">
       <header className="ho-header">
@@ -19,7 +21,7 @@ const HeaderBlock: React.FC<HeaderBlockProps> = ({ deliveryType, setDeliveryType
             <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
           </svg>
         </div>
-        <h1 className="ho-title">Оформление</h1>
+        <h1 className="ho-title">{t('checkout.title')}</h1>
         <div style={{ width: 44 }}></div>
       </header>
 
@@ -32,8 +34,8 @@ const HeaderBlock: React.FC<HeaderBlockProps> = ({ deliveryType, setDeliveryType
           }}
           type="button"
         >
-          <span className="btn-title">Стандарт</span>
-          <span className="btn-sub">25-30 мин</span>
+          <span className="btn-title">{t('checkout.standard')}</span>
+          <span className="btn-sub">25-30 {t('checkout.min_short')}</span>
         </button>
 
         <button
@@ -41,9 +43,9 @@ const HeaderBlock: React.FC<HeaderBlockProps> = ({ deliveryType, setDeliveryType
           onClick={onOpenTimeModal}
           type="button"
         >
-          <span className="btn-title">Ко времени</span>
+          <span className="btn-title">{t('checkout.scheduled')}</span>
           <span className="btn-sub">
-            {scheduledTime ? scheduledTime : 'Выбрать время'}
+            {scheduledTime ? scheduledTime : t('checkout.scheduled_desc')}
           </span>
         </button>
       </div>

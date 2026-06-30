@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './TipsBlock.css';
+import { useLanguage } from '../../../translations/LanguageContext';
 
 interface TipsBlockProps {
   tipAmount: number;
@@ -8,6 +9,7 @@ interface TipsBlockProps {
 }
 
 const TipsBlock: React.FC<TipsBlockProps> = ({ tipAmount, setTipAmount, onOpenCustomTip }) => {
+  const { t } = useLanguage();
   // Локальное состояние для галочки "Сохранить выбор"
   const [isSaved, setIsSaved] = useState<boolean>(false);
 
@@ -24,7 +26,7 @@ const TipsBlock: React.FC<TipsBlockProps> = ({ tipAmount, setTipAmount, onOpenCu
   return (
     <section className="tips-card">
       <div className="tips-header">
-        <h2 className="tips-title">Чаевые курьеру</h2>
+        <h2 className="tips-title">{t('checkout.tips_title')}</h2>
         <div className="tips-chev-ph"></div>
       </div>
 
@@ -37,7 +39,12 @@ const TipsBlock: React.FC<TipsBlockProps> = ({ tipAmount, setTipAmount, onOpenCu
           className={`tip-btn tip-btn--text ${tipAmount === 0 ? 'active' : ''}`}
           onClick={() => handlePresetClick(0)}
         >
-          Без<br />чаевых
+          {t('checkout.no_tips').split(' ').map((part, index, arr) => (
+            <React.Fragment key={index}>
+              {part}
+              {index < arr.length - 1 && <br />}
+            </React.Fragment>
+          ))}
         </button>
 
         {/* Кнопки с суммами */}
@@ -62,7 +69,12 @@ const TipsBlock: React.FC<TipsBlockProps> = ({ tipAmount, setTipAmount, onOpenCu
           {isCustom ? (
             `${tipAmount.toFixed(2)} ₾`
           ) : (
-            <>Другая<br />сумма</>
+            t('checkout.custom_tip').split(' ').map((part, index, arr) => (
+              <React.Fragment key={index}>
+                {part}
+                {index < arr.length - 1 && <br />}
+              </React.Fragment>
+            ))
           )}
         </button>
       </div>
@@ -77,7 +89,7 @@ const TipsBlock: React.FC<TipsBlockProps> = ({ tipAmount, setTipAmount, onOpenCu
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
-        <span className="save-choice-text">Сохранить выбор</span>
+        <span className="save-choice-text">{t('checkout.save_choice')}</span>
       </div>
     </section>
   );

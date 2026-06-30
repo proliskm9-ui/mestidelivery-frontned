@@ -1,27 +1,63 @@
+import React, { useState } from 'react';
 import {
     HomeIcon, OrdersIcon, ProductIcon, RestaurantIcon,
-    CategoriesIcon, StoreIcon, UsersIcon, LogoutIcon
+    StoreIcon, UsersIcon, LogoutIcon
 } from '../../components/icons/StatusIcons';
 import { adminAuth } from '../../services/adminService';
 import './AdminStyles.css';
 
-export type AdminPage = 'dashboard' | 'orders' | 'products' | 'restaurants' | 'stores' | 'categories' | 'users' | 'courier' | 'partners';
+export type AdminPage = 'dashboard' | 'orders' | 'products' | 'store_products' | 'restaurants' | 'stores' | 'categories' | 'users' | 'courier' | 'partners' | 'webhooks';
+
+export function WebhookIcon({ size = 24, className = '' }: { size?: number; className?: string }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 2v6M12 16v6M2 12h6M16 12h6" />
+        </svg>
+    );
+}
+
+const PRESET_AVATARS = [
+    { id: 'av1', img: '/Assets/photo_2026-02-11_23-14-10.jpg', label: 'Art 1' },
+    { id: 'av2', img: '/Assets/photo_2026-02-11_23-14-27.jpg', label: 'Art 2' },
+    { id: 'av3', img: '/Assets/photo_2026-02-11_23-14-50.jpg', label: 'Art 3' },
+    { id: 'av4', img: '/Assets/photo_2026-02-11_23-19-47.jpg', label: 'Art 4' }
+];
 
 type Props = {
-    activePage: AdminPage;
-    onNavigate: (page: AdminPage) => void;
+    activePage: AdminPage | string;
+    onNavigate: (page: AdminPage | string) => void;
     isOpen?: boolean;
 };
 
 export function AdminSidebar({ activePage, onNavigate, isOpen }: Props) {
     const user = adminAuth.getUser();
     const isSuperAdmin = user?.role === 'super_admin';
+    const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
+    const [avatar, setAvatar] = useState<string>(
+        () => localStorage.getItem('admin_avatar') || PRESET_AVATARS[0].img
+    );
+    const [avatarModal, setAvatarModal] = useState(false);
 
-    const navItems = [
-        { id: 'dashboard' as AdminPage, Icon: HomeIcon, label: 'Dashboard' },
-        { id: 'orders' as AdminPage, Icon: OrdersIcon, label: 'Orders' },
-        { id: 'products' as AdminPage, Icon: ProductIcon, label: 'Products' },
-    ];
+    const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                if (typeof reader.result === 'string') {
+                    setAvatar(reader.result);
+                    localStorage.setItem('admin_avatar', reader.result);
+                    setAvatarModal(false);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const toggleFolder = (folderId: string) => {
+        setOpenFolders(prev => ({ ...prev, [folderId]: !prev[folderId] }));
+    };
+
 
     if (user?.role === 'courier') {
         // Courier only sees their specific tasks
@@ -40,49 +76,184 @@ export function AdminSidebar({ activePage, onNavigate, isOpen }: Props) {
                         <span>Delivery</span>
                     </button>
                 </div>
-                <div style={{ marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
-                    <button className="nav-item" onClick={adminAuth.logout} style={{ color: '#ff4444' }}>
+                <div className="sidebar-footer">
+                    <div className="admin-profile-section">
+                        <div className="admin-avatar-wrapper" onClick={() => setAvatarModal(true)}>
+                            <img src={avatar} alt="Admin Avatar" className="admin-avatar" />
+                            <div className="admin-avatar-edit-badge">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5">
+                                    <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div className="admin-profile-info">
+                            <span className="admin-username">{user?.username || 'Courier'}</span>
+                            <span className="admin-role">{user?.role?.replace('_', ' ').toUpperCase()}</span>
+                        </div>
+                    </div>
+                    <button className="nav-item logout-btn" onClick={adminAuth.logout} style={{ color: '#ff4444' }}>
                         <LogoutIcon size={20} className="nav-icon" />
                         <span>Logout</span>
                     </button>
                 </div>
+                {avatarModal && (
+                    <div className="admin-avatar-modal-overlay" onClick={() => setAvatarModal(false)}>
+                        <div className="admin-avatar-modal" onClick={e => e.stopPropagation()}>
+                            <h3>Choose Avatar</h3>
+                            <div className="admin-preset-avatars-grid">
+                                {PRESET_AVATARS.map(av => (
+                                    <div
+                                        key={av.id}
+                                        className={`admin-preset-avatar-btn ${avatar === av.img ? 'active' : ''}`}
+                                        onClick={() => {
+                                            setAvatar(av.img);
+                                            localStorage.setItem('admin_avatar', av.img);
+                                            setAvatarModal(false);
+                                        }}
+                                    >
+                                        <img src={av.img} alt={av.label} />
+                                    </div>
+                                ))}
+                            </div>
+                            <label className="admin-upload-btn">
+                                Upload Custom Photo
+                                <input type="file" hidden accept="image/*" onChange={handleAvatarUpload} />
+                            </label>
+                            <button className="admin-cancel-btn" onClick={() => setAvatarModal(false)}>Cancel</button>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
 
-    if (isSuperAdmin) {
-        navItems.push(
-            { id: 'restaurants' as AdminPage, Icon: RestaurantIcon, label: 'Restaurants' },
-            { id: 'stores' as AdminPage, Icon: StoreIcon, label: 'Stores' },
-            { id: 'categories' as AdminPage, Icon: CategoriesIcon, label: 'Categories' },
-            { id: 'users' as AdminPage, Icon: UsersIcon, label: 'Users' },
-            { id: 'partners' as AdminPage, Icon: UsersIcon, label: 'Partners' }
-        );
-    }
+    const sections = [
+        {
+            title: '',
+            items: [
+                { id: 'dashboard' as AdminPage, Icon: HomeIcon, label: 'Dashboard' },
+                { id: 'orders' as AdminPage, Icon: OrdersIcon, label: 'Orders' }
+            ]
+        },
+        {
+            title: 'Management',
+            items: [
+                isSuperAdmin && { 
+                    id: 'folder_restaurants', 
+                    Icon: RestaurantIcon, 
+                    label: 'Restaurants',
+                    subItems: [
+                        { id: 'restaurants', label: 'Restaurant List' },
+                        { id: 'products', label: 'Products' },
+                        { id: 'categories', label: 'Categories' }
+                    ]
+                },
+                isSuperAdmin && { 
+                    id: 'folder_stores', 
+                    Icon: StoreIcon, 
+                    label: 'Stores',
+                    subItems: [
+                        { id: 'stores', label: 'Store List' },
+                        { id: 'store_products', label: 'Products' }
+                    ]
+                },
+                isSuperAdmin && { 
+                    id: 'webhooks' as AdminPage, 
+                    Icon: WebhookIcon, 
+                    label: 'Webhooks'
+                }
+            ].filter(Boolean) as any[]
+        },
+        {
+            title: 'Users',
+            items: [
+                isSuperAdmin && {
+                    id: 'folder_users',
+                    Icon: UsersIcon,
+                    label: 'Users',
+                    subItems: [
+                        { id: 'users', label: 'Customers' },
+                        { id: 'partners', label: 'Partners' }
+                    ]
+                }
+            ].filter(Boolean) as any[]
+        }
+    ].filter(s => s.items.length > 0);
 
     return (
         <div className={`admin-sidebar ${isOpen ? 'open' : ''}`}>
             <div className="sidebar-logo">
                 <img src="/Assets/general-green.png" alt="Logo" />
-                <span>ADMIN PANEL</span>
+                <span>MestiDelivery<br />Admin</span>
             </div>
 
             <div className="sidebar-nav">
-                {navItems.map(item => (
-                    <button
-                        key={item.id}
-                        className={`nav-item ${activePage === item.id ? 'active' : ''}`}
-                        onClick={() => onNavigate(item.id)}
-                    >
-                        <item.Icon size={20} className="nav-icon" />
-                        <span>{item.label}</span>
-                    </button>
+                {sections.map((section, idx) => (
+                    <div key={idx} className="sidebar-section">
+                        {section.title && (
+                            <div className="sidebar-section-header">
+                                {section.title}
+                            </div>
+                        )}
+                        <div className="sidebar-section-items">
+                            {section.items.map((item: any) => (
+                                <div key={item.id} className="nav-item-container">
+                                    <button
+                                        className={`nav-item ${activePage === item.id ? 'active' : ''}`}
+                                        onClick={() => {
+                                            if (item.subItems) {
+                                                toggleFolder(item.id);
+                                            } else {
+                                                onNavigate(item.id);
+                                            }
+                                        }}
+                                    >
+                                        <item.Icon size={20} className="nav-icon" />
+                                        <span>{item.label}</span>
+                                        {item.subItems && (
+                                            <span className={`folder-chevron ${openFolders[item.id] ? 'open' : ''}`}>
+                                                ›
+                                            </span>
+                                        )}
+                                    </button>
+                                    
+                                    {item.subItems && openFolders[item.id] && (
+                                        <div className="nav-sub-items">
+                                            {item.subItems.map((sub: any) => (
+                                                <button
+                                                    key={sub.id}
+                                                    className={`nav-sub-item ${activePage === sub.id ? 'active' : ''}`}
+                                                    onClick={() => onNavigate(sub.id)}
+                                                >
+                                                    {sub.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 ))}
             </div>
 
-            <div style={{ marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
+            <div className="sidebar-footer">
+                <div className="admin-profile-section">
+                    <div className="admin-avatar-wrapper" onClick={() => setAvatarModal(true)}>
+                        <img src={avatar} alt="Admin Avatar" className="admin-avatar" />
+                        <div className="admin-avatar-edit-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5">
+                                <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div className="admin-profile-info">
+                        <span className="admin-username">{user?.username || 'Admin'}</span>
+                        <span className="admin-role">{user?.role?.replace('_', ' ').toUpperCase()}</span>
+                    </div>
+                </div>
                 <button
-                    className="nav-item"
+                    className="nav-item logout-btn"
                     onClick={adminAuth.logout}
                     style={{ color: '#ff4444' }}
                 >
@@ -90,6 +261,33 @@ export function AdminSidebar({ activePage, onNavigate, isOpen }: Props) {
                     <span>Logout</span>
                 </button>
             </div>
+            {avatarModal && (
+                <div className="admin-avatar-modal-overlay" onClick={() => setAvatarModal(false)}>
+                    <div className="admin-avatar-modal" onClick={e => e.stopPropagation()}>
+                        <h3>Choose Avatar</h3>
+                        <div className="admin-preset-avatars-grid">
+                            {PRESET_AVATARS.map(av => (
+                                <div
+                                    key={av.id}
+                                    className={`admin-preset-avatar-btn ${avatar === av.img ? 'active' : ''}`}
+                                    onClick={() => {
+                                        setAvatar(av.img);
+                                        localStorage.setItem('admin_avatar', av.img);
+                                        setAvatarModal(false);
+                                    }}
+                                >
+                                    <img src={av.img} alt={av.label} />
+                                </div>
+                            ))}
+                        </div>
+                        <label className="admin-upload-btn">
+                            Upload Custom Photo
+                            <input type="file" hidden accept="image/*" onChange={handleAvatarUpload} />
+                        </label>
+                        <button className="admin-cancel-btn" onClick={() => setAvatarModal(false)}>Cancel</button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

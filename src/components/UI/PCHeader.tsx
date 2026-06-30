@@ -47,7 +47,7 @@ const PCHeader: React.FC<HeaderProps> = ({
     searchPlaceholder,
     onLogoClick
 }) => {
-    const { language, setLanguage } = useLanguage();
+    const { language, setLanguage, t } = useLanguage();
     const [langOpen, setLangOpen] = useState(false);
     const [mapOpen, setMapOpen] = useState(false);
     const [isDetectingLocation, setIsDetectingLocation] = useState(false);
@@ -133,14 +133,14 @@ const PCHeader: React.FC<HeaderProps> = ({
                     {showSearch && setSearchQuery && (
                         <div className="pc-search-pill">
                             <div className="pc-search-icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <circle cx="11" cy="11" r="8"></circle>
                                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                                 </svg>
                             </div>
                             <input
                                 type="text"
-                                placeholder={searchPlaceholder || "Искать в mestigo"}
+                                placeholder={searchPlaceholder || t('common.search_placeholder')}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
@@ -155,11 +155,11 @@ const PCHeader: React.FC<HeaderProps> = ({
                             <circle cx="12" cy="10" r="3"></circle>
                         </svg>
                         <div className="pc-ap-text">
-                            <span className="pc-ap-title">Местия <SmallArrowIcon style={{ marginLeft: '4px', transform: 'rotate(90deg)' }} /></span>
+                            <span className="pc-ap-title">{t('common.mestia')} <SmallArrowIcon style={{ marginLeft: '4px', transform: 'rotate(90deg)' }} /></span>
                             <span className="pc-ap-subtitle">
                                 {(userAddress?.street || userAddress?.house)
                                     ? `${userAddress.street}${userAddress.house ? `, ${userAddress.house}` : ''}`
-                                    : 'Укажите адрес доставки'}
+                                    : t('map.title')}
                             </span>
                         </div>
                     </div>
@@ -198,16 +198,14 @@ const PCHeader: React.FC<HeaderProps> = ({
                 </div>
             </div>
 
-
-
             {mapOpen && (
                 <>
                     <div className="modal-overlay pam-overlay" onClick={() => setMapOpen(false)} style={{ zIndex: 100000 }}></div>
                     <div className="premium-address-modal" onClick={e => e.stopPropagation()} style={{ zIndex: 100001, background: '#191917', border: '1px solid #333' }}>
                         <div className="pam-header">
                             <div>
-                                <h3 className="pam-title" style={{ color: '#fff' }}>г. Местия</h3>
-                                <p className="pam-subtitle" style={{ color: '#aaa' }}>Укажите адрес доставки</p>
+                                <h3 className="pam-title" style={{ color: '#fff' }}>{t('common.mestia')}</h3>
+                                <p className="pam-subtitle" style={{ color: '#aaa' }}>{t('map.title')}</p>
                             </div>
                         </div>
 
@@ -231,26 +229,26 @@ const PCHeader: React.FC<HeaderProps> = ({
                                 style={{ position: 'absolute', bottom: '15px', right: '15px', zIndex: 10, background: 'rgba(255,255,255,0.95)', border: 'none', borderRadius: '12px', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '13px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                             >
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
-                                <span>{isDetectingLocation ? '...' : 'Где я?'}</span>
+                                <span>{isDetectingLocation ? '...' : t('map.where_am_i')}</span>
                             </button>
                         </div>
 
                         <div className="address-fields-mini am-fields-v2">
                             <div className="side-by-side" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                                 <div className={`pam-input-group ${tempStreet ? 'has-value' : ''}`}>
-                                    <label>Улица</label>
+                                    <label>{t('checkout.street')}</label>
                                     <input
                                         type="text"
-                                        placeholder="Улица"
+                                        placeholder={t('checkout.street')}
                                         value={tempStreet}
                                         onChange={e => setTempStreet(e.target.value)}
                                     />
                                 </div>
                                 <div className={`pam-input-group ${tempHouse ? 'has-value' : ''}`}>
-                                    <label>Дом</label>
+                                    <label>{t('checkout.house')}</label>
                                     <input
                                         type="text"
-                                        placeholder="Дом"
+                                        placeholder={t('checkout.house')}
                                         value={tempHouse}
                                         onChange={e => setTempHouse(e.target.value)}
                                     />
@@ -259,19 +257,19 @@ const PCHeader: React.FC<HeaderProps> = ({
 
                             <div className="side-by-side" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                                 <div className={`pam-input-group ${tempApartment ? 'has-value' : ''}`}>
-                                    <label>Кв. / Офис</label>
+                                    <label>{t('checkout.apartment')}</label>
                                     <input
                                         type="text"
-                                        placeholder="Кв. / Офис"
+                                        placeholder={t('checkout.apartment')}
                                         value={tempApartment}
                                         onChange={e => setTempApartment(e.target.value)}
                                     />
                                 </div>
                                 <div className={`pam-input-group ${tempEntrance ? 'has-value' : ''}`}>
-                                    <label>Подъезд</label>
+                                    <label>{t('map.entrance')}</label>
                                     <input
                                         type="text"
-                                        placeholder="Подъезд"
+                                        placeholder={t('map.entrance')}
                                         value={tempEntrance}
                                         onChange={e => setTempEntrance(e.target.value)}
                                     />
@@ -285,7 +283,7 @@ const PCHeader: React.FC<HeaderProps> = ({
                             disabled={!tempStreet || !tempHouse}
                             style={{ width: '100%', background: '#21EA7C', color: '#000', border: 'none', borderRadius: '16px', padding: '16px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', marginTop: '20px' }}
                         >
-                            Подтвердить адрес
+                            {t('map.confirm')}
                         </button>
                     </div>
                 </>

@@ -1,11 +1,12 @@
-.mobile-cart-container,
-.mobile-cart-empty {
+.mobile-cart-container.cart-v2-layout {
     min-height: 100vh;
-    background-color: var(--bg);
+    background-color: #0A0A0A;
     color: white;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Inter', sans-serif;
     padding-bottom: 110px;
-    /* Уменьшил, чтобы убрать дыру, но оставить место под панель */
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
 .mobile-cart-empty {
@@ -13,13 +14,32 @@
     flex-direction: column;
 }
 
+/* V2 Blocks */
+.cart-block-top {
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 0 0 28px 28px;
+    padding-bottom: 24px;
+}
+
+.cart-block-bottom {
+    background: rgba(255, 255, 255, 0.04);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 28px 28px 0 0;
+    padding-top: 24px;
+}
+
 /* Header */
 .mobile-cart-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: max(22px, calc(14px + env(safe-area-inset-top, 0px))) 20px 17px 20px;
-    background-color: var(--bg);
+    padding: max(22px, calc(14px + env(safe-area-inset-top, 0px))) 16px 17px 16px;
+    background-color: transparent;
     position: relative;
     z-index: 100;
 }
@@ -115,7 +135,7 @@
 
 /* Items List */
 .mc-items-list {
-    padding: 16px 20px 0;
+    padding: 16px 16px 0;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -235,7 +255,7 @@
 .mc-extras-row {
     display: flex;
     gap: 12px;
-    padding: 0 20px;
+    padding: 0 16px;
     margin-top: 0;
 }
 
@@ -303,7 +323,7 @@
 }
 
 .mc-comment-box-floating {
-    margin: 12px 20px;
+    margin: 12px 16px;
     background: rgba(255, 255, 255, 0.03);
     border-radius: 16px;
     padding: 12px;
@@ -324,14 +344,15 @@
 
 /* Recommendations Section */
 .mc-recs-section {
-    margin-top: 40px;
-    padding: 0 20px 20px 20px;
+    margin-top: 0;
+    padding: 0 16px 20px 16px;
 }
 
 .mc-section-title {
     font-size: 30px;
     font-weight: 800;
     color: white;
+    margin-top: 0;
     margin-bottom: 20px;
     font-family: 'Inter', sans-serif;
     letter-spacing: -0.3px;
