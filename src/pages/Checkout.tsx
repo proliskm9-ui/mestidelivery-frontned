@@ -246,10 +246,10 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                                     />
                                 </div>
                                 <div className="field-group">
-                                    <label><IconHash /> {t('checkout.entrance') || 'Подъезд'}</label>
+                                    <label><IconHash /> {t('checkout.entrance')}</label>
                                     <input
                                         className="premium-input"
-                                        placeholder="Напр. 1"
+                                        placeholder={t('checkout.entrance_ph')}
                                         value={address.entrance || ''}
                                         onChange={e => handleUpdateAddress('entrance', e.target.value)}
                                     />

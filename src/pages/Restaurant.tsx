@@ -327,7 +327,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                 <div className="cw-items">
                                     {cart.map(item => (
                                         <div key={item.product.id} className="cw-item">
-                                            <img src={item.product.img} className="cw-item-img" alt={item.product.name} />
+                                            <img src={item.product.img || '/Assets/default-food.png'} className="cw-item-img" alt={item.product.name} />
                                             <div className="cw-item-info">
                                                 <div className="cw-item-name">{item.product.name}</div>
                                                 <div className="cw-item-price-row">

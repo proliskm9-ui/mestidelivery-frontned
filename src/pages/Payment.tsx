@@ -122,22 +122,29 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onBack, totalAmount, orderDat
                     ? `https://t.me/CryptoBot?start=pay_${result.id}` 
                     : `https://t.me/tribute?startapp=pay_${result.id}`);
                 
-                const tg = (window as any).Telegram?.WebApp;
-                if (tg) {
-                    if (tg.openInvoice && finalUrl.includes('t.me/$')) {
-                        tg.openInvoice(finalUrl);
-                    } else if (tg.openTelegramLink && finalUrl.includes('t.me')) {
-                        tg.openTelegramLink(finalUrl);
-                    } else if (tg.openLink) {
-                        tg.openLink(finalUrl);
+                // Order is already committed server-side at this point: any failure below
+                // (deep-link opening, parent navigation) must not revert the UI to a
+                // "select payment method" screen that orderCreatedRef would then make inert.
+                try {
+                    const tg = (window as any).Telegram?.WebApp;
+                    if (tg) {
+                        if (tg.openInvoice && finalUrl.includes('t.me/$')) {
+                            tg.openInvoice(finalUrl);
+                        } else if (tg.openTelegramLink && finalUrl.includes('t.me')) {
+                            tg.openTelegramLink(finalUrl);
+                        } else if (tg.openLink) {
+                            tg.openLink(finalUrl);
+                        } else {
+                            window.open(finalUrl, '_blank');
+                        }
                     } else {
                         window.open(finalUrl, '_blank');
                     }
-                } else {
-                    window.open(finalUrl, '_blank');
+
+                    onPaymentComplete(method, result.id);
+                } catch (navError) {
+                    console.error('Order created but post-success navigation failed', navError);
                 }
-                
-                onPaymentComplete(method, result.id);
             } else {
                 alert(t('checkout.order_creation_error'));
                 setSubmitting(false);
@@ -189,7 +196,7 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onBack, totalAmount, orderDat
                             </div>
 
                             <div className="payment-method-card" onClick={() => handlePaymentSelect('card')}>
-                                <div className="method-icon card">
+                                <div className="method-icon eu-card">
                                     <IconCard />
                                 </div>
                                 <div className="method-info">

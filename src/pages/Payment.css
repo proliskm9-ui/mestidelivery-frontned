@@ -149,7 +149,7 @@
     background: rgba(242, 169, 0, 0.1);
 }
 
-.method-icon.card {
+.method-icon.eu-card {
     color: var(--primary);
     background: rgba(33, 234, 124, 0.1);
 }

@@ -35,8 +35,21 @@ const DEFAULT_AVATARS = [
 
 import { LanguageProvider, useLanguage } from './translations/LanguageContext';
 
+function useIsMobile(breakpoint = 1024) {
+    const [isMobile, setIsMobile] = useState(() => window.innerWidth <= breakpoint);
+    useEffect(() => {
+        const mql = window.matchMedia(`(max-width: ${breakpoint}px)`);
+        const onChange = () => setIsMobile(mql.matches);
+        onChange();
+        mql.addEventListener('change', onChange);
+        return () => mql.removeEventListener('change', onChange);
+    }, [breakpoint]);
+    return isMobile;
+}
+
 function AppContent() {
     const { t } = useLanguage();
+    const isMobile = useIsMobile();
     // Auth State
     const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
 
@@ -428,7 +441,7 @@ function AppContent() {
                                 onClick={() => setCurrentPage('menu')} // Click outside to close
                             />
                             <div style={{ position: 'relative', zIndex: 1, minHeight: '100%' }}>
-                                {window.innerWidth <= 1024 ? (
+                                {isMobile ? (
                                     <MobileCart
                                         onBack={() => {
                                             if (cart.length > 0) {
@@ -474,7 +487,7 @@ function AppContent() {
                     {currentPage === 'checkout' && (
                         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 3000, overflowY: 'hidden', background: 'var(--bg)' }}>
                             <div className="no-scrollbar" style={{ height: '100%', overflowY: 'auto' }}>
-                                {window.innerWidth <= 1024 ? (
+                                {isMobile ? (
                                     <MobileCheckoutPage
                                         totalAmount={cartTotalAmount}
                                         cartItems={cart}
@@ -513,7 +526,7 @@ function AppContent() {
 
                     {currentPage === 'payment' && (
                         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 4000, overflowY: 'auto', background: 'var(--bg)' }}>
-                            {window.innerWidth <= 1024 ? (
+                            {isMobile ? (
                                 <MobilePaymentPage
                                     onBack={() => setCurrentPage('checkout')}
                                     totalAmount={pendingOrderData?.total || 0}

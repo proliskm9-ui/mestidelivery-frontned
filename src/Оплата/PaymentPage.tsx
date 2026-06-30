@@ -111,10 +111,16 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                     stopPolling();
                     setScreen('success');
                     await new Promise(r => setTimeout(r, 1800));
-                    onPaymentComplete(selectedMethod, id);
+                    try {
+                        onPaymentComplete(selectedMethod, id);
+                    } catch (navError) {
+                        console.error('Order confirmed but post-success navigation failed', navError);
+                    }
                 }
-            } catch {
-                // Network glitch – keep polling
+            } catch (e) {
+                // Only swallow genuine polling/network errors; onPaymentComplete errors
+                // are handled above so they don't get misread as "keep polling".
+                console.warn('Order status poll failed, will retry', e);
             }
         }, POLL_INTERVAL_MS);
     }, [stopPolling, onPaymentComplete]);
@@ -198,7 +204,13 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                 setMethod('cash');
                 setScreen('pending_confirmation');
                 await new Promise(r => setTimeout(r, 3000));
-                onPaymentComplete(selectedMethod, result.id);
+                // Order is already committed server-side here: a failure in the parent's
+                // completion callback shouldn't surface as "order failed" or reset the flow.
+                try {
+                    onPaymentComplete(selectedMethod, result.id);
+                } catch (navError) {
+                    console.error('Order created but post-success navigation failed', navError);
+                }
                 return;
             }
 
@@ -295,7 +307,11 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
 
             setScreen('pending_confirmation');
             await new Promise(r => setTimeout(r, 3000));
-            onPaymentComplete('card', result.id);
+            try {
+                onPaymentComplete('card', result.id);
+            } catch (navError) {
+                console.error('Order created but post-success navigation failed', navError);
+            }
 
         } catch (e: any) {
             console.error('Order creation error:', e);

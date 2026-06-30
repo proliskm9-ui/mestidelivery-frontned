@@ -167,6 +167,12 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
 
   // Обработка оплаты
   const handlePay = (): void => {
+    const hasLocation = orderData.address.type === 'map' ? !!orderData.address.geo : !!orderData.address.street;
+    if (!hasLocation || !orderData.address.phone) {
+      alert(t('checkout.fill_alert'));
+      return;
+    }
+
     if (onProceedToPayment) {
       onProceedToPayment({
         ...orderData,
