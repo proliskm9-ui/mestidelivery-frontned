@@ -264,7 +264,7 @@ export function AdminProducts() {
     const avgPrice = products.length > 0 ? (products.reduce((a, p) => a + p.price, 0) / products.length).toFixed(2) : '0';
     const categoriesCount = new Set(products.map(p => p.category || 'main')).size;
 
-    if (loading) return <FullPageLoader text="Загрузка..." />;
+    if (loading) return <FullPageLoader variant="list" />;
 
     return (
         <div className="admin-page">
@@ -492,7 +492,7 @@ export function AdminProducts() {
             {/* ─── Products Table ─── */}
             {selectedRestaurant ? (
                 productsLoading ? (
-                    <FullPageLoader text="Загрузка меню..." />
+                    <FullPageLoader variant="list" />
                 ) : (
                     <div className="admin-table-premium">
                         <table className="admin-table">

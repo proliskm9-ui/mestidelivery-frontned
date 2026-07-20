@@ -12,6 +12,7 @@ import {
   CheckCircle2, 
   Loader2 
 } from 'lucide-react';
+import FullPageLoader from '../../../components/UI/FullPageLoader';
 
 const REFRESH_MS = 5000;
 
@@ -161,7 +162,7 @@ export function RestaurantOrders({ defaultTab = 'active' }: { defaultTab?: 'acti
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 60, color: 'var(--admin-text-muted)' }}>Загрузка...</div>
+        <FullPageLoader variant="list" />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 

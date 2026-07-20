@@ -12,12 +12,21 @@ interface ActiveOrder {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-    pending: '#fbbf24', // yellow
-    confirmed: '#3b82f6', // blue
-    preparing: '#8b5cf6', // purple
-    ready: '#10b981', // green
-    delivering: '#21ea7c', // bright green
-    delivered: '#f59e0b', // gold for rating
+    pending: '#fbbf24',
+    pending_payment: '#fbbf24',
+    confirmed: '#3b82f6',
+    accepted: '#3b82f6',
+    preparing: '#8b5cf6',
+    ready: '#10b981',
+    delivering: '#21ea7c',
+    delivered: '#f59e0b',
+};
+
+/** Normalize backend status aliases to i18n keys under status.* */
+const normalizeStatusKey = (status: string): string => {
+    if (status === 'accepted') return 'confirmed';
+    if (status === 'pending_payment') return 'pending';
+    return status;
 };
 
 const ESTIMATED_TIMES: Record<string, string> = {
@@ -37,7 +46,7 @@ interface Props {
 const HeaderOrderStatus: React.FC<Props> = ({ onNavigate, compact }) => {
     const { t } = useLanguage();
     const [order, setOrder] = useState<ActiveOrder | null>(null);
-    const userId = localStorage.getItem('user_id');
+    const token = localStorage.getItem('token');
 
     // Rating state
     const [showRatingModal, setShowRatingModal] = useState(false);
@@ -48,11 +57,11 @@ const HeaderOrderStatus: React.FC<Props> = ({ onNavigate, compact }) => {
     const [prevStatus, setPrevStatus] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!userId) return;
+        if (!token) return;
 
         const checkStatus = async () => {
             try {
-                const data = await api.getActiveOrder(userId);
+                const data = await api.getActiveOrder();
                 setOrder(data);
             } catch (error) {
                 console.error("Status check failed", error);
@@ -63,7 +72,7 @@ const HeaderOrderStatus: React.FC<Props> = ({ onNavigate, compact }) => {
         const interval = setInterval(checkStatus, 30000); // Check every 30s as fallback
 
         return () => clearInterval(interval);
-    }, [userId]);
+    }, [token]);
 
     // WebSocket logic specific to the current active order
     useEffect(() => {
@@ -118,14 +127,22 @@ const HeaderOrderStatus: React.FC<Props> = ({ onNavigate, compact }) => {
     };
 
     const color = STATUS_COLORS[order.status] || '#888';
-    const statusText = order.status === 'delivered' ? t('status.courier_on_site') : (t(`status.${order.status}`) !== `status.${order.status}` ? t(`status.${order.status}`) : order.status_label);
-    const estimatedTime = t(`status.desc_${order.status}`) !== `status.desc_${order.status}` ? t(`status.desc_${order.status}`) : (ESTIMATED_TIMES[order.status] || '...');
+    const statusKey = normalizeStatusKey(order.status);
+    const translatedStatus = t(`status.${statusKey}`);
+    const statusText = order.status === 'delivered'
+        ? t('status.courier_on_site')
+        : (translatedStatus !== `status.${statusKey}` ? translatedStatus : (ESTIMATED_TIMES[statusKey] || order.status));
+    const translatedDesc = t(`status.desc_${statusKey}`);
+    const estimatedTime = translatedDesc !== `status.desc_${statusKey}`
+        ? translatedDesc
+        : (ESTIMATED_TIMES[statusKey] || ESTIMATED_TIMES[order.status] || '...');
 
     const getStatusIcon = (status: string) => {
-        const size = 24;
+        const size = compact ? 22 : 24;
         const strokeWidth = 2;
+        const key = normalizeStatusKey(status);
 
-        switch (status) {
+        switch (key) {
             case 'delivered':
                 return <MapPin size={size} strokeWidth={strokeWidth} className="simple-anim-pulse" />;
             case 'delivering':
@@ -144,8 +161,9 @@ const HeaderOrderStatus: React.FC<Props> = ({ onNavigate, compact }) => {
 
     if (compact) {
         return (
-            <div 
-                className="compact-order-status-pill"
+            <button
+                type="button"
+                className="hd-order-aob"
                 onClick={(e) => {
                     e.stopPropagation();
                     if (order.status === 'delivered') setShowRatingModal(true);
@@ -153,14 +171,14 @@ const HeaderOrderStatus: React.FC<Props> = ({ onNavigate, compact }) => {
                 }}
                 style={{ '--status-color': color } as React.CSSProperties}
             >
-                <div className="compact-icon">
+                <span className="aob-icon-wrapper" aria-hidden="true">
                     {getStatusIcon(order.status)}
-                </div>
-                <div className="compact-info">
-                    <span className="compact-label">{statusText}</span>
-                    <span className="compact-time">{estimatedTime}</span>
-                </div>
-            </div>
+                </span>
+                <span className="aob-info">
+                    <span className="aob-status">{statusText}</span>
+                    <span className="aob-time">{estimatedTime}</span>
+                </span>
+            </button>
         );
     }
 

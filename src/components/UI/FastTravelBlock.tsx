@@ -24,7 +24,7 @@ const FastTravelBlock: React.FC<FastTravelBlockProps> = ({ onNavigate }) => {
             />
             <div className="cardLabel cardLabel--restaurants">{t('menu.restaurants')}</div>
 
-            {/* Shops */}
+            {/* Shops — always visible on mobile */}
             <div
                 className="card card--shops"
                 onClick={() => onNavigate('shops')}

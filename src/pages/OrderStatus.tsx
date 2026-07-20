@@ -130,8 +130,9 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
     const currentStepIndex = order ? STATUS_STEPS.findIndex(s => s.key === order.status || (order.status === 'pending_payment' && s.key === 'pending')) : 0;
     const activeStepIndex = currentStepIndex === -1 ? 0 : currentStepIndex;
 
-    // Scroll active step into view
+    // Scroll active step into view (mobile carousel only)
     useEffect(() => {
+        if (typeof window !== 'undefined' && window.innerWidth > 1024) return;
         if (stepsRef.current[activeStepIndex] && scrollContainerRef.current) {
             stepsRef.current[activeStepIndex]?.scrollIntoView({
                 behavior: 'smooth',
@@ -156,7 +157,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
         }
     };
 
-    if (loading) return <FullPageLoader text={t('common.loading') as string} />;
+    if (loading) return <FullPageLoader variant="order" />;
     
     if (isNetworkError) {
         return (
@@ -202,7 +203,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
         <div className="order-status-page page-layout">
             <div className="os-block-top">
                 <header className="status-header">
-                    <button className="back-btn-status" onClick={onBack}>
+                    <button type="button" className="back-btn-status" onClick={onBack} aria-label={t('common.back')}>
                         <IconChevronLeft />
                     </button>
                     <div className="header-title-block">
@@ -283,7 +284,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                     </div>
 
                     {/* Detailed Info Button */}
-                    <button className="od-details-btn" onClick={() => onViewDetails?.(order.id)}>
+                    <button type="button" className="od-details-btn" onClick={() => onViewDetails?.(order.id)}>
                         {t('order.detailed_info')}
                     </button>
 

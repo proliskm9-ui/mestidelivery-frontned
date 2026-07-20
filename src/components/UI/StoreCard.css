@@ -1,0 +1,22 @@
+.store-bg {
+    position: relative;
+}
+
+.store-bg-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.store-bg--skeleton {
+    overflow: hidden;
+    background: #1c1c1e;
+}
+
+.store-bg .fav-btn {
+    z-index: 3;
+}

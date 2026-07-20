@@ -1,0 +1,28 @@
+.mdp-map {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #14161a;
+}
+
+.mdp-maplibre {
+  width: 100%;
+  height: 100%;
+}
+
+.mdp-map .maplibregl-canvas,
+.mdp-map .maplibregl-map {
+  outline: none;
+}
+
+/* Soft dark mood without killing label contrast */
+.mdp-map .maplibregl-canvas {
+  filter: brightness(0.92) saturate(0.95);
+}
+
+.mdp-pin {
+  background: transparent !important;
+  border: none !important;
+  line-height: 0;
+  pointer-events: auto;
+}

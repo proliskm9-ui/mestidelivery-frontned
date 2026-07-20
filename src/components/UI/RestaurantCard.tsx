@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Restaurant } from '../../services/api';
 import { useLanguage, formatDuration } from '../../translations/LanguageContext';
+import './favBtn.css';
+import './cardImageSkeleton.css';
 
 interface RestaurantCardProps {
     item: Restaurant;
@@ -12,34 +14,37 @@ interface RestaurantCardProps {
 
 const RestaurantCard: React.FC<RestaurantCardProps> = ({ item, onClick, isVertical, isFavorite, onToggleFavorite }) => {
     const { language } = useLanguage();
+    const [imageOk, setImageOk] = useState(true);
+    const hasImage = Boolean(item.img && item.img.trim());
+    const showSkeleton = !hasImage || !imageOk;
+
+    useEffect(() => {
+        setImageOk(true);
+    }, [item.img]);
+
     return (
         <div className={`rest-card ${isVertical ? 'rest-card-vertical' : ''}`} onClick={onClick}>
-            <div className="rest-img" style={{
-                backgroundImage: `url("${item.img || '/Assets/default-restaurant.png'}")`,
-                transition: 'transform 0.3s ease',
-                position: 'relative'
-            }}>
+            <div
+                className={`rest-img ${showSkeleton ? 'rest-img--skeleton' : ''}`}
+                style={{ transition: 'transform 0.3s ease', position: 'relative' }}
+            >
+                {hasImage && imageOk && (
+                    <img
+                        src={item.img}
+                        alt=""
+                        className="rest-img-photo"
+                        onError={() => setImageOk(false)}
+                    />
+                )}
+                {showSkeleton && <div className="card-img-skeleton" aria-hidden="true" />}
                 {onToggleFavorite && (
                     <button
+                        type="button"
                         className={`fav-btn ${isFavorite ? 'fav-active' : ''}`}
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleFavorite(e); }}
-                        style={{
-                            width: '44px',
-                            height: '44px',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            top: '10px',
-                            right: '12px',
-                            padding: '0',
-                            position: 'absolute',
-                            border: 'none',
-                            outline: 'none',
-                            cursor: 'pointer'
-                        }}
+                        aria-label="Add to favorites"
                     >
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill={isFavorite ? "black" : "none"} stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', margin: 'auto', pointerEvents: 'none' }}>
+                        <svg viewBox="0 0 24 24" fill={isFavorite ? 'black' : 'none'} stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                         </svg>
                     </button>
@@ -58,23 +63,6 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ item, onClick, isVertic
                         <span>{formatDuration(item.delivery || '25-35 мин', language)}</span>
                     </div>
                 </div>
-                {item.promo && (
-                    <div style={{
-                        marginTop: '4px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        background: '#1F3426',
-                        color: '#4AD378',
-                        padding: '4px 12px',
-                        borderRadius: '16px',
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        whiteSpace: 'nowrap',
-                        marginLeft: '6px'
-                    }}>
-                        {item.promo}
-                    </div>
-                )}
             </div>
         </div>
     );

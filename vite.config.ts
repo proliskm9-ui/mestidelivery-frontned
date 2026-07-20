@@ -10,6 +10,9 @@ export default defineConfig({
       '@': '/src',
     },
   },
+  optimizeDeps: {
+    include: ['leaflet', 'react-leaflet', '@turf/boolean-point-in-polygon', '@turf/helpers'],
+  },
   server: {
     host: true,
     proxy: {
@@ -17,11 +20,26 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
+        configure: (proxy) => {
+          // Gateway sends HSTS/CSP meant for production HTTPS.
+          // When proxied over LAN HTTP (phone → PC IP), HSTS poisons the IP
+          // and Safari/Chrome start forcing https://172.x.x.x which fails.
+          proxy.on('proxyRes', (proxyRes) => {
+            delete proxyRes.headers['strict-transport-security'];
+            delete proxyRes.headers['content-security-policy'];
+          });
+        },
       },
       '/uploads': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
+        configure: (proxy) => {
+          proxy.on('proxyRes', (proxyRes) => {
+            delete proxyRes.headers['strict-transport-security'];
+            delete proxyRes.headers['content-security-policy'];
+          });
+        },
       },
       '/poster-api': {
         target: 'https://joinposter.com',
@@ -43,6 +61,7 @@ export default defineConfig({
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           // Анимации
           'lottie-vendor': ['lottie-react'],
+          'leaflet-vendor': ['leaflet', 'react-leaflet'],
         },
       },
     },

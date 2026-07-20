@@ -1,18 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { Loader2, Lock, User } from 'lucide-react';
 
 export const LoginScreen: React.FC = () => {
   const login = useStore(state => state.login);
+  const telegramLogin = useStore(state => state.telegramLogin);
   const isLoading = useStore(state => state.isLoading);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPass, setShowPass] = useState(false);
+  const [tgAutoLogging, setTgAutoLogging] = useState(false);
 
-  // Автоматическая авторизация через Telegram отключена для PartnerApp,
-  // так как сессия партнера не должна перетираться данными Telegram.
+  // Auto-login via Telegram WebApp when opened through the Partners bot
+  useEffect(() => {
+    const tgWebApp = (window as any).Telegram?.WebApp;
+    if (!tgWebApp) return;
+    const user = tgWebApp.initDataUnsafe?.user;
+    if (!user?.id) return;
+
+    // Check if we already have a stored JWT for this session
+    const existingToken = localStorage.getItem('delivery_jwt_token');
+    if (existingToken) return; // Already logged in, no need to re-auth
+
+    setTgAutoLogging(true);
+    telegramLogin(user.id, user.username, user.first_name)
+      .catch(() => {
+        setTgAutoLogging(false);
+      });
+  }, [telegramLogin]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +51,15 @@ export const LoginScreen: React.FC = () => {
         <div style={{ ...styles.blob, ...styles.blob2 }} />
         <div style={{ ...styles.blob, ...styles.blob3 }} />
       </div>
+
+      {tgAutoLogging && (
+        <div style={{ position: 'absolute', inset: 0, zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+          <img src="/Assets/general-green.png" alt="Logo" style={{ width: 64, height: 64, borderRadius: 16 }} />
+          <Loader2 size={32} style={{ color: '#35E07A', animation: 'spin 1s linear infinite' }} />
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, margin: 0 }}>Вход через Telegram...</p>
+          <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
 
       {/* Container */}
       <div style={styles.container}>

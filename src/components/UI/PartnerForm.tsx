@@ -24,22 +24,37 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ type, onClose }) => {
         setError('');
 
         try {
-            // Updated to relative path
-            const response = await fetch('/api/partners/request', {
+            const payload = {
+                type,
+                name: formData.name.trim(),
+                phone: formData.phone.trim(),
+                email: formData.email.trim(),
+                company_name: formData.company_name.trim(),
+                message: formData.message.trim(),
+            };
+
+            const response = await fetch('/api/partners/apply', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    type,
-                    ...formData
-                })
+                body: JSON.stringify(payload),
             });
 
-            const data = await response.json();
+            const data = await response.json().catch(() => ({}));
 
             if (!response.ok) {
-                throw new Error(data.detail || 'Ошибка отправки заявки');
+                const detail = data?.detail ?? data?.error ?? data?.message;
+                let message = 'Ошибка отправки заявки';
+                if (typeof detail === 'string' && detail.trim()) {
+                    message = detail;
+                } else if (Array.isArray(detail) && detail.length > 0) {
+                    message = detail
+                        .map((item: { msg?: string }) => item?.msg)
+                        .filter(Boolean)
+                        .join('. ') || message;
+                }
+                throw new Error(message);
             }
 
             setSuccess(true);
@@ -57,16 +72,29 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ type, onClose }) => {
         });
     };
 
+    const isFormReady =
+        formData.name.trim().length > 0 &&
+        formData.phone.trim().length > 0 &&
+        (type !== 'restaurant' || formData.company_name.trim().length > 0);
+
     if (success) {
         return (
-            <div className="partner-form-overlay" onClick={onClose}>
-                <div className="partner-form-modal success" onClick={(e) => e.stopPropagation()}>
-                    <div className="success-lottie">
-                        <div className="success-icon">✓</div>
+            <div className="partner-form-overlay partner-form-overlay--success" onClick={onClose}>
+                <div className="partner-form-modal partner-form-success" onClick={(e) => e.stopPropagation()}>
+                    <div className="partner-success">
+                        <div className="partner-success-icon" aria-hidden="true">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                                <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </div>
+                        <h2 className="partner-success-title">Заявка принята!</h2>
+                        <p className="partner-success-text">
+                            Наш менеджер свяжется с вами в ближайшее время для уточнения деталей.
+                        </p>
+                        <button type="button" className="partner-success-btn" onClick={onClose}>
+                            Закрыть
+                        </button>
                     </div>
-                    <h2>Заявка принята!</h2>
-                    <p>Наш менеджер свяжется с вами в ближайшее время для уточнения деталей.</p>
-                    <button className="done-btn" onClick={onClose}>Закрыть</button>
                 </div>
             </div>
         );
@@ -76,21 +104,30 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ type, onClose }) => {
         <div className="partner-form-overlay" onClick={onClose}>
             <div className="partner-form-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header-accent"></div>
-                <button className="close-btn-minimal" onClick={onClose}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <button
+                    type="button"
+                    className="partner-form-close"
+                    onClick={onClose}
+                    aria-label="Close"
+                >
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
                 </button>
                 
                 <div className="form-head">
                     <div className="form-badge">
-                        {type === 'restaurant' ? 'ПАРТНЁРСТВО' : 'РАБОТА'}
+                        {type === 'restaurant' ? 'ПАРТНЁРСТВО' : 'КУРЬЕРАМ'}
                     </div>
                     <h1>
-                        {type === 'restaurant' ? 'Разместите ваш ресторан' : 'Станьте курьером MestiGo'}
+                        {type === 'restaurant'
+                            ? 'Разместите ваш ресторан'
+                            : 'Станьте курьером MestiDelivery'}
                     </h1>
                     <p>
-                        {type === 'restaurant' 
-                            ? 'Присоединяйтесь к крупнейшей сети доставки в Местии и начните получать больше заказов.'
-                            : 'Доставляйте заказы в свободное время и получайте выплаты каждую неделю.'}
+                        {type === 'restaurant'
+                            ? 'MestiDelivery объединяет все рестораны Местии в одном приложении. Разместите меню — и станьте видны каждому, кто ищет, где заказать еду в городе.'
+                            : 'Доставляйте заказы в свободное время и получайте выплаты, когда удобно вам.'}
                     </p>
                 </div>
 
@@ -129,6 +166,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ type, onClose }) => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 placeholder="example@mail.com"
+                                autoComplete="email"
                             />
                         </div>
                     </div>
@@ -171,9 +209,12 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ type, onClose }) => {
                         </div>
                     )}
 
-                    <button type="submit" className="premium-submit-btn" disabled={loading}>
-                        <span>{loading ? 'Отправляем данные...' : 'Отправить заявку'}</span>
-                        {!loading && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>}
+                    <button
+                        type="submit"
+                        className={`premium-submit-btn${isFormReady ? ' is-ready' : ''}`}
+                        disabled={loading || !isFormReady}
+                    >
+                        {loading ? 'Отправляем данные...' : 'Отправить заявку'}
                     </button>
                     
                     <p className="form-footer-note">

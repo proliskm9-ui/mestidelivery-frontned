@@ -495,7 +495,7 @@ const AdminPartners: React.FC = () => {
             {view === 'requests' && (
                 <>
                     {requestsLoading ? (
-                        <FullPageLoader text="Загрузка заявлений..." />
+                        <FullPageLoader variant="list" />
                     ) : (
                         <>
                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '28px', flexWrap: 'wrap', width: '100%' }}>

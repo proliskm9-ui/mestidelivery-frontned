@@ -48,6 +48,33 @@ export function isJwtTokenValid(token: string | null): boolean {
 }
 
 /**
+ * True if token looks like our backend customer/admin JWT (has user_id + role),
+ * not a Firebase ID token (which would 401 on /profile/me).
+ */
+export function isBackendApiToken(token: string | null): boolean {
+    if (!token) return false;
+    try {
+        const parts = token.split('.');
+        if (parts.length !== 3) return false;
+        const payloadBase64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+            window.atob(payloadBase64)
+                .split('')
+                .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                .join('')
+        );
+        const decoded = JSON.parse(jsonPayload);
+        return (
+            decoded != null &&
+            typeof decoded.user_id !== 'undefined' &&
+            typeof decoded.role === 'string'
+        );
+    } catch {
+        return false;
+    }
+}
+
+/**
  * Encrypts/Obfuscates sensitive user strings to prevent plaintext local storage scraping.
  * Uses a dynamic salt/XOR + Base64 encoding.
  */

@@ -1,13 +1,18 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
+import { Clock } from 'lucide-react';
 import './Payment.css';
 import { api, restaurantCache } from '../services/api';
 import IsometricBoxLoader from '../components/UI/IsometricBoxLoader';
 import { useLanguage } from '../translations/LanguageContext';
+import { formatCheckoutAddress, formatCourierComment } from '../utils/checkoutAddress';
 
-// Enhanced SVG Icons
+/** Keepz payment link — same as mobile (no Tribute). */
+const PAYMENT_URL = 'https://tiny.keepz.me/5ab2hxer';
+
 const IconBack = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M19 12H5M12 19l-7-7 7-7" />
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
     </svg>
 );
 
@@ -19,20 +24,15 @@ const IconCrypto = () => (
     </svg>
 );
 
-const IconCard = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="5" width="20" height="14" rx="2" />
-        <line x1="2" y1="10" x2="22" y2="10" />
-    </svg>
-);
-
 const IconCash = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="6" width="20" height="12" rx="2" />
+        <rect x="2" y="6" width="20" height="12" rx="3" />
         <circle cx="12" cy="12" r="2" />
         <path d="M6 12h.01M18 12h.01" />
     </svg>
 );
+
+type ScreenState = 'select' | 'creating' | 'pending_confirmation' | 'success' | 'error';
 
 interface PaymentPageProps {
     onBack: () => void;
@@ -42,186 +42,357 @@ interface PaymentPageProps {
     onPaymentComplete: (method: string, orderId: number) => void;
 }
 
-const PaymentPage: React.FC<PaymentPageProps> = ({ onBack, totalAmount, orderData, cartItems, onPaymentComplete }) => {
+const PaymentPage: React.FC<PaymentPageProps> = ({
+    onBack,
+    totalAmount,
+    orderData,
+    cartItems,
+    onPaymentComplete,
+}) => {
     const { t } = useLanguage();
-    const [submitting, setSubmitting] = useState(false);
-    const [isSuccess, setIsSuccess] = useState(false);
-    const [processingMethod, setProcessingMethod] = useState<string | null>(null);
+    const [screen, setScreen] = useState<ScreenState>('select');
+    const [method, setMethod] = useState<string | null>(null);
+    const [orderId, setOrderId] = useState<number | null>(null);
+    const [paymentLinkOpened, setPaymentLinkOpened] = useState(false);
 
-    // Double-order protection
     const orderCreatedRef = useRef(false);
+    const shellRef = useRef<HTMLDivElement>(null);
     const idempotencyKey = useMemo(() => {
-        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-            return crypto.randomUUID();
-        }
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
         return Date.now().toString(36) + Math.random().toString(36).slice(2);
     }, []);
 
-    const handlePaymentSelect = async (method: string) => {
-        if (submitting || orderCreatedRef.current) return;
-        setSubmitting(true);
-        setProcessingMethod(method);
+    // Cursor green glow — same idea as ScrollHero on the home page
+    useEffect(() => {
+        const shell = shellRef.current;
+        if (!shell) return;
+        let raf = 0;
+        let mx = 50;
+        let my = 50;
+        const apply = () => {
+            raf = 0;
+            shell.style.setProperty('--mx', `${mx}%`);
+            shell.style.setProperty('--my', `${my}%`);
+        };
+        const onMove = (e: PointerEvent) => {
+            const rect = shell.getBoundingClientRect();
+            mx = ((e.clientX - rect.left) / rect.width) * 100;
+            my = ((e.clientY - rect.top) / rect.height) * 100;
+            if (!raf) raf = requestAnimationFrame(apply);
+        };
+        shell.addEventListener('pointermove', onMove, { passive: true });
+        return () => {
+            shell.removeEventListener('pointermove', onMove);
+            if (raf) cancelAnimationFrame(raf);
+        };
+    }, []);
+
+    const openPaymentUrl = (url: string) => {
+        const tg = (window as any).Telegram?.WebApp;
+        if (tg) {
+            if (tg.openLink) tg.openLink(url);
+            else window.open(url, '_blank');
+        } else {
+            window.open(url, '_blank');
+        }
+    };
+
+    const buildOrderPayload = (paymentMethod: string, extras: Record<string, unknown> = {}) => {
+        const userId = localStorage.getItem('user_id') || 'anonymous';
+        const addr = orderData?.address || {};
+        const fullAddress = formatCheckoutAddress(addr);
+        const restaurantId = cartItems?.[0]?.product?.restaurant_id || '';
+
+        const items = (cartItems || []).map((ci: any) => ({
+            product_id: ci.product.id,
+            name: ci.product.name,
+            price: ci.product.price,
+            quantity: ci.quantity,
+        }));
+
+        return {
+            user_id: userId,
+            restaurant_id: restaurantId,
+            restaurant_name: restaurantCache[`rest_${restaurantId}`]?.name || '',
+            items,
+            total: totalAmount,
+            customer_name: addr.customerName || localStorage.getItem('user_name') || t('checkout.customer_fallback'),
+            phone: addr.phone || '',
+            address: fullAddress,
+            courier_comment: formatCourierComment(addr),
+            cutlery_count: orderData?.cutleryCount || 0,
+            apartment: addr.apartment || '',
+            entrance: addr.entrance || '',
+            floor: addr.floor || '',
+            intercom: addr.intercom || '',
+            place_type: addr.type || 'home',
+            scheduled_time: null,
+            promo_code: orderData?.promoCode || '',
+            tips: orderData?.tip || 0,
+            delivery_fee: Number(orderData?.deliveryFee ?? 0) || 0,
+            service_fee: Number(orderData?.serviceFee ?? 0) || 0,
+            delivery_lat: Number(orderData?.deliveryLat ?? 0) || 0,
+            delivery_lng: Number(orderData?.deliveryLng ?? 0) || 0,
+            idempotency_key: idempotencyKey,
+            payment_method: paymentMethod,
+            ...extras,
+        };
+    };
+
+    const handleCashSelect = async () => {
+        if (orderCreatedRef.current) return;
+        orderCreatedRef.current = true;
+
+        setMethod('cash');
+        setScreen('creating');
 
         try {
-            // Get user_id from token (decode JWT or use stored ID)
-            const userId = localStorage.getItem('user_id') || 'anonymous';
-
-            // Build full address string
-            const addr = orderData?.address || {};
-            const fullAddress = [addr.street, addr.house, addr.apartment, addr.floor]
-                .filter(Boolean).join(', ');
-
-            // Build items array for API
-            const items = (cartItems || []).map((ci: any) => ({
-                product_id: ci.product.id,
-                name: ci.product.name,
-                price: ci.product.price,
-                quantity: ci.quantity
-            }));
-
-            // Get restaurant_id from first cart item
-            const restaurantId = cartItems?.[0]?.product?.restaurant_id || '';
-
-            const payload = {
-                user_id: userId,
-                restaurant_id: restaurantId,
-                restaurant_name: restaurantCache[`rest_${restaurantId}`]?.name || '',
-                items: items,
-                total: totalAmount,
-                customer_name: addr.customerName || localStorage.getItem('user_name') || t('checkout.customer_fallback'),
-                phone: addr.phone || '',
-                address: fullAddress,
-                comment: (orderData?.restaurantComment || '') + ` [Оплата: ${method === 'cash' ? 'Cash' : (method === 'card' ? 'Card' : 'Crypto')}]`,
-                courier_comment: addr.comment || '',
-                cutlery_count: orderData?.cutleryCount || 0,
-                apartment: addr.apartment || '',
-                entrance: addr.entrance || '',
-                floor: addr.floor || '',
-                intercom: addr.intercom || '',
-                place_type: addr.type || 'home',
+            const payload = buildOrderPayload('cash', {
+                comment: (orderData?.restaurantComment || '') + ' [Оплата: Cash]',
                 scheduled_time: orderData?.deliveryType === 'scheduled' ? orderData?.scheduledTime : null,
-                promo_code: orderData?.promoCode || '',
-                tips: orderData?.tip || 0,
-                idempotency_key: idempotencyKey,
-                payment_method: method,
-            };
-
-            console.log('Creating order with payload:', payload);
+            });
 
             const result = await api.createOrder(payload);
-
-            if (result && result.id) {
-                orderCreatedRef.current = true;
-                setIsSuccess(true);
-                // Wait for success animation
-                await new Promise(resolve => setTimeout(resolve, 2700));
-
-                // Use server-generated payment URL if available, else fallback
-                const paymentUrl = (result as any).payment_url;
-                const finalUrl = paymentUrl || (method === 'crypto' 
-                    ? `https://t.me/CryptoBot?start=pay_${result.id}` 
-                    : `https://t.me/tribute?startapp=pay_${result.id}`);
-                
-                // Order is already committed server-side at this point: any failure below
-                // (deep-link opening, parent navigation) must not revert the UI to a
-                // "select payment method" screen that orderCreatedRef would then make inert.
-                try {
-                    const tg = (window as any).Telegram?.WebApp;
-                    if (tg) {
-                        if (tg.openInvoice && finalUrl.includes('t.me/$')) {
-                            tg.openInvoice(finalUrl);
-                        } else if (tg.openTelegramLink && finalUrl.includes('t.me')) {
-                            tg.openTelegramLink(finalUrl);
-                        } else if (tg.openLink) {
-                            tg.openLink(finalUrl);
-                        } else {
-                            window.open(finalUrl, '_blank');
-                        }
-                    } else {
-                        window.open(finalUrl, '_blank');
-                    }
-
-                    onPaymentComplete(method, result.id);
-                } catch (navError) {
-                    console.error('Order created but post-success navigation failed', navError);
-                }
-            } else {
+            if (!result?.id) {
                 alert(t('checkout.order_creation_error'));
-                setSubmitting(false);
-                setIsSuccess(false);
+                setScreen('select');
+                orderCreatedRef.current = false;
+                return;
+            }
+
+            setOrderId(result.id);
+            setScreen('pending_confirmation');
+            await new Promise(r => setTimeout(r, 3000));
+            try {
+                onPaymentComplete('cash', result.id);
+            } catch (navError) {
+                console.error('Order created but post-success navigation failed', navError);
             }
         } catch (e: any) {
             console.error('Order creation error:', e);
             alert(t('common.error') + ': ' + (e.message || t('checkout.order_failed')));
-            setSubmitting(false);
-            setIsSuccess(false);
+            setScreen('select');
+            orderCreatedRef.current = false;
         }
     };
 
+    const handleConfirmPaid = async () => {
+        if (orderCreatedRef.current) return;
+        orderCreatedRef.current = true;
+
+        setMethod('card');
+        setScreen('creating');
+
+        try {
+            const isScheduled = orderData?.deliveryType === 'scheduled' && orderData?.scheduledTime;
+            const commentSuffix = isScheduled
+                ? ` [Оплата: Онлайн] [Ко времени: ${orderData.scheduledTime}]`
+                : ' [Оплата: Онлайн]';
+
+            const payload = buildOrderPayload('card', {
+                comment: (orderData?.restaurantComment || '') + commentSuffix,
+                status: 'pending_payment',
+            });
+
+            const result = await api.createOrder(payload);
+            if (!result?.id) {
+                alert(t('checkout.order_creation_error'));
+                setScreen('select');
+                orderCreatedRef.current = false;
+                return;
+            }
+
+            setOrderId(result.id);
+
+            try {
+                await api.updateOrderStatus(result.id, 'pending:card');
+            } catch (e) {
+                console.warn('Could not set pending status:', e);
+            }
+
+            setScreen('pending_confirmation');
+            await new Promise(r => setTimeout(r, 3000));
+            try {
+                onPaymentComplete('card', result.id);
+            } catch (navError) {
+                console.error('Order created but post-success navigation failed', navError);
+            }
+        } catch (e: any) {
+            console.error('Order creation error:', e);
+            alert(t('common.error') + ': ' + (e.message || t('checkout.order_failed')));
+            setScreen('select');
+            orderCreatedRef.current = false;
+        }
+    };
+
+    const busy = screen === 'creating' || screen === 'pending_confirmation' || screen === 'success';
+
     return (
-        <div className="page-transition-wrapper">
-            <div className="payment-page-container">
-                <header className="payment-header">
-                    <button className="back-circle-btn" onClick={onBack} aria-label={t('common.back')} disabled={submitting}>
-                        <IconBack />
-                    </button>
-                    <h1>{t('checkout.payment_page_title')}</h1>
-                </header>
+        <div className="page-transition-wrapper pc-payment-wrap">
+            <div className="pc-payment">
+                <div className="pc-payment-stack">
+                    <header className="pc-payment-header">
+                        <button
+                            type="button"
+                            className="ui-circle-btn"
+                            onClick={onBack}
+                            aria-label={t('common.back')}
+                            disabled={busy}
+                        >
+                            <IconBack />
+                        </button>
+                        <h1>{t('checkout.payment_page_title')}</h1>
+                        <div className="pc-payment-header-spacer" aria-hidden="true" />
+                    </header>
 
-                <div className="payment-content">
-                    <div className="amount-summary">
-                        <span className="label">{t('checkout.total_with_delivery')}</span>
-                        <h2 className="value">{totalAmount.toFixed(2)} ₾</h2>
-                    </div>
+                    <div className="pc-payment-shell" ref={shellRef}>
+                        <div className="pc-payment-glow" aria-hidden="true" />
 
-                    {submitting ? (
-                        <div className="payment-loading-fullscreen">
-                            <div className="mestigo-loading-container">
-                                <IsometricBoxLoader isSuccess={isSuccess} />
-                                <h2>{processingMethod === 'crypto' || processingMethod === 'card' ? t('checkout.processing_payment') : t('checkout.placing_order')}</h2>
-                                <p>{t('checkout.wait_seconds')}</p>
-                            </div>
+                    {screen !== 'select' ? (
+                        <div className="pc-payment-status">
+                            {screen === 'creating' && (
+                                <>
+                                    <IsometricBoxLoader isSuccess={false} />
+                                    <h2>{t('checkout.placing_order')}</h2>
+                                    <p>{t('checkout.wait_seconds')}</p>
+                                </>
+                            )}
+
+                            {screen === 'pending_confirmation' && (
+                                <>
+                                    <div className="pc-pending-icon">
+                                        {method === 'cash' ? (
+                                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#21ea7c" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
+                                        ) : (
+                                            <Clock color="#21ea7c" size={40} strokeWidth={2} />
+                                        )}
+                                    </div>
+                                    <h2>{t('checkout.order_placed').toUpperCase()}</h2>
+                                    <p>
+                                        {method === 'cash'
+                                            ? t('checkout.pay_cash_on_delivery')
+                                            : t('checkout.waiting_payment_confirm')}
+                                    </p>
+                                    {orderId && (
+                                        <div className="pc-order-badge">{t('common.order').toUpperCase()} #{orderId}</div>
+                                    )}
+                                </>
+                            )}
+
+                            {screen === 'success' && (
+                                <>
+                                    <IsometricBoxLoader isSuccess={true} />
+                                    <h2>{method === 'cash' ? t('checkout.order_placed') : t('checkout.payment_confirmed')}</h2>
+                                </>
+                            )}
+
+                            {screen === 'error' && (
+                                <>
+                                    <h2>{t('checkout.waiting_timeout')}</h2>
+                                    <button type="button" className="pc-pay-btn primary" onClick={() => setScreen('select')}>
+                                        {t('checkout.try_again')}
+                                    </button>
+                                </>
+                            )}
                         </div>
                     ) : (
-                        <div className="payment-methods-grid">
-                            <div className="payment-method-card" onClick={() => handlePaymentSelect('crypto')}>
-                                <div className="method-icon crypto">
-                                    <IconCrypto />
+                        <div className="pc-payment-grid">
+                            <div className="pc-qr-panel">
+                                <h3 className="pc-section-title">{t('checkout.qr_title')}</h3>
+                                <div className="pc-qr-frame">
+                                    <QRCodeSVG
+                                        value={PAYMENT_URL}
+                                        size={240}
+                                        bgColor="transparent"
+                                        fgColor="#000000"
+                                        level="L"
+                                        includeMargin={false}
+                                    />
                                 </div>
-                                <div className="method-info">
-                                    <h3>{t('checkout.crypto')}</h3>
-                                    <p>Crypto Pay (USDT, TON, BTC)</p>
-                                </div>
-                                <div className="arrow">→</div>
+                                <p className="pc-qr-hint">{t('checkout.qr_hint')}</p>
                             </div>
 
-                            <div className="payment-method-card" onClick={() => handlePaymentSelect('card')}>
-                                <div className="method-icon eu-card">
-                                    <IconCard />
+                            <div className="pc-actions-panel">
+                                <div className="pc-amount-card">
+                                    <span className="pc-amount-label">{t('checkout.total_with_delivery')}</span>
+                                    <h2 className="pc-amount-value">{totalAmount.toFixed(2)} ₾</h2>
                                 </div>
-                                <div className="method-info">
-                                    <h3>{t('checkout.card_eu')}</h3>
-                                    <p>{t('checkout.tribute_desc')}</p>
-                                </div>
-                                <div className="arrow">→</div>
-                            </div>
 
-                            <div className="payment-method-card" onClick={() => handlePaymentSelect('cash')}>
-                                <div className="method-icon cash">
-                                    <IconCash />
+                                {!paymentLinkOpened ? (
+                                    <button
+                                        type="button"
+                                        className="pc-pay-btn primary"
+                                        onClick={() => {
+                                            openPaymentUrl(PAYMENT_URL);
+                                            setPaymentLinkOpened(true);
+                                        }}
+                                    >
+                                        {t('checkout.pay_online')}
+                                    </button>
+                                ) : (
+                                    <div className="pc-pay-actions">
+                                        <button type="button" className="pc-pay-btn primary confirmed" onClick={handleConfirmPaid}>
+                                            <svg className="pc-pay-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
+                                            {t('checkout.i_paid')}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="pc-pay-btn secondary"
+                                            onClick={() => openPaymentUrl(PAYMENT_URL)}
+                                        >
+                                            {t('checkout.open_payment_page')}
+                                            <svg className="pc-pay-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                                                <path d="M7 17L17 7" />
+                                                <path d="M8 7h9v9" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                )}
+
+                                <div className="pc-pay-separator">
+                                    <span>{t('checkout.or_other_methods')}</span>
                                 </div>
-                                <div className="method-info">
-                                    <h3>{t('checkout.cash')}</h3>
-                                    <p>{t('checkout.cash_courier_desc')}</p>
-                                </div>
-                                <div className="arrow">→</div>
+
+                                <button
+                                    type="button"
+                                    className="pc-method-row"
+                                    onClick={() => {
+                                        openPaymentUrl(PAYMENT_URL);
+                                        setPaymentLinkOpened(true);
+                                    }}
+                                >
+                                    <div className="pc-method-icon crypto"><IconCrypto /></div>
+                                    <div className="pc-method-info">
+                                        <span className="pc-method-name">{t('checkout.crypto')}</span>
+                                        <span className="pc-method-desc">Crypto Pay (USDT, TON)</span>
+                                    </div>
+                                    <span className="pc-method-arrow">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="9 18 15 12 9 6" />
+                                        </svg>
+                                    </span>
+                                </button>
+
+                                <button type="button" className="pc-method-row" onClick={handleCashSelect}>
+                                    <div className="pc-method-icon cash"><IconCash /></div>
+                                    <div className="pc-method-info">
+                                        <span className="pc-method-name">{t('checkout.cash_courier')}</span>
+                                        <span className="pc-method-desc">{t('checkout.cash_courier_desc')}</span>
+                                    </div>
+                                    <span className="pc-method-arrow">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="9 18 15 12 9 6" />
+                                        </svg>
+                                    </span>
+                                </button>
                             </div>
                         </div>
                     )}
-
-                    <footer className="payment-footer">
-                        <p>{t('checkout.safe_payments_desc')}</p>
-                    </footer>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,8 +1,12 @@
-import { Suspense, useState, useEffect, lazy } from 'react';
+import { Suspense, useState, useEffect, useCallback, lazy } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import './App.css';
 import { api, restaurantCache } from './services/api';
 import LiquidNavBar from './components/UI/LiquidNavBar';
 import LoadingScreen from './components/UI/LoadingScreen';
+import { PageSkeleton } from './components/UI/Skeleton';
+import { useAuth } from './auth/AuthContext';
+import CompleteProfileModal from './components/auth/CompleteProfileModal';
 
 // --- Lazy-loaded pages (loaded only when navigated to) ---
 const HomePage = lazy(() => import('./pages/Home'));
@@ -23,6 +27,11 @@ const OrderStatus = lazy(() => import('./pages/OrderStatus'));
 const OrderDetails = lazy(() => import('./pages/OrderDetails'));
 const MobileCart = lazy(() => import('./pages/MobileCart'));
 const GlassBottomPanel = lazy(() => import('./components/UI/GlassBottomPanel'));
+const LegalInfoPage = lazy(() => import('./pages/LegalInfoPage'));
+import CookieConsentBanner from './components/UI/CookieConsentBanner';
+import { DeliveryLocationProvider, useDeliveryLocation } from './delivery/DeliveryLocationContext';
+import { getDeliveryFeeForAddress } from './utils/deliveryCalculator';
+import { isBackendApiToken } from './utils/security';
 
 import type { CheckoutOrderData } from './Оплата/CheckoutPage';
 
@@ -48,10 +57,19 @@ function useIsMobile(breakpoint = 1024) {
 }
 
 function AppContent() {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const isMobile = useIsMobile();
-    // Auth State
-    const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+    const { logout: firebaseLogout, needsProfileCompletion } = useAuth();
+    const deliveryLoc = useDeliveryLocation();
+    // Auth State — reject leftover Firebase ID tokens (they break profile/orders)
+    const [token, setToken] = useState<string | null>(() => {
+        const stored = localStorage.getItem('token');
+        if (stored && !isBackendApiToken(stored)) {
+            localStorage.removeItem('token');
+            return null;
+        }
+        return stored;
+    });
 
     // Loading State for Authorized Users (Splash Screen)
     const [isLoading, setIsLoading] = useState(!!token);
@@ -67,7 +85,6 @@ function AppContent() {
     // Removal of redundant timer, LoadingScreen handles its own timing
 
     const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
-
 
     // Redirect auth users from home
     useEffect(() => {
@@ -90,10 +107,6 @@ function AppContent() {
     const [pendingProductToAdd, setPendingProductToAdd] = useState<any>(null);
     const [pendingOrderData, setPendingOrderData] = useState<any>(null);
 
-    const cartSubtotal = cart.reduce((a: number, b: { quantity: number; product: any }) => a + (Number(b.product.price) * b.quantity), 0);
-    const cartServiceFee = cartSubtotal > 0 ? Math.max(0.99, Math.min(2.00, cartSubtotal * 0.06)) : 0;
-    const cartTotalAmount = cartSubtotal + 5.00 + cartServiceFee;
-
     // Global Address State (Fetched from Profile)
     const [userAddress, setUserAddress] = useState<any>(() => {
         try {
@@ -108,6 +121,19 @@ function AppContent() {
         localStorage.setItem('user_address', JSON.stringify(newAddress));
         if (newAddress.phone) localStorage.setItem('user_phone', newAddress.phone);
 
+        if (newAddress?.geo) {
+            const match = String(newAddress.geo).match(/(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)/);
+            if (match) {
+                const a = parseFloat(match[1]);
+                const b = parseFloat(match[2]);
+                if (!Number.isNaN(a) && !Number.isNaN(b)) {
+                    const lat = Math.abs(a - 43) <= Math.abs(b - 43) ? a : b;
+                    const lng = lat === a ? b : a;
+                    deliveryLoc.setManualLocation(lat, lng);
+                }
+            }
+        }
+
         if (token) {
             try {
                 await api.updateProfile({ address: newAddress });
@@ -116,6 +142,24 @@ function AppContent() {
             }
         }
     };
+
+    // Keep React address state in sync when GPS / map resolves a zone
+    useEffect(() => {
+        if (deliveryLoc.status !== 'ready' || deliveryLoc.lat == null || deliveryLoc.lng == null) return;
+        const geo = `${deliveryLoc.lat.toFixed(6)}, ${deliveryLoc.lng.toFixed(6)}`;
+        setUserAddress((prev: any) => {
+            if (prev?.geo === geo && prev?.deliveryZone === deliveryLoc.zoneId) return prev;
+            const next = { ...(prev || {}), geo, deliveryZone: deliveryLoc.zoneId };
+            localStorage.setItem('user_address', JSON.stringify(next));
+            return next;
+        });
+    }, [deliveryLoc.status, deliveryLoc.lat, deliveryLoc.lng, deliveryLoc.zoneId]);
+
+    const cartSubtotal = cart.reduce((a: number, b: { quantity: number; product: any }) => a + (Number(b.product.price) * b.quantity), 0);
+    const cartServiceFee = cartSubtotal > 0 ? Math.max(0.99, Math.min(2.00, cartSubtotal * 0.06)) : 0;
+    
+    const deliveryFee = deliveryLoc.fee ?? getDeliveryFeeForAddress(userAddress) ?? 8;
+    const cartTotalAmount = cartSubtotal + deliveryFee + cartServiceFee;
 
     // Global Profile State
     const [userProfile, setUserProfile] = useState<any>(() => {
@@ -237,6 +281,17 @@ function AppContent() {
         }
     }, [token]);
 
+    useEffect(() => {
+        if (!token || window.location.pathname.startsWith('/partners')) return;
+        const tg = (window as any).Telegram?.WebApp;
+        const initData = tg?.initData;
+        if (!initData) return;
+
+        api.linkTelegramAccount(initData, language).catch((error) => {
+            console.warn('Telegram link skipped:', error);
+        });
+    }, [token, language]);
+
     // Scroll to top on page change
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -287,15 +342,37 @@ function AppContent() {
         );
     };
 
-    const handleLogin = (newToken: string) => {
+    const handleLogin = useCallback((newToken: string) => {
         localStorage.setItem('token', newToken);
         setToken(newToken);
-        // Show loading screen on login for effect
+        setCurrentPage('menu');
         setIsLoading(true);
-        // Page transition happens after loading
-    };
+    }, []);
 
-    const handleLogout = () => {
+    // Google redirect can finish before Login is mounted
+    useEffect(() => {
+        const onToken = (e: Event) => {
+            const token = (e as CustomEvent<string>).detail;
+            if (token) handleLogin(token);
+        };
+        window.addEventListener('mestigo-google-token', onToken);
+        const pending = sessionStorage.getItem('pending_google_token');
+        if (pending) {
+            sessionStorage.removeItem('pending_google_token');
+            handleLogin(pending);
+        }
+        return () => window.removeEventListener('mestigo-google-token', onToken);
+    }, [handleLogin]);
+
+    // After Google redirect, show login shell + profile modal (not empty home)
+    useEffect(() => {
+        if (needsProfileCompletion) {
+            setCurrentPage('login');
+        }
+    }, [needsProfileCompletion]);
+
+    const handleLogout = async () => {
+        await firebaseLogout();
         localStorage.removeItem('token');
         localStorage.removeItem('user_avatar');
         localStorage.removeItem('user_id');
@@ -317,7 +394,7 @@ function AppContent() {
     // Render Admin Panel exclusively if active
     if (currentPage === 'admin') {
         return (
-            <Suspense fallback={<div style={{ color: 'white' }}>Loading Admin...</div>}>
+            <Suspense fallback={<PageSkeleton variant="generic" />}>
                 <AdminPanel />
             </Suspense>
         );
@@ -325,7 +402,7 @@ function AppContent() {
 
     if (currentPage === 'partner') {
         return (
-            <Suspense fallback={<div style={{ color: 'white' }}>Loading Partner App...</div>}>
+            <Suspense fallback={<PageSkeleton variant="generic" />}>
                 <PartnerApp />
             </Suspense>
         );
@@ -333,12 +410,19 @@ function AppContent() {
 
 
     return (
-        <Suspense fallback={<div style={{ color: 'white', textAlign: 'center', marginTop: '20%' }}>Loading...</div>}>
+        <Suspense
+            fallback={
+                currentPage === 'home'
+                    ? <div className="home-boot" aria-hidden="true" />
+                    : <PageSkeleton variant="menu" />
+            }
+        >
             <div className="app-container">
+                {needsProfileCompletion && <CompleteProfileModal onSuccess={handleLogin} />}
                 {isLoading && (
                     <LoadingScreen onComplete={() => {
                         setIsLoading(false);
-                        if (token) setCurrentPage('menu');
+                        setCurrentPage('menu');
                     }} />
                 )}
                 {/* Navbar - Hidden on Home, Login, Menu, Restaurant AND Cart AND Checkout AND Profile AND Admin pages */}
@@ -347,7 +431,7 @@ function AppContent() {
                     So mostly hidden?
                     Let's update exclusion list to include 'login'.
                 */}
-                {!['home', 'login', 'menu', 'restaurant', 'cart', 'checkout', 'profile', 'favorites', 'payment', 'admin'].includes(currentPage) && (
+                {!['home', 'login', 'menu', 'restaurant', 'cart', 'checkout', 'profile', 'favorites', 'payment', 'admin'].includes(currentPage) && window.location.pathname !== '/legal' && (
                     <nav style={{ padding: '0 2rem', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 100 }}>
                         <div className="logo" onClick={() => setCurrentPage(token ? 'menu' : 'home')} style={{ cursor: 'pointer' }}>
                             <img src="/Assets/general-green.png" alt="MESTIGO" style={{ height: '40px' }} />
@@ -362,263 +446,282 @@ function AppContent() {
 
                 {/* Page Content */}
                 <main style={{ minHeight: 'calc(100vh - 80px)' }}>
-                    {currentPage === 'home' && (
-                        <HomePage
-                            onNavigate={handleNavigate}
-                        />
-                    )}
-
-                    {currentPage === 'login' && (
-                        <LoginPage onLogin={handleLogin} />
-                    )}
-
-                    {currentPage === 'menu' && (
-                        <MenuPage
-                            onRestaurantClick={handleNavigateToRestaurant}
-                            favorites={favorites}
-                            onToggleFavorite={handleToggleFavorite}
-                            userAddress={userAddress}
-                            onUpdateAddress={handleUpdateAddress}
-                            userProfile={userProfile}
-                            onProfileClick={() => handleNavigate('profile')}
-                            onOrderClick={(id) => { setSelectedOrderId(id); handleNavigate('order_status'); }}
-                            onLogout={handleLogout}
-                            onNavigate={handleNavigate}
-                        />
-                    )}
-
-                    {currentPage === 'favorites' && (
-                        <FavoritesPage
-                            favorites={favorites}
-                            onRestaurantClick={handleNavigateToRestaurant}
-                            onToggleFavorite={handleToggleFavorite}
-                            onNavigate={setCurrentPage}
-                        />
-                    )}
-
-                    {currentPage === 'profile' && (
-                        <ProfilePage
-                            userAddress={userAddress}
-                            onUpdateAddress={handleUpdateAddress}
-                            userProfile={userProfile}
-                            onUpdateProfile={handleUpdateProfile}
-                            orderHistory={orderHistory}
-                            onLogout={handleLogout}
-                            onBack={() => setCurrentPage('menu')}
-                            onOrderClick={(id: number) => { setSelectedOrderId(id); setCurrentPage('order_details'); }}
-                        />
-                    )}
-                    {/* Restaurant Page - Kept visible under Cart for overlay effect */}
-                    {currentPage === 'restaurant' && (
-                        <RestaurantPage
-                            restaurantId={selectedRestaurantId}
-                            onBack={() => setCurrentPage('menu')}
-                            onAddToCart={handleAddToCart}
-                            isFavorite={selectedRestaurantId ? favorites.includes(selectedRestaurantId) : false}
-                            onToggleFavorite={handleToggleFavorite}
-                            cart={cart}
-                            onUpdateQuantity={(pid, delta) => {
-                                setCart(prev => prev.map(item => {
-                                    if (item.product.id === pid) {
-                                        return { ...item, quantity: item.quantity + delta };
-                                    }
-                                    return item;
-                                }).filter(i => i.quantity > 0));
-                            }}
-                            onClearCart={() => setCart([])}
-                            onNavigateToCart={() => setCurrentPage('cart')}
-                        />
-                    )}
-
-
-                    {currentPage === 'cart' && (
-                        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2000, overflowY: 'auto' }}>
-                            <div
-                                style={{
-                                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                                    background: 'var(--bg)', zIndex: 0
-                                }}
-                                onClick={() => setCurrentPage('menu')} // Click outside to close
-                            />
-                            <div style={{ position: 'relative', zIndex: 1, minHeight: '100%' }}>
-                                {isMobile ? (
-                                    <MobileCart
-                                        onBack={() => {
-                                            if (cart.length > 0) {
-                                                setSelectedRestaurantId(cart[0].product.restaurant_id);
-                                                setCurrentPage('restaurant');
-                                            } else {
-                                                setCurrentPage('menu');
-                                            }
-                                        }}
-                                        initialCartItems={cart}
-                                        onClearCart={() => setCart([])}
-                                        onUpdateQuantity={(pid: string, delta: number) => setCart(prev => prev.map(item => item.product.id === pid ? { ...item, quantity: item.quantity + delta } : item).filter(i => i.quantity > 0))}
-                                        onAddToCart={handleAddToCart}
-                                        onCheckout={(data: { comment: string; cutlery: number }) => {
-                                            setCheckoutExtras(data);
-                                            setCurrentPage('checkout');
-                                        }}
-                                    />
-                                ) : (
-                                    <CartPage
-                                        onBack={() => {
-                                            if (cart.length > 0) {
-                                                setSelectedRestaurantId(cart[0].product.restaurant_id);
-                                                setCurrentPage('restaurant');
-                                            } else {
-                                                setCurrentPage('menu');
-                                            }
-                                        }}
-                                        initialCartItems={cart}
-                                        onClearCart={() => setCart([])}
-                                        onUpdateQuantity={(pid: string, delta: number) => setCart(prev => prev.map(item => item.product.id === pid ? { ...item, quantity: item.quantity + delta } : item).filter(i => i.quantity > 0))}
-                                        onAddToCart={handleAddToCart}
-                                        onCheckout={(data: { comment: string, cutlery: number }) => {
-                                            setCheckoutExtras(data);
-                                            setCurrentPage('checkout');
-                                        }}
+                    <Routes>
+                        <Route path="/legal" element={<LegalInfoPage />} />
+                        <Route path="*" element={
+                            <>
+                                {currentPage === 'home' && (
+                                    <HomePage
+                                        onNavigate={handleNavigate}
                                     />
                                 )}
-                            </div>
-                        </div>
-                    )}
 
-                    {currentPage === 'checkout' && (
-                        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 3000, overflowY: 'hidden', background: 'var(--bg)' }}>
-                            <div className="no-scrollbar" style={{ height: '100%', overflowY: 'auto' }}>
-                                {isMobile ? (
-                                    <MobileCheckoutPage
-                                        totalAmount={cartTotalAmount}
-                                        cartItems={cart}
-                                        comment={checkoutExtras.comment}
-                                        cutleryCount={checkoutExtras.cutlery}
-                                        initialAddress={userAddress}
-                                        onBack={() => setCurrentPage('cart')}
-                                        onProceedToPayment={(orderData: CheckoutOrderData) => {
-                                            handleUpdateAddress(orderData.address);
-                                            setPendingOrderData({
-                                                ...orderData,
-                                                restaurant_id: selectedRestaurantId,
-                                            });
-                                            setCurrentPage('payment');
-                                        }}
+                                {currentPage === 'login' && (
+                                    <LoginPage onLogin={handleLogin} />
+                                )}
+
+                                {currentPage === 'menu' && (
+                                    <MenuPage
+                                        onRestaurantClick={handleNavigateToRestaurant}
+                                        favorites={favorites}
+                                        onToggleFavorite={handleToggleFavorite}
+                                        userAddress={userAddress}
+                                        onUpdateAddress={handleUpdateAddress}
+                                        userProfile={userProfile}
+                                        onProfileClick={() => handleNavigate('profile')}
+                                        onOrderClick={(id) => { setSelectedOrderId(id); handleNavigate('order_status'); }}
+                                        onLogout={handleLogout}
+                                        onNavigate={handleNavigate}
                                     />
-                                ) : (
-                                    <CheckoutPage
-                                        onBack={() => setCurrentPage('cart')}
-                                        totalAmount={cartTotalAmount}
-                                        comment={checkoutExtras.comment}
-                                        cutleryCount={checkoutExtras.cutlery}
-                                        onOrderPlaced={(data) => {
-                                            handleUpdateAddress(data.address);
-                                            setPendingOrderData(data);
-                                            setCurrentPage('payment');
-                                        }}
-                                        initialAddress={userAddress}
+                                )}
+
+                                {currentPage === 'favorites' && (
+                                    <FavoritesPage
+                                        favorites={favorites}
+                                        onRestaurantClick={handleNavigateToRestaurant}
+                                        onToggleFavorite={handleToggleFavorite}
+                                        onNavigate={setCurrentPage}
+                                    />
+                                )}
+
+                                {currentPage === 'profile' && (
+                                    <ProfilePage
+                                        userAddress={userAddress}
+                                        onUpdateAddress={handleUpdateAddress}
+                                        userProfile={userProfile}
+                                        onUpdateProfile={handleUpdateProfile}
+                                        orderHistory={orderHistory}
+                                        onLogout={handleLogout}
+                                        onBack={() => setCurrentPage('menu')}
+                                        onOrderClick={(id: number) => { setSelectedOrderId(id); setCurrentPage('order_details'); }}
+                                    />
+                                )}
+                                {/* Restaurant Page - Kept visible under Cart for overlay effect */}
+                                {currentPage === 'restaurant' && (
+                                    <RestaurantPage
                                         restaurantId={selectedRestaurantId}
-                                        cartItems={cart}
+                                        onBack={() => setCurrentPage('menu')}
+                                        onAddToCart={handleAddToCart}
+                                        isFavorite={selectedRestaurantId ? favorites.includes(selectedRestaurantId) : false}
+                                        onToggleFavorite={handleToggleFavorite}
+                                        cart={cart}
+                                        onUpdateQuantity={(pid, delta) => {
+                                            setCart(prev => prev.map(item => {
+                                                if (item.product.id === pid) {
+                                                    return { ...item, quantity: item.quantity + delta };
+                                                }
+                                                return item;
+                                            }).filter(i => i.quantity > 0));
+                                        }}
+                                        onClearCart={() => setCart([])}
+                                        onNavigateToCart={() => setCurrentPage('cart')}
                                     />
                                 )}
-                            </div>
-                        </div>
-                    )}
-
-                    {currentPage === 'payment' && (
-                        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 4000, overflowY: 'auto', background: 'var(--bg)' }}>
-                            {isMobile ? (
-                                <MobilePaymentPage
-                                    onBack={() => setCurrentPage('checkout')}
-                                    totalAmount={pendingOrderData?.total || 0}
-                                    orderData={pendingOrderData}
-                                    cartItems={cart}
-                                    onPaymentComplete={(method: string, orderId: number) => {
-                                        console.log('Order created with id:', orderId, 'method:', method);
-                                        const restId = pendingOrderData?.restaurant_id || cart?.[0]?.product?.restaurant_id || '';
-                                        const restName = restaurantCache[`rest_${restId}`]?.name || '';
-                                        const addr = pendingOrderData?.address || {};
-                                        const fullAddress = [addr.street, addr.house, addr.apartment, addr.floor].filter(Boolean).join(', ');
-                                        handleAddOrderToHistory({
-                                            ...pendingOrderData,
-                                            method,
-                                            id: orderId,
-                                            created_at: new Date().toISOString(),
-                                            restaurant_name: restName,
-                                            address: fullAddress,
-                                            status: 'pending'
-                                        });
-
-                                        setCart([]);
-                                        setPendingOrderData(null);
-                                        setSelectedOrderId(orderId);
-                                        setCurrentPage('order_status');
-                                    }}
-                                />
-                            ) : (
-                                <PaymentPage
-                                    onBack={() => setCurrentPage('checkout')}
-                                    totalAmount={pendingOrderData?.total || 0}
-                                    orderData={pendingOrderData}
-                                    cartItems={cart}
-                                    onPaymentComplete={(method: string, orderId: number) => {
-                                        console.log('Order created with id:', orderId, 'method:', method);
-                                        const restId = pendingOrderData?.restaurant_id || cart?.[0]?.product?.restaurant_id || '';
-                                        const restName = restaurantCache[`rest_${restId}`]?.name || '';
-                                        const addr = pendingOrderData?.address || {};
-                                        const fullAddress = [addr.street, addr.house, addr.apartment, addr.floor].filter(Boolean).join(', ');
-                                        handleAddOrderToHistory({
-                                            ...pendingOrderData,
-                                            method,
-                                            id: orderId,
-                                            created_at: new Date().toISOString(),
-                                            restaurant_name: restName,
-                                            address: fullAddress,
-                                            status: 'pending'
-                                        });
-
-                                        setCart([]);
-                                        setPendingOrderData(null);
-                                        setSelectedOrderId(orderId);
-                                        setCurrentPage('order_status');
-                                    }}
-                                />
-                            )}
-                        </div>
-                    )}
-
-                    {currentPage === 'order_status' && selectedOrderId && (
-                        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 5000, overflowY: 'auto', background: 'var(--bg)' }}>
-                            <OrderStatus 
-                                orderId={selectedOrderId} 
-                                onBack={() => setCurrentPage('menu')} 
-                                onViewDetails={(id) => {
-                                    setSelectedOrderId(id);
-                                    setCurrentPage('order_details');
-                                }}
-                            />
-                        </div>
-                    )}
-
-                    {currentPage === 'order_details' && selectedOrderId && (
-                        <OrderDetails orderId={selectedOrderId} onBack={() => setCurrentPage('profile')} />
-                    )}
 
 
-                    {currentPage === 'restaurant' && cart.length > 0 && (
-                        <GlassBottomPanel
-                            totalItems={cart.reduce((a, b) => a + b.quantity, 0)}
-                            totalPrice={cart.reduce((a, b) => a + (b.product.price * b.quantity), 0)}
-                            deliveryTime="Доставка 5₾"
-                            onNext={() => setCurrentPage('cart')}
-                            buttonText="Далее"
-                            showPriceInButton={false}
-                            priceLabel={`${cart.reduce((a, b) => a + (b.product.price * b.quantity), 0).toFixed(0)} GEL`}
-                        />
-                    )}
+                                {currentPage === 'cart' && (
+                                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2000, overflowY: 'auto' }}>
+                                        <div
+                                            style={{
+                                                position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+                                                background: 'var(--bg)', zIndex: 0
+                                            }}
+                                            onClick={() => setCurrentPage('menu')} // Click outside to close
+                                        />
+                                        <div style={{ position: 'relative', zIndex: 1, minHeight: '100%' }}>
+                                            {isMobile ? (
+                                                <MobileCart
+                                                    onBack={() => {
+                                                        if (cart.length > 0) {
+                                                            setSelectedRestaurantId(cart[0].product.restaurant_id);
+                                                            setCurrentPage('restaurant');
+                                                        } else {
+                                                            setCurrentPage('menu');
+                                                        }
+                                                    }}
+                                                    initialCartItems={cart}
+                                                    onClearCart={() => setCart([])}
+                                                    onUpdateQuantity={(pid: string, delta: number) => setCart(prev => prev.map(item => item.product.id === pid ? { ...item, quantity: item.quantity + delta } : item).filter(i => i.quantity > 0))}
+                                                    onAddToCart={handleAddToCart}
+                                                    onCheckout={(data: { comment: string; cutlery: number }) => {
+                                                        setCheckoutExtras(data);
+                                                        setCurrentPage('checkout');
+                                                    }}
+                                                    deliveryFee={deliveryFee}
+                                                />
+                                            ) : (
+                                                <CartPage
+                                                    onBack={() => {
+                                                        if (cart.length > 0) {
+                                                            setSelectedRestaurantId(cart[0].product.restaurant_id);
+                                                            setCurrentPage('restaurant');
+                                                        } else {
+                                                            setCurrentPage('menu');
+                                                        }
+                                                    }}
+                                                    initialCartItems={cart}
+                                                    onClearCart={() => setCart([])}
+                                                    onUpdateQuantity={(pid: string, delta: number) => setCart(prev => prev.map(item => item.product.id === pid ? { ...item, quantity: item.quantity + delta } : item).filter(i => i.quantity > 0))}
+                                                    onAddToCart={handleAddToCart}
+                                                    onCheckout={(data: { comment: string, cutlery: number }) => {
+                                                        setCheckoutExtras(data);
+                                                        setCurrentPage('checkout');
+                                                    }}
+                                                    deliveryFee={deliveryFee}
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {currentPage === 'checkout' && (
+                                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 3000, overflowY: 'hidden', background: 'var(--bg)' }}>
+                                        <div className="no-scrollbar" style={{ height: '100%', overflowY: 'auto' }}>
+                                            {isMobile ? (
+                                                <MobileCheckoutPage
+                                                    totalAmount={cartTotalAmount}
+                                                    cartItems={cart}
+                                                    comment={checkoutExtras.comment}
+                                                    cutleryCount={checkoutExtras.cutlery}
+                                                    initialAddress={userAddress}
+                                                    onBack={() => setCurrentPage('cart')}
+                                                    onProceedToPayment={(orderData: CheckoutOrderData) => {
+                                                        handleUpdateAddress(orderData.address);
+                                                        setPendingOrderData({
+                                                            ...orderData,
+                                                            restaurant_id: selectedRestaurantId,
+                                                            deliveryFee: orderData.deliveryFee ?? deliveryFee,
+                                                            serviceFee: orderData.serviceFee ?? cartServiceFee,
+                                                            deliveryLat: orderData.deliveryLat ?? deliveryLoc.lat ?? null,
+                                                            deliveryLng: orderData.deliveryLng ?? deliveryLoc.lng ?? null,
+                                                        });
+                                                        setCurrentPage('payment');
+                                                    }}
+                                                />
+                                            ) : (
+                                                <CheckoutPage
+                                                    onBack={() => setCurrentPage('cart')}
+                                                    totalAmount={cartTotalAmount}
+                                                    comment={checkoutExtras.comment}
+                                                    cutleryCount={checkoutExtras.cutlery}
+                                                    onOrderPlaced={(data) => {
+                                                        handleUpdateAddress(data.address);
+                                                        setPendingOrderData({
+                                                            ...data,
+                                                            deliveryFee: data.deliveryFee ?? deliveryFee,
+                                                            serviceFee: data.serviceFee ?? cartServiceFee,
+                                                            deliveryLat: data.deliveryLat ?? deliveryLoc.lat ?? null,
+                                                            deliveryLng: data.deliveryLng ?? deliveryLoc.lng ?? null,
+                                                        });
+                                                        setCurrentPage('payment');
+                                                    }}
+                                                    initialAddress={userAddress}
+                                                    restaurantId={selectedRestaurantId}
+                                                    cartItems={cart}
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {currentPage === 'payment' && (
+                                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 4000, overflowY: 'auto', background: 'var(--bg)' }}>
+                                        {isMobile ? (
+                                            <MobilePaymentPage
+                                                onBack={() => setCurrentPage('checkout')}
+                                                totalAmount={pendingOrderData?.total || 0}
+                                                orderData={pendingOrderData}
+                                                cartItems={cart}
+                                                onPaymentComplete={(method: string, orderId: number) => {
+                                                    console.log('Order created with id:', orderId, 'method:', method);
+                                                    const restId = pendingOrderData?.restaurant_id || cart?.[0]?.product?.restaurant_id || '';
+                                                    const restName = restaurantCache[`rest_${restId}`]?.name || '';
+                                                    const addr = pendingOrderData?.address || {};
+                                                    const fullAddress = [addr.street, addr.house, addr.apartment, addr.floor].filter(Boolean).join(', ');
+                                                    handleAddOrderToHistory({
+                                                        ...pendingOrderData,
+                                                        method,
+                                                        id: orderId,
+                                                        created_at: new Date().toISOString(),
+                                                        restaurant_name: restName,
+                                                        address: fullAddress,
+                                                        status: 'pending'
+                                                    });
+
+                                                    setCart([]);
+                                                    setPendingOrderData(null);
+                                                    setSelectedOrderId(orderId);
+                                                    setCurrentPage('order_status');
+                                                }}
+                                            />
+                                        ) : (
+                                            <PaymentPage
+                                                onBack={() => setCurrentPage('checkout')}
+                                                totalAmount={pendingOrderData?.total || 0}
+                                                orderData={pendingOrderData}
+                                                cartItems={cart}
+                                                onPaymentComplete={(method: string, orderId: number) => {
+                                                    console.log('Order created with id:', orderId, 'method:', method);
+                                                    const restId = pendingOrderData?.restaurant_id || cart?.[0]?.product?.restaurant_id || '';
+                                                    const restName = restaurantCache[`rest_${restId}`]?.name || '';
+                                                    const addr = pendingOrderData?.address || {};
+                                                    const fullAddress = [addr.street, addr.house, addr.apartment, addr.floor].filter(Boolean).join(', ');
+                                                    handleAddOrderToHistory({
+                                                        ...pendingOrderData,
+                                                        method,
+                                                        id: orderId,
+                                                        created_at: new Date().toISOString(),
+                                                        restaurant_name: restName,
+                                                        address: fullAddress,
+                                                        status: 'pending'
+                                                    });
+
+                                                    setCart([]);
+                                                    setPendingOrderData(null);
+                                                    setSelectedOrderId(orderId);
+                                                    setCurrentPage('order_status');
+                                                }}
+                                            />
+                                        )}
+                                    </div>
+                                )}
+
+                                {currentPage === 'order_status' && selectedOrderId && (
+                                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 5000, overflowY: 'auto', background: 'var(--bg)' }}>
+                                        <OrderStatus 
+                                            orderId={selectedOrderId} 
+                                            onBack={() => setCurrentPage('menu')} 
+                                            onViewDetails={(id) => {
+                                                setSelectedOrderId(id);
+                                                setCurrentPage('order_details');
+                                            }}
+                                        />
+                                    </div>
+                                )}
+
+                                {currentPage === 'order_details' && selectedOrderId && (
+                                    <OrderDetails orderId={selectedOrderId} onBack={() => setCurrentPage('profile')} />
+                                )}
+
+
+                                {currentPage === 'restaurant' && (
+                                    <GlassBottomPanel
+                                        totalItems={cart.reduce((a, b) => a + b.quantity, 0)}
+                                        totalPrice={cart.reduce((a, b) => a + (b.product.price * b.quantity), 0)}
+                                        deliveryTime={deliveryLoc.etaLabel}
+                                        deliveryFee={deliveryFee}
+                                        onNext={() => setCurrentPage('cart')}
+                                        buttonText={t('common.next')}
+                                        showPriceInButton={false}
+                                    />
+                                )}
+                            </>
+                        } />
+                    </Routes>
                 </main>
 
                 {/* Bottom Navigation - Hidden on Cart, Checkout, Restaurant, Home, Login, Admin, Favorites, Profile, Order Details */}
-                {!['cart', 'checkout', 'restaurant', 'home', 'login', 'admin', 'favorites', 'profile', 'order_details'].includes(currentPage) && (
+                {!['cart', 'checkout', 'restaurant', 'home', 'login', 'admin', 'favorites', 'profile', 'order_details'].includes(currentPage) && window.location.pathname !== '/legal' && (
                     <LiquidNavBar activePage={currentPage} onNavigate={handleNavigate} />
                 )}
             </div>
@@ -644,6 +747,8 @@ function AppContent() {
                     </div>
                 </div>
             )}
+
+            <CookieConsentBanner />
         </Suspense>
     );
 };
@@ -651,7 +756,9 @@ function AppContent() {
 function App() {
     return (
         <LanguageProvider>
-            <AppContent />
+            <DeliveryLocationProvider>
+                <AppContent />
+            </DeliveryLocationProvider>
         </LanguageProvider>
     );
 }

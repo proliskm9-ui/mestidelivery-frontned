@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './CheckoutPage.css';
 import { useLanguage } from '../translations/LanguageContext';
+import { getDeliveryFeeForAddress } from '../utils/deliveryCalculator';
+import { useDeliveryLocationOptional } from '../delivery/DeliveryLocationContext';
 
 // === БЛОКИ ===
 import HeaderBlock from './blocks/HeaderBlock/HeaderBlock';
@@ -50,6 +52,11 @@ export interface CheckoutOrderData {
   total: number;
   restaurantComment?: string;
   cutleryCount?: number;
+  /** Зональная цена доставки — должна уйти в createOrder. */
+  deliveryFee?: number;
+  serviceFee?: number;
+  deliveryLat?: number | null;
+  deliveryLng?: number | null;
 }
 
 interface CheckoutPageProps {
@@ -63,14 +70,15 @@ interface CheckoutPageProps {
 }
 
 const CheckoutPage: React.FC<CheckoutPageProps> = ({
-  totalAmount: externalTotal,
   onBack,
   onProceedToPayment,
   comment: restaurantComment,
   cutleryCount,
-  initialAddress
+  initialAddress,
+  cartItems
 }) => {
   const { t } = useLanguage();
+  const deliveryLoc = useDeliveryLocationOptional();
   // Load saved address from prop or localStorage
   const savedAddressRaw = localStorage.getItem('user_address');
   const savedAddress = initialAddress || (savedAddressRaw ? (() => { try { return JSON.parse(savedAddressRaw); } catch { return null; } })() : null);
@@ -89,10 +97,11 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
       hotelName: '',
       room: '',
       deliveryNote: '',
-      geo: '',
+      geo: savedAddress?.geo || '',
       landmark: '',
       comment: savedAddress?.comment || '',
-      phone: savedAddress?.phone || savedPhone || ''
+      phone: savedAddress?.phone || savedPhone || '',
+      deliveryZone: savedAddress?.deliveryZone || 'center'
     },
 
     payment: 'cash',
@@ -152,9 +161,12 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
     toggleModal('place', false);
   };
 
-  // ИТОГОВАЯ СУММА
-  const BASE_PRICE = externalTotal ?? 0;
-  const totalAmount = BASE_PRICE + orderData.tip;
+  const subtotal = cartItems?.reduce((sum: number, item: any) => sum + (Number(item.product.price) * item.quantity), 0) || 0;
+  const deliveryFee = deliveryLoc?.fee ?? getDeliveryFeeForAddress(orderData.address);
+  const serviceFee = subtotal > 0 ? Math.max(0.99, Math.min(2.00, subtotal * 0.06)) : 0;
+  
+  const finalTotal = subtotal + deliveryFee + serviceFee;
+  const totalAmount = finalTotal + orderData.tip;
 
   // Навигация назад
   const handleBack = (): void => {
@@ -167,18 +179,35 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
 
   // Обработка оплаты
   const handlePay = (): void => {
-    const hasLocation = orderData.address.type === 'map' ? !!orderData.address.geo : !!orderData.address.street;
-    if (!hasLocation || !orderData.address.phone) {
+    const addr = orderData.address;
+    const hasLocation =
+      addr.type === 'map'
+        ? !!addr.geo?.trim()
+        : addr.type === 'hotel'
+          ? !!(addr.hotelName?.trim() && addr.room?.trim())
+          : !!addr.street?.trim();
+
+    if (!hasLocation || !addr.phone?.trim()) {
       alert(t('checkout.fill_alert'));
       return;
     }
 
     if (onProceedToPayment) {
+      const geoParts = String(addr.geo || '')
+        .split(',')
+        .map((p: string) => Number(p.trim()))
+        .filter((n: number) => Number.isFinite(n));
+      const fromGeoLat = geoParts.length >= 2 ? geoParts[0] : null;
+      const fromGeoLng = geoParts.length >= 2 ? geoParts[1] : null;
       onProceedToPayment({
         ...orderData,
         total: totalAmount,
         restaurantComment,
-        cutleryCount
+        cutleryCount,
+        deliveryFee,
+        serviceFee,
+        deliveryLat: deliveryLoc?.lat ?? fromGeoLat,
+        deliveryLng: deliveryLoc?.lng ?? fromGeoLng,
       });
     } else {
       console.log('Данные заказа:', orderData);
@@ -217,6 +246,28 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
             onEditComment={() => toggleModal('comment', true)}
             onEditPhone={() => toggleModal('phone', true)}
           />
+
+          {orderData.address.deliveryZone === 'outside' && (
+            <div style={{
+              margin: '0 16px 12px',
+              padding: '12px 14px',
+              borderRadius: 12,
+              background: 'rgba(251, 191, 36, 0.12)',
+              border: '1px solid rgba(251, 191, 36, 0.35)',
+              fontSize: 13,
+              color: 'rgba(255,255,255,0.9)',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 8,
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+              <span>{t('delivery.outside_zone')}</span>
+              <a href="https://t.me/MestigoSupport_Bot" target="_blank" rel="noopener noreferrer" style={{ color: '#21EA7C', fontWeight: 700 }}>
+                {t('delivery.clarify_telegram')}
+              </a>
+            </div>
+          )}
 
           {/* --- 4. ЧАЕВЫЕ --- */}
           <TipsBlock
@@ -295,13 +346,22 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
           />
         )}
 
-        {/* 7. Карта */}
         {modals.map && (
           <MapModal
             isOpen={modals.map}
             onClose={() => toggleModal('map', false)}
-            onConfirm={(loc) => {
-              updateAddress('geo', loc);
+            onConfirm={(geo, coords, zoneId) => {
+              setOrderData(prev => ({
+                ...prev,
+                address: {
+                  ...prev.address,
+                  type: 'map',
+                  geo,
+                  landmark: geo,
+                  deliveryZone: zoneId,
+                },
+              }));
+              if (coords) deliveryLoc?.setManualLocation(coords[0], coords[1]);
               toggleModal('map', false);
             }}
             initialGeo={orderData.address.geo}

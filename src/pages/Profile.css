@@ -1,506 +1,606 @@
-/* Profile.css - Bento Dashboard Edition */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
-:root {
-    --primary: #21EA7C;
-    --primary-glow: rgba(33, 234, 124, 0.15);
-    --bg-black: var(--bg);
-    --card-bg: rgba(255, 255, 255, 0.03);
-    --card-border: rgba(255, 255, 255, 0.06);
-    --white: #ffffff;
-    --grey: #8E8E93;
-}
+/* Profile — wide bento layout, aligned with site design language */
 
 .profile-page-wrapper {
-    background-color: var(--bg-black);
-    min-height: 100vh;
-    color: var(--white);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    padding: 40px 20px 140px;
+    --primary: #21EA7C;
+    --primary-glow: rgba(33, 234, 124, 0.15);
+    --card-bg: rgba(255, 255, 255, 0.04);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --muted: rgba(255, 255, 255, 0.48);
     position: relative;
+    min-height: 100vh;
+    background: var(--bg, #151514);
+    color: #fff;
+    font-family: 'Outfit', Inter, sans-serif;
+    padding: 28px 32px 120px;
     overflow-x: hidden;
+    box-sizing: border-box;
 }
 
-/* Subtle background noise/gradient */
-.profile-page-wrapper::before {
-    content: '';
+.profile-glow {
     position: fixed;
-    top: -10%;
-    left: -10%;
-    width: 120%;
-    height: 120%;
-    background: radial-gradient(circle at 50% 50%, rgba(33, 234, 124, 0.03) 0%, transparent 60%);
+    top: -120px;
+    right: -80px;
+    width: 340px;
+    height: 340px;
+    background: radial-gradient(circle, rgba(33, 234, 124, 0.14) 0%, transparent 70%);
+    border-radius: 50%;
     pointer-events: none;
     z-index: 0;
 }
 
 .profile-container {
-    max-width: 1000px;
-    margin: 0 auto;
     position: relative;
     z-index: 1;
+    max-width: 1080px;
+    margin: 0 auto;
 }
 
-/* Header Section */
+/* Header — same pattern as OrderStatus / Favorites */
 .profile-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 40px;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    min-height: 48px;
 }
 
 .profile-header h1 {
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: -1px;
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-align: center;
 }
 
-.back-btn-minimal {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    padding: 10px 20px;
-    border-radius: 14px;
-    color: var(--grey);
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s;
+.profile-header-spacer {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
 }
 
-.back-btn-minimal:hover {
-    color: white;
-    background: rgba(255, 255, 255, 0.06);
+.profile-header .ui-circle-btn {
+    width: 48px;
+    height: 48px;
 }
 
 /* BENTO GRID */
 .bento-grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    grid-gap: 20px;
+    gap: 18px;
 }
 
-/* Base Card Style */
 .bento-card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: 30px;
-    padding: 30px;
-    backdrop-filter: blur(20px);
-    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    border-radius: 28px;
+    padding: 24px;
     position: relative;
     overflow: hidden;
+    transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .bento-card:hover {
-    transform: translateY(-5px);
     border-color: rgba(255, 255, 255, 0.12);
     background: rgba(255, 255, 255, 0.05);
 }
 
-/* 1. Profile Summary Card (Main Card) */
+.bento-card--form {
+    grid-column: span 6;
+    padding: 28px;
+}
+
+/* 1. Profile Summary */
 .card-profile-main {
     grid-column: span 6;
     display: flex;
     align-items: center;
-    gap: 32px;
-    background: linear-gradient(110deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+    gap: 24px;
+    background:
+        radial-gradient(120% 100% at 0% 0%, rgba(33, 234, 124, 0.08) 0%, transparent 55%),
+        var(--card-bg);
 }
 
 .main-avatar-box {
-    width: 120px;
-    height: 120px;
+    position: relative;
+    width: 96px;
+    height: 96px;
     flex-shrink: 0;
-    aspect-ratio: 1;
     border-radius: 50%;
-    background: rgba(33, 234, 124, 0.05);
-    border: 1px solid rgba(33, 234, 124, 0.15);
+    background: rgba(33, 234, 124, 0.08);
+    border: 1px solid rgba(33, 234, 124, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 50px;
-    position: relative;
     cursor: pointer;
+    padding: 0;
 }
 
 .main-avatar-box img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: inherit;
+    border-radius: 50%;
+    display: block;
+}
+
+.main-avatar-fallback {
+    font-size: 2rem;
+    font-weight: 750;
+    color: var(--primary);
 }
 
 .edit-overlay-btn {
     position: absolute;
-    bottom: 5px;
-    right: 5px;
-    width: 32px;
-    height: 32px;
+    bottom: -2px;
+    right: -2px;
+    width: 30px;
+    height: 30px;
     background: var(--primary);
     border-radius: 50%;
     color: #000;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
-    box-shadow: 0 4px 15px var(--primary-glow);
-    border: 3px solid var(--bg-black);
+    border: 2px solid var(--bg, #151514);
+}
+
+.main-user-info {
+    flex: 1;
+    min-width: 0;
 }
 
 .main-user-info h2 {
-    font-size: 32px;
-    margin: 0 0 4px 0;
-    letter-spacing: -1px;
+    margin: 0 0 4px;
+    font-size: clamp(1.4rem, 2vw, 1.75rem);
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
 }
 
 .main-user-info p {
-    color: var(--grey);
-    margin: 0 0 16px 0;
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-weight: 500;
 }
 
 .points-pill {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 14px;
-    background: rgba(33, 234, 124, 0.1);
-    border: 1px solid rgba(33, 234, 124, 0.2);
-    border-radius: 12px;
-    font-weight: 700;
-    color: #21EA7C;
-    box-shadow: 0 0 15px rgba(33, 234, 124, 0.05);
+    padding: 6px 12px;
+    background: rgba(33, 234, 124, 0.12);
+    border: 1px solid rgba(33, 234, 124, 0.28);
+    border-radius: 999px;
+    font-weight: 650;
+    color: var(--primary);
+    font-size: 0.85rem;
 }
 
-.points-pill span {
-    color: #21EA7C;
+.bento-ghost-btn {
+    margin-left: auto;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    border: none;
+    background: var(--primary);
+    color: #000;
+    font-family: inherit;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease;
 }
 
-/* 2. Order History Card (Vertical Wide) */
+.bento-ghost-btn:hover {
+    transform: scale(1.04);
+}
+
+.bento-ghost-btn span {
+    display: none;
+}
+
+.bento-ghost-btn svg {
+    color: #000;
+    stroke: #000;
+}
+
+/* 2. Orders — wide left */
 .card-orders {
     grid-column: span 4;
     grid-row: span 2;
+    display: flex;
+    flex-direction: column;
+    min-height: 280px;
 }
 
-@media (max-width: 768px) {
-    .card-orders {
-        grid-column: span 6;
-    }
-}
-
-.profile-header button:hover {
-    transform: scale(1.1);
-    color: white !important;
+.card-orders-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
 }
 
 .card-label {
-    font-size: 13px;
+    margin: 0;
+    font-size: 1rem;
     font-weight: 700;
-    color: var(--grey);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 24px;
-    display: block;
+    letter-spacing: -0.02em;
+    color: #fff;
+    text-transform: none;
+}
+
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
 }
 
 .mini-order-item {
+    appearance: none;
+    -webkit-appearance: none;
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--card-border);
-    border-radius: 20px;
-    margin-bottom: 12px;
-    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-    cursor: pointer;
-}
-
-.mini-order-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    transform: translateX(5px);
-    border-color: rgba(33, 234, 124, 0.2);
-}
-
-.order-icon-box {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    overflow: hidden;
-}
-
-.order-icon-box img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    margin: 0;
+    padding: 14px 14px;
+    border: 1px solid transparent;
+    border-radius: 18px;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    font-family: inherit;
+    cursor: pointer;
+    box-sizing: border-box;
+    outline: none;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.mini-order-item:last-child {
+    border-bottom: 1px solid transparent;
+}
+
+.mini-order-item:hover,
+.mini-order-item:focus-visible {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.mini-order-item:active {
+    background: rgba(255, 255, 255, 0.07);
 }
 
 .order-main-content {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
 }
 
 .order-vendor-name {
     margin: 0;
-    font-size: 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+    font-size: 0.98rem;
     font-weight: 700;
     color: #fff;
-    text-transform: uppercase;
+    text-transform: none;
+}
+
+.order-vendor-text {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
+.order-vendor-time {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
 .order-meta-info {
-    font-size: 12px;
-    color: var(--grey);
+    font-size: 0.85rem;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .order-side-info {
-    width: 100px;
-    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 .order-price-bold {
-    font-weight: 800;
-    color: #21EA7C;
-    font-size: 16px;
+    font-weight: 750;
+    color: var(--primary);
+    font-size: 1rem;
+    letter-spacing: -0.02em;
 }
 
 .order-status-pill {
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 650;
+    padding: 4px 10px;
+    border-radius: 999px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.02em;
 }
 
 .order-status-pill.delivered {
-    color: #21EA7C;
-    background: rgba(33, 234, 124, 0.1);
+    color: var(--primary);
+    background: rgba(33, 234, 124, 0.12);
 }
 
 .order-status-pill.pending {
-    color: #FFD60A;
-    background: rgba(255, 214, 10, 0.1);
+    color: #ffd60a;
+    background: rgba(255, 214, 10, 0.12);
 }
 
 .order-status-pill.cancelled {
-    color: #FF453A;
-    background: rgba(255, 69, 58, 0.1);
+    color: #ff453a;
+    background: rgba(255, 69, 58, 0.12);
 }
 
-/* 3. Address Card (Square) */
+.history-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.profile-empty {
+    padding: 28px 8px;
+    color: var(--muted);
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+/* 3. Address — right column */
 .card-address {
     grid-column: span 2;
-    background: radial-gradient(circle at top right, rgba(33, 234, 124, 0.05), transparent);
-}
-
-@media (max-width: 768px) {
-    .card-address {
-        grid-column: span 6;
-    }
+    background:
+        radial-gradient(circle at top right, rgba(33, 234, 124, 0.08), transparent 60%),
+        var(--card-bg);
+    min-height: 150px;
 }
 
 .address-content-bento {
     height: 100%;
+    min-height: 140px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    gap: 16px;
 }
 
-.address-preview {
-    font-size: 15px;
-    line-height: 1.5;
-    margin: 10px 0;
+.address-block-top {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+
+.address-chip {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: inherit;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.address-chip:hover {
+    border-color: rgba(33, 234, 124, 0.35);
+    background: rgba(33, 234, 124, 0.06);
+}
+
+.address-chip-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(33, 234, 124, 0.14);
+    color: var(--primary);
+    margin-top: 1px;
+}
+
+.address-chip.is-empty .address-chip-icon {
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.address-chip-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    padding-top: 3px;
+}
+
+.address-chip-line {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.92);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.address-chip.is-empty .address-chip-line {
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.48);
+}
+
+.address-chip-meta {
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.3;
+    color: rgba(255, 255, 255, 0.45);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .bento-icon-btn {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     background: var(--primary);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #000;
-    transition: 0.3s;
     border: none;
     cursor: pointer;
+    flex-shrink: 0;
+    align-self: flex-end;
+    transition: transform 0.15s ease;
 }
 
-/* 4. Support Card (Square-ish) */
+.bento-icon-btn:hover {
+    transform: scale(1.04);
+}
+
+/* 4. Support — right column */
 .card-support {
     grid-column: span 2;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    color: inherit;
+    min-height: 130px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-@media (max-width: 768px) {
-    .card-support {
-        grid-column: span 6;
-    }
+.support-preview {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--muted);
+    font-weight: 500;
 }
 
-/* Sub-page Forms Style */
+/* Forms */
 .personal-form-bento {
     display: grid;
-    gap: 24px;
+    gap: 18px;
+}
+
+.bento-input-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
 }
 
 .bento-input-group label {
     display: block;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--grey);
-    margin-bottom: 10px;
+    font-size: 0.85rem;
+    font-weight: 550;
+    color: var(--muted);
+    margin-bottom: 8px;
 }
 
 .bento-input {
     width: 100%;
+    height: 54px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--card-border);
-    padding: 18px 20px;
+    padding: 0 16px;
     border-radius: 16px;
-    color: white;
+    color: #fff;
     font-family: inherit;
-    font-size: 16px;
-    transition: 0.3s;
+    font-size: 1rem;
+    font-weight: 500;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .bento-input:focus {
-    outline: none;
-    border-color: var(--primary);
+    border-color: rgba(33, 234, 124, 0.45);
     background: rgba(255, 255, 255, 0.05);
 }
 
-.bento-primary-btn {
+.bento-primary-btn,
+.bento-secondary-btn {
     width: 100%;
-    padding: 18px;
-    background: var(--primary);
+    height: 54px;
     border: none;
     border-radius: 16px;
-    color: #000;
-    font-weight: 800;
-    font-size: 16px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 1rem;
     cursor: pointer;
-    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.bento-primary-btn:hover {
-    transform: scale(1.02);
-    box-shadow: 0 10px 25px var(--primary-glow);
+.bento-primary-btn {
+    background: var(--primary);
+    color: #000;
+}
+
+.bento-secondary-btn {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border: 1px solid var(--card-border);
 }
 
 .logout-link-bento {
     grid-column: span 6;
-    text-align: center;
-    padding: 20px;
-    color: #ff453a;
-    font-weight: 700;
+    height: 52px;
+    border-radius: 100px;
+    border: 1px solid rgba(255, 69, 58, 0.2);
+    background: rgba(255, 69, 58, 0.08);
+    color: #ff6b63;
+    font-family: inherit;
+    font-weight: 650;
+    font-size: 0.98rem;
     cursor: pointer;
-    opacity: 0.6;
-    transition: 0.3s;
+    transition: background 0.2s ease;
 }
 
 .logout-link-bento:hover {
-    opacity: 1;
+    background: rgba(255, 69, 58, 0.14);
 }
 
-/* Modal Liquid style */
-.bento-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(15px);
-    z-index: 5000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.bento-modal {
-    background: #111;
-    border: 1px solid var(--card-border);
-    border-radius: 40px;
-    padding: 40px;
-    width: 90%;
-    max-width: 440px;
-}
-
-.emoji-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin: 30px 0;
-}
-
-.emoji-btn {
-    aspect-ratio: 1;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--card-border);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.emoji-btn:hover,
-.emoji-btn.active {
-    border-color: var(--primary);
-    background: rgba(33, 234, 124, 0.05);
-    transform: scale(1.05);
-}
-
-/* Animations */
-@keyframes bentoIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.bento-grid>div {
-    animation: bentoIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) backwards;
-}
-
-.bento-grid>div:nth-child(1) {
-    animation-delay: 0.05s;
-}
-
-.bento-grid>div:nth-child(2) {
-    animation-delay: 0.1s;
-}
-
-.bento-grid>div:nth-child(3) {
-    animation-delay: 0.15s;
-}
-
-.bento-grid>div:nth-child(4) {
-    animation-delay: 0.2s;
-}
-
+/* See all — matches catalog */
 .see-all {
-    background: rgba(30, 30, 30, 0.4);
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(30, 30, 30, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     color: #21EA7C;
     padding: 0;
     border-radius: 20px;
@@ -513,27 +613,148 @@
     width: 48px;
     height: 26px;
     flex-shrink: 0;
-    margin-right: 0px;
-    transform: translateY(-1px);
-    opacity: 1 !important;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease-out;
-}
-
-.see-all:active {
-    transform: scale(0.96) translateY(-1px);
-    background: rgba(40, 40, 40, 0.6);
-    border-color: rgba(255, 255, 255, 0.1);
+    font-family: inherit;
 }
 
 .see-all span:first-child {
     margin-left: 6px;
-    transform: translateY(-0.5px) !important;
-    display: inline-block;
 }
 
 .see-all span:last-child {
-    display: inline-block;
-    transform: rotate(0deg) scale(0.8) translateY(1.9px) !important;
+    display: inline-flex;
+    transform: scale(0.85);
     margin-left: -1px;
+}
+
+/* Modal — same language as PC address modal */
+.bento-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(12px);
+    z-index: 5000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.bento-modal {
+    width: 100%;
+    max-width: 440px;
+    background: rgba(25, 25, 23, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    padding: 24px;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    font-family: 'Outfit', Inter, sans-serif;
+    color: #fff;
+}
+
+.avatar-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.avatar-modal-title {
+    margin: 0 0 4px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+}
+
+.avatar-modal-subtitle {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #8E8E93;
+}
+
+.avatar-modal-close {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+}
+
+.avatar-modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    padding: 4px 0 2px;
+}
+
+.emoji-btn {
+    aspect-ratio: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    overflow: hidden;
+    padding: 0;
+    cursor: pointer;
+    transition: border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.emoji-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.emoji-btn:hover {
+    border-color: rgba(33, 234, 124, 0.55);
+    transform: scale(1.03);
+}
+
+.emoji-btn.active {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(33, 234, 124, 0.2);
+}
+
+.avatar-upload-btn {
+    cursor: pointer;
+    margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+    .card-orders,
+    .card-address,
+    .card-support,
+    .logout-link-bento,
+    .bento-card--form {
+        grid-column: span 6;
+    }
+
+    .card-orders {
+        grid-row: auto;
+        min-height: 0;
+    }
+
+    .bento-input-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .profile-page-wrapper {
+        padding: 20px 16px 100px;
+    }
+
+    .card-profile-main {
+        flex-wrap: wrap;
+    }
+
+    .bento-ghost-btn {
+        margin-left: auto;
+    }
 }

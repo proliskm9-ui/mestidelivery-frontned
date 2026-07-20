@@ -1,15 +1,18 @@
 import React from 'react';
+import { PageSkeleton, type SkeletonVariant } from './Skeleton';
 import './FullPageLoader.css';
 
 interface FullPageLoaderProps {
     text?: string;
+    /** Page layout to mimic while loading */
+    variant?: SkeletonVariant;
 }
 
-const FullPageLoader: React.FC<FullPageLoaderProps> = ({ text = 'Загрузка...' }) => {
+/** Skeleton page placeholder — replaces classic spinner / "Loading..." */
+const FullPageLoader: React.FC<FullPageLoaderProps> = ({ variant = 'generic' }) => {
     return (
-        <div className="global-loading-container">
-            <div className="global-loading-spinner" />
-            <span className="global-loading-text">{text}</span>
+        <div className="global-skeleton-wrap">
+            <PageSkeleton variant={variant} />
         </div>
     );
 };

@@ -6,6 +6,7 @@ import { useLanguage } from '../translations/LanguageContext';
 import Header from '../components/UI/Header';
 import FastTravelBlock from '../components/UI/FastTravelBlock';
 import PromoBanner from '../components/UI/PromoBanner';
+import AddressDeliveryPrompt from '../components/UI/AddressDeliveryPrompt';
 import MobileRestaurantCard from '../components/UI/MobileRestaurantCard';
 import NetworkErrorState from '../components/UI/NetworkErrorState';
 
@@ -28,21 +29,6 @@ const CATEGORY_ICONS = [
     { key: 'soups', img: '/Assets/Ellipse 30.png', label: 'Супы' },
     { key: 'coffee', img: '/Assets/Ellipse 29.png', label: 'Кофе' },
 ];
-
-const RESTAURANT_TAG_DATA: Record<string, string[]> = {
-    "Sunset Restaurant": ["pizza", "bakery", "bbq", "pasta", "soup", "coffee", "georgian", "local", "europe", "east", "italy", "fast_food"],
-    "BBQ Garden": ["sandwiches", "bakery", "desserts", "bbq", "soup", "coffee", "georgian", "local", "europe", "fast_food"],
-    "Dom Kubdari": ["bakery", "desserts", "bbq", "soup", "coffee", "georgian", "local", "east", "fast_food"],
-    "sunset restaurant": ["pizza", "bakery", "bbq", "pasta", "soup", "coffee", "georgian", "local", "europe", "east", "italy", "fast_food"],
-    "bbq garden": ["sandwiches", "bakery", "desserts", "bbq", "soup", "coffee", "georgian", "local", "europe", "fast_food"],
-    "dom kubdari": ["bakery", "desserts", "bbq", "soup", "coffee", "georgian", "local", "east", "fast_food"],
-};
-
-const STORE_IMAGE_OVERRIDES: Record<string, string> = {
-    'spar': '/Assets/Rectangle 16.png',
-    'nikora': '/Assets/Rectangle 17.png',
-    'magniti': '/Assets/Rectangle 20.png'
-};
 
 const SmallArrowIcon = ({ style }: { style?: React.CSSProperties }) => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={style}>
@@ -94,7 +80,7 @@ const MenuPage: React.FC<{
     const [activeCollection, setActiveCollection] = useState<{
         title: string,
         items: (Restaurant | Store)[],
-        type: 'store' | 'restaurant',
+        type: 'store' | 'restaurant' | 'restaurants_browse' | 'stores_soon',
         isMobileSource?: boolean
     } | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -106,41 +92,51 @@ const MenuPage: React.FC<{
     const [promoFilter, setPromoFilter] = useState(false);
     const [taggedRestaurants, setTaggedRestaurants] = useState<any[]>([]);
     const [isNetworkError, setIsNetworkError] = useState(false);
+    const [addressModalKey, setAddressModalKey] = useState(0);
+    const [addressPromptDismissed, setAddressPromptDismissed] = useState(false);
+
+    const hasDeliveryAddress = Boolean(userAddress?.street && String(userAddress.street).trim());
+    const showAddressPrompt = !hasDeliveryAddress && !addressPromptDismissed && !activeCollection;
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(true);
+
+    const updateCategoryScrollState = () => {
+        const el = scrollRef.current;
+        if (!el) return;
+        const max = el.scrollWidth - el.clientWidth;
+        setCanScrollLeft(el.scrollLeft > 8);
+        setCanScrollRight(max > 8 && el.scrollLeft < max - 8);
+    };
 
     useEffect(() => {
-        const handleScroll = () => {
-            if (scrollRef.current) {
-                setCanScrollLeft(scrollRef.current.scrollLeft > 0);
-            }
+        const el = scrollRef.current;
+        if (!el) return;
+        updateCategoryScrollState();
+        el.addEventListener('scroll', updateCategoryScrollState, { passive: true });
+        const onWheel = (e: WheelEvent) => {
+            if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+            e.preventDefault();
+            el.scrollBy({ left: e.deltaY, behavior: 'auto' });
         };
-
-        const currentRef = scrollRef.current;
-        if (currentRef) {
-            currentRef.addEventListener('scroll', handleScroll);
-            // Initial check
-            handleScroll();
-        }
-
+        el.addEventListener('wheel', onWheel, { passive: false });
+        const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateCategoryScrollState) : null;
+        ro?.observe(el);
+        window.addEventListener('resize', updateCategoryScrollState);
         return () => {
-            if (currentRef) {
-                currentRef.removeEventListener('scroll', handleScroll);
-            }
+            el.removeEventListener('scroll', updateCategoryScrollState);
+            el.removeEventListener('wheel', onWheel);
+            ro?.disconnect();
+            window.removeEventListener('resize', updateCategoryScrollState);
         };
-    }, []);
+    }, [taggedRestaurants.length, activeCollection]);
 
     const scrollCategories = (direction: 'left' | 'right') => {
-        if (scrollRef.current) {
-            const { current } = scrollRef;
-            const scrollAmount = 300;
-            if (direction === 'left') {
-                current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-            } else {
-                current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-            }
-        }
+        const el = scrollRef.current;
+        if (!el) return;
+        const step = Math.max(320, Math.round(el.clientWidth * 0.6));
+        el.scrollBy({ left: direction === 'left' ? -step : step, behavior: 'smooth' });
     };
 
     const toggleCategory = (catKey: string) => {
@@ -154,28 +150,32 @@ const MenuPage: React.FC<{
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [rests, strs] = await Promise.all([
-                    api.getRestaurants(),
-                    api.getStores()
-                ]);
+                // Don't let stores failure blank the whole menu
+                const rests = await api.getRestaurants();
                 const labeledRests = rests.map(r => {
-                    const tags = RESTAURANT_TAG_DATA[r.name] || RESTAURANT_TAG_DATA[r.name.toLowerCase()] || [];
-                    return { ...r, tags };
-                });
-                const mappedStores = strs.map(s => {
-                    const key = Object.keys(STORE_IMAGE_OVERRIDES).find(name =>
-                        s.name.toLowerCase().includes(name)
-                    );
-                    const randomRating = (4.5 + Math.random() * 0.5).toFixed(1);
+                    const fromApi = (r.filter_tags || '')
+                        .split(',')
+                        .map(t => t.trim().toLowerCase())
+                        .filter(Boolean);
+                    // legacy alias: soup -> soups
+                    const tags = fromApi.map(t => (t === 'soup' ? 'soups' : t));
                     return {
-                        ...(key ? { ...s, img: STORE_IMAGE_OVERRIDES[key] } : s),
-                        rating: randomRating
+                        ...r,
+                        promo: r.promo_text || r.promo || '',
+                        tags,
                     };
                 });
                 setRestaurants(rests);
                 setTaggedRestaurants(labeledRests);
-                setStores(mappedStores);
                 setIsNetworkError(false);
+
+                try {
+                    const strs = await api.getStores();
+                    setStores(strs);
+                } catch (storesError) {
+                    console.warn('Stores unavailable', storesError);
+                    setStores([]);
+                }
             } catch (error) {
                 console.error("Failed to load data", error);
                 setIsNetworkError(true);
@@ -216,35 +216,23 @@ const MenuPage: React.FC<{
             }
         }
 
-        const matchesPromo = promoFilter
-            ? !['dom kubdari', 'дом кубдари'].includes(r.name.toLowerCase())
-            : true;
+        const matchesPromo = promoFilter ? Boolean(r.has_promo) : true;
 
         return matchesSearch && matchesCategory && matchesRating && matchesDelivery && matchesPromo;
     });
 
     const filteredRestaurants = getSortedRestaurants(baseFiltered);
-    const worthTryingRestaurants = taggedRestaurants.filter(r =>
-        ["Дом Кубдари", "BBQ Garden", "Dom Kubdari"].includes(r.name) || r.name.toLowerCase().includes('sunset')
-    ).sort((a, b) => {
-        const getIndex = (name: string) => {
-            if (name.includes('BBQ')) return 0;
-            if (name.includes('Кубдари') || name.includes('Kubdari')) return 1;
-            if (name.toLowerCase().includes('sunset')) return 2;
-            return 3;
-        };
-        return getIndex(a.name) - getIndex(b.name);
-    });
+    const worthTryingRestaurants = taggedRestaurants
+        .filter(r => r.is_worth_trying)
+        .sort((a, b) => (a.worth_trying_sort ?? 0) - (b.worth_trying_sort ?? 0));
 
-    const mustTryRestaurants = [...worthTryingRestaurants].sort((a, b) => {
-        const getIndex = (name: string) => {
-            if (name.includes('Кубдари') || name.includes('Kubdari')) return 0;
-            if (name.toLowerCase().includes('sunset')) return 1;
-            if (name.includes('BBQ')) return 2;
-            return 3;
-        };
-        return getIndex(a.name) - getIndex(b.name);
-    });
+    const mustTryRestaurants = taggedRestaurants
+        .filter(r => r.is_must_try)
+        .sort((a, b) => (a.must_try_sort ?? 0) - (b.must_try_sort ?? 0));
+
+    const promoRestaurants = taggedRestaurants
+        .filter(r => r.has_promo)
+        .map(r => ({ ...r, promo: r.promo_text || r.promo || t('menu.promo_first_order') }));
 
     const worthTryingFiltered = worthTryingRestaurants.filter(r =>
         r.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -255,6 +243,15 @@ const MenuPage: React.FC<{
     const filteredStores = stores.filter(s =>
         s.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+    const hasStores = filteredStores.length > 0;
+
+    const openStoresCollection = () => {
+        setActiveCollection({
+            title: t('menu.stores'),
+            items: filteredStores,
+            type: 'store',
+        });
+    };
 
     const renderCategorySection = (hideTitle: boolean = false) => (
         <section className="categories-section sticky-categories" style={{ padding: '10px 0', margin: hideTitle ? '0 0 14px 0' : '14px 0' }}>
@@ -263,15 +260,22 @@ const MenuPage: React.FC<{
                     <h2>{t('menu.dish_categories')}</h2>
                 </div>
             )}
-            <div className="categories-wrapper">
-                {canScrollLeft && (
-                    <button className="cat-scroll-btn cat-scroll-left" onClick={() => scrollCategories('left')}>
-                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '-1px' }}>
-                            <path d="M15 18l-6-6 6-6" />
-                        </svg>
-                    </button>
-                )}
-                <div className="categories-scroll-area" ref={scrollRef}>
+            <div className={`categories-wrapper${canScrollLeft ? ' has-left' : ''}${canScrollRight ? ' has-right' : ''}`}>
+                <button
+                    type="button"
+                    className={`cat-scroll-btn cat-scroll-left${!canScrollLeft ? ' is-hidden' : ''}`}
+                    onClick={() => scrollCategories('left')}
+                    aria-label="Scroll categories left"
+                    tabIndex={canScrollLeft ? 0 : -1}
+                >
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                </button>
+                <div
+                    className="categories-scroll-area"
+                    ref={scrollRef}
+                >
                     {CATEGORY_ICONS.map((cat, idx) => {
                         const isActive = activeCategories.includes(cat.key);
                         return (
@@ -286,8 +290,14 @@ const MenuPage: React.FC<{
                         );
                     })}
                 </div>
-                <button className="cat-scroll-btn cat-scroll-right" onClick={() => scrollCategories('right')}>
-                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '1px' }}>
+                <button
+                    type="button"
+                    className={`cat-scroll-btn cat-scroll-right${!canScrollRight ? ' is-hidden' : ''}`}
+                    onClick={() => scrollCategories('right')}
+                    aria-label="Scroll categories right"
+                    tabIndex={canScrollRight ? 0 : -1}
+                >
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <path d="M9 18l6-6-6-6" />
                     </svg>
                 </button>
@@ -431,10 +441,16 @@ const MenuPage: React.FC<{
                 </div>
             </section>
             {activeCategories.length > 0 && items.length === 0 && (
-                <div style={{ padding: '60px 20px', textAlign: 'center', color: '#888' }}>
-                    <img src="/Assets/избранное.png" alt="Empty" style={{ width: '200px', height: 'auto', opacity: 0.5, marginBottom: '20px' }} />
-                    <h3>{t('menu.category_empty')}</h3>
-                    <p>{t('menu.try_another')}</p>
+                <div className="category-empty">
+                    <img
+                        className="category-empty-img"
+                        src="/Assets/избранное.png"
+                        alt=""
+                    />
+                    <div className="category-empty-copy">
+                        <h3>{t('menu.category_empty')}</h3>
+                        <p>{t('menu.try_another')}</p>
+                    </div>
                 </div>
             )}
         </>
@@ -454,9 +470,23 @@ const MenuPage: React.FC<{
                 onLogout={onLogout}
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
-                showSearch={activeCollection?.title !== t('menu.stores') && activeCollection?.title !== 'Продукты'}
+                showSearch={activeCollection?.type !== 'store' && activeCollection?.type !== 'stores_soon'}
                 onNavigate={onNavigate}
+                openAddressModalKey={addressModalKey}
             />
+
+            {showAddressPrompt && (
+                <AddressDeliveryPrompt
+                    title={t('common.address_prompt_title')}
+                    laterLabel={t('common.address_prompt_later')}
+                    selectLabel={t('common.address_prompt_select')}
+                    onLater={() => setAddressPromptDismissed(true)}
+                    onSelect={() => {
+                        setAddressPromptDismissed(true);
+                        setAddressModalKey((k) => k + 1);
+                    }}
+                />
+            )}
 
             <div className="menu-container">
                 {activeCollection ? (
@@ -472,105 +502,65 @@ const MenuPage: React.FC<{
                             zIndex: 0,
                             pointerEvents: 'none'
                         }}></div>
-                        <header style={{
-                            position: 'relative',
-                            zIndex: 10,
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: 'calc(24px + env(safe-area-inset-top, 0px)) 20px 2px 20px',
-                            justifyContent: 'space-between'
-                        }}>
-                            <div className="mp-back-btn" onClick={() => setActiveCollection(null)} style={{
-                                background: 'rgba(255, 255, 255, 0.08)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                backdropFilter: 'blur(15px)',
-                                WebkitBackdropFilter: 'blur(15px)',
-                                width: '44px',
-                                height: '44px',
-                                borderRadius: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: '#fff',
-                                cursor: 'pointer'
-                            }}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <header className="menu-collection-header">
+                            <button
+                                type="button"
+                                className="mp-back-btn menu-collection-back"
+                                onClick={() => setActiveCollection(null)}
+                                aria-label="Back"
+                            >
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                                     <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
                                 </svg>
-                            </div>
-                            <h1 style={{
-                                fontSize: '20px',
-                                fontWeight: 700,
-                                margin: 0,
-                                color: 'white',
-                                fontFamily: 'Inter, sans-serif',
-                                textTransform: 'uppercase'
-                            }}>
-                                {activeCollection.title === 'Рестораны' ? t('menu.restaurants') : 
-                                 activeCollection.title === 'Акции' ? t('menu.promotions') : 
-                                 activeCollection.title === 'Продукты' || activeCollection.title === t('menu.stores') ? t('menu.stores') : 
-                                 activeCollection.title}
+                            </button>
+                            <h1 className="menu-collection-title">
+                                {activeCollection.title}
                             </h1>
-                            <div style={{ width: '44px' }}></div>
+                            <div className="menu-collection-spacer" aria-hidden="true" />
                         </header>
-                        {activeCollection.title === 'Рестораны' ? (
+                        {activeCollection.type === 'restaurants_browse' ? (
                             <div className="content-pad" style={{ paddingTop: '0px' }}>
                                 {renderCategorySection(true)}
                                 {renderFiltersRow()}
                                 {renderRestaurantGrid(filteredRestaurants)}
                             </div>
-                        ) : activeCollection.title === 'Акции' || activeCollection.title === 'Популярное' || activeCollection.title === t('menu.must_try') || activeCollection.title === t('menu.worth_trying') ? (
+                        ) : activeCollection.type === 'restaurant' ? (
                             <div className="content-pad" style={{ paddingTop: '25px' }}>
                                 {renderRestaurantGrid(activeCollection.items)}
                             </div>
-                        ) : activeCollection.title === 'Продукты' ? (
+                        ) : activeCollection.type === 'store' ? (
                             <div className="content-pad" style={{ paddingTop: '25px' }}>
-                                <PromoBanner onFirstBannerClick={() => {
-                                    setActiveCollection({
-                                        title: 'Рестораны',
-                                        items: taggedRestaurants,
-                                        type: 'restaurant',
-                                        isMobileSource: true
-                                    });
-                                }} />
-
-                                <div className="search-pill" style={{ marginTop: '5px', marginBottom: '34px', display: 'flex' }}>
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.9 }}>
-                                        <circle cx="11" cy="11" r="8"></circle>
-                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                    </svg>
-                                    <input
-                                        type="text"
-                                        placeholder={t('menu.search_stores_placeholder')}
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        style={{ width: '100%', fontSize: '1.1rem', fontWeight: 500, background: 'transparent', border: 'none', color: 'white', outline: 'none' }}
-                                    />
+                                <div className="vertical-grid">
+                                    {activeCollection.items.map((item) => (
+                                        <StoreCard
+                                            key={item.id}
+                                            item={item as Store}
+                                            onClick={() => setActiveCollection({
+                                                title: t('menu.stores'),
+                                                items: [],
+                                                type: 'stores_soon',
+                                            })}
+                                            isFavorite={favorites.includes(item.id)}
+                                            onToggleFavorite={() => onToggleFavorite && onToggleFavorite(item.id)}
+                                        />
+                                    ))}
                                 </div>
-
-                                <section className="section popular-stores-collection" id="worth-trying-section">
-                                    <div className="section-header">
-                                        <h2>{t('menu.popular_stores')}</h2>
-                                        <button className="see-all" onClick={() => setActiveCollection({ title: t('menu.popular_stores'), items: filteredStores, type: 'store', isMobileSource: true })}>
-                                            <span>{t('menu.all')}</span>
-                                            <span><SmallArrowIcon /></span>
-                                        </button>
-                                    </div>
-                                    <div className="horizontal-scroll section-fade-edges">
-                                        {filteredStores.map((store) => (
-                                            <RestaurantCard
-                                                key={store.id}
-                                                item={store as any}
-                                                onClick={() => onRestaurantClick(store.id)}
-                                                isFavorite={favorites.includes(store.id)}
-                                                onToggleFavorite={() => onToggleFavorite && onToggleFavorite(store.id)}
-                                            />
-                                        ))}
-                                    </div>
-                                </section>
+                            </div>
+                        ) : activeCollection.type === 'stores_soon' ? (
+                            <div className="stores-empty">
+                                <img
+                                    src="/Assets/раздел_магазины-removebg-preview-removebg-preview%204.png"
+                                    alt=""
+                                    className="stores-empty-img"
+                                    onError={(e) => {
+                                        (e.currentTarget as HTMLImageElement).src = '/Assets/Rectangle 16.png';
+                                    }}
+                                />
+                                <h2 className="stores-empty-title">{t('menu.stores_empty_title')}</h2>
+                                <p className="stores-empty-desc">{t('menu.stores_empty_desc')}</p>
                             </div>
                         ) : (
-                            <div className="allRestaurantsList" style={{ padding: '0 16px', paddingBottom: '100px' }}>
+                            <div className="content-pad" style={{ paddingTop: '25px' }}>
                                 {activeCollection.items.map((item: any) => (
                                     <MobileRestaurantCard
                                         key={item.id}
@@ -589,68 +579,46 @@ const MenuPage: React.FC<{
                     <div className="content-pad">
                         <PromoBanner onFirstBannerClick={() => {
                             setActiveCollection({
-                                title: 'Рестораны',
+                                title: t('menu.restaurants'),
                                 items: taggedRestaurants,
-                                type: 'restaurant',
+                                type: 'restaurants_browse',
                                 isMobileSource: true
                             });
                         }} />
-                        <FastTravelBlock onNavigate={(tab) => {
+                        <FastTravelBlock
+                            onNavigate={(tab) => {
                             if (tab === 'shops') {
-                                setActiveCollection({
-                                    title: t('menu.stores'),
-                                    items: stores,
-                                    type: 'store',
-                                    isMobileSource: true
-                                });
+                                if (hasStores) {
+                                    openStoresCollection();
+                                } else {
+                                    setActiveCollection({
+                                        title: t('menu.stores'),
+                                        items: [],
+                                        type: 'stores_soon',
+                                    });
+                                }
                             } else if (tab === 'restaurants') {
                                 setActiveCollection({
                                     title: t('menu.restaurants'),
                                     items: taggedRestaurants,
-                                    type: 'restaurant',
+                                    type: 'restaurants_browse',
                                     isMobileSource: true
                                 });
                             } else if (tab === 'promos') {
-                                const promoItems = taggedRestaurants
-                                    .filter(i => !['dom kubdari', 'дом кубдари'].includes(i.name.toLowerCase()))
-                                    .map(i => ({ ...i, promo: t('menu.promo_first_order') }));
-
                                 setActiveCollection({
                                     title: t('menu.promotions'),
-                                    items: promoItems,
+                                    items: promoRestaurants,
                                     type: 'restaurant',
                                     isMobileSource: true
                                 });
                             }
                         }} />
 
-                        {/* Promotions */}
-                        <section className="section desktop-only">
-                            <div className="section-header">
-                                <h2>{t('menu.promotions')}</h2>
-                            </div>
-                            <div className="horizontal-scroll section-fade-edges" style={{ gap: '24px' }}>
-                                {restaurants
-                                    .filter(r => r.name.toLowerCase().includes('sunset'))
-                                    .slice(0, 1)
-                                    .map((item, index) => (
-                                        <RestaurantCard
-                                            key={`promo-${item.id}-${index}`}
-                                            item={{ ...item, promo: t('menu.promo_first_order') }}
-                                            onClick={() => onRestaurantClick(item.id)}
-                                            isFavorite={favorites.includes(item.id)}
-                                            onToggleFavorite={() => onToggleFavorite && onToggleFavorite(item.id)}
-                                        />
-                                    ))
-                                }
-                            </div>
-                        </section>
-
-                        {/* Stores */}
+                        {hasStores && (
                         <section className="section desktop-only" id="stores-section">
                             <div className="section-header">
                                 <h2>{t('menu.stores')}</h2>
-                                <button className="see-all" onClick={() => setActiveCollection({ title: t('menu.stores'), items: filteredStores, type: 'store', isMobileSource: true })}>
+                                <button className="see-all" onClick={openStoresCollection}>
                                     <span>{t('menu.all')}</span>
                                     <span><SmallArrowIcon /></span>
                                 </button>
@@ -660,19 +628,24 @@ const MenuPage: React.FC<{
                                     <StoreCard
                                         key={store.id}
                                         item={store}
-                                        onClick={() => onRestaurantClick(store.id)}
+                                        onClick={() => setActiveCollection({
+                                            title: t('menu.stores'),
+                                            items: [],
+                                            type: 'stores_soon',
+                                        })}
                                         isFavorite={favorites.includes(store.id)}
                                         onToggleFavorite={() => onToggleFavorite && onToggleFavorite(store.id)}
                                     />
                                 ))}
                             </div>
                         </section>
+                        )}
 
-                        {/* Must Try (Mobile Only) */}
-                        <section className="section mobile-only" id="must-try-section">
+                        {mustTryFiltered.length > 0 && (
+                        <section className="section" id="must-try-section">
                             <div className="section-header">
                                 <h2>{t('menu.must_try')}</h2>
-                                <button className="see-all" onClick={() => setActiveCollection({ title: t('menu.must_try'), items: mustTryFiltered, type: 'restaurant', isMobileSource: true })}>
+                                <button className="see-all" onClick={() => setActiveCollection({ title: t('menu.must_try'), items: mustTryFiltered, type: 'restaurant' })}>
                                     <span>{t('menu.all')}</span>
                                     <span><SmallArrowIcon /></span>
                                 </button>
@@ -689,12 +662,13 @@ const MenuPage: React.FC<{
                                 ))}
                             </div>
                         </section>
+                        )}
 
-                        {/* Worth Trying */}
+                        {worthTryingFiltered.length > 0 && (
                         <section className="section" id="worth-trying-section">
                             <div className="section-header">
                                 <h2>{t('menu.worth_trying')}</h2>
-                                <button className="see-all" onClick={() => setActiveCollection({ title: t('menu.worth_trying'), items: worthTryingFiltered, type: 'restaurant', isMobileSource: true })}>
+                                <button className="see-all" onClick={() => setActiveCollection({ title: t('menu.worth_trying'), items: worthTryingFiltered, type: 'restaurant' })}>
                                     <span>{t('menu.all')}</span>
                                     <span><SmallArrowIcon /></span>
                                 </button>
@@ -702,7 +676,7 @@ const MenuPage: React.FC<{
                             <div className="horizontal-scroll section-fade-edges">
                                 {worthTryingFiltered.map(item => (
                                     <RestaurantCard
-                                        key={item.id}
+                                        key={`worth-trying-${item.id}`}
                                         item={item}
                                         onClick={() => onRestaurantClick(item.id)}
                                         isFavorite={favorites.includes(item.id)}
@@ -711,6 +685,7 @@ const MenuPage: React.FC<{
                                 ))}
                             </div>
                         </section>
+                        )}
 
                         {/* Extracted Render Sections for Main View */}
                         {renderCategorySection(false)}
@@ -729,7 +704,122 @@ const MenuPage: React.FC<{
                     color: white;
                     font-family: 'Segoe UI', sans-serif;
                 }
-                .content-pad { padding: 32px 24px; padding-bottom: 120px; max-width: 1600px; margin: 0 auto; }
+                .stores-empty {
+                    position: relative;
+                    z-index: 1;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                    padding: 24px 28px 80px;
+                    min-height: calc(100dvh - 90px);
+                    box-sizing: border-box;
+                }
+                .stores-empty-img {
+                    width: min(180px, 48vw);
+                    height: auto;
+                    object-fit: contain;
+                    margin-bottom: 24px;
+                    filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.45));
+                }
+                .stores-empty-title {
+                    margin: 0 0 10px;
+                    font-family: 'Outfit', Inter, sans-serif;
+                    font-weight: 750;
+                    font-size: clamp(1.15rem, 3vw, 1.45rem);
+                    line-height: 1.25;
+                    color: #fff;
+                    letter-spacing: -0.02em;
+                    max-width: 18ch;
+                }
+                .stores-empty-desc {
+                    margin: 0;
+                    font-family: 'Outfit', Inter, sans-serif;
+                    font-weight: 500;
+                    font-size: 0.95rem;
+                    line-height: 1.5;
+                    color: rgba(255, 255, 255, 0.5);
+                    max-width: 32ch;
+                }
+                .category-empty {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: clamp(28px, 5vw, 72px);
+                    padding: clamp(40px, 8vh, 80px) 20px 60px;
+                    flex-wrap: wrap;
+                }
+                .category-empty-img {
+                    width: min(420px, 42vw);
+                    max-width: 100%;
+                    height: auto;
+                    object-fit: contain;
+                    flex-shrink: 0;
+                    display: block;
+                }
+                .category-empty-copy {
+                    text-align: left;
+                    max-width: 320px;
+                }
+                .category-empty-copy h3 {
+                    margin: 0 0 8px;
+                    font-family: 'Outfit', Inter, sans-serif;
+                    font-weight: 750;
+                    font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+                    line-height: 1.2;
+                    letter-spacing: -0.02em;
+                    color: #fff;
+                    text-transform: none;
+                }
+                .category-empty-copy p {
+                    margin: 0;
+                    font-family: 'Outfit', Inter, sans-serif;
+                    font-weight: 500;
+                    font-size: 1rem;
+                    line-height: 1.45;
+                    color: rgba(255, 255, 255, 0.48);
+                }
+                .menu-collection-header {
+                    position: relative;
+                    z-index: 10;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: calc(24px + env(safe-area-inset-top, 0px)) 20px 2px 20px;
+                }
+                .menu-collection-back {
+                    appearance: none;
+                    -webkit-appearance: none;
+                    background: rgba(255, 255, 255, 0.08);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    backdrop-filter: blur(15px);
+                    -webkit-backdrop-filter: blur(15px);
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #fff;
+                    cursor: pointer;
+                    padding: 0;
+                    flex-shrink: 0;
+                }
+                .menu-collection-title {
+                    font-size: 20px;
+                    font-weight: 700;
+                    margin: 0;
+                    color: white;
+                    font-family: Inter, sans-serif;
+                    text-transform: uppercase;
+                    text-align: center;
+                }
+                .menu-collection-spacer {
+                    width: 44px;
+                    flex-shrink: 0;
+                }
+                .content-pad { padding: 32px 24px; padding-bottom: 120px; max-width: 1520px; margin: 0 auto; }
                 /* --- Categories Section --- */
                 .sticky-categories {
                     position: relative;
@@ -740,7 +830,7 @@ const MenuPage: React.FC<{
                     padding: 0; overflow: visible;
                 }
                 .categories-wrapper {
-                    position: relative; /* anchor for absolute arrows */
+                    position: relative;
                     overflow: visible;
                 }
                 .cat-item {
@@ -749,29 +839,46 @@ const MenuPage: React.FC<{
                 }
                 .categories-scroll-area {
                     display: flex; gap: 24px; overflow-x: auto; align-items: flex-start;
-                    padding: 0; /* no extra padding — parent content-pad handles alignment */
+                    padding: 4px 8px 8px;
                     scrollbar-width: none; -ms-overflow-style: none;
                     -webkit-overflow-scrolling: touch;
+                    scroll-behavior: smooth;
                 }
                 .categories-scroll-area::-webkit-scrollbar { display: none; }
 
-                /* Scroll arrow buttons */
+                /* Scroll arrow buttons — desktop */
                 .cat-scroll-btn {
                     position: absolute;
-                    top: 50%;
-                    transform: translateY(-70%); /* vertically center on images, slightly above center because label is below */
-                    width: 42px; height: 42px;
+                    top: 36px;
+                    width: 44px;
+                    height: 44px;
                     border-radius: 50%;
-                    background: rgba(33, 234, 124, 0.75);
-                    border: none;
-                    display: flex; align-items: center; justify-content: center;
+                    background: rgba(22, 22, 22, 0.92);
+                    border: 1px solid rgba(255, 255, 255, 0.12);
+                    color: #21EA7C;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                     cursor: pointer;
-                    z-index: 10;
-                    transition: background 0.2s, transform 0.2s;
+                    z-index: 12;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+                    transition: background .2s ease, border-color .2s ease, transform .2s ease, opacity .2s ease;
                 }
-                .cat-scroll-left { left: 0px; }
-                .cat-scroll-right { right: 0px; }
-                .cat-scroll-btn:hover { background: rgba(33, 234, 124, 1); }
+                .cat-scroll-left { left: 6px; }
+                .cat-scroll-right { right: 6px; }
+                .cat-scroll-btn:hover {
+                    background: rgba(33, 234, 124, 0.18);
+                    border-color: rgba(33, 234, 124, 0.45);
+                    transform: scale(1.05);
+                }
+                .cat-scroll-btn:active {
+                    transform: scale(0.96);
+                }
+                .cat-scroll-btn.is-hidden {
+                    opacity: 0;
+                    pointer-events: none;
+                    transform: scale(0.9);
+                }
 
                 .section-fade-edges {
                      mask-image: linear-gradient(to right, black 95%, transparent);
@@ -855,44 +962,40 @@ const MenuPage: React.FC<{
                     scrollbar-width: thin; scrollbar-color: #444 #111; -webkit-overflow-scrolling: touch;
                 }
                 .expanded-grid {
-                    display: grid !important; grid-template-columns: repeat(auto-fill, 286px);
+                    display: grid !important; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
                     gap: 24px; overflow: visible !important; flex-wrap: wrap; mask-image: none !important;
                     -webkit-mask-image: none !important;
                 }
-                .horizontal-scroll .rest-card { min-width: 361px; max-width: 361px; flex-shrink: 0; }
-                .store-card { min-width: 361px; max-width: 361px; cursor: pointer; flex-shrink: 0; }
+                .horizontal-scroll .rest-card { min-width: 300px; max-width: 320px; flex-shrink: 0; }
+                .store-card { min-width: 300px; max-width: 320px; cursor: pointer; flex-shrink: 0; width: 100%; }
                 .store-bg {
-                    height: 182px; width: 361px; border-radius: 25px !important; margin-bottom: 4px;
+                    height: auto; width: 100%; aspect-ratio: 2 / 1; border-radius: 25px !important; margin-bottom: 4px;
                     background-size: cover; background-position: center; overflow: hidden; border: none; display: block;
                 }
                 .store-name { font-weight: 600; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
                 .store-meta { font-size: 0.85rem; color: #21EA7C; }
-                .discount-card {
-                    min-width: 361px; height: 182px; border-radius: 24px; position: relative; overflow: hidden;
-                    flex-shrink: 0; cursor: pointer;
-                }
-                .discount-bg {
-                    width: 100%; height: 100%; background-size: cover; background-position: center; transition: transform 0.5s;
-                }
-                .discount-card:hover .discount-bg { transform: scale(1.05); }
-                .discount-overlay {
-                    position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, transparent 100%);
-                }
-                .discount-content {
-                    position: absolute; top: 24px; left: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px;
-                }
-                .discount-tag {
-                    align-self: flex-start; padding: 6px 14px; border-radius: 10px; color: black; font-weight: 700; font-size: 0.9rem;
-                }
-                .discount-content h4 { margin: 0; font-size: 1.6rem; line-height: 1.1; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
                 .vertical-grid {
-                    display: grid; grid-template-columns: repeat(auto-fill, 361px); gap: 30px;
+                    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px;
                 }
                 .rest-card { cursor: pointer; }
                 .rest-img {
-                    height: 182px; width: 361px; border-radius: 25px !important;
+                    height: auto; width: 100%; aspect-ratio: 2 / 1; border-radius: 25px !important;
                     background-size: cover; background-position: center; margin-bottom: 4px;
                     overflow: hidden; transform: translateZ(0);
+                    position: relative;
+                    background-color: #1c1c1e;
+                }
+                .rest-img-photo {
+                    position: absolute;
+                    inset: 0;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    object-position: center;
+                    display: block;
+                }
+                .rest-img--skeleton {
+                    background-image: none !important;
                 }
                 .rest-details h3 { margin: 0; font-size: 1.2rem; font-weight: 700; }
                 .rest-sub { display: flex; gap: 2px; color: #21EA7C; font-size: 1rem; align-items: center; }
@@ -900,7 +1003,6 @@ const MenuPage: React.FC<{
                 .rest-sub span.separator { color: rgba(255, 255, 255, 0.85); }
                 .rest-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
                 .rest-rating { color: #21EA7C; font-weight: 500; font-size: 1rem; transform: translateY(-3px); margin-right: 15px; }
-                .rest-img { position: relative; }
 
                 .modal-overlay {
                     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -914,9 +1016,20 @@ const MenuPage: React.FC<{
                 .close-btn {
                     padding: 12px; background: #21EA7C; color: black; border: none; border-radius: 12px; font-weight: bold; cursor: pointer;
                 }
-                @media (max-width: 768px) {
+                @media (max-width: 1024px) {
                     .cat-scroll-btn {
                         display: none !important;
+                    }
+                    .category-empty {
+                        flex-direction: column;
+                        gap: 18px;
+                        padding: 36px 16px 48px;
+                    }
+                    .category-empty-img {
+                        width: min(280px, 72vw);
+                    }
+                    .category-empty-copy {
+                        text-align: center;
                     }
                     .content-pad { padding: 16px; padding-top: calc(160px + env(safe-area-inset-top, 0px)); padding-bottom: 100px; }
                     .categories-layout {
@@ -939,9 +1052,30 @@ const MenuPage: React.FC<{
                     }
                     .vertical-grid {
                         grid-template-columns: 1fr;
+                        gap: 0;
+                    }
+                    .vertical-grid .rest-card,
+                    .vertical-grid .store-card {
+                        margin-bottom: 18px;
                     }
                     .horizontal-scroll .rest-card {
                         min-width: 286px;
+                        max-width: 286px;
+                    }
+                    .store-card {
+                        min-width: 286px;
+                        max-width: 286px;
+                    }
+                    .store-bg {
+                        height: 142px;
+                        aspect-ratio: auto;
+                    }
+                    /* Large cards = small (286×142) + ~12% height */
+                    .vertical-grid .store-bg,
+                    .vertical-grid .store-card .store-bg {
+                        width: 100%;
+                        height: auto;
+                        aspect-ratio: 286 / 160;
                     }
                     #must-try-section,
                     #worth-trying-section {
@@ -968,16 +1102,20 @@ const MenuPage: React.FC<{
                     #worth-trying-section .rest-img {
                         width: 286px;
                         height: 142px;
+                        aspect-ratio: auto;
                         border-radius: 25px !important;
                         overflow: hidden; transform: translateZ(0);
                     }
                     .vertical-grid .rest-img {
+                        width: 100%;
+                        height: auto;
+                        aspect-ratio: 286 / 160;
                         border-radius: 25px !important;
-                        overflow: hidden; transform: translateZ(0);
+                        overflow: hidden;
+                        transform: translateZ(0);
                     }
                     #must-try-section .fav-btn,
-                    #worth-trying-section .fav-btn,
-                    .vertical-grid .fav-btn {
+                    #worth-trying-section .fav-btn {
                         width: 32px !important;
                         height: 32px !important;
                         top: 8px !important;
@@ -1072,17 +1210,17 @@ const MenuPage: React.FC<{
                         transform: translateY(0px) !important;
                     }
 
-                    /* --- Large Vertical Grid Cards (All Restaurants) --- */
+                    /* --- Large cards: small collection type scaled up ~12% --- */
                     .vertical-grid .fav-btn {
-                        width: 38px !important;
-                        height: 38px !important;
-                        top: 10px !important;
-                        right: 10px !important;
+                        width: 34px !important;
+                        height: 34px !important;
+                        top: 8px !important;
+                        right: 8px !important;
                         background: #21EA7C !important;
                     }
                     .vertical-grid .fav-btn svg {
-                        width: 24px !important;
-                        height: 24px !important;
+                        width: 21px !important;
+                        height: 21px !important;
                         stroke: black !important;
                     }
                     .vertical-grid .rest-details {
@@ -1096,57 +1234,61 @@ const MenuPage: React.FC<{
                     .vertical-grid .rest-details h3 {
                         font-family: 'Inter', sans-serif !important;
                         font-size: 16px !important;
-                        font-weight: 800 !important;
-                        line-height: 16px !important;
+                        font-weight: 700 !important;
+                        line-height: 18px !important;
                         color: #FFFFFF !important;
-                        margin: 7px 0 0 5px !important;
+                        margin: 10px 0 0 5px !important;
                         padding: 0 !important;
+                        max-width: calc(100% - 52px);
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
                     }
                     .vertical-grid .rest-rating {
-                        font-size: 15px !important;
-                        font-weight: 500 !important;
-                        line-height: 17px !important;
+                        font-size: 14px !important;
+                        font-weight: 400 !important;
+                        line-height: 16px !important;
                         color: #21EA7C !important;
                         position: absolute !important;
-                        top: 6px !important;
+                        top: 9px !important;
                         right: 5px !important;
                         margin: 0 !important;
                         display: flex !important;
                         align-items: center !important;
-                        gap: 3px !important;
-                        transform: translateY(-2px) !important;
+                        gap: 2px !important;
+                        transform: none !important;
                     }
                     .vertical-grid .rest-rating .star-icon {
-                        font-size: 14px !important;
-                        line-height: 14px !important;
-                        transform: translateY(0px) !important; /* Offset parent's extra -1px Y */
+                        font-size: 13px !important;
+                        line-height: 13px !important;
+                        transform: none !important;
                     }
                     .vertical-grid .rest-sub {
                         margin-top: 6px !important;
                         margin-left: 0 !important;
-                        padding-left: 27px !important; 
+                        padding-left: 24px !important;
                         position: relative !important;
-                        min-height: 20px !important;
+                        min-height: 16px !important;
                         display: flex !important;
                         align-items: center !important;
                     }
                     .vertical-grid .rest-sub img {
                         position: absolute !important;
                         left: 5px !important;
-                        width: 20px !important;
-                        height: 20px !important;
+                        width: 17px !important;
+                        height: 17px !important;
                         object-fit: contain !important;
                         top: 50% !important;
                         transform: translateY(-50%) !important;
                     }
                     .vertical-grid .rest-sub .rest-meta-content span {
                         font-family: 'Inter', sans-serif !important;
-                        font-size: 14px !important;
-                        font-weight: 500 !important;
+                        font-size: 13px !important;
+                        font-weight: 400 !important;
                         line-height: 14px !important;
                         color: #21EA7C !important;
                         display: inline-block !important;
-                        transform: translateY(0) !important;
+                        transform: none !important;
                     }
                     .expanded-grid {
                         grid-template-columns: repeat(auto-fill, minmax(286px, 1fr));
@@ -1159,10 +1301,93 @@ const MenuPage: React.FC<{
                     scrollbar-width: none; -ms-overflow-style: none;
                     display: flex; gap: 12px; align-items: center; justify-content: flex-start;
                 }
-                @media (min-width: 769px) {
+                @media (min-width: 1025px) {
+                    .menu-collection-header {
+                        /* Align with catalog header inset, keep back button reachable */
+                        padding: 28px max(48px, 5vw) 8px max(48px, 5vw);
+                        max-width: 1400px;
+                        margin: 0 auto;
+                        width: 100%;
+                        box-sizing: border-box;
+                    }
+                    .menu-collection-back {
+                        width: 48px;
+                        height: 48px;
+                        margin-left: 12px;
+                    }
+                    .menu-collection-spacer {
+                        width: 60px;
+                    }
                     .filters-row .horizontal-scroll {
                         padding: 10px 24px; margin: -10px -24px 0 -24px;
                     }
+                    /* PC: ~4 cards × 350px */
+                    .horizontal-scroll .rest-card,
+                    .store-card,
+                    .vertical-grid .rest-card,
+                    .vertical-grid .store-card {
+                        min-width: 350px;
+                        max-width: 350px;
+                        width: 350px;
+                    }
+                    .vertical-grid,
+                    .expanded-grid,
+                    #stores-section .horizontal-scroll:not(.expanded-grid),
+                    .desktop-only .horizontal-scroll:not(.expanded-grid),
+                    #must-try-section .horizontal-scroll:not(.expanded-grid),
+                    #worth-trying-section .horizontal-scroll:not(.expanded-grid) {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, 350px);
+                        justify-content: start;
+                        overflow: visible;
+                        gap: 20px;
+                        padding-bottom: 0;
+                        mask-image: none;
+                        -webkit-mask-image: none;
+                    }
+                    #stores-section .horizontal-scroll:not(.expanded-grid) .store-card,
+                    #stores-section .horizontal-scroll:not(.expanded-grid) .rest-card,
+                    .desktop-only .horizontal-scroll:not(.expanded-grid) .rest-card,
+                    .desktop-only .horizontal-scroll:not(.expanded-grid) .store-card,
+                    #must-try-section .horizontal-scroll:not(.expanded-grid) .rest-card,
+                    #worth-trying-section .horizontal-scroll:not(.expanded-grid) .rest-card {
+                        min-width: 350px;
+                        max-width: 350px;
+                        width: 350px;
+                    }
+                    .rest-details {
+                        padding: 6px 2px 0;
+                    }
+                    .rest-header-row {
+                        margin-bottom: 2px;
+                        gap: 8px;
+                    }
+                    .rest-details h3 {
+                        font-size: 1.05rem;
+                        font-weight: 700;
+                        letter-spacing: -0.01em;
+                        line-height: 1.25;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                    .rest-rating {
+                        font-size: 0.9rem;
+                        font-weight: 600;
+                        transform: none;
+                        margin-right: 2px;
+                        flex-shrink: 0;
+                    }
+                    .rest-sub {
+                        font-size: 0.875rem;
+                        gap: 4px;
+                    }
+                    .rest-sub img {
+                        width: 16px !important;
+                        height: 16px !important;
+                    }
+                    .store-name { font-size: 1.05rem; }
+                    .store-meta { font-size: 0.875rem; }
                 }
                 .filter-pill {
                     background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);

@@ -1,0 +1,599 @@
+.sk-page {
+  min-height: 100dvh;
+  width: 100%;
+  background: var(--bg, #151514);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.sk-bone {
+  display: block;
+  background: rgba(255, 255, 255, 0.07);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.sk-bone::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 45%,
+    rgba(33, 234, 124, 0.08) 50%,
+    rgba(255, 255, 255, 0.06) 55%,
+    transparent 100%
+  );
+  animation: sk-shimmer 1.35s ease-in-out infinite;
+}
+
+@keyframes sk-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Show mobile by default; desktop only ≥1025px (same breakpoint as app) */
+.sk-only-desktop {
+  display: none;
+}
+
+.sk-only-mobile {
+  display: block;
+}
+
+.sk-h-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 0 4px;
+}
+
+.sk-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sk-rest-meta {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.sk-rest-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sk-rest-divider {
+  width: 1px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
+}
+
+.sk-rest-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.sk-rest-nav-right {
+  display: flex;
+  gap: 15px;
+}
+
+.sk-rest-cats {
+  display: flex;
+  gap: 15px;
+  overflow: hidden;
+  padding: 20px 16px 12px;
+}
+
+.sk-dish-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px 12px;
+  padding: 0 16px 20px;
+}
+
+.sk-dish-card {
+  width: 100%;
+}
+
+.sk-dish-photo {
+  width: 100% !important;
+  height: 0 !important;
+  padding-top: 100%;
+  border-radius: 25px;
+}
+
+/* ─── Menu mobile ─── */
+.sk-menu {
+  padding: 0;
+}
+
+.sk-menu-header {
+  position: relative;
+  z-index: 2;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px;
+  background: rgba(15, 15, 15, 0.55);
+  border-radius: 0 0 24px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sk-menu-header-inner {
+  position: relative;
+  height: 112px;
+}
+
+.sk-menu-avatar {
+  position: absolute;
+  top: 2px;
+  left: 0;
+}
+
+.sk-menu-lang {
+  position: absolute;
+  top: 2px;
+  right: 0;
+}
+
+.sk-menu-address {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.sk-menu-search {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+}
+
+.sk-menu-body {
+  padding: 20px 16px 100px;
+}
+
+.sk-menu-banner {
+  margin: 0 0 35px;
+}
+
+.sk-fast-travel {
+  position: relative;
+  width: min(343px, 100%);
+  height: 195px;
+  margin: 0 auto 35px;
+}
+
+.sk-ft-big {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.sk-ft-top {
+  position: absolute;
+  left: 184px;
+  top: 0;
+}
+
+.sk-ft-bot {
+  position: absolute;
+  left: 184px;
+  top: 95px;
+}
+
+.sk-ft-lab1 {
+  position: absolute;
+  left: 44px;
+  top: 162px;
+}
+
+.sk-ft-lab2 {
+  position: absolute;
+  left: 236px;
+  top: 70px;
+}
+
+.sk-ft-lab3 {
+  position: absolute;
+  left: 236px;
+  top: 162px;
+}
+
+@media (max-width: 380px) {
+  .sk-fast-travel {
+    transform: scale(0.9);
+    transform-origin: top center;
+    margin-bottom: 0;
+  }
+}
+
+.sk-h-scroll {
+  display: flex;
+  gap: 10px;
+  overflow: hidden;
+  margin: 0 -16px 15px;
+  padding: 0 16px;
+}
+
+.sk-h-card {
+  width: 286px;
+  flex-shrink: 0;
+}
+
+/* ─── Restaurant mobile ─── */
+.sk-restaurant {
+  padding: 0 0 100px;
+}
+
+.sk-rest-header {
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0 0 28px 28px;
+  padding: max(22px, calc(14px + env(safe-area-inset-top, 0px))) 16px 24px;
+  margin-bottom: 5px;
+}
+
+.sk-rest-menu {
+  background: rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28px 28px 0 0;
+  padding-bottom: 24px;
+}
+
+/* ─── List / Favorites ─── */
+.sk-list {
+  padding: calc(24px + env(safe-area-inset-top, 0px)) 16px 100px;
+}
+
+.sk-list-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  min-height: 44px;
+}
+
+.sk-list-back {
+  position: absolute;
+  left: 4px;
+}
+
+.sk-list-segment {
+  padding: 0 4px;
+  margin: 25px 0 24px;
+}
+
+.sk-list-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sk-v-card {
+  width: 100%;
+}
+
+/* ─── Desktop (≥1025) ─── */
+@media (min-width: 1025px) {
+  .sk-only-mobile {
+    display: none !important;
+  }
+
+  .sk-only-desktop {
+    display: block;
+  }
+
+  /* Desktop menu header — mirrors .pc-hd catalog header */
+  .sk-pc-header {
+    padding: 24px 0 16px;
+    background: rgba(15, 15, 15, 0.85);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 0 0 28px 28px;
+  }
+
+  .sk-pc-header--catalog {
+    padding: 0;
+    background: rgba(10, 10, 10, 0.98);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0 0 18px 18px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .sk-pc-header-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 60px;
+  }
+
+  .sk-pc-header-inner--catalog {
+    max-width: none;
+    height: 78px;
+    padding: 0 5vw;
+    gap: 20px;
+  }
+
+  .sk-pc-logo {
+    flex-shrink: 0;
+  }
+
+  .sk-pc-header-mid {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .sk-pc-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .sk-pc-search {
+    flex: 1;
+    max-width: 600px;
+    margin: 0 4px;
+  }
+
+  .sk-pc-addr,
+  .sk-pc-order {
+    flex-shrink: 0;
+  }
+
+  .sk-pc-body {
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 32px 24px 120px;
+  }
+
+  .sk-pc-section {
+    margin-bottom: 48px;
+  }
+
+  .sk-pc-section--compact {
+    margin-bottom: 28px;
+  }
+
+  .sk-pc-promo-row {
+    display: flex;
+    gap: 16px;
+    overflow: hidden;
+    margin-bottom: 36px;
+  }
+
+  .sk-pc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 350px);
+    gap: 20px;
+    justify-content: start;
+  }
+
+  .sk-pc-categories {
+    display: flex;
+    gap: 24px;
+    overflow: hidden;
+    padding: 4px 0 8px;
+  }
+
+  .sk-pc-cat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100px;
+    flex-shrink: 0;
+  }
+
+  .sk-pc-filters {
+    display: flex;
+    gap: 12px;
+    overflow: hidden;
+    flex-wrap: nowrap;
+  }
+
+  .sk-pc-row {
+    display: flex;
+    gap: 24px;
+    overflow: hidden;
+  }
+
+  .sk-pc-card {
+    width: 350px;
+    max-width: 350px;
+    flex: 0 0 350px;
+  }
+
+  .sk-pc-card-img {
+    width: 100% !important;
+    height: 0 !important;
+    padding-top: 50%; /* aspect-ratio 2/1 */
+    border-radius: 25px;
+  }
+
+  /* Desktop restaurant — mirrors .rest-content-wrapper */
+  .sk-pc-rest {
+    padding-bottom: 40px;
+  }
+
+  .sk-pc-rest-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 28px;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px 32px 48px;
+  }
+
+  .sk-pc-info-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    padding: 16px 20px 20px;
+    margin-bottom: 24px;
+  }
+
+  .sk-pc-info-card .sk-rest-nav {
+    margin-bottom: 26px;
+  }
+
+  .sk-pc-info-cats {
+    margin: 28px 0 0;
+    padding: 0;
+    gap: 6px;
+  }
+
+  .sk-pc-dish-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 18px;
+  }
+
+  .sk-pc-dish-grid .sk-dish-photo {
+    border-radius: 22px;
+  }
+
+  .sk-pc-cart {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    padding: 20px;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: sticky;
+    top: 24px;
+  }
+
+  .sk-pc-cart-empty {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+  }
+
+  /* Favorites desktop */
+  .sk-list-desktop {
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 24px 24px 120px;
+  }
+
+  .sk-list-header--desktop {
+    position: relative;
+    justify-content: center;
+    min-height: 56px;
+    margin-bottom: 24px;
+  }
+
+  .sk-list-segment--desktop {
+    max-width: 420px;
+    margin: 0 0 32px;
+    padding: 0;
+  }
+
+  /* Order status desktop */
+  .sk-order-desktop {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 24px 32px 48px;
+  }
+
+  .sk-order-top {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    margin-bottom: 8px;
+  }
+
+  .sk-order-top .sk-bone:first-child {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .sk-order-steps {
+    display: flex;
+    gap: 28px;
+    overflow: hidden;
+    padding: 20px 0 8px 4px;
+  }
+
+  .sk-order-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .sk-order-steps-mobile {
+    display: flex;
+    gap: 12px;
+    overflow: hidden;
+    padding: 0 16px;
+  }
+
+  .sk-list {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 24px 120px;
+  }
+
+  .sk-list-segment {
+    max-width: 420px;
+  }
+
+  .sk-list-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+  }
+
+  .sk-v-card-img {
+    width: 100% !important;
+    height: 0 !important;
+    padding-top: 50%;
+    border-radius: 25px;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1100px) {
+  .sk-pc-rest-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sk-pc-sidebar {
+    display: none;
+  }
+}

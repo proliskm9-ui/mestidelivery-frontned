@@ -5,29 +5,24 @@ import { useLanguage } from '../translations/LanguageContext';
 
 // SVG Icons
 const IconTrash = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="3 6 5 6 21 6" />
         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
     </svg>
 );
 
 const IconBack = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18" />
-        <line x1="6" y1="6" x2="18" y2="18" />
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
     </svg>
 );
 
 const IconCutlery = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 21l-4.35-4.35M9 3v10c0 1.1.9 2 2 2h0c1.1 0 2-.9 2-2V3m-4 0v18m14-18v18" />
-    </svg>
+    <img src="/Assets/fork-and-spoon 1.png" alt="" width={22} height={22} style={{ objectFit: 'contain' }} />
 );
 
 const IconComment = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
+    <img src="/Assets/speech-bubble 1.png" alt="" width={22} height={22} style={{ objectFit: 'contain' }} />
 );
 
 interface CartPageProps {
@@ -37,9 +32,10 @@ interface CartPageProps {
     onUpdateQuantity?: (productId: string, delta: number) => void;
     onAddToCart?: (product: Product) => void;
     onCheckout?: (data: { comment: string, cutlery: number }) => void;
+    deliveryFee?: number;
 }
 
-const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onClearCart, onUpdateQuantity, onAddToCart, onCheckout }) => {
+const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onClearCart, onUpdateQuantity, onAddToCart, onCheckout, deliveryFee = 6.00 }) => {
     const { t } = useLanguage();
 
     // Local state for cutlery and comment
@@ -53,7 +49,7 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
 
     // Calculate totals
     const subtotal = initialCartItems.reduce((sum, item) => sum + (Number(item.product.price) * item.quantity), 0);
-    const deliveryFee = 5.00; // Fixed for now
+    // deliveryFee is received from props
     
     let serviceFee = 0;
     if (subtotal > 0) {
@@ -109,79 +105,29 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
     if (initialCartItems.length === 0) {
         return (
             <div className="page-transition-wrapper">
-                <div style={{ color: 'white', padding: '40px', textAlign: 'center', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', background: '#000000' }}>
-                    <button
-                        onClick={onBack}
-                        style={{
-                            position: 'absolute',
-                            top: 'max(24px, env(safe-area-inset-top))',
-                            left: '20px',
-                            width: '44px',
-                            height: '44px',
-                            borderRadius: '50%',
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            color: 'white',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            backdropFilter: 'blur(15px)',
-                            WebkitBackdropFilter: 'blur(15px)',
-                            zIndex: 10
-                        }}
-                    >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                    </button>
+                <div className="cart-page-container cart-page-empty">
+                    <header className="empty-cart-header">
+                        <button type="button" className="ui-circle-btn" onClick={onBack} aria-label={t('common.back')}>
+                            <IconBack />
+                        </button>
+                        <h1>{t('cart.title')}</h1>
+                        <div className="empty-cart-header-spacer" aria-hidden="true" />
+                    </header>
 
-                    <img src="/Assets/корзина.png" alt="Empty" style={{ width: '280px', height: '195px', marginBottom: '24px', objectFit: 'contain' }} />
-
-                    <h2 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '16px', lineHeight: '22px', color: '#FFFFFF', margin: '0 0 8px 0', opacity: 1, textTransform: 'none', letterSpacing: 'normal' }}>
-                        {t('cart.empty_subtitle')}
-                    </h2>
-                    <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '14px', lineHeight: '22px', color: '#B5B5B5', margin: '0 0 0 0', opacity: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <span style={{ whiteSpace: 'nowrap' }}>{t('cart.empty_desc_1')}</span>
-                        <span style={{ whiteSpace: 'nowrap' }}>{t('cart.empty_desc_2')}</span>
+                    <div className="empty-cart-view">
+                        <div className="empty-cart-card">
+                            <img className="empty-cart-illustration" src="/Assets/корзина.png" alt="" />
+                            <h2>{t('cart.empty_subtitle')}</h2>
+                            <p>
+                                <span>{t('cart.empty_desc_1')}</span>
+                                <br />
+                                <span>{t('cart.empty_desc_2')}</span>
+                            </p>
+                            <button type="button" className="empty-cart-cta" onClick={onBack}>
+                                {t('cart.go_to_restaurants')}
+                            </button>
+                        </div>
                     </div>
-
-                    <button
-                        onClick={onBack}
-                        style={{
-                            position: 'fixed',
-                            bottom: 'calc(24px + env(safe-area-inset-bottom))',
-                            left: '0',
-                            right: '0',
-                            margin: '0 auto',
-                            width: '361px',
-                            maxWidth: 'calc(100vw - 32px)',
-                            height: '56px',
-                            background: '#21EA7C',
-                            color: '#000000',
-                            border: 'none',
-                            borderRadius: '16px',
-                            fontFamily: 'Inter, sans-serif',
-                            fontWeight: 600,
-                            fontSize: '17px',
-                            lineHeight: '10px',
-                            letterSpacing: '-0.2px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                            zIndex: 100
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(0.98)'; e.currentTarget.style.filter = 'brightness(1.1)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.filter = 'brightness(1)'; }}
-                        onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.95)'; }}
-                        onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(0.98)'; }}
-                        onTouchStart={(e) => { e.currentTarget.style.transform = 'scale(0.95)'; }}
-                        onTouchEnd={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-                    >
-                        {t('cart.go_to_restaurants')}
-                    </button>
                 </div>
             </div>
         );
@@ -191,29 +137,24 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
         <div className="page-transition-wrapper">
             <div className="cart-page-container">
 
-                {/* Desktop Layout Header */}
                 <header className="cart-main-header">
-                    <div className="header-left">
-                        <button className="back-circle-btn" onClick={onBack}>
-                            <IconBack />
-                        </button>
-                        <h1>{t('cart.title')}</h1>
-                    </div>
-
-                    <div className="header-right">
-                        <button className="clear-liquid-btn" onClick={handleClearCart}>
-                            <IconTrash />
-                            <span>{t('cart.clear')}</span>
-                        </button>
-                    </div>
+                    <button type="button" className="ui-circle-btn" onClick={onBack} aria-label={t('common.back')}>
+                        <IconBack />
+                    </button>
+                    <h1>{t('cart.title')}</h1>
+                    <button type="button" className="clear-cart-btn" onClick={handleClearCart} aria-label={t('cart.clear')}>
+                        <IconTrash />
+                    </button>
                 </header>
 
                 <div className="cart-main-content">
-                    {/* ITEMS SECTION */}
                     <div className="items-column">
-                        <div className="items-scroll-pane">
-                            {initialCartItems.map(({ product, quantity }) => (
-                                <div key={product.id} className="cart-premium-item">
+                        <div className="cart-glass-block">
+                            {initialCartItems.map(({ product, quantity }, index) => (
+                                <div
+                                    key={product.id}
+                                    className={`cart-premium-item${index < initialCartItems.length - 1 ? ' cart-premium-item--divided' : ''}`}
+                                >
                                     <div className="item-image-container">
                                         <img src={product.img || '/Assets/default-food.png'} alt={product.name} />
                                     </div>
@@ -221,63 +162,68 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                                     <div className="item-details">
                                         <div className="item-main-info">
                                             <h3>{product.name}</h3>
-                                            <p>{product.weight || `350 ${t('restaurant.grams')}`}</p>
-                                        </div>
-                                        <div className="item-pricing">
-                                            {(product.price * quantity).toFixed(2)} ₾
+                                            <div className="item-meta-row">
+                                                <span className="item-pricing">
+                                                    {(Number(product.price) * quantity).toFixed(2)} ₾
+                                                </span>
+                                                <span className="item-sep">·</span>
+                                                <span className="item-weight">
+                                                    {product.weight
+                                                        ? `${product.weight}${t('restaurant.grams')}`
+                                                        : `350 ${t('restaurant.grams')}`}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
 
                                     <div className="item-actions">
-                                        <div className="premium-qty-selector">
-                                            <button onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, -1)}>−</button>
+                                        <div className="qty-control">
+                                            <button type="button" onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, -1)}>−</button>
                                             <span>{quantity}</span>
-                                            <button onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, 1)}>+</button>
+                                            <button type="button" onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, 1)}>+</button>
                                         </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
 
-
-
-                        {/* Redesigned Sleek Extras */}
                         <div className="cart-extras-section">
                             <h3 className="extras-title">{t('cart.extras')}</h3>
 
-                            <div className="sleek-extra-row">
-                                <div className="sleek-extra-left">
-                                    <IconCutlery />
-                                    <span>{t('cart.cutlery')}</span>
-                                </div>
-                                <div className="sleek-qty-selector">
-                                    <button onClick={() => setCutleryCount(curr => Math.max(0, curr - 1))}>−</button>
-                                    <span>{cutleryCount}</span>
-                                    <button onClick={() => setCutleryCount(curr => curr + 1)}>+</button>
-                                </div>
-                            </div>
-
-                            <div className={`sleek-comment-container ${isCommentOpen ? 'open' : ''}`}>
-                                <div className="sleek-extra-row comment-toggle" onClick={() => setIsCommentOpen(!isCommentOpen)}>
-                                    <div className="sleek-extra-left">
-                                        <IconComment />
-                                        <span>{t('cart.comment')}</span>
+                            <div className="cart-extras-row">
+                                <div className="extra-card">
+                                    <div className="extra-info">
+                                        <IconCutlery />
+                                        <span className="extra-label">{t('cart.cutlery')}</span>
                                     </div>
-                                    <span className="arrow-indicator">{isCommentOpen ? '▲' : '▼'}</span>
+                                    <div className="qty-control">
+                                        <button type="button" onClick={() => setCutleryCount(curr => Math.max(0, curr - 1))}>−</button>
+                                        <span>{cutleryCount}</span>
+                                        <button type="button" onClick={() => setCutleryCount(curr => curr + 1)}>+</button>
+                                    </div>
                                 </div>
-                                {isCommentOpen && (
-                                    <textarea
-                                        className="sleek-textarea"
-                                        placeholder={t('cart.comment_placeholder')}
-                                        value={comment}
-                                        onChange={e => setComment(e.target.value)}
-                                        autoFocus
-                                    />
-                                )}
+
+                                <div className="comment-card">
+                                    <div className="comment-header" onClick={() => setIsCommentOpen(!isCommentOpen)}>
+                                        <div>
+                                            <IconComment />
+                                            <span>{t('cart.comment')}</span>
+                                        </div>
+                                        <span className="arrow-indicator">{isCommentOpen ? '▲' : '▼'}</span>
+                                    </div>
+                                    {isCommentOpen && (
+                                        <textarea
+                                            className="premium-textarea"
+                                            placeholder={t('cart.comment_placeholder')}
+                                            value={comment}
+                                            onChange={e => setComment(e.target.value)}
+                                            autoFocus
+                                        />
+                                    )}
+                                </div>
                             </div>
                         </div>
 
-                        {/* Recommendations Section */}
                         {recommendations.length > 0 && (
                             <div className="cart-recommendations-section">
                                 <h3 className="extras-title">{t('cart.recs_title')}</h3>
@@ -289,9 +235,9 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                                             </div>
                                             <div className="rec-info">
                                                 <div className="rec-name">{prod.name}</div>
-                                                <div className="rec-price">{prod.price.toFixed(0)} ₾</div>
+                                                <div className="rec-price">{Number(prod.price).toFixed(0)} ₾</div>
                                             </div>
-                                            <button className="rec-add-btn" onClick={() => onAddToCart && onAddToCart(prod)}>
+                                            <button type="button" className="rec-add-btn" onClick={() => onAddToCart && onAddToCart(prod)}>
                                                 {t('cart.add_btn')}
                                             </button>
                                         </div>
@@ -301,12 +247,9 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                         )}
                     </div>
 
-                    {/* SUMMARY SECTION (Sticky) */}
                     <div className="summary-column">
                         <div className="premium-summary-card">
-                            <div className="summary-header">
-                                <h3>{t('cart.details')}</h3>
-                            </div>
+                            <h2>{t('cart.details')}</h2>
 
                             <div className="summary-details">
                                 <div className="summary-line">
@@ -330,58 +273,48 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                                 <div className="total-value">{total.toFixed(2)} ₾</div>
                             </div>
 
-                            <button className="confirm-order-btn" onClick={handleCheckoutClick}>
+                            <button type="button" className="confirm-order-btn" onClick={handleCheckoutClick}>
                                 {t('cart.checkout')}
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M5 12h14M12 5l7 7-7 7" />
-                                </svg>
                             </button>
-
-                            <div className="summary-badges">
-                                <div className="badge">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-                                    {t('cart.safe_payment')}
-                                </div>
-                                <div className="badge">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
-                                    {t('cart.time')}
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* MOBILE FIXED BOTTOM BAR (Visible only on mobile) */}
                 <div className="mobile-checkout-bar">
-                    <button className="mobile-confirm-btn" onClick={handleCheckoutClick}>
-                        {t('cart.checkout')} - {total.toFixed(2)} ₾
+                    <div className="mobile-total-info">
+                        <span>{t('common.total')}</span>
+                        <span>{total.toFixed(2)} ₾</span>
+                    </div>
+                    <button type="button" className="mobile-confirm-btn" onClick={handleCheckoutClick}>
+                        {t('cart.checkout')}
                     </button>
                 </div>
             </div>
 
-            {/* Min Order Modal */}
             {showMinOrderModal && (
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowMinOrderModal(false)}>
-                    <div style={{ background: '#1c1c1e', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '400px', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
-                        <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px', color: '#fff', letterSpacing: '-0.5px' }}>{t('checkout.min_order_title')}</h2>
-                        <p style={{ fontSize: '15px', color: '#8e8e93', marginBottom: '24px', lineHeight: 1.4 }}>
+                <div className="min-order-overlay" onClick={() => setShowMinOrderModal(false)}>
+                    <div className="min-order-modal" onClick={e => e.stopPropagation()}>
+                        <h3>{t('checkout.min_order_title')}</h3>
+                        <p>
                             {t('checkout.min_order_desc').split('{diff}').map((part, index, arr) => (
                                 <React.Fragment key={index}>
                                     {part}
-                                    {index < arr.length - 1 && <strong style={{ color: '#fff' }}>{(50 - subtotal).toFixed(2)} GEL</strong>}
+                                    {index < arr.length - 1 && <strong>{(50 - subtotal).toFixed(2)} GEL</strong>}
                                 </React.Fragment>
                             ))}
                         </p>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <button 
+                        <div className="min-order-actions">
+                            <button
+                                type="button"
+                                className="min-order-primary"
                                 onClick={() => { setShowMinOrderModal(false); onBack(); }}
-                                className="panel-btn-next"
                             >
                                 {t('cart.go_to_restaurant')}
                             </button>
-                            <button 
+                            <button
+                                type="button"
+                                className="min-order-secondary"
                                 onClick={() => setShowMinOrderModal(false)}
-                                style={{ background: '#2c2c2e', color: '#fff', border: 'none', padding: '16px', borderRadius: '12px', fontSize: '16px', fontWeight: 600, width: '100%', cursor: 'pointer' }}
                             >
                                 {t('checkout.got_it')}
                             </button>

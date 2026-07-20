@@ -222,135 +222,155 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
     return (
         <div className="od-page">
             <div className="od-bg-glow" />
-            {/* Header — restaurant name centered, date below */}
-            <div className="od-header">
-                <button className="od-back-btn" onClick={onBack}><IconBack /></button>
-                <div className="od-header-center">
-                    <span className="od-header-title">{restName}</span>
-                    <span className="od-header-subtitle">{order.total?.toFixed(2)} ₾ · {dateStr}</span>
-                </div>
-                <div className="od-header-spacer" />
-            </div>
-
-            {/* Content */}
-            <div className="od-content">
-                {/* Help Button */}
-                <a
-                    className="od-help-btn"
-                    href="https://t.me/MestigoSupport_Bot"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <IconHelp />
-                    {t('order.help')}
-                </a>
-
-                {/* Address */}
-                <div className="od-address-card">
-                    <div className="od-address-icon"><IconPin /></div>
-                    <span className="od-address-text">{address}</span>
-                </div>
-
-                {/* Comment (if any) */}
-                {comment && (
-                    <div className="od-comment-card">
-                        <div className="od-comment-icon"><IconComment /></div>
-                        <span className="od-comment-text">{comment}</span>
+            <div className="od-shell">
+                {/* Header — restaurant name centered, date below */}
+                <div className="od-header">
+                    <button className="od-back-btn" onClick={onBack}><IconBack /></button>
+                    <div className="od-header-center">
+                        <span className="od-header-title">{restName}</span>
+                        <span className="od-header-subtitle od-header-subtitle-mobile">{order.total?.toFixed(2)} ₾ · {dateStr}</span>
+                        <span className="od-header-subtitle od-header-subtitle-pc">{dateStr !== '—' ? dateStr : ''}</span>
                     </div>
-                )}
+                    <div className="od-header-spacer" />
+                </div>
 
-                {/* Items */}
-                <h3 className="od-section-label">{t('order.items_structure')}</h3>
-                <div className="od-items-card">
-                    {items.map((item, i) => (
-                        <div className="od-item-row" key={i}>
-                            <span className="od-item-name">
-                                {item.name}
-                                <span className="od-item-qty"> {item.quantity}x</span>
-                            </span>
-                            <span className="od-item-price">{(item.price * item.quantity).toFixed(2)} ₾</span>
+                {/* Content */}
+                <div className="od-content">
+                    {/* PC-only hero */}
+                    <div className="od-pc-hero">
+                        <div className="od-pc-hero-total">
+                            <span className="od-pc-hero-label">{t('order.total')}</span>
+                            <span className="od-pc-hero-value">{order.total?.toFixed(2)} ₾</span>
                         </div>
-                    ))}
-                    {deliveryFee > 0 && (
-                        <div className="od-item-row">
-                            <span className="od-item-name">{t('order.delivery')}</span>
-                            <span className="od-item-price">{deliveryFee.toFixed(2)} ₾</span>
+                        <span className={`od-status-badge ${statusInfo.cls}`}>{statusInfo.label}</span>
+                    </div>
+
+                    {/* Help Button (mobile original) */}
+                    <a
+                        className="od-help-btn"
+                        href="https://t.me/MestigoSupport_Bot"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <IconHelp />
+                        {t('order.help')}
+                    </a>
+
+                    {/* Address */}
+                    <div className="od-address-card">
+                        <div className="od-address-icon"><IconPin /></div>
+                        <div className="od-address-copy">
+                            <span className="od-address-label">{t('checkout.address_title')}</span>
+                            <span className="od-address-text">{address}</span>
+                        </div>
+                    </div>
+
+                    {/* Comment (if any) */}
+                    {comment && (
+                        <div className="od-comment-card">
+                            <div className="od-comment-icon"><IconComment /></div>
+                            <span className="od-comment-text">{comment}</span>
                         </div>
                     )}
-                </div>
 
-                {/* Cost Summary */}
-                <h3 className="od-section-label">{t('order.cost')}</h3>
-                <div className="od-cost-card">
-                    <div className="od-cost-row">
-                        <span>{t('order.goods')}</span>
-                        <span className="od-cost-value">{itemsTotal.toFixed(2)} ₾</span>
-                    </div>
-                    <div className="od-cost-row">
-                        <span>{t('order.delivery')}</span>
-                        <span className="od-cost-value">{deliveryFee > 0 ? `${deliveryFee.toFixed(2)} ₾` : t('favorites.free')}</span>
-                    </div>
-                    {calculatedServiceFee > 0 && (
-                        <div className="od-cost-row">
-                            <span>{t('order.service_fee')}</span>
-                            <span className="od-cost-value">{calculatedServiceFee.toFixed(2)} ₾</span>
-                        </div>
-                    )}
-                    <div className="od-cost-row total">
-                        <span>{t('order.total')}</span>
-                        <span className="od-cost-value">{order.total?.toFixed(2)} ₾</span>
-                    </div>
-                </div>
-
-                {/* Status */}
-                <div className="od-status-section">
-                    <span className="od-status-label">{t('order.status')}</span>
-                    <span className={`od-status-badge ${statusInfo.cls}`}>{statusInfo.label}</span>
-                </div>
-
-                {/* Rating Section (only if delivered) */}
-                {order.status === 'delivered' && (
-                    <div className="od-rating-card">
-                        {ratingSubmitted || order.rating ? (
-                            <div className="od-rating-submitted">
-                                <span className="od-rating-title">{t('order.rating_title')}</span>
-                                <div className="od-stars">
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                        <div key={star} className={`od-star ${(order.rating || rating) >= star ? 'active' : ''}`} style={{ cursor: 'default' }}>
-                                            <IconStar filled={(order.rating || rating) >= star} />
-                                        </div>
-                                    ))}
-                                </div>
-                                <span className="od-rating-submitted-text">{t('order.thanks_rating')}</span>
-
+                    <div className="od-pc-receipt">
+                        <div className="od-pc-col od-pc-col-items">
+                            <h3 className="od-section-label od-label-items">{t('order.items_structure')}</h3>
+                            <div className="od-items-card">
+                                {items.map((item, i) => (
+                                    <div className="od-item-row" key={i}>
+                                        <span className="od-item-name">
+                                            {item.name}
+                                            <span className="od-item-qty od-item-qty-mobile"> {item.quantity}x</span>
+                                            <span className="od-item-qty od-item-qty-pc"> ×{item.quantity}</span>
+                                        </span>
+                                        <span className="od-item-price">{(item.price * item.quantity).toFixed(2)} ₾</span>
+                                    </div>
+                                ))}
+                                {deliveryFee > 0 && (
+                                    <div className="od-item-row od-item-row-delivery">
+                                        <span className="od-item-name">{t('order.delivery')}</span>
+                                        <span className="od-item-price">{deliveryFee.toFixed(2)} ₾</span>
+                                    </div>
+                                )}
                             </div>
-                        ) : (
-                            <button 
-                                onClick={() => setShowRatingModal(true)}
-                                style={{
-                                    width: '100%',
-                                    padding: '16px',
-                                    background: 'rgba(33, 234, 124, 0.1)',
-                                    borderRadius: '16px',
-                                    border: '1px solid rgba(33, 234, 124, 0.3)',
-                                    color: '#21EA7C',
-                                    fontWeight: 'bold',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '8px',
-                                    cursor: 'pointer',
-                                    fontSize: '16px',
-                                    transition: 'background 0.2s',
-                                    marginTop: '12px'
-                                }}
-                            >
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-                                {t('order.rate_order')}
-                            </button>
-                        )}
+                        </div>
+
+                        <div className="od-pc-col od-pc-col-cost">
+                            <h3 className="od-section-label od-label-cost">{t('order.cost')}</h3>
+                            <div className="od-cost-card">
+                                <div className="od-cost-row">
+                                    <span>{t('order.goods')}</span>
+                                    <span className="od-cost-value">{itemsTotal.toFixed(2)} ₾</span>
+                                </div>
+                                <div className="od-cost-row">
+                                    <span>{t('order.delivery')}</span>
+                                    <span className="od-cost-value">{deliveryFee > 0 ? `${deliveryFee.toFixed(2)} ₾` : t('favorites.free')}</span>
+                                </div>
+                                {calculatedServiceFee > 0 && (
+                                    <div className="od-cost-row">
+                                        <span>{t('order.service_fee')}</span>
+                                        <span className="od-cost-value">{calculatedServiceFee.toFixed(2)} ₾</span>
+                                    </div>
+                                )}
+                                <div className="od-cost-row total">
+                                    <span>{t('order.total')}</span>
+                                    <span className="od-cost-value">{order.total?.toFixed(2)} ₾</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                )}
+
+                    {/* Status (mobile) */}
+                    <div className="od-status-section">
+                        <span className="od-status-label">{t('order.status')}</span>
+                        <span className={`od-status-badge ${statusInfo.cls}`}>{statusInfo.label}</span>
+                    </div>
+
+                    {/* Rating Section (only if delivered) */}
+                    {order.status === 'delivered' && (
+                        <div className="od-rating-card">
+                            {ratingSubmitted || order.rating ? (
+                                <div className="od-rating-submitted">
+                                    <span className="od-rating-title">{t('order.rating_title')}</span>
+                                    <div className="od-stars">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <div key={star} className={`od-star ${(order.rating || rating) >= star ? 'active' : ''}`} style={{ cursor: 'default' }}>
+                                                <IconStar filled={(order.rating || rating) >= star} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <span className="od-rating-submitted-text">{t('order.thanks_rating')}</span>
+
+                                </div>
+                            ) : (
+                                <button 
+                                    onClick={() => setShowRatingModal(true)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '16px',
+                                        background: 'rgba(33, 234, 124, 0.1)',
+                                        borderRadius: '16px',
+                                        border: '1px solid rgba(33, 234, 124, 0.3)',
+                                        color: '#21EA7C',
+                                        fontWeight: 'bold',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '8px',
+                                        cursor: 'pointer',
+                                        fontSize: '16px',
+                                        transition: 'background 0.2s',
+                                        marginTop: '12px'
+                                    }}
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                                    {t('order.rate_order')}
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {showRatingModal && createPortal(

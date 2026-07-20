@@ -151,3 +151,85 @@
   margin-top: 24px;
   box-shadow: 0px 4px 5px 0px rgba(59, 180, 74, 0.20);
 }
+
+/* Desktop: centered card instead of bottom sheet */
+@media (min-width: 1025px) {
+  .tm-overlay.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 5000;
+  }
+
+  .tm-bottom-sheet {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    width: min(440px, calc(100vw - 48px));
+    max-width: 440px;
+    border-radius: 28px;
+    padding: 28px 24px 24px;
+    max-height: min(82vh, 680px);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+    z-index: 5001;
+  }
+
+  .tm-bottom-sheet.active {
+    animation: tmDesktopIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes tmDesktopIn {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .tm-slots-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    max-height: 360px;
+    overflow-y: auto;
+    padding-right: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .tm-slots-grid::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  .tm-slot-btn {
+    height: 44px;
+    border: 2px solid #2D2D2B;
+    border-radius: 12px;
+    background: transparent;
+    font-weight: 500;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+    padding: 0;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .tm-slot-btn:hover {
+    border-color: rgba(33, 234, 124, 0.4);
+  }
+
+  .tm-slot-btn.active {
+    border-color: rgba(33, 234, 124, 0.85);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
+  }
+}

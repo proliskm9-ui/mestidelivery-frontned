@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/translations/LanguageContext';
 import HeaderOrderStatus from './HeaderOrderStatus';
-import { YMaps, Map } from '@pbe/react-yandex-maps';
+import AddressConfirmModal from '../delivery/AddressConfirmModal';
 import PCHeader from './PCHeader';
+import './Header.css';
 
 const LANGUAGES = [
     { code: 'ru', name: 'Русский', flag: '/Assets/RU.png' },
@@ -31,6 +32,7 @@ interface HeaderProps {
     hideLogo?: boolean;
     searchPlaceholder?: string;
     onLogoClick?: () => void;
+    openAddressModalKey?: number;
 }
 
 const Header: React.FC<HeaderProps> = (props) => {
@@ -55,32 +57,24 @@ const Header: React.FC<HeaderProps> = (props) => {
     const [referralModalOpen, setReferralModalOpen] = useState(false);
     const [paymentModalOpen, setPaymentModalOpen] = useState(false);
     const [shareCopied, setShareCopied] = useState(false);
-    const [isDetectingLocation, setIsDetectingLocation] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isDesktop, setIsDesktop] = useState(false);
+    const openAddressModalKey = props.openAddressModalKey ?? 0;
 
     useEffect(() => {
         const checkDesktop = () => {
-            setIsDesktop(window.innerWidth > 768);
+            setIsDesktop(window.innerWidth > 1024);
         };
         checkDesktop();
         window.addEventListener('resize', checkDesktop);
         return () => window.removeEventListener('resize', checkDesktop);
     }, []);
 
-    const [tempStreet, setTempStreet] = useState('');
-    const [tempHouse, setTempHouse] = useState('');
-    const [tempApartment, setTempApartment] = useState('');
-    const [tempEntrance, setTempEntrance] = useState('');
-
     useEffect(() => {
-        if (mapOpen) {
-            setTempStreet(userAddress?.street || '');
-            setTempHouse(userAddress?.house || '');
-            setTempApartment(userAddress?.apartment || '');
-            setTempEntrance(userAddress?.entrance || '');
+        if (openAddressModalKey > 0) {
+            setMapOpen(true);
         }
-    }, [mapOpen, userAddress]);
+    }, [openAddressModalKey]);
 
     useEffect(() => {
         let ticking = false;
@@ -101,56 +95,6 @@ const Header: React.FC<HeaderProps> = (props) => {
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
-
-    const handleSaveAddress = () => {
-        onUpdateAddress?.({
-            ...userAddress,
-            street: tempStreet,
-            house: tempHouse,
-            apartment: tempApartment,
-            entrance: tempEntrance
-        });
-        setMapOpen(false);
-    };
-
-    const handleDetectLocation = () => {
-        if (!navigator.geolocation) return;
-        setIsDetectingLocation(true);
-        navigator.geolocation.getCurrentPosition((pos) => {
-            const { latitude, longitude } = pos.coords;
-            // Use the global ymaps object if available
-            const ymaps = (window as any).ymaps;
-            if (ymaps && ymaps.geocode) {
-                ymaps.geocode([latitude, longitude]).then((res: any) => {
-                    const firstGeoObject = res.geoObjects.get(0);
-                    if (firstGeoObject) {
-                        const street = firstGeoObject.getThoroughfare() || firstGeoObject.getPremise() || '';
-                        const house = firstGeoObject.getPremiseNumber() || '';
-                        setTempStreet(street);
-                        setTempHouse(house);
-                    }
-                }).finally(() => setIsDetectingLocation(false));
-            } else {
-                setIsDetectingLocation(false);
-            }
-        }, () => setIsDetectingLocation(false));
-    };
-
-    const handleMapBoundsChange = (e: any) => {
-        const ymaps = (window as any).ymaps;
-        if (!ymaps) return;
-        
-        const center = e.get('target').getCenter();
-        ymaps.geocode(center).then((res: any) => {
-            const firstGeoObject = res.geoObjects.get(0);
-            if (firstGeoObject) {
-                const street = firstGeoObject.getThoroughfare() || firstGeoObject.getPremise() || '';
-                const house = firstGeoObject.getPremiseNumber() || '';
-                if (street) setTempStreet(street);
-                if (house) setTempHouse(house);
-            }
-        });
-    };
 
     useEffect(() => {
         if (mapOpen || referralModalOpen) {
@@ -233,7 +177,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                             </div>
 
                             <div className="profile-container">
-                                <button className="user-avatar" onClick={() => onProfileClick && onProfileClick()}>
+                                <button type="button" className="user-avatar" onClick={() => onProfileClick && onProfileClick()}>
                                     {userProfile?.avatar && userProfile.avatar.length > 2 ? (
                                         <img src={userProfile.avatar} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     ) : (
@@ -268,99 +212,13 @@ const Header: React.FC<HeaderProps> = (props) => {
                 {onOrderClick && <HeaderOrderStatus onNavigate={onOrderClick} />}
             </div>
 
-            {mapOpen && (
-                <>
-                    <div className="modal-overlay pam-overlay" onClick={() => setMapOpen(false)}></div>
-                    <div className="premium-address-modal" onClick={e => e.stopPropagation()}>
-                        <div className="pam-header">
-                            <div>
-                                <h3 className="pam-title">{t('common.mestia')}</h3>
-                                <p className="pam-subtitle">{t('map.title')}</p>
-                            </div>
-                        </div>
-
-                        <div className="pam-map-visual" style={{ padding: 0, position: 'relative', overflow: 'hidden', height: '180px', borderRadius: '16px', marginBottom: '16px' }}>
-                            <YMaps query={{ apikey: '09cb021e-5a23-41f0-9979-14523fdbd16c', lang: 'ru_RU' }}>
-                                <Map
-                                    defaultState={{ center: [43.0445, 42.7278], zoom: 16 }}
-                                    width="100%"
-                                    height="100%"
-                                    onBoundsChange={handleMapBoundsChange}
-                                >
-                                    <div className="map-center-marker">
-                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" fill="#111"></path><circle cx="12" cy="10" r="3" fill="#21EA7C"></circle></svg>
-                                    </div>
-                                </Map>
-                            </YMaps>
-                            <button
-                                className={`pam-detect-btn ${isDetectingLocation ? 'is-detecting' : ''}`}
-                                onClick={handleDetectLocation}
-                                disabled={isDetectingLocation}
-                                style={{ position: 'absolute', bottom: '15px', right: '15px', zIndex: 10, background: 'rgba(255,255,255,0.95)', border: 'none', borderRadius: '12px', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '13px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
-                                <span>{isDetectingLocation ? '...' : t('map.where_am_i')}</span>
-                            </button>
-                        </div>
-
-                        <div className="address-fields-mini am-fields-v2">
-                            <div className="side-by-side">
-                                <div className={`pam-ct-input-wrapper ${tempStreet ? 'has-value' : ''}`}>
-                                    <span className="pam-ct-input-label">{t('checkout.street')}</span>
-                                    <input
-                                        type="text"
-                                        className="pam-ct-input"
-                                        placeholder={tempStreet ? '' : t('checkout.street')}
-                                        value={tempStreet}
-                                        onChange={e => setTempStreet(e.target.value)}
-                                    />
-                                </div>
-                                <div className={`pam-ct-input-wrapper ${tempHouse ? 'has-value' : ''}`}>
-                                    <span className="pam-ct-input-label">{t('checkout.house')}</span>
-                                    <input
-                                        type="text"
-                                        className="pam-ct-input"
-                                        placeholder={tempHouse ? '' : t('checkout.house')}
-                                        value={tempHouse}
-                                        onChange={e => setTempHouse(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="side-by-side">
-                                <div className={`pam-ct-input-wrapper ${tempApartment ? 'has-value' : ''}`}>
-                                    <span className="pam-ct-input-label">{t('checkout.apartment')}</span>
-                                    <input
-                                        type="text"
-                                        className="pam-ct-input"
-                                        placeholder={tempApartment ? '' : t('checkout.apartment')}
-                                        value={tempApartment}
-                                        onChange={e => setTempApartment(e.target.value)}
-                                    />
-                                </div>
-                                <div className={`pam-ct-input-wrapper ${tempEntrance ? 'has-value' : ''}`}>
-                                    <span className="pam-ct-input-label">{t('map.entrance')}</span>
-                                    <input
-                                        type="text"
-                                        className="pam-ct-input"
-                                        placeholder={tempEntrance ? '' : t('map.entrance')}
-                                        value={tempEntrance}
-                                        onChange={e => setTempEntrance(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <button
-                            className="pam-save-btn ct-confirm-btn"
-                            onClick={handleSaveAddress}
-                            disabled={!tempStreet || !tempHouse}
-                        >
-                            {t('map.confirm')}
-                        </button>
-                    </div>
-                </>
-            )}
+            <AddressConfirmModal
+                open={mapOpen}
+                onClose={() => setMapOpen(false)}
+                userAddress={userAddress}
+                onConfirm={(addr) => onUpdateAddress?.(addr)}
+                variant="mobile"
+            />
 
             {referralModalOpen && (
                 <div className="modal-overlay pam-overlay" onClick={() => setReferralModalOpen(false)}>

@@ -12,14 +12,16 @@
     display: flex;
     flex-direction: column;
     cursor: pointer;
-    margin-bottom: 24px;
+    margin-bottom: 18px;
 }
 
+/* Large card = small collection (286×142) scaled ~12% taller */
 .allRestaurantPreview {
     position: relative;
     width: 100%;
-    height: 180px;
-    background: transparent;
+    height: auto;
+    aspect-ratio: 286 / 160;
+    background: #1c1c1e;
     border-radius: 25px;
     overflow: hidden;
     background-position: center;
@@ -27,57 +29,105 @@
     background-size: cover;
 }
 
+.allRestaurantPreviewImg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.allRestaurantPreview--skeleton {
+    background-image: none !important;
+}
+
 .allRestaurantFavorite {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 32px;
-    height: 32px;
+    top: 8px;
+    right: 8px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     background: #21EA7C;
     border: none;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     cursor: pointer;
-    z-index: 2;
+    z-index: 3;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
 }
 
+.allRestaurantFavorite svg {
+    width: 21px;
+    height: 21px;
+}
+
 .allRestaurantInfo {
-    margin-top: 10px;
-    padding: 0 4px;
+    margin-top: 0;
+    padding: 0;
+    position: relative;
 }
 
 .allRestaurantNameRow {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+    position: relative;
 }
 
 .allRestaurantName {
     font-family: 'Inter', sans-serif;
     font-weight: 700;
-    font-size: 17px;
+    font-size: 16px;
+    line-height: 18px;
     color: #FFFFFF;
+    margin: 10px 0 0 5px;
+    padding: 0;
+    max-width: calc(100% - 52px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .allRestaurantRating {
-    font-family: 'Rubik', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-weight: 400;
     font-size: 14px;
+    line-height: 16px;
     color: #21EA7C;
-    /* transform: translateX(-6px); removed slightly offset */
+    position: absolute;
+    top: 9px;
+    right: 5px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
 }
 
 .allRestaurantDelivery {
-    font-family: 'Rubik', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-weight: 400;
-    font-size: 14px;
+    font-size: 13px;
+    line-height: 14px;
     color: #21EA7C;
-    margin-top: 4px;
+    margin-top: 6px;
+    margin-left: 0;
+    padding-left: 24px;
+    position: relative;
+    min-height: 16px;
     display: flex;
     align-items: center;
-    gap: 8px;
+}
+
+.allRestaurantDelivery img {
+    position: absolute;
+    left: 5px;
+    width: 17px;
+    height: 17px;
+    object-fit: contain;
+    top: 50%;
+    transform: translateY(-50%);
 }

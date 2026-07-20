@@ -9,12 +9,13 @@ from typing import Optional, List
 import jwt
 import bcrypt
 import logging
+import secrets
 
 from supabase_client import get_supabase
 from models import AdminUser, UserRole, Customer
 from schemas import (
     LoginRequest, LoginResponse, AdminUserResponse, CreateAdminRequest,
-    CustomerRegister, CustomerLogin, CustomerResponse, CustomerLoginResponse
+    CustomerRegister, CustomerLogin, CustomerGoogleAuth, CustomerResponse, CustomerLoginResponse
 )
 from config import SECRET_KEY, JWT_ALGORITHM, JWT_EXPIRE_DAYS
 
@@ -260,6 +261,66 @@ async def customer_login(data: CustomerLogin):
         
     token = create_token(customer['id'], 'customer')
     
+    return CustomerLoginResponse(
+        token=token,
+        user=CustomerResponse(
+            id=customer['id'],
+            email=customer['email'],
+            full_name=customer.get('full_name'),
+            phone=customer.get('phone')
+        )
+    )
+
+
+@router.post("/auth/customer/google", response_model=CustomerLoginResponse)
+async def customer_google(data: CustomerGoogleAuth):
+    """
+    Exchange Google identity for a backend JWT.
+    - Existing customer (by email): return JWT; phone optional.
+    - New customer: requires phone, creates account, returns JWT.
+    """
+    supabase = get_supabase()
+    if not supabase:
+        raise HTTPException(status_code=503, detail="Database unavailable")
+
+    email = data.email.strip().lower()
+    full_name = (data.full_name or '').strip() or 'User'
+    phone = (data.phone or '').strip() or None
+
+    existing = supabase.table("customers").select("*").ilike("email", email).execute()
+    if not existing.data:
+        # fallback exact match if ilike unsupported
+        existing = supabase.table("customers").select("*").eq("email", email).execute()
+
+    if existing.data:
+        customer = existing.data[0]
+        updates = {}
+        if full_name and full_name != 'User' and full_name != customer.get('full_name'):
+            updates['full_name'] = full_name
+        if phone and phone != customer.get('phone'):
+            updates['phone'] = phone
+        if updates:
+            updated = supabase.table("customers").update(updates).eq("id", customer['id']).execute()
+            if updated.data:
+                customer = updated.data[0]
+    else:
+        if not phone or len(phone) < 5:
+            raise HTTPException(
+                status_code=400,
+                detail="phone_required",
+            )
+        new_customer = {
+            "email": email,
+            "password_hash": hash_password(secrets.token_urlsafe(32)),
+            "full_name": full_name,
+            "phone": phone,
+        }
+        result = supabase.table("customers").insert(new_customer).execute()
+        if not result.data:
+            raise HTTPException(status_code=500, detail="Registration failed")
+        customer = result.data[0]
+
+    token = create_token(customer['id'], 'customer')
     return CustomerLoginResponse(
         token=token,
         user=CustomerResponse(

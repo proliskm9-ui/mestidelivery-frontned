@@ -3,6 +3,7 @@ import { useStore } from '../store/useStore';
 import type { Order } from '../api';
 import { api } from '../api';
 import { Phone, MapPin, ChevronDown, ChevronUp, Clock, CheckCircle2, ShoppingBag } from 'lucide-react';
+import FullPageLoader from '../../../components/UI/FullPageLoader';
 
 const REFRESH_MS = 4000;
 
@@ -105,7 +106,7 @@ export function CourierOrders() {
 
       {/* Content */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 60, color: 'var(--admin-text-muted)' }}>Загрузка...</div>
+        <FullPageLoader variant="list" />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 

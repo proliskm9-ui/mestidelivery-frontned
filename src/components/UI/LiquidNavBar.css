@@ -75,6 +75,17 @@
     height: 28px;
 }
 
+/* Basket is line-art — slight bump so weight matches solid icons */
+.icon-wrapper--cart {
+    width: 31px;
+    height: 31px;
+}
+
+.icon-wrapper--cart .nav-icon-img {
+    width: 31px;
+    height: 31px;
+}
+
 .icon-wrapper.active {
     transform: none;
 }
@@ -87,14 +98,14 @@
 }
 
 /* Hide tab bar on desktop — show only on mobile/tablet */
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
     .matte-glass-navbar-container {
         display: none !important;
     }
 }
 
 /* Hide tab bar when modal is open on mobile */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     body.modal-open .matte-glass-navbar-container {
         display: none !important;
     }

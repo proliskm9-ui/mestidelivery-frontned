@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { adminApi, type Product, type Restaurant, adminAuth } from '../../../services/adminService';
 import { EditIcon, TrashIcon, RefreshIcon } from '../../../components/icons/StatusIcons';
+import FullPageLoader from '../../../components/UI/FullPageLoader';
 
 export function RestaurantMenu() {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
@@ -170,7 +171,7 @@ export function RestaurantMenu() {
 
       {/* Products table */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 60, color: 'var(--admin-text-muted)' }}>Загрузка...</div>
+        <FullPageLoader variant="list" />
       ) : (
         <div className="admin-table-premium">
           <table className="admin-table">

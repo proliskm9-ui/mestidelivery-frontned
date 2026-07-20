@@ -5,7 +5,6 @@ import RestaurantCard from '../components/UI/RestaurantCard';
 import StoreCard from '../components/UI/StoreCard';
 import FullPageLoader from '../components/UI/FullPageLoader';
 import NetworkErrorState from '../components/UI/NetworkErrorState';
-import '../components/UI/Header.css';
 
 interface FavoritesPageProps {
     favorites: string[];
@@ -55,7 +54,7 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
 
     const totalFavoritesCount = favorites.length;
 
-    if (loading) return <FullPageLoader text={t('common.loading') as string} />;
+    if (loading) return <FullPageLoader variant="list" />;
     if (isNetworkError) return <NetworkErrorState />;
 
     if (totalFavoritesCount === 0) {
@@ -316,14 +315,39 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
                     gap: 0;
                 }
 
-                /* Restaurant card styling — matches main page vertical grid exactly */
+                @media (min-width: 1025px) {
+                    .favorites-page-container {
+                        max-width: 1400px;
+                        margin: 0 auto;
+                        padding: 24px 24px 120px;
+                    }
+                    .favorites-content {
+                        padding: 0 !important;
+                    }
+                    .fav-vertical-grid {
+                        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                        gap: 30px;
+                    }
+                    .fav-vertical-grid .rest-card,
+                    .fav-vertical-grid .store-card {
+                        margin-bottom: 0;
+                    }
+                    .fav-vertical-grid .rest-img,
+                    .fav-vertical-grid .store-bg {
+                        height: auto;
+                        aspect-ratio: 2 / 1;
+                    }
+                }
+
+                /* Restaurant card styling — matches menu large cards (small + ~12%) */
                 .fav-vertical-grid .rest-card {
                     cursor: pointer;
-                    margin-bottom: 24px;
+                    margin-bottom: 18px;
                 }
                 .fav-vertical-grid .rest-img {
                     width: 100%;
-                    height: 182px;
+                    height: auto;
+                    aspect-ratio: 286 / 160;
                     border-radius: 25px !important;
                     background-size: cover;
                     background-position: center;
@@ -333,15 +357,15 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
                     transform: translateZ(0);
                 }
                 .fav-vertical-grid .fav-btn {
-                    width: 38px !important;
-                    height: 38px !important;
-                    top: 10px !important;
-                    right: 10px !important;
+                    width: 34px !important;
+                    height: 34px !important;
+                    top: 8px !important;
+                    right: 8px !important;
                     background: #21EA7C !important;
                 }
                 .fav-vertical-grid .fav-btn svg {
-                    width: 24px !important;
-                    height: 24px !important;
+                    width: 21px !important;
+                    height: 21px !important;
                     stroke: black !important;
                 }
                 .fav-vertical-grid .rest-details {
@@ -355,69 +379,74 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
                 .fav-vertical-grid .rest-details h3 {
                     font-family: 'Inter', sans-serif !important;
                     font-size: 16px !important;
-                    font-weight: 800 !important;
-                    line-height: 16px !important;
+                    font-weight: 700 !important;
+                    line-height: 18px !important;
                     color: #FFFFFF !important;
-                    margin: 7px 0 0 5px !important;
+                    margin: 10px 0 0 5px !important;
                     padding: 0 !important;
                     text-transform: uppercase;
+                    max-width: calc(100% - 52px);
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
                 }
                 .fav-vertical-grid .rest-rating {
-                    font-size: 15px !important;
-                    font-weight: 500 !important;
-                    line-height: 17px !important;
+                    font-size: 14px !important;
+                    font-weight: 400 !important;
+                    line-height: 16px !important;
                     color: #21EA7C !important;
                     position: absolute !important;
-                    top: 6px !important;
+                    top: 9px !important;
                     right: 5px !important;
                     margin: 0 !important;
                     display: flex !important;
                     align-items: center !important;
-                    gap: 3px !important;
-                    transform: translateY(-2px) !important;
+                    gap: 2px !important;
+                    transform: none !important;
                 }
                 .fav-vertical-grid .rest-rating .star-icon {
-                    font-size: 14px !important;
-                    line-height: 14px !important;
-                    transform: translateY(0px) !important;
+                    font-size: 13px !important;
+                    line-height: 13px !important;
+                    transform: none !important;
                 }
                 .fav-vertical-grid .rest-sub {
                     margin-top: 6px !important;
                     margin-left: 0 !important;
-                    padding-left: 27px !important;
+                    padding-left: 24px !important;
                     position: relative !important;
-                    min-height: 20px !important;
+                    min-height: 16px !important;
                     display: flex !important;
                     align-items: center !important;
                 }
                 .fav-vertical-grid .rest-sub img {
                     position: absolute !important;
                     left: 5px !important;
-                    width: 20px !important;
-                    height: 20px !important;
+                    width: 17px !important;
+                    height: 17px !important;
                     object-fit: contain !important;
                     top: 50% !important;
                     transform: translateY(-50%) !important;
                 }
                 .fav-vertical-grid .rest-sub .rest-meta-content span {
                     font-family: 'Inter', sans-serif !important;
-                    font-size: 14px !important;
-                    font-weight: 500 !important;
+                    font-size: 13px !important;
+                    font-weight: 400 !important;
                     line-height: 14px !important;
                     color: #21EA7C !important;
                     display: inline-block !important;
-                    transform: translateY(0) !important;
+                    transform: none !important;
                 }
 
-                /* Store card styling — matches main page vertical grid */
+                /* Store card styling — matches menu large cards */
                 .fav-vertical-grid .store-card {
                     cursor: pointer;
                     display: block;
-                    margin-bottom: 24px;
+                    margin-bottom: 18px;
                 }
                 .fav-vertical-grid .store-bg {
-                    height: 182px;
+                    height: auto;
                     width: 100%;
+                    aspect-ratio: 286 / 160;
                     border-radius: 25px !important;
                     margin-bottom: 4px;
                     background-size: cover;
@@ -429,11 +458,12 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
                     position: relative;
                 }
                 .fav-vertical-grid .store-name {
-                    margin-top: 7px !important;
+                    margin-top: 10px !important;
                     margin-left: 5px;
                     font-family: 'Inter', sans-serif !important;
-                    font-weight: 800 !important;
+                    font-weight: 700 !important;
                     font-size: 16px !important;
+                    line-height: 18px !important;
                     color: #fff;
                     white-space: nowrap;
                     overflow: hidden;
@@ -443,10 +473,10 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
                 .fav-vertical-grid .store-meta {
                     margin-left: 5px;
                     font-family: 'Inter', sans-serif !important;
-                    font-size: 14px !important;
-                    font-weight: 500 !important;
+                    font-size: 13px !important;
+                    font-weight: 400 !important;
                     color: #21EA7C !important;
-                    margin-top: 4px !important;
+                    margin-top: 6px !important;
                 }
             `}</style>
         </div>

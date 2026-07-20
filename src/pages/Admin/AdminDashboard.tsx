@@ -443,7 +443,7 @@ export function AdminDashboard() {
         fetchData();
     }, [isSuperAdmin]);
 
-    if (loading) return <FullPageLoader text="Загрузка сводки..." />;
+    if (loading) return <FullPageLoader variant="list" />;
 
     // Analytics Calculations (Strict & Accurate)
     const today = new Date();

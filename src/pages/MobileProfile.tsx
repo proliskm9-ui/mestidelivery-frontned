@@ -140,7 +140,7 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                         <h2 className="mp-user-name">{userProfile?.name || t('profile.user_fallback')}</h2>
                         <p className="mp-user-phone">{userProfile?.phone || t('profile.phone')}</p>
                         <div className="mp-points-pill">
-                            <span>{userProfile?.points || 0} {t('profile.points_label') || 'баллов'}</span>
+                            <span>{userProfile?.points || 0} {t('profile.points_label')}</span>
                         </div>
                     </div>
                 </div>
@@ -206,18 +206,17 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                         {orderHistory.slice(0, 2).map((order, i) => {
                             const statusInfo = getStatusLabel(order.status);
                             const orderName = order.restaurant_name || `${t('common.order')} #${order.id}`;
-                            const orderAddress = order.address || (order.address?.street ? `${order.address.street}, ${order.address.house}` : '');
+                            const orderAddress = typeof order.address === 'string'
+                                ? order.address
+                                : [order.address?.street, order.address?.house].filter(Boolean).join(', ');
                             return (
                                 <div key={order.id || i} className="mp-order-item" onClick={() => onOrderClick?.(order.id)}>
                                     <div className="mp-order-main">
-                                        <h4 className="mp-order-name">
-                                            <span className="mp-order-title-text">{orderName}</span>
-                                            <span className="mp-order-title-time">, {formatTime(order)}</span>
-                                        </h4>
+                                        <h4 className="mp-order-name">{orderName}, {formatTime(order)}</h4>
                                         <span className="mp-order-meta">{orderAddress || '—'}</span>
                                     </div>
                                     <div className="mp-order-side">
-                                        <span className="mp-order-price">{order.total?.toFixed(2)} ₾</span>
+                                        <span className="mp-order-price">{Number(order.total || 0).toFixed(2)} ₾</span>
                                         <span className={`mp-order-status-badge ${statusInfo.class}`}>{statusInfo.label}</span>
                                     </div>
                                 </div>
@@ -346,7 +345,9 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                         {orderHistory.map((order, i) => {
                             const statusInfo = getStatusLabel(order.status);
                              const orderName = order.restaurant_name || `${t('common.order')} #${order.id}`;
-                            const orderAddress = order.address || '';
+                            const orderAddress = typeof order.address === 'string'
+                                ? order.address
+                                : [order.address?.street, order.address?.house].filter(Boolean).join(', ');
 
                             // Date grouping logic
                             const currentDate = formatHeaderDate(order);
@@ -364,14 +365,11 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                                             <img src="/Assets/general-green.png" alt="MestiGo" style={{ objectFit: 'contain', padding: '6px' }} />
                                         </div>
                                         <div className="mp-order-main">
-                                            <h4 className="mp-order-name">
-                                                <span className="mp-order-title-text">{orderName}</span>
-                                                <span className="mp-order-title-time">, {formatTime(order)}</span>
-                                            </h4>
+                                            <h4 className="mp-order-name">{orderName}, {formatTime(order)}</h4>
                                             <span className="mp-order-meta">{orderAddress || '—'}</span>
-                                        </div>
+                                          </div>
                                         <div className="mp-order-side">
-                                            <span className="mp-order-price">{order.total?.toFixed(2)} ₾</span>
+                                            <span className="mp-order-price">{Number(order.total || 0).toFixed(2)} ₾</span>
                                             <span className={`mp-order-status-badge ${statusInfo.class}`}>{statusInfo.label}</span>
                                         </div>
                                     </div>

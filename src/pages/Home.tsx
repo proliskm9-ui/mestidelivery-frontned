@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Bike } from 'lucide-react';
 import './Home.css';
 import PartnerForm from '../components/UI/PartnerForm';
 import { useLanguage } from '../translations/LanguageContext';
@@ -40,6 +42,13 @@ const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    useEffect(() => {
+        if (!drawerOpen) return;
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = prev; };
+    }, [drawerOpen]);
+
     const openPartnerForm = (type: 'restaurant' | 'courier') => {
         setPartnerType(type);
         setShowPartnerForm(true);
@@ -66,15 +75,16 @@ const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate
             <header className={`hd${isScrolled ? ' is-scrolled' : ''}`}>
                 <div className="hd-inner">
                     <div className="hd-logo" onClick={() => onNavigate('menu')}>
-                        <img src="/Assets/Loading/logo.png" alt="MestiDelivery" className="hd-logo-mark" />
-                        <span className="hd-logo-text">Mesti<span className="acc">Delivery</span></span>
+                        <span className="hd-logo-text"><span className="solid">Mesti</span><span className="logo-delivery">Delivery</span></span>
                     </div>
 
+                    <nav className="hd-nav">
+                        <button className="hd-link" onClick={() => onNavigate('menu')}>{t('nav.restaurants') || 'Рестораны'}<i /></button>
+                        <button className="hd-link" onClick={() => document.getElementById('partners-section')?.scrollIntoView({ behavior: 'smooth' })}>{t('nav.become_partner') || 'Стать партнером'}<i /></button>
+                        <a className="hd-link" href="https://t.me/MestigoSupport_Bot" target="_blank" rel="noopener noreferrer">{supportText}<i /></a>
+                    </nav>
+
                     <div className="hd-actions">
-                        <nav className="hd-nav">
-                            <button className="hd-link" onClick={() => onNavigate('menu')}>{t('nav.menu')}<i /></button>
-                            <a className="hd-link" href="https://t.me/MestigoSupport_Bot" target="_blank" rel="noopener noreferrer">{supportText}<i /></a>
-                        </nav>
                         <span className="hd-divider" />
                         <div className="hd-lang">
                             <button className="hd-lang-btn" onClick={() => setLangOpen(!langOpen)}>
@@ -109,9 +119,6 @@ const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate
                         </div>
                         <button className="hd-cta" onClick={() => onNavigate('login')}>
                             {registerText}
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
                         </button>
                         <button className="hd-burger" onClick={() => setDrawerOpen(true)} aria-label="Menu">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -127,45 +134,57 @@ const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate
                     <div className="hd-drawer" onClick={e => e.stopPropagation()}>
                         <div className="hd-drawer-head">
                             <div className="hd-logo" onClick={() => { setDrawerOpen(false); onNavigate('menu'); }}>
-                                <img src="/Assets/Loading/logo.png" alt="MestiDelivery" className="hd-logo-mark" />
-                                <span className="hd-logo-text">Mesti<span className="acc">Delivery</span></span>
+                                <span className="hd-logo-text"><span className="solid">Mesti</span><span className="logo-delivery">Delivery</span></span>
                             </div>
-                            <button className="hd-drawer-close" onClick={() => setDrawerOpen(false)} aria-label="Close">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                                    <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+                            <button
+                                type="button"
+                                className="hd-drawer-close ui-circle-btn"
+                                onClick={() => setDrawerOpen(false)}
+                                aria-label="Close"
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M18 6L6 18M6 6l12 12" />
                                 </svg>
                             </button>
                         </div>
+
                         <div className="hd-drawer-body">
-                            <button className="hd-drawer-link" onClick={() => { setDrawerOpen(false); onNavigate('menu'); }}>
-                                {t('nav.menu')}
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                            </button>
-                            <a className="hd-drawer-link" href="https://t.me/MestigoSupport_Bot" target="_blank" rel="noopener noreferrer" onClick={() => setDrawerOpen(false)}>
-                                {supportText}
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M7 17L17 7M9 7h8v8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                            </a>
+                            <nav className="hd-drawer-nav">
+                                <button className="hd-drawer-link" onClick={() => { setDrawerOpen(false); onNavigate('menu'); }}>
+                                    {t('nav.restaurants') || 'Рестораны'}
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                </button>
+                                <button className="hd-drawer-link" onClick={() => { setDrawerOpen(false); document.getElementById('partners-section')?.scrollIntoView({ behavior: 'smooth' }); }}>
+                                    {t('nav.become_partner') || 'Стать партнером'}
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                </button>
+                                <a className="hd-drawer-link" href="https://t.me/MestigoSupport_Bot" target="_blank" rel="noopener noreferrer" onClick={() => setDrawerOpen(false)}>
+                                    {supportText}
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M7 17L17 7M9 7h8v8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                </a>
+                            </nav>
 
-                            <div className="hd-drawer-lang">
-                                <span className="hd-drawer-label">{t('home.language')}</span>
-                                <div className="hd-drawer-langgrid">
-                                    {LANGUAGES.map(lang => (
-                                        <button
-                                            key={lang.code}
-                                            className={`hd-drawer-langcard${language === lang.code ? ' is-active' : ''}`}
-                                            onClick={() => { setLanguage(lang.code as any); setDrawerOpen(false); }}
-                                        >
-                                            <img src={lang.flag} alt={lang.name} />
-                                            <span>{lang.name}</span>
-                                        </button>
-                                    ))}
+                            <div className="hd-drawer-footer">
+                                <div className="hd-drawer-lang">
+                                    <span className="hd-drawer-label">{t('home.language')}</span>
+                                    <div className="hd-drawer-langrow">
+                                        {LANGUAGES.map(lang => (
+                                            <button
+                                                key={lang.code}
+                                                className={`hd-drawer-langpill${language === lang.code ? ' is-active' : ''}`}
+                                                onClick={() => { setLanguage(lang.code as any); }}
+                                            >
+                                                <img src={lang.flag} alt="" />
+                                                <span>{lang.name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
 
-                            <button className="hd-cta hd-drawer-cta" onClick={() => { setDrawerOpen(false); onNavigate('login'); }}>
-                                {registerText}
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                            </button>
+                                <button className="hd-cta hd-drawer-cta" onClick={() => { setDrawerOpen(false); onNavigate('login'); }}>
+                                    {registerText}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -205,9 +224,6 @@ const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate
                                     <h3>{t(`home.step${n}_title`)}</h3>
                                     <p>{t(`home.step${n}_desc`)}</p>
                                 </div>
-                                <svg className="hm-step-arrow" width="34" height="20" viewBox="0 0 34 20" fill="none" stroke="currentColor" strokeWidth="1.6">
-                                    <path d="M2 10h28M22 3l8 7-8 7" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
                             </li>
                         ))}
                     </ol>
@@ -239,9 +255,13 @@ const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate
                         </article>
 
                         <article className="hm-tile hm-tile--promo reveal-on-scroll">
+                            <div className="hm-promo-shot" aria-hidden="true">
+                                <img src="/Assets/photo_2026-02-11_23-14-27.jpg" alt="" />
+                            </div>
+                            <div className="hm-promo-glow" aria-hidden="true" />
+                            <span className="hm-promo-flag">promo</span>
                             <div className="hm-stat-mid hm-acc">−10₾</div>
                             <span className="hm-tile-foot">{t('home.stat_promo')}</span>
-                            <span className="hm-promo-flag">promo</span>
                         </article>
 
                         <article className="hm-tile hm-tile--zone reveal-on-scroll" style={{ backgroundImage: "url('/Assets/mestia_3d_map_grey_1770421992583.png')" }}>
@@ -254,19 +274,24 @@ const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate
                             <div className="hm-live-left">
                                 <span className="hm-tile-kick">{t('home.lo_kicker')}</span>
                                 <h3>{t('home.lo_title')}</h3>
-                                <p>{t('home.why_us_feature1_desc')}</p>
+                                <p>{t('home.lo_desc')}</p>
                             </div>
-                            <div className="hm-live-card">
-                                <div className="hm-live-top">
-                                    <span className="hm-live-rest">{t('home.lo_rest')}</span>
-                                    <span className="hm-live-eta">{t('home.lo_eta')}</span>
+                            <div
+                                className="hm-live-card"
+                                style={{ '--status-color': '#21ea7c' } as React.CSSProperties}
+                            >
+                                <div className="hm-live-aob-left">
+                                    <div className="hm-live-aob-icon">
+                                        <Bike size={26} strokeWidth={2} className="hm-live-anim-pulse" />
+                                    </div>
+                                    <div className="hm-live-aob-info">
+                                        <span className="hm-live-aob-status">{t('home.lo_status3')}</span>
+                                        <span className="hm-live-aob-time">{t('home.lo_eta')}</span>
+                                    </div>
                                 </div>
-                                <div className="hm-live-status">
-                                    {[1, 2, 3].map((n) => (
-                                        <span key={n} className={`hm-pill ${n < 3 ? 'is-done' : ''} ${n === 3 ? 'is-cur' : ''}`}>{t(`home.lo_status${n}`)}</span>
-                                    ))}
+                                <div className="hm-live-aob-right" aria-hidden>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
                                 </div>
-                                <div className="hm-live-bar"><i /></div>
                             </div>
                         </article>
                     </div>
@@ -274,7 +299,7 @@ const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate
             </div>
 
             {/* PARTNERS — full-bleed band over the Mestia mountains */}
-            <section className="hm-partners reveal-on-scroll" style={{ backgroundImage: "url('/Assets/Loading/mountains-background.png')" }}>
+            <section id="partners-section" className="hm-partners reveal-on-scroll" style={{ backgroundImage: "url('/Assets/Loading/mountains-background.png')" }}>
                 <div className="hm-partners-ovl" />
                 <div className="hm-partners-inner">
                     <span className="hm-kicker">{t('home.part_kicker')}</span>
@@ -282,12 +307,10 @@ const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate
                     <p className="hm-partners-sub">{t('home.partnership_subtitle')}</p>
                     <div className="hm-partners-cta">
                         <button className="hm-btn hm-btn--green" onClick={() => openPartnerForm('restaurant')}>
-                            {t('home.partner_restaurant_btn')}
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            <span>{t('home.partner_restaurant_btn')}</span>
                         </button>
                         <button className="hm-btn hm-btn--ghost" onClick={() => openPartnerForm('courier')}>
-                            {t('home.partner_courier_btn')}
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            <span>{t('home.partner_courier_btn')}</span>
                         </button>
                     </div>
                 </div>
@@ -295,19 +318,50 @@ const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate
 
             {/* Футер */}
             <footer className="home-footer">
-                <div className="hm-footer-mark" aria-hidden="true">MestiDelivery</div>
-                <div className="footer-content">
-                    <div className="footer-logo">
-                        <img src="/Assets/Loading/logo.png" alt="MestiDelivery" style={{ height: '36px', marginRight: '10px', verticalAlign: 'middle' }} />
-                        <span>Mesti<span style={{ color: '#21EA7C' }}>Delivery</span></span>
-                    </div>
-                    <div className="footer-links">
-                        <a href="#">{t('home.footer_about')}</a>
-                        <a href="#">{t('home.footer_contacts')}</a>
-                        <a href="#">{t('home.footer_faq')}</a>
-                        <a href="#">{t('home.footer_terms')}</a>
+                <div className="hm-footer-mark-wrapper" aria-hidden="true">
+                    <div className="hm-footer-mark-track">
+                        <span>MestiDelivery</span>
+                        <span>MestiDelivery</span>
+                        <span>MestiDelivery</span>
+                        <span>MestiDelivery</span>
                     </div>
                 </div>
+                <div className="footer-selections">
+                    <div className="footer-selection-col">
+                        <h4>{t('home.footer_popular_brands')}</h4>
+                        <ul>
+                            <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('menu'); }}>Sunset Restaurant</a></li>
+                            <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('menu'); }}>BBQ Garden</a></li>
+                            <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('menu'); }}>BURGERS</a></li>
+                            <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('menu'); }}>LUIZASTAN</a></li>
+                            <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('menu'); }}>SPAR</a></li>
+                        </ul>
+                    </div>
+                    <div className="footer-selection-col">
+                        <h4>{t('home.footer_popular_categories')}</h4>
+                        <ul>
+                            <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('menu'); }}>{language === 'ka' ? 'ადგილობრივი სამზარეულო' : language === 'en' ? 'Local Cuisine' : 'Местная кухня'}</a></li>
+                            <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('menu'); }}>{language === 'ka' ? 'ქართული სამზარეულო' : language === 'en' ? 'Georgian Cuisine' : 'Грузинская кухня'}</a></li>
+                            <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('menu'); }}>{language === 'ka' ? 'ბურგერები' : language === 'en' ? 'Burgers' : 'Бургеры'}</a></li>
+                            <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('menu'); }}>{language === 'ka' ? 'ცხობილა' : language === 'en' ? 'Bakery' : 'Выпечка'}</a></li>
+                            <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('menu'); }}>{language === 'ka' ? 'მწვადი' : language === 'en' ? 'Mtsvadi / BBQ' : 'Шашлык'}</a></li>
+                            <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('menu'); }}>{language === 'ka' ? 'პიცა' : language === 'en' ? 'Pizza' : 'Пицца'}</a></li>
+                            <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('menu'); }}>{language === 'ka' ? 'წვნიანი' : language === 'en' ? 'Soups' : 'Супы'}</a></li>
+                            <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('menu'); }}>{language === 'ka' ? 'ბლინები' : language === 'en' ? 'Pancakes' : 'Блины'}</a></li>
+                            <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('menu'); }}>{language === 'ka' ? 'დესერტები' : language === 'en' ? 'Desserts' : 'Десерты'}</a></li>
+                            <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('menu'); }}>{language === 'ka' ? 'ყველა კატეგორია' : language === 'en' ? 'All Categories' : 'Все категории'}</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div className="footer-links">
+                    <Link to="/legal#privacy">{t('home.footer_privacy')}</Link>
+                    <Link to="/legal#terms">{t('home.footer_terms')}</Link>
+                    <a href="#" onClick={(e) => { e.preventDefault(); openPartnerForm('restaurant'); }}>{t('home.footer_add_restaurant')}</a>
+                    <Link to="/legal#returns">{t('home.footer_refunds')}</Link>
+                    <a href="https://t.me/MestigoSupport_Bot" target="_blank" rel="noopener noreferrer">{t('home.footer_feedback')}</a>
+                </div>
+
                 <div className="footer-bottom">
                     <p>&copy; {new Date().getFullYear()} MestiDelivery. {t('home.footer_rights')}</p>
                 </div>

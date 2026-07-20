@@ -38,9 +38,10 @@ interface MobileCartProps {
     onUpdateQuantity?: (productId: string, delta: number) => void;
     onAddToCart?: (product: Product) => void;
     onCheckout?: (data: { comment: string, cutlery: number }) => void;
+    deliveryFee?: number;
 }
 
-const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], onClearCart, onUpdateQuantity, onAddToCart, onCheckout }) => {
+const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], onClearCart, onUpdateQuantity, onAddToCart, onCheckout, deliveryFee = 6.00 }) => {
     const { t } = useLanguage();
 
     const [comment, setComment] = useState('');
@@ -52,7 +53,7 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
 
     const totalItems = initialCartItems.reduce((sum, item) => sum + item.quantity, 0);
     const subtotal = initialCartItems.reduce((sum, item) => sum + (Number(item.product.price) * item.quantity), 0);
-    const deliveryFee = 5.00;
+    // deliveryFee is received from props
     
     let serviceFee = 0;
     if (subtotal > 0) {
@@ -284,10 +285,10 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                 totalItems={totalItems}
                 totalPrice={total}
                 deliveryTime={restaurant?.delivery || `30-35 ${t('checkout.min_short')}`}
+                deliveryFee={deliveryFee}
                 onNext={handleCheckoutClick}
                 buttonText={t('cart.checkout_btn')}
                 showPriceInButton={false}
-                priceLabel={`${t('cart.delivery')} 5₾`}
             />
 
             {/* Min Order Modal */}

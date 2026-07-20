@@ -539,7 +539,7 @@
     flex-shrink: 0;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .menu-compact-header {
         display: block;
     }
@@ -839,22 +839,12 @@
 }
 
 .pam-close-btn {
-    background: rgba(255, 255, 255, 0.05);
-    border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #8E8E93;
-    cursor: pointer;
-    transition: all 0.3s;
+    /* uses .ui-circle-btn */
+    flex-shrink: 0;
 }
 
 .pam-close-btn:hover {
     background: rgba(255, 255, 255, 0.1);
-    color: #fff;
 }
 
 .pam-map-visual {
@@ -1028,7 +1018,7 @@
     transform: scale(1.02);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .bottom-sheet-overlay {
         align-items: flex-end;
     }
@@ -1563,7 +1553,7 @@
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .premium-address-modal {
         position: fixed;
         bottom: 0;

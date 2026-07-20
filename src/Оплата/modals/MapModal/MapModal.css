@@ -67,10 +67,42 @@
 .mm-map-container {
   position: relative;
   overflow: hidden;
-  height: 235px;
+  height: 260px;
   border-radius: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mm-detect-btn {
+  z-index: 1000;
+}
+
+.mm-zone-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(33, 234, 124, 0.12);
+  border: 1px solid rgba(33, 234, 124, 0.28);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mm-zone-banner.is-prelim {
+  background: rgba(251, 191, 36, 0.12);
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+.mm-zone-tg {
+  color: #21EA7C;
+  text-decoration: underline;
+  font-weight: 700;
+  font-size: 12px;
 }
 
 .mm-detect-btn {
@@ -122,4 +154,28 @@
   color: rgba(255, 255, 255, 0.40);
   box-shadow: none;
   cursor: default;
+}
+
+@media (min-width: 1025px) {
+  .mm-overlay {
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    z-index: 5000;
+  }
+
+  .mm-bottom-sheet {
+    width: min(560px, calc(100vw - 48px));
+    max-width: 560px;
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transform: translateY(12px) scale(0.97);
+    opacity: 0;
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.32s ease;
+  }
+
+  .mm-bottom-sheet.active {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }

@@ -163,7 +163,7 @@ export function AdminWebhooks() {
         alert('Секретный ключ скопирован!');
     };
 
-    if (loading) return <FullPageLoader text="Загрузка вебхуков..." />;
+    if (loading) return <FullPageLoader variant="list" />;
 
     return (
         <div className="admin-page">

@@ -1,0 +1,76 @@
+rules_version = '2';
+
+/**
+ * Role model: Firestore documents (not Custom Claims).
+ * - customers → users/{uid} with role "customer"
+ * - admins    → admins/{uid}
+ * - partners  → partners/{uid} with partnerId
+ *
+ * Custom Claims would be stricter at the token level but require Cloud Functions
+ * to assign roles when creating admin/partner accounts manually. Document-based
+ * roles fit Spark plan + manual Console account creation.
+ */
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isCustomer() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isPartner() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/partners/$(request.auth.uid));
+    }
+
+    function partnerOwns(partnerId) {
+      return isPartner()
+        && get(/databases/$(database)/documents/partners/$(request.auth.uid)).data.partnerId == partnerId;
+    }
+
+    // Customer profiles — owner read/write only
+    match /users/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow create: if isSignedIn()
+        && request.auth.uid == uid
+        && request.resource.data.role == 'customer'
+        && request.resource.data.provider == 'google';
+      allow update: if isSignedIn()
+        && request.auth.uid == uid
+        && resource.data.role == 'customer'
+        && request.resource.data.role == 'customer';
+      allow delete: if false;
+    }
+
+    // Admins — no customer/partner access
+    match /admins/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if false; // create/update only via Console / Admin SDK
+    }
+
+    // Partners — scoped to own doc; no customer access
+    match /partners/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if false; // create/update only via Console / Admin SDK
+    }
+
+    // Example restaurant data for partners (adjust to your collections)
+    match /restaurants/{restaurantId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || partnerOwns(restaurantId);
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

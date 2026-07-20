@@ -3,9 +3,10 @@ Partner Requests Router
 Handles restaurant and courier partnership applications
 """
 from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 from datetime import datetime
+import re
 
 from supabase_client import get_supabase
 
@@ -16,13 +17,42 @@ router = APIRouter(prefix="/api/partners", tags=["partners"])
 # Schemas
 # =============================================================================
 
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
 class PartnerRequestCreate(BaseModel):
     type: str = Field(..., pattern="^(restaurant|courier)$")
     name: str = Field(..., min_length=2, max_length=100)
-    phone: str = Field(..., min_length=5, max_length=20)
-    email: Optional[EmailStr] = None
+    phone: str = Field(..., min_length=5, max_length=32)
+    email: Optional[str] = None
     company_name: Optional[str] = Field(None, max_length=200)
     message: Optional[str] = Field(None, max_length=1000)
+
+    @field_validator("email", "company_name", "message", mode="before")
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            v = v.strip()
+            return v or None
+        return v
+
+    @field_validator("name", "phone", mode="before")
+    @classmethod
+    def strip_required(cls, v):
+        if isinstance(v, str):
+            return v.strip()
+        return v
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v):
+        if v is None:
+            return None
+        if not _EMAIL_RE.match(v):
+            raise ValueError("Укажите корректный email или оставьте поле пустым")
+        return v
 
 
 class PartnerRequestResponse(BaseModel):
@@ -84,6 +114,8 @@ async def create_partner_request(request: PartnerRequestCreate):
             "request_id": result.data[0]["id"]
         }
     
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

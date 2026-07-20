@@ -110,6 +110,7 @@ export interface AddressData {
   landmark: string;
   comment: string;
   phone: string;
+  deliveryZone?: string;
 }
 
 interface AddressBlockProps {
@@ -218,7 +219,6 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
 
         {/* --- 2. ПОЛЯ ВВОДА --- */}
         <div className="fields-grid">
-
           {/* === ДОМ / КВАРТИРА === */}
           {currentType === 'home' && (
             <>

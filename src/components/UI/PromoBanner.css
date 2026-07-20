@@ -1,3 +1,4 @@
+/* ——— Mobile carousel (original) ——— */
 .promoBannerWrap {
     position: relative;
     width: 100%;
@@ -7,12 +8,6 @@
     display: none;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-@media (max-width: 768px) {
-    .promoBannerWrap {
-        display: block;
-    }
 }
 
 .promoBannerTrack {
@@ -62,4 +57,76 @@
     background: #fff;
     width: 16px;
     border-radius: 4px;
+}
+
+/* ——— Desktop cards ——— */
+.promoBannerSection {
+    display: none;
+    width: 100%;
+    margin: 4px 0 36px;
+}
+
+.promoBannerScroller {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+}
+
+.promoBannerScroller::-webkit-scrollbar {
+    display: none;
+}
+
+.promoBannerCard {
+    flex: 0 0 auto;
+    width: 480px;
+    height: 168px;
+    border-radius: 24px;
+    overflow: hidden;
+    scroll-snap-align: start;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+    background: #1a1a1a;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease;
+}
+
+.promoBannerCard:hover {
+    transform: translateY(-2px);
+}
+
+.promoBannerCardImg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
+}
+
+@media (max-width: 1024px) {
+    .promoBannerWrap {
+        display: block;
+    }
+
+    .promoBannerSection {
+        display: none;
+    }
+}
+
+@media (min-width: 1025px) {
+    .promoBannerWrap {
+        display: none;
+    }
+
+    .promoBannerSection {
+        display: block;
+    }
 }

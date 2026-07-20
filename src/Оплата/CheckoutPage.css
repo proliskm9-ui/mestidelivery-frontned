@@ -1,7 +1,7 @@
 /* Стили для мобильного оформления заказа (Оплата) */
 /* Все стили заскоупены под .mobile-checkout-wrapper чтобы не влиять на остальное приложение */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 
 .mobile-checkout-wrapper .page {
   width: 393px;

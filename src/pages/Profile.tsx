@@ -3,26 +3,31 @@ import './Profile.css';
 import { useLanguage } from '../translations/LanguageContext';
 import MobileProfile from './MobileProfile';
 
-// --- Icons ---
 const IconEdit = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
     </svg>
 );
 
-const SmallArrowIcon = ({ style }: { style?: React.CSSProperties }) => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={style}>
-        <path d="M9 18l6-6-6-6"></path>
+const SmallArrowIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 18l6-6-6-6" />
     </svg>
 );
 
 const IconPlus = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
     </svg>
 );
 
-type ProfileSection = 'dashboard' | 'personal' | 'addresses' | 'history' | 'support';
+const IconBack = () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+    </svg>
+);
+
+type ProfileSection = 'dashboard' | 'personal' | 'addresses' | 'history';
 
 interface ProfilePageProps {
     userAddress?: any;
@@ -42,12 +47,6 @@ const PRESET_AVATARS = [
     { id: 'av4', img: '/Assets/photo_2026-02-11_23-19-47.jpg', label: 'Art 4' }
 ];
 
-const IconArrowLeft = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
-    </svg>
-);
-
 const ProfilePage: React.FC<ProfilePageProps> = ({
     userAddress,
     onUpdateAddress,
@@ -60,31 +59,10 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
 }) => {
     const { t } = useLanguage();
     const [view, setView] = useState<ProfileSection>('dashboard');
-
-    const formatTime = (order: any) => {
-        const raw = order.created_at || order.date || order.timestamp;
-        if (!raw) return '—';
-        try {
-            const d = new Date(raw);
-            if (isNaN(d.getTime())) return '—';
-            const hours = d.getHours().toString().padStart(2, '0');
-            const mins = d.getMinutes().toString().padStart(2, '0');
-            return `${hours}:${mins}`;
-        } catch { return '—'; }
-    };
-
-    const getStatusLabel = (status?: string): { label: string, class: string } => {
-        const s = status?.toLowerCase() || 'delivered';
-        switch (s) {
-            case 'pending': return { label: t('status.pending'), class: 'pending' };
-            case 'preparing': return { label: t('status.preparing'), class: 'pending' };
-            case 'delivering': return { label: t('status.delivering'), class: 'pending' };
-            case 'cancelled': return { label: t('status.cancelled'), class: 'cancelled' };
-            default: return { label: t('status.delivered'), class: 'delivered' };
-        }
-    };
     const [avatarModal, setAvatarModal] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [editProfile, setEditProfile] = useState({ name: '', phone: '' });
+    const [editAddress, setEditAddress] = useState({ street: '', house: '', apartment: '', entrance: '' });
 
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -92,275 +70,376 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const handleBack = () => setView('dashboard');
-
     if (isMobile) {
-        return <MobileProfile userAddress={userAddress} onUpdateAddress={onUpdateAddress} userProfile={userProfile} onUpdateProfile={onUpdateProfile} orderHistory={orderHistory} onLogout={onLogout} onBack={onBack} onOrderClick={onOrderClick} />;
+        return (
+            <MobileProfile
+                userAddress={userAddress}
+                onUpdateAddress={onUpdateAddress}
+                userProfile={userProfile}
+                onUpdateProfile={onUpdateProfile}
+                orderHistory={orderHistory}
+                onLogout={onLogout}
+                onBack={onBack}
+                onOrderClick={onOrderClick}
+            />
+        );
     }
 
-    // Sub-renders
+    const formatTime = (order: any) => {
+        const raw = order.created_at || order.date || order.timestamp;
+        if (!raw) return '—';
+        try {
+            const d = new Date(raw);
+            if (isNaN(d.getTime())) return '—';
+            return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+        } catch {
+            return '—';
+        }
+    };
+
+    const getStatusLabel = (status?: string): { label: string; className: string } => {
+        const s = status?.toLowerCase() || 'delivered';
+        switch (s) {
+            case 'pending':
+            case 'confirmed':
+                return { label: t('status.pending'), className: 'pending' };
+            case 'preparing':
+                return { label: t('status.preparing'), className: 'pending' };
+            case 'ready':
+                return { label: t('status.ready'), className: 'pending' };
+            case 'delivering':
+                return { label: t('status.delivering'), className: 'pending' };
+            case 'cancelled':
+                return { label: t('status.cancelled'), className: 'cancelled' };
+            default:
+                return { label: t('status.delivered'), className: 'delivered' };
+        }
+    };
+
+    const openPersonal = () => {
+        setEditProfile({ name: userProfile?.name || '', phone: userProfile?.phone || '' });
+        setView('personal');
+    };
+
+    const openAddresses = () => {
+        setEditAddress({
+            street: userAddress?.street || '',
+            house: userAddress?.house || '',
+            apartment: userAddress?.apartment || '',
+            entrance: userAddress?.entrance || ''
+        });
+        setView('addresses');
+    };
+
+    const renderHeader = (title: string, onHeaderBack: () => void) => (
+        <header className="profile-header">
+            <button type="button" className="ui-circle-btn" onClick={onHeaderBack} aria-label={t('common.back')}>
+                <IconBack />
+            </button>
+            <h1>{title}</h1>
+            <div className="profile-header-spacer" aria-hidden="true" />
+        </header>
+    );
+
+    const renderOrderItem = (order: any, i: number) => {
+        const statusInfo = getStatusLabel(order.status);
+        const orderName = order.restaurant_name || `${t('common.order')} #${order.id}`;
+        const orderAddress = typeof order.address === 'string' ? order.address : (order.address?.street || '—');
+        return (
+            <button
+                key={order.id || i}
+                type="button"
+                className="mini-order-item"
+                onClick={() => onOrderClick?.(order.id)}
+            >
+                <div className="order-main-content">
+                    <h4 className="order-vendor-name">
+                        <span className="order-vendor-text">{orderName}</span>
+                        <span className="order-vendor-time">{formatTime(order)}</span>
+                    </h4>
+                    <span className="order-meta-info">{orderAddress || '—'}</span>
+                </div>
+                <div className="order-side-info">
+                    <span className="order-price-bold">{Number(order.total || 0).toFixed(2)} ₾</span>
+                    <span className={`order-status-pill ${statusInfo.className}`}>{statusInfo.label}</span>
+                </div>
+            </button>
+        );
+    };
+
     const renderPersonal = () => (
-        <div className="bento-card" style={{ gridColumn: 'span 6' }}>
-            <div className="profile-header" style={{ marginBottom: 30 }}>
-                <h2>{t('profile.personal_data')}</h2>
-                <button className="back-btn-minimal" onClick={handleBack}>{t('common.back')}</button>
-            </div>
-            <div className="personal-form-bento">
-                <div className="bento-input-group">
-                    <label>{t('profile.name')}</label>
-                    <input
-                        className="bento-input"
-                        value={userProfile?.name || ''}
-                        onChange={e => onUpdateProfile?.({ name: e.target.value })}
-                    />
-                </div>
-                <div className="bento-input-group">
-                    <label>{t('profile.phone')}</label>
-                    <input
-                        className="bento-input"
-                        value={userProfile?.phone || ''}
-                        onChange={e => onUpdateProfile?.({ phone: e.target.value })}
-                    />
-                </div>
-                <button className="bento-primary-btn" onClick={handleBack}>{t('common.save')}</button>
-            </div>
-        </div>
-    );
-
-    const renderAddresses = () => (
-        <div className="bento-card" style={{ gridColumn: 'span 6' }}>
-            <div className="profile-header" style={{ marginBottom: 30 }}>
-                <h2>{t('profile.addresses')}</h2>
-                <button className="back-btn-minimal" onClick={handleBack}>{t('common.back')}</button>
-            </div>
-
-            <div className="personal-form-bento">
-                <div className="bento-input-group">
-                    <label>{t('profile.street')}</label>
-                    <input
-                        className="bento-input"
-                        value={userAddress?.street || ''}
-                        onChange={e => onUpdateAddress?.({ ...userAddress, street: e.target.value })}
-                    />
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
+        <>
+            {renderHeader(t('profile.personal_data'), () => setView('dashboard'))}
+            <div className="bento-card bento-card--form">
+                <div className="personal-form-bento">
                     <div className="bento-input-group">
-                        <label>{t('profile.house')}</label>
-                        <input className="bento-input" value={userAddress?.house || ''} onChange={e => onUpdateAddress?.({ ...userAddress, house: e.target.value })} />
+                        <label>{t('profile.name')}</label>
+                        <input
+                            className="bento-input"
+                            value={editProfile.name}
+                            onChange={(e) => setEditProfile({ ...editProfile, name: e.target.value })}
+                        />
                     </div>
                     <div className="bento-input-group">
-                        <label>{t('map.entrance')}</label>
-                        <input className="bento-input" value={userAddress?.entrance || ''} onChange={e => onUpdateAddress?.({ ...userAddress, entrance: e.target.value })} />
+                        <label>{t('profile.phone')}</label>
+                        <input
+                            className="bento-input"
+                            value={editProfile.phone}
+                            onChange={(e) => setEditProfile({ ...editProfile, phone: e.target.value })}
+                        />
                     </div>
-                    <div className="bento-input-group">
-                        <label>{t('profile.apartment')}</label>
-                        <input className="bento-input" value={userAddress?.apartment || ''} onChange={e => onUpdateAddress?.({ ...userAddress, apartment: e.target.value })} />
-                    </div>
-                </div>
-                <button className="bento-primary-btn" onClick={handleBack}>{t('profile.update')}</button>
-            </div>
-        </div>
-    );
-
-    const renderHistory = () => (
-        <div className="bento-card" style={{ gridColumn: 'span 12' }}>
-            <div className="profile-header" style={{ marginBottom: 30 }}>
-                <h2>{t('profile.history_title')}</h2>
-                <button className="back-btn-minimal" onClick={handleBack}>{t('common.back')}</button>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                {orderHistory.map((order, i) => {
-                    const statusInfo = getStatusLabel(order.status);
-                    const orderName = order.restaurant_name || `${t('common.order')} #${order.id}`;
-                    const orderAddress = order.address || '';
-                    return (
-                        <div key={order.id || i} className="mini-order-item" style={{ marginBottom: 0, cursor: 'pointer' }} onClick={() => onOrderClick?.(order.id)}>
-                            <div className="order-icon-box">
-                                <img src="/Assets/general-green.png" alt="MestiGo" style={{ objectFit: 'contain', padding: '6px' }} />
-                            </div>
-                            <div className="order-main-content">
-                                <h4 className="order-vendor-name">{orderName}, {formatTime(order)}</h4>
-                                <span className="order-meta-info">{orderAddress || '—'}</span>
-                            </div>
-                            <div className="order-side-info">
-                                <span className="order-price-bold">{order.total?.toFixed(2)} ₾</span>
-                                <span className={`order-status-pill ${statusInfo.class}`}>{statusInfo.label}</span>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
-    );
-
-    const renderDashboard = () => (
-        <div className="bento-grid">
-            {/* 1. Profile Summary Card */}
-            <div className="bento-card card-profile-main">
-                <div className="main-avatar-box" style={{ borderRadius: '50%' }} onClick={() => setAvatarModal(true)}>
-                    {userProfile?.avatar?.length > 2 ? (
-                        <img src={userProfile.avatar} alt="Avatar" style={{ borderRadius: '50%' }} />
-                    ) : (
-                        <span>👤</span>
-                    )}
-                    <div className="edit-overlay-btn" style={{ borderRadius: '50%' }}><IconEdit /></div>
-                </div>
-                <div className="main-user-info">
-                    <h2>{userProfile?.name || t('profile.user_fallback')}</h2>
-                    <p>{userProfile?.phone || t('profile.phone')}</p>
-                    <div className="points-pill">
-                        <span>{userProfile?.points || 0} {t('profile.points_label')}</span>
-                    </div>
-                </div>
-                <button
-                    className="bento-icon-btn"
-                    style={{ marginLeft: 'auto', background: 'rgba(255,255,255,0.05)', color: 'white' }}
-                    onClick={() => setView('personal')}
-                >
-                    <IconEdit />
-                </button>
-            </div>
-
-            {/* 2. Order History Card */}
-            <div className="bento-card card-orders">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                    <span className="card-label" style={{ margin: 0 }}>{t('profile.history_title')}</span>
-                    {orderHistory.length > 0 && (
-                        <button className="see-all" onClick={() => setView('history')}>
-                            <span>{t('menu.all')}</span>
-                            <span><SmallArrowIcon /></span>
-                        </button>
-                    )}
-                </div>
-                <div style={{ marginTop: '5px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {orderHistory.length === 0 ? (
-                        <div style={{ padding: '20px 0', opacity: 0.4 }}>{t('profile.history_empty')}</div>
-                    ) : (
-                        orderHistory.slice(0, 2).map((order, i) => {
-                            const statusInfo = getStatusLabel(order.status);
-                            const orderName = order.restaurant_name || `${t('common.order')} #${order.id}`;
-                            const orderAddress = order.address || '';
-                            return (
-                                <div key={order.id || i} className="mini-order-item" onClick={() => onOrderClick?.(order.id)}>
-                                    <div className="order-main-content">
-                                        <h4 className="order-vendor-name">{orderName}, {formatTime(order)}</h4>
-                                        <span className="order-meta-info">{orderAddress || '—'}</span>
-                                    </div>
-                                    <div className="order-side-info">
-                                        <span className="order-price-bold">{order.total?.toFixed(2)} ₾</span>
-                                        <span className={`order-status-pill ${statusInfo.class}`}>{statusInfo.label}</span>
-                                    </div>
-                                </div>
-                            );
-                        })
-                    )}
-                </div>
-            </div>
-
-            {/* 3. Address Card */}
-            <div className="bento-card card-address">
-                <div className="address-content-bento">
-                    <div>
-                        <span className="card-label">{t('profile.addresses')}</span>
-                        <p className="address-preview">
-                            {userAddress?.street ? `${userAddress.street}, ${userAddress.house}` : t('common.select_address')}
-                        </p>
-                    </div>
-                    <button className="bento-icon-btn" onClick={() => setView('addresses')}>
-                        <IconPlus />
+                    <button
+                        type="button"
+                        className="bento-primary-btn"
+                        onClick={() => {
+                            onUpdateProfile?.(editProfile);
+                            setView('dashboard');
+                        }}
+                    >
+                        {t('common.save')}
                     </button>
                 </div>
             </div>
+        </>
+    );
 
-            {/* 4. Support Card */}
-            <div className="bento-card card-support" onClick={() => window.open('https://t.me/MestigoSupport_Bot', '_blank')} style={{ cursor: 'pointer' }}>
-                <span className="card-label">{t('profile.support')}</span>
-                <div style={{ marginTop: 10 }}>
-                    <p style={{ fontSize: '14px', color: 'var(--grey)' }}>{t('profile.support_desc')}</p>
+    const renderAddresses = () => (
+        <>
+            {renderHeader(t('profile.addresses'), () => setView('dashboard'))}
+            <div className="bento-card bento-card--form">
+                <div className="personal-form-bento">
+                    <div className="bento-input-group">
+                        <label>{t('profile.street')}</label>
+                        <input
+                            className="bento-input"
+                            value={editAddress.street}
+                            onChange={(e) => setEditAddress({ ...editAddress, street: e.target.value })}
+                        />
+                    </div>
+                    <div className="bento-input-row">
+                        <div className="bento-input-group">
+                            <label>{t('profile.house')}</label>
+                            <input
+                                className="bento-input"
+                                value={editAddress.house}
+                                onChange={(e) => setEditAddress({ ...editAddress, house: e.target.value })}
+                            />
+                        </div>
+                        <div className="bento-input-group">
+                            <label>{t('map.entrance')}</label>
+                            <input
+                                className="bento-input"
+                                value={editAddress.entrance}
+                                onChange={(e) => setEditAddress({ ...editAddress, entrance: e.target.value })}
+                            />
+                        </div>
+                        <div className="bento-input-group">
+                            <label>{t('profile.apartment')}</label>
+                            <input
+                                className="bento-input"
+                                value={editAddress.apartment}
+                                onChange={(e) => setEditAddress({ ...editAddress, apartment: e.target.value })}
+                            />
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        className="bento-primary-btn"
+                        onClick={() => {
+                            onUpdateAddress?.(editAddress);
+                            setView('dashboard');
+                        }}
+                    >
+                        {t('profile.update')}
+                    </button>
                 </div>
             </div>
+        </>
+    );
 
-            {/* Logout */}
-            <div className="logout-link-bento" onClick={onLogout}>
-                {t('profile.logout')}
+    const renderHistory = () => (
+        <>
+            {renderHeader(t('profile.history_title'), () => setView('dashboard'))}
+            <div className="bento-card bento-card--form">
+                {orderHistory.length === 0 ? (
+                    <div className="profile-empty">{t('profile.history_empty')}</div>
+                ) : (
+                    <div className="history-grid">
+                        {orderHistory.map(renderOrderItem)}
+                    </div>
+                )}
             </div>
-        </div>
+        </>
+    );
+
+    const renderDashboard = () => (
+        <>
+            {renderHeader(t('profile.title'), () => onBack?.())}
+            <div className="bento-grid">
+                <div className="bento-card card-profile-main">
+                    <button type="button" className="main-avatar-box" onClick={() => setAvatarModal(true)} aria-label={t('profile.choose_avatar')}>
+                        {userProfile?.avatar?.length > 2 ? (
+                            <img src={userProfile.avatar} alt="" />
+                        ) : (
+                            <span className="main-avatar-fallback">{(userProfile?.name || '?').charAt(0).toUpperCase()}</span>
+                        )}
+                        <span className="edit-overlay-btn"><IconEdit /></span>
+                    </button>
+                    <div className="main-user-info">
+                        <h2>{userProfile?.name || t('profile.user_fallback')}</h2>
+                        <p>{userProfile?.phone || t('profile.phone')}</p>
+                        <div className="points-pill">
+                            <span>{userProfile?.points || 0} {t('profile.points_label')}</span>
+                        </div>
+                    </div>
+                    <button type="button" className="bento-ghost-btn" onClick={openPersonal} aria-label={t('profile.personal_data')}>
+                        <IconEdit />
+                    </button>
+                </div>
+
+                <div className="bento-card card-orders">
+                    <div className="card-orders-head">
+                        <h3 className="card-label">{t('profile.history_title')}</h3>
+                        {orderHistory.length > 0 && (
+                            <button type="button" className="see-all" onClick={() => setView('history')}>
+                                <span>{t('menu.all')}</span>
+                                <span><SmallArrowIcon /></span>
+                            </button>
+                        )}
+                    </div>
+                    {orderHistory.length === 0 ? (
+                        <div className="profile-empty">{t('profile.history_empty')}</div>
+                    ) : (
+                        <div className="orders-list">
+                            {orderHistory.slice(0, 3).map(renderOrderItem)}
+                        </div>
+                    )}
+                </div>
+
+                <div className="bento-card card-address">
+                    <div className="address-content-bento">
+                        <div className="address-block-top">
+                            <h3 className="card-label">{t('profile.addresses')}</h3>
+                            <button
+                                type="button"
+                                className={`address-chip ${userAddress?.street ? 'has-address' : 'is-empty'}`}
+                                onClick={openAddresses}
+                            >
+                                <span className="address-chip-icon" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                        <circle cx="12" cy="10" r="3" />
+                                    </svg>
+                                </span>
+                                <span className="address-chip-text">
+                                    {userAddress?.street ? (
+                                        <>
+                                            <span className="address-chip-line">
+                                                {userAddress.street}
+                                                {userAddress.house ? `, ${userAddress.house}` : ''}
+                                            </span>
+                                            {(userAddress.apartment || userAddress.entrance) && (
+                                                <span className="address-chip-meta">
+                                                    {[
+                                                        userAddress.apartment && `${userAddress.apartment}`,
+                                                        userAddress.entrance && `${t('map.entrance')} ${userAddress.entrance}`,
+                                                    ].filter(Boolean).join(' · ')}
+                                                </span>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <span className="address-chip-line">{t('common.select_address')}</span>
+                                    )}
+                                </span>
+                            </button>
+                        </div>
+                        <button type="button" className="bento-icon-btn" onClick={openAddresses} aria-label={t('profile.addresses')}>
+                            <IconPlus />
+                        </button>
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    className="bento-card card-support"
+                    onClick={() => window.open('https://t.me/MestigoSupport_Bot', '_blank')}
+                >
+                    <h3 className="card-label">{t('profile.support')}</h3>
+                    <p className="support-preview">{t('profile.support_desc')}</p>
+                </button>
+
+                <button type="button" className="logout-link-bento" onClick={onLogout}>
+                    {t('profile.logout')}
+                </button>
+            </div>
+        </>
     );
 
     return (
         <div className="profile-page-wrapper">
+            <div className="profile-glow" aria-hidden="true" />
             <div className="profile-container">
-                <header className="profile-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                    <h1>{t('profile.title')}</h1>
-                    {view === 'dashboard' && (
-                        <button
-                            onClick={onBack}
-                            style={{
-                                background: 'none',
-                                border: 'none',
-                                borderRadius: '0',
-                                padding: '0',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'var(--primary)',
-                                transition: 'all 0.3s'
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-                            onMouseLeave={e => e.currentTarget.style.color = 'var(--primary)'}
-                        >
-                            <IconArrowLeft />
-                        </button>
-                    )}
-                </header>
-
-                <main>
-                    {view === 'dashboard' && renderDashboard()}
-                    {view === 'personal' && renderPersonal()}
-                    {view === 'addresses' && renderAddresses()}
-                    {view === 'history' && renderHistory()}
-                </main>
+                {view === 'dashboard' && renderDashboard()}
+                {view === 'personal' && renderPersonal()}
+                {view === 'addresses' && renderAddresses()}
+                {view === 'history' && renderHistory()}
             </div>
 
-            {/* Avatar Modal */}
             {avatarModal && (
                 <div className="bento-modal-overlay" onClick={() => setAvatarModal(false)}>
-                    <div className="bento-modal" onClick={e => e.stopPropagation()}>
-                        <h3 style={{ textAlign: 'center' }}>{t('profile.choose_avatar')}</h3>
+                    <div className="bento-modal avatar-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="avatar-modal-header">
+                            <div>
+                                <h3 className="avatar-modal-title">{t('profile.choose_avatar')}</h3>
+                                <p className="avatar-modal-subtitle">{t('profile.choose_avatar_hint')}</p>
+                            </div>
+                            <button
+                                type="button"
+                                className="avatar-modal-close ui-circle-btn"
+                                onClick={() => setAvatarModal(false)}
+                                aria-label={t('common.cancel')}
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M18 6L6 18M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
                         <div className="emoji-grid">
-                            {PRESET_AVATARS.map(av => (
-                                <div
+                            {PRESET_AVATARS.map((av) => (
+                                <button
                                     key={av.id}
+                                    type="button"
                                     className={`emoji-btn ${userProfile?.avatar === av.img ? 'active' : ''}`}
                                     onClick={() => {
                                         onUpdateProfile?.({ avatar: av.img });
                                         setAvatarModal(false);
                                     }}
-                                    style={{
-                                        borderRadius: '50%',
-                                        overflow: 'hidden',
-                                        aspectRatio: '1',
-                                        padding: 0,
-                                        background: 'var(--card-bg)'
-                                    }}
                                 >
-                                    <img src={av.img} alt={av.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                </div>
+                                    <img src={av.img} alt={av.label} />
+                                </button>
                             ))}
                         </div>
-                        <label className="bento-primary-btn" style={{ background: 'rgba(255,255,255,0.05)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '1px solid var(--card-border)' }}>
+                        <label className="bento-primary-btn avatar-upload-btn">
                             {t('profile.upload_photo')}
-                            <input type="file" hidden accept="image/*" onChange={e => {
-                                const file = e.target.files?.[0];
-                                if (file) {
+                            <input
+                                type="file"
+                                hidden
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
                                     const reader = new FileReader();
-                                    reader.onloadend = () => { onUpdateProfile?.({ avatar: reader.result }); setAvatarModal(false); };
+                                    reader.onloadend = () => {
+                                        onUpdateProfile?.({ avatar: reader.result });
+                                        setAvatarModal(false);
+                                    };
                                     reader.readAsDataURL(file);
-                                }
-                            }} />
+                                }}
+                            />
                         </label>
-                        <button className="back-btn-minimal" style={{ width: '100%', marginTop: 16 }} onClick={() => setAvatarModal(false)}>{t('common.cancel')}</button>
+                        <button type="button" className="bento-secondary-btn" onClick={() => setAvatarModal(false)}>
+                            {t('common.cancel')}
+                        </button>
                     </div>
                 </div>
             )}

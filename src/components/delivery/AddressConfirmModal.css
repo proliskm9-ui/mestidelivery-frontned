@@ -1,0 +1,318 @@
+.addr-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.addr-confirm {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    max-height: min(94vh, 860px);
+    display: flex;
+    flex-direction: column;
+    background: #161614;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.55);
+    font-family: 'Outfit', Inter, sans-serif;
+    color: #fff;
+}
+
+.addr-confirm__close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 20;
+}
+
+.addr-confirm__map {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 280px;
+    height: min(42vh, 380px);
+    background: #1a1a1a;
+}
+
+.addr-confirm__map-fallback {
+    height: 100%;
+    background: #1a1a1a;
+}
+
+.addr-confirm__pin-tip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, calc(-100% - 42px));
+    z-index: 12;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: #fff;
+    color: #111;
+    font-size: 0.82rem;
+    font-weight: 650;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+    animation: addrPinTipIn 0.35s ease;
+}
+
+.addr-confirm__pin-tip::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -6px;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #fff;
+    border-bottom: 0;
+}
+
+@keyframes addrPinTipIn {
+    from { opacity: 0; transform: translate(-50%, calc(-100% - 28px)); }
+    to { opacity: 1; transform: translate(-50%, calc(-100% - 42px)); }
+}
+
+.addr-confirm__locate {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    z-index: 12;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    background: rgba(18, 18, 18, 0.92);
+    color: #21EA7C;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.addr-confirm__locate:disabled,
+.addr-confirm__locate.is-busy {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.addr-confirm__sheet {
+    flex-shrink: 0;
+    max-height: min(54vh, 460px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 18px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+    background: #1a1a18;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    -webkit-overflow-scrolling: touch;
+}
+
+.addr-confirm__title {
+    margin: 0 0 8px;
+    padding: 0 4px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.addr-confirm__sub {
+    margin: 0 0 14px;
+    padding: 0 4px;
+    color: #8E8E93;
+    font-size: 0.92rem;
+    line-height: 1.4;
+}
+
+.addr-confirm__approx {
+    margin: 0 0 14px;
+    padding: 0 4px;
+    font-size: 0.9rem;
+}
+
+.addr-confirm__approx.muted {
+    color: #8E8E93;
+}
+
+.addr-confirm__place {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 12px;
+    padding: 12px 4px 14px;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    color: #fff;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.addr-confirm__place-text {
+    min-width: 0;
+    flex: 1;
+}
+
+.addr-confirm__place-text strong {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 750;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+}
+
+.addr-confirm__place-note {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.3;
+    color: rgba(255, 255, 255, 0.38);
+}
+
+.addr-confirm__chev {
+    flex-shrink: 0;
+    color: #8E8E93;
+    transition: transform 0.2s ease;
+}
+
+.addr-confirm__place.is-open .addr-confirm__chev {
+    transform: rotate(180deg);
+}
+
+.addr-confirm__grid {
+    width: 100%;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    margin: 0 0 14px;
+    animation: addrGridIn 0.22s ease;
+}
+
+@keyframes addrGridIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.addr-confirm__cell {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    height: 52px;
+    padding: 0 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.045);
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    outline: none;
+}
+
+.addr-confirm__cell--wide {
+    grid-column: 1 / -1;
+}
+
+.addr-confirm__cell:focus {
+    border-color: #21EA7C;
+}
+
+.addr-confirm__cell::placeholder {
+    color: #8E8E93;
+    font-weight: 500;
+}
+
+.addr-confirm__cta {
+    width: 100%;
+    box-sizing: border-box;
+    height: 54px;
+    border: none;
+    border-radius: 16px;
+    background: #21EA7C;
+    color: #000;
+    font-family: inherit;
+    font-size: 1.02rem;
+    font-weight: 750;
+    cursor: pointer;
+    transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.addr-confirm__cta:hover:not(:disabled) {
+    background: #1ad96f;
+}
+
+.addr-confirm__cta:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.addr-confirm-overlay--mobile {
+    align-items: flex-end;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.addr-confirm--mobile {
+    max-width: none;
+    width: 100%;
+    max-height: 94vh;
+    border-radius: 24px 24px 0 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+}
+
+.addr-confirm--mobile .addr-confirm__map {
+    min-height: 36vh;
+    height: 38vh;
+    flex: 0 0 auto;
+}
+
+.addr-confirm--mobile .addr-confirm__sheet {
+    max-height: none;
+    flex: 1 1 auto;
+    width: 100%;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+@media (max-width: 1024px) {
+    .addr-confirm-overlay--pc {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .addr-confirm--pc {
+        max-width: none;
+        width: 100%;
+        border-radius: 24px 24px 0 0;
+    }
+
+    .addr-confirm--pc .addr-confirm__map {
+        min-height: 34vh;
+        height: 36vh;
+        flex: 0 0 auto;
+    }
+
+    .addr-confirm--pc .addr-confirm__sheet {
+        width: 100%;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}

@@ -267,6 +267,8 @@ export type Order = {
     restaurant_confirmed?: boolean;
     courier_confirmed?: boolean;
     courier_id?: number;
+    delivery_lat?: number;
+    delivery_lng?: number;
 };
 
 export type Product = {
@@ -321,4 +323,14 @@ export type Restaurant = {
     spot_id?: string;
     poster_token?: string;
     poster_spot_id?: number;
+    min_order?: number;
+    category?: string;
+    promo?: string;
+    promo_text?: string;
+    has_promo?: boolean;
+    is_must_try?: boolean;
+    is_worth_trying?: boolean;
+    must_try_sort?: number;
+    worth_trying_sort?: number;
+    filter_tags?: string;
 };

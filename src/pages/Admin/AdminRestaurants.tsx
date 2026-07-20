@@ -102,7 +102,7 @@ export function AdminRestaurants() {
         setIsModalOpen(true);
     };
 
-    if (loading) return <FullPageLoader text="Загрузка списка ресторанов..." />;
+    if (loading) return <FullPageLoader variant="list" />;
 
     return (
         <div className="admin-page">
@@ -144,6 +144,16 @@ export function AdminRestaurants() {
                                 </td>
                                  <td style={{ fontWeight: 600 }}>
                                      <div>{r.name}</div>
+                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
+                                     {r.is_must_try ? (
+                                         <span style={{ fontSize: '0.7rem', color: '#21EA7C', background: 'rgba(33,234,124,0.08)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(33,234,124,0.18)', fontWeight: 600 }}>Must Try</span>
+                                     ) : null}
+                                     {r.is_worth_trying ? (
+                                         <span style={{ fontSize: '0.7rem', color: '#7dd3fc', background: 'rgba(125,211,252,0.08)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(125,211,252,0.18)', fontWeight: 600 }}>Worth Trying</span>
+                                     ) : null}
+                                     {r.has_promo ? (
+                                         <span style={{ fontSize: '0.7rem', color: '#fbbf24', background: 'rgba(251,191,36,0.08)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(251,191,36,0.18)', fontWeight: 600 }}>Promo</span>
+                                     ) : null}
                                      {r.poster_token && r.poster_spot_id ? (
                                          <div style={{ 
                                              display: 'inline-flex', 
@@ -154,13 +164,13 @@ export function AdminRestaurants() {
                                              background: 'rgba(33, 234, 124, 0.06)',
                                              padding: '2px 8px',
                                              borderRadius: '6px',
-                                             marginTop: '4px',
                                              fontWeight: 600,
                                              border: '1px solid rgba(33, 234, 124, 0.15)'
                                          }}>
                                              <span style={{ fontSize: '0.78rem' }}>🔌</span> Poster активен
                                          </div>
                                      ) : null}
+                                     </div>
                                  </td>
                                  <td><span style={{ color: '#FFD700' }}>★</span> {r.rating}</td>
                                 <td style={{ color: 'var(--admin-text-muted)', fontWeight: 600 }}>{r.delivery}</td>

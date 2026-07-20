@@ -5,6 +5,10 @@ import { api, restaurantCache } from '../services/api';
 import IsometricBoxLoader from '../components/UI/IsometricBoxLoader';
 import { Clock } from 'lucide-react';
 import { useLanguage } from '../translations/LanguageContext';
+import { formatCheckoutAddress, formatCourierComment } from '../utils/checkoutAddress';
+
+/** Keepz payment link — Tribute removed. */
+const PAYMENT_URL = 'https://tiny.keepz.me/5ab2hxer';
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 
@@ -154,7 +158,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
         try {
             const userId      = localStorage.getItem('user_id') || 'anonymous';
             const addr        = orderData?.address || {};
-            const fullAddress = [addr.street, addr.house, addr.apartment, addr.floor].filter(Boolean).join(', ');
+            const fullAddress = formatCheckoutAddress(addr);
             const restaurantId = cartItems?.[0]?.product?.restaurant_id || '';
 
             const items = (cartItems || []).map((ci: any) => ({
@@ -174,7 +178,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                 phone:            addr.phone || '',
                 address:          fullAddress,
                 comment:          (orderData?.restaurantComment || '') + ` [Оплата: ${selectedMethod === 'cash' ? 'Cash' : selectedMethod === 'card' ? 'Card' : 'Crypto'}]`,
-                courier_comment:  addr.comment || '',
+                courier_comment:  formatCourierComment(addr),
                 cutlery_count:    orderData?.cutleryCount || 0,
                 apartment:        addr.apartment || '',
                 entrance:         addr.entrance || '',
@@ -184,6 +188,10 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                 scheduled_time:   orderData?.deliveryType === 'scheduled' ? orderData?.scheduledTime : null,
                 promo_code:       orderData?.promoCode || '',
                 tips:             orderData?.tip || 0,
+                delivery_fee:     Number(orderData?.deliveryFee ?? 0) || 0,
+                service_fee:      Number(orderData?.serviceFee ?? 0) || 0,
+                delivery_lat:     Number(orderData?.deliveryLat ?? 0) || 0,
+                delivery_lng:     Number(orderData?.deliveryLng ?? 0) || 0,
                 idempotency_key:  idempotencyKey,
                 payment_method:   selectedMethod,
             };
@@ -214,11 +222,8 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                 return;
             }
 
-            // ── CARD / CRYPTO: redirect, then wait for webhook ────────────
-            const paymentUrl = (result as any).payment_url
-                || (selectedMethod === 'crypto'
-                    ? `https://t.me/CryptoBot?start=pay_${result.id}`
-                    : `https://t.me/tribute?startapp=pay_${result.id}`);
+            // ── CARD / CRYPTO: open Keepz payment, wait for confirmation path ──
+            const paymentUrl = (result as any).payment_url || PAYMENT_URL;
 
             // Small delay so user sees the "creating" state
             await new Promise(r => setTimeout(r, 800));
@@ -247,7 +252,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
         try {
             const userId      = localStorage.getItem('user_id') || 'anonymous';
             const addr        = orderData?.address || {};
-            const fullAddress = [addr.street, addr.house, addr.apartment, addr.floor].filter(Boolean).join(', ');
+            const fullAddress = formatCheckoutAddress(addr);
             const restaurantId = cartItems?.[0]?.product?.restaurant_id || '';
 
             const items = (cartItems || []).map((ci: any) => ({
@@ -272,7 +277,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                 phone:            addr.phone || '',
                 address:          fullAddress,
                 comment:          (orderData?.restaurantComment || '') + commentSuffix,
-                courier_comment:  addr.comment || '',
+                courier_comment:  formatCourierComment(addr),
                 cutlery_count:    orderData?.cutleryCount || 0,
                 apartment:        addr.apartment || '',
                 entrance:         addr.entrance || '',
@@ -282,6 +287,10 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                 scheduled_time:   null, // Backend expects full timestamp, passing string range causes 22007 error
                 promo_code:       orderData?.promoCode || '',
                 tips:             orderData?.tip || 0,
+                delivery_fee:     Number(orderData?.deliveryFee ?? 0) || 0,
+                service_fee:      Number(orderData?.serviceFee ?? 0) || 0,
+                delivery_lat:     Number(orderData?.deliveryLat ?? 0) || 0,
+                delivery_lng:     Number(orderData?.deliveryLng ?? 0) || 0,
                 idempotency_key:  idempotencyKey,
                 payment_method:   'card',
                 status:           'pending_payment',
@@ -395,12 +404,9 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                                 )}
                                 <button
                                     className="mp-reopen-btn"
-                                    onClick={async () => {
+                                    onClick={() => {
                                         if (!orderId) return;
-                                        const url = method === 'crypto'
-                                            ? `https://t.me/CryptoBot?start=pay_${orderId}`
-                                            : `https://t.me/tribute?startapp=pay_${orderId}`;
-                                        openPaymentUrl(url);
+                                        openPaymentUrl(PAYMENT_URL);
                                     }}
                                 >
                                     {t('checkout.open_payment_page')}
@@ -475,7 +481,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                                     <div className="mp-qr-container">
                                         <div className="mp-qr-frame">
                                             <QRCodeSVG 
-                                                value="https://tiny.keepz.me/5ab2hxer"
+                                                value={PAYMENT_URL}
                                                 size={180}
                                                 bgColor={"transparent"}
                                                 fgColor={"#000000"}
@@ -489,7 +495,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                                         <button 
                                             className="mp-pay-button-primary"
                                             onClick={() => {
-                                                openPaymentUrl('https://tiny.keepz.me/5ab2hxer');
+                                                openPaymentUrl(PAYMENT_URL);
                                                 setPaymentLinkOpened(true);
                                             }}
                                         >
@@ -501,13 +507,20 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                                                 className="mp-pay-button-primary mp-pay-confirmed"
                                                 onClick={handleConfirmPaid}
                                             >
+                                                <svg className="mp-pay-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                                                    <polyline points="20 6 9 17 4 12" />
+                                                </svg>
                                                 {t('checkout.i_paid')}
                                             </button>
                                             <button
                                                 className="mp-pay-button-secondary"
-                                                onClick={() => openPaymentUrl('https://tiny.keepz.me/5ab2hxer')}
+                                                onClick={() => openPaymentUrl(PAYMENT_URL)}
                                             >
                                                 {t('checkout.open_payment_page')}
+                                                <svg className="mp-pay-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                                                    <path d="M7 17L17 7" />
+                                                    <path d="M8 7h9v9" />
+                                                </svg>
                                             </button>
                                         </>
                                     )}
@@ -518,7 +531,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                                 </div>
 
                                 <div className="mp-method-btn" onClick={() => {
-                                    openPaymentUrl('https://tiny.keepz.me/5ab2hxer');
+                                    openPaymentUrl(PAYMENT_URL);
                                     setPaymentLinkOpened(true);
                                     window.scrollTo({ top: 0, behavior: 'smooth' });
                                 }}>

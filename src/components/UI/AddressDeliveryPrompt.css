@@ -1,0 +1,91 @@
+.address-delivery-prompt-wrap {
+    position: fixed;
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 12000;
+    width: min(400px, calc(100vw - 24px));
+    pointer-events: none;
+}
+
+.address-delivery-prompt {
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 16px 16px 14px;
+    border-radius: 20px;
+    background: rgba(28, 28, 30, 0.97);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+    animation: addressPromptIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes addressPromptIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.address-delivery-prompt__title {
+    margin: 0;
+    text-align: center;
+    font-family: 'Outfit', Inter, sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #fff;
+    line-height: 1.3;
+}
+
+.address-delivery-prompt__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.address-delivery-prompt__btn {
+    height: 48px;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Outfit', Inter, sans-serif;
+    font-size: 0.98rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.address-delivery-prompt__btn--later {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.address-delivery-prompt__btn--later:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.address-delivery-prompt__btn--select {
+    background: #21EA7C;
+    color: #000;
+}
+
+.address-delivery-prompt__btn--select:hover {
+    background: #1ad96f;
+}
+
+.address-delivery-prompt__btn:active {
+    transform: scale(0.98);
+}
+
+@media (min-width: 1025px) {
+    .address-delivery-prompt-wrap {
+        top: 96px;
+        width: min(380px, calc(100vw - 48px));
+    }
+}

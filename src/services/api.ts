@@ -14,6 +14,14 @@ export interface Restaurant {
     longitude?: number;
     address?: string;
     promo?: string;
+    promo_text?: string;
+    has_promo?: boolean;
+    is_must_try?: boolean;
+    is_worth_trying?: boolean;
+    must_try_sort?: number;
+    worth_trying_sort?: number;
+    filter_tags?: string;
+    tags?: string[];
     poster_api_token?: string;
     spot_id?: string;
     poster_token?: string;
@@ -304,6 +312,26 @@ export const api = {
         return await res.json();
     },
 
+    linkTelegramAccount: async (initData: string, language: string) => {
+        const res = await fetch(`${API_BASE}/profile/telegram-link`, {
+            method: 'POST',
+            headers: {
+                ...api.getHeaders(),
+                'X-Telegram-Init-Data': initData,
+                'X-App-Language': language,
+            },
+            body: JSON.stringify({ init_data: initData, language }),
+        });
+        if (res.status === 401) {
+            localStorage.removeItem('token');
+            throw new Error('Unauthorized');
+        }
+        if (!res.ok) {
+            throw new Error('Failed to link telegram account');
+        }
+        return await res.json();
+    },
+
     getOrderHistory: async () => {
         const res = await fetch(`${API_BASE}/profile/orders`, {
             headers: api.getHeaders()
@@ -364,8 +392,8 @@ export const api = {
         return { ...result, id: result.order_id || result.id };
     },
 
-    getActiveOrder: async (userId: string) => {
-        const res = await fetch(`${API_BASE}/orders/active/${userId}`, {
+    getActiveOrder: async () => {
+        const res = await fetch(`${API_BASE}/orders/active`, {
             headers: api.getHeaders()
         });
         if (res.status === 404 || res.status === 204) return null; // Handle not found

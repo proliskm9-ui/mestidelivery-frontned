@@ -1,20 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/translations/LanguageContext';
 import HeaderOrderStatus from './HeaderOrderStatus';
-import { YMaps, Map } from '@pbe/react-yandex-maps';
+import AddressConfirmModal from '../delivery/AddressConfirmModal';
 import './PCHeader.css';
 
 const LANGUAGES = [
-    { code: 'ru', name: 'Русский', flag: '/Assets/RU.png' },
-    { code: 'ka', name: 'ქართული', flag: '/Assets/GE.png' },
-    { code: 'en', name: 'English', flag: '/Assets/US.png' }
+    { code: 'ru', name: 'RU', flag: '/Assets/RU.png' },
+    { code: 'ka', name: 'KA', flag: '/Assets/GE.png' },
+    { code: 'en', name: 'EN', flag: '/Assets/US.png' }
 ];
-
-const SmallArrowIcon = ({ style }: { style?: React.CSSProperties }) => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={style}>
-        <path d="M9 18l6-6-6-6"></path>
-    </svg>
-);
 
 interface HeaderProps {
     onRestaurantClick?: (id: string) => void;
@@ -31,6 +25,7 @@ interface HeaderProps {
     hideLogo?: boolean;
     searchPlaceholder?: string;
     onLogoClick?: () => void;
+    openAddressModalKey?: number;
 }
 
 const PCHeader: React.FC<HeaderProps> = ({
@@ -45,99 +40,58 @@ const PCHeader: React.FC<HeaderProps> = ({
     onNavigate,
     hideLogo = false,
     searchPlaceholder,
-    onLogoClick
+    onLogoClick,
+    openAddressModalKey = 0,
 }) => {
     const { language, setLanguage, t } = useLanguage();
     const [langOpen, setLangOpen] = useState(false);
     const [mapOpen, setMapOpen] = useState(false);
-    const [isDetectingLocation, setIsDetectingLocation] = useState(false);
-
-    const [tempStreet, setTempStreet] = useState('');
-    const [tempHouse, setTempHouse] = useState('');
-    const [tempApartment, setTempApartment] = useState('');
-    const [tempEntrance, setTempEntrance] = useState('');
+    const [isScrolled, setIsScrolled] = useState(false);
 
     useEffect(() => {
-        if (mapOpen) {
-            setTempStreet(userAddress?.street || '');
-            setTempHouse(userAddress?.house || '');
-            setTempApartment(userAddress?.apartment || '');
-            setTempEntrance(userAddress?.entrance || '');
+        const onScroll = () => setIsScrolled(window.scrollY > 12);
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
+    useEffect(() => {
+        if (openAddressModalKey > 0) {
+            setMapOpen(true);
         }
-    }, [mapOpen, userAddress]);
-
-    const handleSaveAddress = () => {
-        onUpdateAddress?.({
-            ...userAddress,
-            street: tempStreet,
-            house: tempHouse,
-            apartment: tempApartment,
-            entrance: tempEntrance
-        });
-        setMapOpen(false);
-    };
-
-    const handleDetectLocation = () => {
-        if (!navigator.geolocation) return;
-        setIsDetectingLocation(true);
-        navigator.geolocation.getCurrentPosition((pos) => {
-            const { latitude, longitude } = pos.coords;
-            const ymaps = (window as any).ymaps;
-            if (ymaps && ymaps.geocode) {
-                ymaps.geocode([latitude, longitude]).then((res: any) => {
-                    const firstGeoObject = res.geoObjects.get(0);
-                    if (firstGeoObject) {
-                        const street = firstGeoObject.getThoroughfare() || firstGeoObject.getPremise() || '';
-                        const house = firstGeoObject.getPremiseNumber() || '';
-                        setTempStreet(street);
-                        setTempHouse(house);
-                    }
-                }).finally(() => setIsDetectingLocation(false));
-            } else {
-                setIsDetectingLocation(false);
-            }
-        }, () => setIsDetectingLocation(false));
-    };
-
-    const handleMapBoundsChange = (e: any) => {
-        const ymaps = (window as any).ymaps;
-        if (!ymaps) return;
-        
-        const center = e.get('target').getCenter();
-        ymaps.geocode(center).then((res: any) => {
-            const firstGeoObject = res.geoObjects.get(0);
-            if (firstGeoObject) {
-                const street = firstGeoObject.getThoroughfare() || firstGeoObject.getPremise() || '';
-                const house = firstGeoObject.getPremiseNumber() || '';
-                if (street) setTempStreet(street);
-                if (house) setTempHouse(house);
-            }
-        });
-    };
+    }, [openAddressModalKey]);
 
     const currentLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0];
+    const isGuest = !userProfile?.phone && !(userProfile?.name && userProfile.name !== '...' && userProfile.name.trim().length > 1);
+    const addressLabel = (userAddress?.street || userAddress?.house)
+        ? `${userAddress.street || ''}${userAddress.house ? `, ${userAddress.house}` : ''}`
+        : (t('map.title') || 'Укажите адрес');
 
     return (
-        <header className="pc-header-container">
-            <div className="pc-header-content">
+        <header className={`hd pc-hd${isScrolled ? ' is-scrolled' : ''}`}>
+            <div className="hd-inner">
                 {!hideLogo && (
-                    <div className="pc-header-left" onClick={() => {
-                        if (onLogoClick) onLogoClick();
-                        else onNavigate?.('menu');
-                    }}>
-                        <img src="/Assets/Loading/logo.png" alt="MestiGo" className="pc-header-logo" />
+                    <div
+                        className="hd-logo"
+                        onClick={() => {
+                            if (onLogoClick) onLogoClick();
+                            else onNavigate?.('menu');
+                        }}
+                    >
+                        <span className="hd-logo-text">
+                            <span className="solid">Mesti</span>
+                            <span className="logo-delivery">Delivery</span>
+                        </span>
                     </div>
                 )}
 
-                <div className="pc-header-center">
+                <div className="hd-catalog-mid">
                     {showSearch && setSearchQuery && (
-                        <div className="pc-search-pill">
-                            <div className="pc-search-icon">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <circle cx="11" cy="11" r="8"></circle>
-                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                </svg>
-                            </div>
+                        <div className="hd-search">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <circle cx="11" cy="11" r="8" />
+                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
                             <input
                                 type="text"
                                 placeholder={searchPlaceholder || t('common.search_placeholder')}
@@ -146,41 +100,52 @@ const PCHeader: React.FC<HeaderProps> = ({
                             />
                         </div>
                     )}
+
+                    <button
+                        type="button"
+                        className="hd-address"
+                        onClick={() => setMapOpen(true)}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        <span className="hd-address-text">{addressLabel}</span>
+                    </button>
                 </div>
 
-                <div className="pc-header-right">
-                    <div className="pc-address-pill" onClick={() => setMapOpen(true)}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                            <circle cx="12" cy="10" r="3"></circle>
-                        </svg>
-                        <div className="pc-ap-text">
-                            <span className="pc-ap-title">{t('common.mestia')} <SmallArrowIcon style={{ marginLeft: '4px', transform: 'rotate(90deg)' }} /></span>
-                            <span className="pc-ap-subtitle">
-                                {(userAddress?.street || userAddress?.house)
-                                    ? `${userAddress.street}${userAddress.house ? `, ${userAddress.house}` : ''}`
-                                    : t('map.title')}
-                            </span>
-                        </div>
-                    </div>
+                <div className="hd-actions">
+                    <span className="hd-divider" />
 
                     {onOrderClick && (
                         <HeaderOrderStatus onNavigate={onOrderClick} compact={true} />
                     )}
 
-                    <div className="pc-lang-container">
-                        <button className="pc-lang-btn" onClick={() => setLangOpen(!langOpen)}>
-                            <img src={currentLang.flag} alt={currentLang.name} className="pc-lang-flag" />
-                            <SmallArrowIcon style={{ transform: langOpen ? 'rotate(-90deg)' : 'rotate(90deg)', marginLeft: '6px' }} />
+                    <div className="hd-lang">
+                        <button type="button" className="hd-lang-btn" onClick={() => setLangOpen(!langOpen)}>
+                            <img src={currentLang.flag} alt="" className="hd-lang-flag" />
+                            <span>{currentLang.name}</span>
+                            <svg className={`hd-chev${langOpen ? ' open' : ''}`} width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+                                <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
                         </button>
                         {langOpen && (
                             <>
-                                <div className="pc-lang-modal-backdrop" onClick={() => setLangOpen(false)}></div>
-                                <div className="pc-lang-modal">
-                                    {LANGUAGES.map((lang) => (
-                                        <div key={lang.code} className={`pc-lang-option ${language === lang.code ? 'active' : ''}`} onClick={() => { setLanguage(lang.code as any); setLangOpen(false); }}>
-                                            <img src={lang.flag} alt={lang.name} />
+                                <div className="hd-lang-backdrop" onClick={() => setLangOpen(false)} />
+                                <div className="hd-lang-menu">
+                                    {LANGUAGES.map(lang => (
+                                        <div
+                                            key={lang.code}
+                                            className={`hd-lang-item${language === lang.code ? ' is-active' : ''}`}
+                                            onClick={() => { setLanguage(lang.code as any); setLangOpen(false); }}
+                                        >
+                                            <img src={lang.flag} alt="" />
                                             <span>{lang.name}</span>
+                                            {language === lang.code && (
+                                                <svg className="hd-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                                    <path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round" />
+                                                </svg>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -188,106 +153,36 @@ const PCHeader: React.FC<HeaderProps> = ({
                         )}
                     </div>
 
-                    <button className="pc-user-avatar" onClick={() => onProfileClick && onProfileClick()}>
-                        {userProfile?.avatar && userProfile.avatar.length > 2 ? (
-                            <img src={userProfile.avatar} alt="Profile" />
-                        ) : (
-                            <img src="/Assets/profile-green.png" alt="Profile" />
-                        )}
-                    </button>
+                    {isGuest ? (
+                        <button
+                            type="button"
+                            className="hd-cta"
+                            onClick={() => {
+                                if (onNavigate) onNavigate('login');
+                                else onProfileClick?.();
+                            }}
+                        >
+                            {t('auth.sign_in') || 'Войти'}
+                        </button>
+                    ) : (
+                        <button type="button" className="hd-user-avatar" onClick={() => onProfileClick?.()}>
+                            {userProfile?.avatar && userProfile.avatar.length > 2 && !String(userProfile.avatar).includes('profile-green') ? (
+                                <img src={userProfile.avatar} alt="Profile" />
+                            ) : (
+                                <span>{(userProfile?.name || 'U').trim().charAt(0).toUpperCase()}</span>
+                            )}
+                        </button>
+                    )}
                 </div>
             </div>
 
-            {mapOpen && (
-                <>
-                    <div className="modal-overlay pam-overlay" onClick={() => setMapOpen(false)} style={{ zIndex: 100000 }}></div>
-                    <div className="premium-address-modal" onClick={e => e.stopPropagation()} style={{ zIndex: 100001, background: '#191917', border: '1px solid #333' }}>
-                        <div className="pam-header">
-                            <div>
-                                <h3 className="pam-title" style={{ color: '#fff' }}>{t('common.mestia')}</h3>
-                                <p className="pam-subtitle" style={{ color: '#aaa' }}>{t('map.title')}</p>
-                            </div>
-                        </div>
-
-                        <div className="pc-pam-map-visual" style={{ height: '220px', borderRadius: '16px', overflow: 'hidden', marginBottom: '16px', position: 'relative' }}>
-                            <YMaps query={{ apikey: '09cb021e-5a23-41f0-9979-14523fdbd16c', lang: 'ru_RU' }}>
-                                <Map
-                                    defaultState={{ center: [43.0445, 42.7278], zoom: 16 }}
-                                    width="100%"
-                                    height="100%"
-                                    onBoundsChange={handleMapBoundsChange}
-                                >
-                                    <div className="map-center-marker">
-                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" fill="#111"></path><circle cx="12" cy="10" r="3" fill="#21EA7C"></circle></svg>
-                                    </div>
-                                </Map>
-                            </YMaps>
-                            <button
-                                className={`pam-detect-btn ${isDetectingLocation ? 'is-detecting' : ''}`}
-                                onClick={handleDetectLocation}
-                                disabled={isDetectingLocation}
-                                style={{ position: 'absolute', bottom: '15px', right: '15px', zIndex: 10, background: 'rgba(255,255,255,0.95)', border: 'none', borderRadius: '12px', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '13px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
-                                <span>{isDetectingLocation ? '...' : t('map.where_am_i')}</span>
-                            </button>
-                        </div>
-
-                        <div className="address-fields-mini am-fields-v2">
-                            <div className="side-by-side" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                                <div className={`pam-input-group ${tempStreet ? 'has-value' : ''}`}>
-                                    <label>{t('checkout.street')}</label>
-                                    <input
-                                        type="text"
-                                        placeholder={t('checkout.street')}
-                                        value={tempStreet}
-                                        onChange={e => setTempStreet(e.target.value)}
-                                    />
-                                </div>
-                                <div className={`pam-input-group ${tempHouse ? 'has-value' : ''}`}>
-                                    <label>{t('checkout.house')}</label>
-                                    <input
-                                        type="text"
-                                        placeholder={t('checkout.house')}
-                                        value={tempHouse}
-                                        onChange={e => setTempHouse(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="side-by-side" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                                <div className={`pam-input-group ${tempApartment ? 'has-value' : ''}`}>
-                                    <label>{t('checkout.apartment')}</label>
-                                    <input
-                                        type="text"
-                                        placeholder={t('checkout.apartment')}
-                                        value={tempApartment}
-                                        onChange={e => setTempApartment(e.target.value)}
-                                    />
-                                </div>
-                                <div className={`pam-input-group ${tempEntrance ? 'has-value' : ''}`}>
-                                    <label>{t('map.entrance')}</label>
-                                    <input
-                                        type="text"
-                                        placeholder={t('map.entrance')}
-                                        value={tempEntrance}
-                                        onChange={e => setTempEntrance(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <button
-                            className="pam-save-btn ct-confirm-btn"
-                            onClick={handleSaveAddress}
-                            disabled={!tempStreet || !tempHouse}
-                            style={{ width: '100%', background: '#21EA7C', color: '#000', border: 'none', borderRadius: '16px', padding: '16px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', marginTop: '20px' }}
-                        >
-                            {t('map.confirm')}
-                        </button>
-                    </div>
-                </>
-            )}
+            <AddressConfirmModal
+                open={mapOpen}
+                onClose={() => setMapOpen(false)}
+                userAddress={userAddress}
+                onConfirm={(addr) => onUpdateAddress?.(addr)}
+                variant="pc"
+            />
         </header>
     );
 };

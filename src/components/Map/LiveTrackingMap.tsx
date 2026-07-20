@@ -1,6 +1,10 @@
-import React from 'react';
-import { YMaps, Map, Placemark, Polyline } from '@pbe/react-yandex-maps';
+import React, { useEffect, useMemo } from 'react';
+import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { useLanguage } from '../../translations/LanguageContext';
+import { MESTIA_CENTER } from '../../types/delivery';
+import { MAP_TILE_ATTR, MAP_TILE_OPTIONS, MAP_TILE_URL } from '../../lib/delivery/mapTiles';
 
 interface LiveTrackingMapProps {
     courierLocation?: {
@@ -12,83 +16,90 @@ interface LiveTrackingMapProps {
         latitude: number;
         longitude: number;
     };
-    className?: string; // e.g. "live-map-v3-full"
+    className?: string;
+}
+
+const customerIcon = L.divIcon({
+    className: 'ltm-pin',
+    html: `<div style="width:14px;height:14px;border-radius:50%;background:#3b82f6;border:2px solid #fff;box-shadow:0 0 0 2px #3b82f6"></div>`,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
+});
+
+const courierIcon = L.divIcon({
+    className: 'ltm-pin',
+    html: `<div style="font-size:22px;line-height:1">🚘</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+});
+
+function FitBounds({
+    points,
+}: {
+    points: [number, number][];
+}) {
+    const map = useMap();
+    useEffect(() => {
+        if (points.length === 0) return;
+        if (points.length === 1) {
+            map.setView(points[0], 14);
+            return;
+        }
+        map.fitBounds(L.latLngBounds(points), { padding: [40, 40] });
+    }, [map, points]);
+    return null;
 }
 
 const LiveTrackingMap: React.FC<LiveTrackingMapProps> = ({ courierLocation, orderLocation, className }) => {
     const { t } = useLanguage();
 
-    // Default Center (Tbilisi)
-    const defaultState = {
-        center: [41.7151, 44.8271],
-        zoom: 13,
-    };
+    const points = useMemo(() => {
+        const list: [number, number][] = [];
+        if (orderLocation) list.push([orderLocation.latitude, orderLocation.longitude]);
+        if (courierLocation) list.push([courierLocation.latitude, courierLocation.longitude]);
+        return list;
+    }, [orderLocation, courierLocation]);
 
-    const state = {
-        center: orderLocation
-            ? [orderLocation.latitude, orderLocation.longitude]
-            : (courierLocation ? [courierLocation.latitude, courierLocation.longitude] : defaultState.center),
-        zoom: 14
-    };
+    const center = points[0] || MESTIA_CENTER;
 
     return (
-        <div className={className || "live-tracking-map"} style={{ width: '100%', height: '100%' }}>
-            <YMaps query={{ apikey: '09cb021e-5a23-41f0-9979-14523fdbd16c', lang: 'ru_RU' }}>
-                <Map
-                    defaultState={defaultState}
-                    state={state}
-                    width="100%"
-                    height="100%"
-                    // Customize controls if needed
-                    options={{ suppressMapOpenBlock: true }}
-                >
-                    {/* Customer Marker */}
-                    {orderLocation && (
-                        <Placemark
-                            geometry={[orderLocation.latitude, orderLocation.longitude]}
-                            properties={{
-                                hintContent: t('map.client'),
-                                balloonContent: t('checkout.address_title')
-                            }}
-                            options={{
-                                preset: 'islands#blueHomeCircleIcon'
-                            }}
-                        />
-                    )}
-
-                    {/* Courier Marker */}
-                    {courierLocation && (
-                        <Placemark
-                            geometry={[courierLocation.latitude, courierLocation.longitude]}
-                            properties={{
-                                hintContent: t('map.courier'),
-                                iconContent: '🚘'
-                            }}
-                            options={{
-                                preset: 'islands#darkGreenAutoCircleIcon',
-                                // Smooth movement not natively supported by React wrapper for ONE placemark
-                                // effectively, but re-renders are fast enough for 3s polling.
-                            }}
-                        />
-                    )}
-
-                    {/* Route Line */}
-                    {orderLocation && courierLocation && (
-                        <Polyline
-                            geometry={[
-                                [courierLocation.latitude, courierLocation.longitude],
-                                [orderLocation.latitude, orderLocation.longitude]
-                            ]}
-                            options={{
-                                strokeColor: "#21EA7C",
-                                strokeWidth: 4,
-                                strokeOpacity: 0.8,
-                                strokeStyle: 'shortdash'
-                            }}
-                        />
-                    )}
-                </Map>
-            </YMaps>
+        <div className={className || 'live-tracking-map'} style={{ width: '100%', height: '100%' }} title={t('map.title')}>
+            <MapContainer
+                center={center}
+                zoom={14}
+                style={{ width: '100%', height: '100%' }}
+                zoomControl={false}
+                attributionControl={false}
+            >
+                <TileLayer
+                    url={MAP_TILE_URL}
+                    attribution={MAP_TILE_ATTR}
+                    subdomains={[...MAP_TILE_OPTIONS.subdomains]}
+                    maxZoom={MAP_TILE_OPTIONS.maxZoom}
+                />
+                <FitBounds points={points.length ? points : [MESTIA_CENTER]} />
+                {orderLocation && (
+                    <Marker
+                        position={[orderLocation.latitude, orderLocation.longitude]}
+                        icon={customerIcon}
+                    />
+                )}
+                {courierLocation && (
+                    <Marker
+                        position={[courierLocation.latitude, courierLocation.longitude]}
+                        icon={courierIcon}
+                    />
+                )}
+                {orderLocation && courierLocation && (
+                    <Polyline
+                        positions={[
+                            [courierLocation.latitude, courierLocation.longitude],
+                            [orderLocation.latitude, orderLocation.longitude],
+                        ]}
+                        pathOptions={{ color: '#21EA7C', weight: 4, opacity: 0.85, dashArray: '6 8' }}
+                    />
+                )}
+            </MapContainer>
         </div>
     );
 };

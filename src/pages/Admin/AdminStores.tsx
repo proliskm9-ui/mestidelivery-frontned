@@ -72,7 +72,7 @@ export function AdminStores() {
         setIsModalOpen(true);
     };
 
-    if (loading) return <FullPageLoader text="Загрузка списка магазинов..." />;
+    if (loading) return <FullPageLoader variant="list" />;
 
     return (
         <div className="admin-page">

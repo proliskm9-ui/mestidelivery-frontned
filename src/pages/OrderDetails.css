@@ -455,3 +455,343 @@
     font-weight: 600;
 }
 
+/* PC-only bits — hidden on mobile so original layout stays */
+.od-shell {
+    width: 100%;
+}
+
+.od-pc-hero,
+.od-header-subtitle-pc {
+    display: none;
+}
+
+.od-address-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.od-address-label {
+    display: none;
+}
+
+.od-item-qty-pc {
+    display: none;
+}
+
+.od-pc-receipt {
+    display: contents;
+}
+
+.od-pc-col {
+    display: contents;
+}
+
+/* Desktop only */
+@media (min-width: 1025px) {
+    .od-page {
+        font-family: 'Outfit', Inter, Montserrat, sans-serif;
+        background: var(--bg, #151514);
+    }
+
+    .od-shell {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 32px 40px 80px;
+        box-sizing: border-box;
+    }
+
+    .od-header {
+        padding: 0 0 22px;
+    }
+
+    .od-back-btn {
+        width: 48px;
+        height: 48px;
+        transition: background 0.2s ease, transform 0.15s ease;
+    }
+
+    .od-back-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .od-header-spacer {
+        width: 48px;
+    }
+
+    .od-header-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        text-transform: none;
+        letter-spacing: -0.03em;
+    }
+
+    .od-header-subtitle-mobile {
+        display: none;
+    }
+
+    .od-header-subtitle-pc:not(:empty) {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.88rem;
+        color: rgba(255, 255, 255, 0.42);
+    }
+
+    .od-content {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        gap: 14px;
+    }
+
+    .od-pc-hero {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 24px 28px;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+    }
+
+    .od-pc-hero-total {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .od-pc-hero-label {
+        font-size: 0.8rem;
+        font-weight: 650;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.42);
+    }
+
+    .od-pc-hero-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        color: #21EA7C;
+        line-height: 1;
+    }
+
+    .od-pc-hero .od-status-badge {
+        flex-shrink: 0;
+        font-size: 0.88rem;
+        font-weight: 700;
+        padding: 10px 16px;
+        border-radius: 999px;
+        text-transform: none;
+        letter-spacing: 0;
+        border: 1px solid transparent;
+    }
+
+    .od-pc-hero .od-status-badge.pending {
+        border-color: rgba(255, 214, 10, 0.22);
+        box-shadow: 0 0 0 4px rgba(255, 214, 10, 0.06);
+    }
+
+    .od-pc-hero .od-status-badge.delivered {
+        border-color: rgba(33, 234, 124, 0.25);
+        box-shadow: 0 0 0 4px rgba(33, 234, 124, 0.06);
+    }
+
+    .od-pc-hero .od-status-badge.cancelled {
+        border-color: rgba(255, 69, 58, 0.25);
+        box-shadow: 0 0 0 4px rgba(255, 69, 58, 0.06);
+    }
+
+    .od-help-btn,
+    .od-status-section {
+        display: none;
+    }
+
+    .od-address-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 20px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.035);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .od-address-card:hover {
+        border-color: rgba(33, 234, 124, 0.28);
+        background: rgba(33, 234, 124, 0.04);
+    }
+
+    .od-address-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: rgba(33, 234, 124, 0.14);
+        color: #21EA7C;
+    }
+
+    .od-address-label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.4);
+        margin-bottom: 2px;
+    }
+
+    .od-address-text {
+        font-size: 1.02rem;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+        line-height: 1.3;
+    }
+
+    .od-comment-card {
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.035);
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .od-pc-receipt {
+        display: grid;
+        grid-template-columns: 1fr 1.15fr;
+        gap: 14px;
+        align-items: stretch;
+    }
+
+    .od-pc-col-cost {
+        order: 1;
+    }
+
+    .od-pc-col-items {
+        order: 2;
+    }
+
+    .od-pc-col {
+        display: flex;
+        flex-direction: column;
+        padding: 20px 22px 16px;
+        box-sizing: border-box;
+        min-height: 100%;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        transition: border-color 0.2s ease;
+    }
+
+    .od-pc-col:hover {
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .od-section-label {
+        margin: 0 0 10px;
+        padding: 0;
+        border-bottom: none;
+        font-size: 1.2rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        text-transform: none;
+        color: #fff;
+    }
+
+    .od-items-card,
+    .od-cost-card {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        padding: 2px 0 0;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        overflow: visible;
+    }
+
+    .od-item-row,
+    .od-cost-row {
+        padding: 13px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .od-item-row:last-child {
+        border-bottom: none;
+        padding-bottom: 4px;
+    }
+
+    .od-item-row-delivery {
+        display: none;
+    }
+
+    .od-item-name {
+        font-size: 0.98rem;
+        font-weight: 600;
+        color: #fff;
+        line-height: 1.35;
+    }
+
+    .od-item-qty-mobile {
+        display: none;
+    }
+
+    .od-item-qty-pc {
+        display: inline;
+        margin-left: 2px;
+        font-weight: 550;
+        color: rgba(255, 255, 255, 0.38);
+    }
+
+    .od-item-price {
+        font-size: 0.98rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.92);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .od-cost-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        font-size: 0.92rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.45);
+    }
+
+    .od-cost-row .od-cost-value {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .od-cost-row.total {
+        margin-top: auto;
+        padding: 14px 14px;
+        margin-left: -6px;
+        margin-right: -6px;
+        margin-bottom: -2px;
+        border-bottom: none;
+        border-top: none;
+        border-radius: 14px;
+        background: rgba(33, 234, 124, 0.1);
+        font-size: 1rem;
+        font-weight: 750;
+        color: #fff;
+    }
+
+    .od-cost-row.total .od-cost-value {
+        color: #21EA7C;
+        font-size: 1.2rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    .od-rating-card {
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.08);
+        margin-top: 2px;
+    }
+}
+

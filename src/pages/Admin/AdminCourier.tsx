@@ -110,7 +110,9 @@ export function AdminCourier() {
     const showActiveMap = activeOrder && tab === 'active';
 
     if (showActiveMap && activeOrder) {
-        const customerPos: [number, number] = [41.7151, 44.8271]; // TODO: Parse activeOrder.address_coords
+        const customerPos: [number, number] = activeOrder.delivery_lat && activeOrder.delivery_lng
+            ? [activeOrder.delivery_lat, activeOrder.delivery_lng]
+            : [41.7151, 44.8271];
         const courierPos = myPos || [41.7151, 44.8271];
 
         return (

@@ -118,7 +118,7 @@ export function AdminUsers() {
         return labels[role] || role;
     };
 
-    if (loading) return <FullPageLoader text="Загрузка пользователей..." />;
+    if (loading) return <FullPageLoader variant="list" />;
 
     return (
         <div className="admin-users-page">

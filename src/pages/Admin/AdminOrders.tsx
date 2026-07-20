@@ -157,7 +157,7 @@ export function AdminOrders() {
     })();
 
 
-    if (loading) return <FullPageLoader text="Загрузка заказов..." />;
+    if (loading) return <FullPageLoader variant="list" />;
 
     return (
         <div className="admin-page">

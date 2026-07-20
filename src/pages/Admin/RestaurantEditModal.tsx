@@ -95,7 +95,14 @@ export default function RestaurantEditModal({
             min_order: formData.min_order ? Number(formData.min_order) : undefined,
             latitude: formData.latitude ? Number(formData.latitude) : undefined,
             longitude: formData.longitude ? Number(formData.longitude) : undefined,
-            poster_spot_id: formData.poster_spot_id ? Number(formData.poster_spot_id) : undefined
+            poster_spot_id: formData.poster_spot_id ? Number(formData.poster_spot_id) : undefined,
+            must_try_sort: Number(formData.must_try_sort ?? 0),
+            worth_trying_sort: Number(formData.worth_trying_sort ?? 0),
+            is_must_try: Boolean(formData.is_must_try),
+            is_worth_trying: Boolean(formData.is_worth_trying),
+            has_promo: Boolean(formData.has_promo),
+            promo_text: formData.promo_text || formData.promo || '',
+            filter_tags: formData.filter_tags || '',
         };
         await onSave(payload);
     };
@@ -400,14 +407,103 @@ export default function RestaurantEditModal({
                                 </div>
 
                                 <div className="form-group" style={{ marginBottom: 0 }}>
-                                    <label className="form-label">Промо-акция / Описание (Promo)</label>
-                                    <textarea
+                                    <label className="form-label">Теги фильтра каталога</label>
+                                    <input
                                         className="admin-input"
-                                        style={{ minHeight: '90px', resize: 'vertical', fontFamily: 'inherit' }}
-                                        value={formData.promo || ''}
-                                        onChange={e => setFormData({ ...formData, promo: e.target.value })}
-                                        placeholder="Например: Скидка 10% на хинкали при первом заказе!"
+                                        value={formData.filter_tags || ''}
+                                        onChange={e => setFormData({ ...formData, filter_tags: e.target.value })}
+                                        placeholder="pizza,bbq,georgian,local,fast_food"
                                     />
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--admin-text-muted)', marginTop: '4px', display: 'block' }}>
+                                        Ключи через запятую (как в фильтрах каталога): pizza, bbq, georgian, local, italy…
+                                    </span>
+                                </div>
+
+                                <div style={{
+                                    padding: '16px',
+                                    borderRadius: '14px',
+                                    border: '1px solid rgba(255,255,255,0.08)',
+                                    background: 'rgba(255,255,255,0.03)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '14px'
+                                }}>
+                                    <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Подборки каталога</div>
+
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: 'var(--admin-text)' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={Boolean(formData.is_must_try)}
+                                            onChange={e => setFormData({ ...formData, is_must_try: e.target.checked })}
+                                            style={{ accentColor: 'var(--admin-primary)', width: 18, height: 18 }}
+                                        />
+                                        Показывать в «Must Try»
+                                    </label>
+                                    {formData.is_must_try && (
+                                        <div className="form-group" style={{ marginBottom: 0, marginLeft: 28 }}>
+                                            <label className="form-label">Порядок в Must Try</label>
+                                            <input
+                                                className="admin-input"
+                                                type="number"
+                                                min={0}
+                                                value={formData.must_try_sort ?? 0}
+                                                onChange={e => setFormData({ ...formData, must_try_sort: Number(e.target.value) })}
+                                            />
+                                        </div>
+                                    )}
+
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: 'var(--admin-text)' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={Boolean(formData.is_worth_trying)}
+                                            onChange={e => setFormData({ ...formData, is_worth_trying: e.target.checked })}
+                                            style={{ accentColor: 'var(--admin-primary)', width: 18, height: 18 }}
+                                        />
+                                        Показывать в «Стоит попробовать»
+                                    </label>
+                                    {formData.is_worth_trying && (
+                                        <div className="form-group" style={{ marginBottom: 0, marginLeft: 28 }}>
+                                            <label className="form-label">Порядок в «Стоит попробовать»</label>
+                                            <input
+                                                className="admin-input"
+                                                type="number"
+                                                min={0}
+                                                value={formData.worth_trying_sort ?? 0}
+                                                onChange={e => setFormData({ ...formData, worth_trying_sort: Number(e.target.value) })}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div style={{
+                                    padding: '16px',
+                                    borderRadius: '14px',
+                                    border: '1px solid rgba(255,255,255,0.08)',
+                                    background: 'rgba(255,255,255,0.03)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '14px'
+                                }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: 'var(--admin-text)', fontWeight: 700 }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={Boolean(formData.has_promo)}
+                                            onChange={e => setFormData({ ...formData, has_promo: e.target.checked })}
+                                            style={{ accentColor: 'var(--admin-primary)', width: 18, height: 18 }}
+                                        />
+                                        Акция / промо в каталоге
+                                    </label>
+                                    <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label className="form-label">Текст промо</label>
+                                        <textarea
+                                            className="admin-input"
+                                            style={{ minHeight: '90px', resize: 'vertical', fontFamily: 'inherit' }}
+                                            value={formData.promo_text || formData.promo || ''}
+                                            onChange={e => setFormData({ ...formData, promo_text: e.target.value, promo: e.target.value })}
+                                            placeholder="Например: Скидка 10₾ на первый заказ"
+                                            disabled={!formData.has_promo}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         )}

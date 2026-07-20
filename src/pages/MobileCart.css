@@ -1,6 +1,6 @@
 .mobile-cart-container.cart-v2-layout {
     min-height: 100vh;
-    background-color: #0A0A0A;
+    background-color: var(--bg);
     color: white;
     font-family: 'Inter', sans-serif;
     padding-bottom: 110px;

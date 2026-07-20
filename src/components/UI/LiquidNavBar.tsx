@@ -73,14 +73,11 @@ const NavIcon = ({ icon, active }: { icon: string, active: boolean }) => {
 
     const isCart = icon === 'cart';
     return (
-        <div
-            className={`icon-wrapper ${active ? 'active' : ''}`}
-        >
+        <div className={`icon-wrapper ${active ? 'active' : ''} ${isCart ? 'icon-wrapper--cart' : ''}`}>
             <img
                 src={src}
                 alt={icon}
                 className="nav-icon-img"
-                style={isCart ? { width: '31px', height: '31px', objectFit: 'contain' } : undefined}
             />
         </div>
     );

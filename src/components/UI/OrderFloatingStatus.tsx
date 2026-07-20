@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../services/api';
+import { useLanguage } from '../../translations/LanguageContext';
 
 
 interface ActiveOrder {
@@ -12,11 +13,19 @@ interface ActiveOrder {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-    pending: '#fbbf24', // yellow
-    confirmed: '#3b82f6', // blue
-    preparing: '#8b5cf6', // purple
-    ready: '#10b981', // green
-    delivering: '#21ea7c', // bright green
+    pending: '#fbbf24',
+    pending_payment: '#fbbf24',
+    confirmed: '#3b82f6',
+    accepted: '#3b82f6',
+    preparing: '#8b5cf6',
+    ready: '#10b981',
+    delivering: '#21ea7c',
+};
+
+const normalizeStatusKey = (status: string): string => {
+    if (status === 'accepted') return 'confirmed';
+    if (status === 'pending_payment') return 'pending';
+    return status;
 };
 
 interface Props {
@@ -24,21 +33,18 @@ interface Props {
 }
 
 const OrderFloatingStatus: React.FC<Props> = ({ onNavigate }) => {
+    const { t } = useLanguage();
     const [order, setOrder] = useState<ActiveOrder | null>(null);
-    const userId = localStorage.getItem('user_id'); // We need to ensure we save user_id on login
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
-        // If no user_id in local storage, try to parse token or fetch profile
-        // For now let's assume token logic handles auth state
-        if (!userId) {
-            // Try to get from token payload if possible, or skip
-            // Ideally we should rely on App.tsx passing user info, but let's keep it self-contained
+        if (!token) {
             return;
         }
 
         const checkStatus = async () => {
             try {
-                const data = await api.getActiveOrder(userId);
+                const data = await api.getActiveOrder();
                 setOrder(data);
             } catch (error) {
                 console.error("Status check failed", error);
@@ -48,12 +54,15 @@ const OrderFloatingStatus: React.FC<Props> = ({ onNavigate }) => {
         checkStatus();
         const interval = setInterval(checkStatus, 10000); // Check every 10s
         return () => clearInterval(interval);
-    }, [userId]);
+    }, [token]);
 
     if (!order) return null;
 
     const progress = (order.status_step / order.total_steps) * 100;
     const color = STATUS_COLORS[order.status] || '#888';
+    const statusKey = normalizeStatusKey(order.status);
+    const translated = t(`status.${statusKey}`);
+    const statusLabel = translated !== `status.${statusKey}` ? translated : order.status;
 
     return (
         <div
@@ -102,10 +111,10 @@ const OrderFloatingStatus: React.FC<Props> = ({ onNavigate }) => {
             <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, alignItems: 'center' }}>
                     <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>
-                        Заказ #{order.id}
+                        {t('common.order')} #{order.id}
                     </span>
                     <span style={{ fontSize: 12, color: color, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '50%' }}>
-                        {order.status_label}
+                        {statusLabel}
                     </span>
                 </div>
 

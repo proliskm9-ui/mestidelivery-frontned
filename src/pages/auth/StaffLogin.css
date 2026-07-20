@@ -1,0 +1,85 @@
+.staff-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #0a0a0a;
+  color: #fff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.staff-login-card {
+  width: 100%;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 32px 28px;
+  backdrop-filter: blur(20px);
+}
+
+.staff-login-title {
+  margin: 0 0 8px;
+  font-family: 'Archivo', 'Inter', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.staff-login-subtitle {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.staff-login-error {
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 80, 80, 0.12);
+  color: #ff8f8f;
+  font-size: 13px;
+}
+
+.staff-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.staff-login-input {
+  height: 48px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  padding: 0 14px;
+  font-size: 15px;
+  outline: none;
+}
+
+.staff-login-input:focus {
+  border-color: rgba(33, 234, 124, 0.5);
+}
+
+.staff-login-btn {
+  margin-top: 8px;
+  height: 52px;
+  border: none;
+  border-radius: 16px;
+  background: #21EA7C;
+  color: #000;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.staff-login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.staff-login-btn:not(:disabled):hover {
+  filter: brightness(1.05);
+}
