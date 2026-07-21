@@ -6,6 +6,7 @@
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
+        "build:local": "tsc && vite build --mode localhost",
         "preview": "vite preview"
     },
     "dependencies": {

@@ -2,6 +2,7 @@ node_modules/
 dist/
 .env*
 !.env.example
+!.env.localhost
 .firebase/
 npm-debug.log*
 yarn-debug.log*
