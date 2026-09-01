@@ -30,7 +30,7 @@ const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate
     ];
 
     const currentLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0];
-    const registerText = language === 'ru' ? 'Зарегистрироваться' : language === 'ka' ? 'რეგისტრაცია' : 'Register';
+    const registerText = t('auth.register');
     const supportText = t('profile.support') || 'Поддержка';
     const marqueeItems = MARQUEE_ITEMS[language] || MARQUEE_ITEMS.en;
 
@@ -81,7 +81,7 @@ const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate
                     <nav className="hd-nav">
                         <button className="hd-link" onClick={() => onNavigate('menu')}>{t('nav.restaurants') || 'Рестораны'}<i /></button>
                         <button className="hd-link" onClick={() => document.getElementById('partners-section')?.scrollIntoView({ behavior: 'smooth' })}>{t('nav.become_partner') || 'Стать партнером'}<i /></button>
-                        <a className="hd-link" href="https://t.me/MestigoSupport_Bot" target="_blank" rel="noopener noreferrer">{supportText}<i /></a>
+                        <Link className="hd-link" to={`/${language}/contact`}>{supportText}<i /></Link>
                     </nav>
 
                     <div className="hd-actions">
@@ -158,10 +158,10 @@ const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate
                                     {t('nav.become_partner') || 'Стать партнером'}
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
                                 </button>
-                                <a className="hd-drawer-link" href="https://t.me/MestigoSupport_Bot" target="_blank" rel="noopener noreferrer" onClick={() => setDrawerOpen(false)}>
+                                <Link className="hd-drawer-link" to={`/${language}/contact`} onClick={() => setDrawerOpen(false)}>
                                     {supportText}
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M7 17L17 7M9 7h8v8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                                </a>
+                                </Link>
                             </nav>
 
                             <div className="hd-drawer-footer">
@@ -241,7 +241,7 @@ const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate
                         <article className="hm-tile hm-tile--hero reveal-on-scroll" style={{ backgroundImage: "url('/hero-frames/desktop/frame_0240.webp')" }}>
                             <div className="hm-tile-ovl" />
                             <span className="hm-tile-kick">{t('home.stat_speed')}</span>
-                            <div className="hm-stat-big"><Counter value={30} /><span className="hm-stat-unit">мин</span></div>
+                            <div className="hm-stat-big"><Counter value={30} /><span className="hm-stat-unit">{t('common.min')}</span></div>
                             <svg className="hm-route" viewBox="0 0 240 24" preserveAspectRatio="none" aria-hidden="true">
                                 <path d="M2 16 C 40 4, 70 22, 110 12 S 180 2, 238 14" fill="none" stroke="rgba(33,234,124,0.35)" strokeWidth="2" strokeLinecap="round" />
                                 <circle className="hm-route-dot" cx="238" cy="14" r="4" fill="#21EA7C" />
@@ -355,11 +355,11 @@ const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate
                 </div>
 
                 <div className="footer-links">
-                    <Link to="/legal#privacy">{t('home.footer_privacy')}</Link>
-                    <Link to="/legal#terms">{t('home.footer_terms')}</Link>
+                    <Link to={`/${language}/privacy`}>{t('home.footer_privacy')}</Link>
+                    <Link to={`/${language}/terms`}>{t('home.footer_terms')}</Link>
                     <a href="#" onClick={(e) => { e.preventDefault(); openPartnerForm('restaurant'); }}>{t('home.footer_add_restaurant')}</a>
-                    <Link to="/legal#returns">{t('home.footer_refunds')}</Link>
-                    <a href="https://t.me/MestigoSupport_Bot" target="_blank" rel="noopener noreferrer">{t('home.footer_feedback')}</a>
+                    <Link to={`/${language}/returns`}>{t('home.footer_refunds')}</Link>
+                    <Link to={`/${language}/contact`}>{t('home.footer_feedback')}</Link>
                 </div>
 
                 <div className="footer-bottom">

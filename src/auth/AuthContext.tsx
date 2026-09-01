@@ -6,38 +6,23 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import {
-  GoogleAuthProvider,
-  getRedirectResult,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-  type User,
-} from 'firebase/auth';
-import {
-  doc,
-  getDoc,
-} from 'firebase/firestore';
-import { auth, db } from '../firebase/config';
 import type { AuthProfile, UserRole } from './types';
-import { firebaseAuthErrorKey, getFirebaseErrorCode } from './authErrors';
 import { isValidInternationalPhone, normalizePhone } from './phone';
 import {
   clearPendingGoogleUser,
-  identityFromFirebaseUser,
   loadPendingGoogleUser,
   savePendingGoogleUser,
   type PendingGoogleIdentity,
-  GOOGLE_TOKEN_KEY,
+  GOOGLE_PENDING_TOKEN_KEY,
 } from './googlePending';
+import { signInWithGoogleIdToken } from './googleSignIn';
 
 export type GoogleSignInResult =
   | { status: 'ready'; token: string }
-  | { status: 'needs_profile' };
+  | { status: 'needs_profile' }
+  | { status: 'redirecting' };
 
 interface AuthContextValue {
-  user: User | null;
-  /** Google identity waiting for phone (sessionStorage-backed) */
   pendingGoogleIdentity: PendingGoogleIdentity | null;
   profile: AuthProfile;
   role: UserRole | null;
@@ -47,147 +32,114 @@ interface AuthContextValue {
   clearError: () => void;
   signInWithGoogle: () => Promise<GoogleSignInResult>;
   completeCustomerProfile: (displayName: string, phone: string) => Promise<string>;
-  signInAdmin: (email: string, password: string) => Promise<void>;
-  signInPartner: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  clearFirebaseSession: () => Promise<void>;
-  getIdToken: () => Promise<string | null>;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-async function exchangeGoogleForApiToken(params: {
-  email: string;
-  full_name: string;
-  phone?: string;
-  firebase_uid?: string;
-}): Promise<{ token: string } | { needsPhone: true }> {
-  const API_URL = (import.meta as any).env.VITE_API_URL || '';
-  const res = await fetch(`${API_URL}/api/auth/customer/google`, {
+function apiBase(): string {
+  return (import.meta as any).env.VITE_API_URL || '';
+}
+
+type GoogleExchange =
+  | { status: 'ready'; token: string }
+  | { status: 'needs_profile' };
+
+async function exchangeGoogleIdToken(
+  idToken: string,
+  name: string,
+  email: string,
+): Promise<GoogleExchange> {
+  const res = await fetch(`${apiBase()}/api/auth/customer/google`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(params),
+    body: JSON.stringify({ id_token: idToken, full_name: name }),
   });
   const data = await res.json().catch(() => ({}));
   const detail = typeof data.detail === 'string'
     ? data.detail
     : typeof data.error === 'string'
       ? data.error
-      : Array.isArray(data.detail)
-        ? data.detail.map((d: any) => d.msg || d).join(', ')
-        : '';
+      : '';
 
-  if (res.status === 400 && (detail === 'phone_required' || detail.includes('phone_required'))) {
-    return { needsPhone: true };
+  if (res.status === 400 && String(detail).includes('phone_required')) {
+    ingestGoogleOAuthResult({
+      pending: data.pending_token,
+      email: data.email || email,
+      name: data.name || name,
+    });
+    window.dispatchEvent(new CustomEvent('mestigo-google-pending'));
+    return { status: 'needs_profile' };
   }
-  if (!res.ok) {
-    throw new Error(detail || `Google auth failed (${res.status})`);
+  if (!res.ok || !data.token) {
+    throw new Error(detail || 'Google auth failed');
   }
-  if (!data.token) throw new Error('No token');
-  return { token: data.token as string };
+  ingestGoogleOAuthResult({ token: data.token });
+  window.dispatchEvent(new CustomEvent('mestigo-google-token', { detail: data.token }));
+  return { status: 'ready', token: data.token as string };
 }
 
-/**
- * Google = popup only → dump identity to sessionStorage → sign out Firebase.
- * Phone modal + API JWT never depend on a live Firebase session.
- */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
   const [pendingGoogleIdentity, setPendingGoogleIdentity] = useState<PendingGoogleIdentity | null>(
     () => loadPendingGoogleUser(),
   );
   const [profile, setProfile] = useState<AuthProfile>(null);
   const [role, setRole] = useState<UserRole | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading] = useState(false);
   const [needsProfileCompletion, setNeedsProfileCompletion] = useState(
-    () => !!loadPendingGoogleUser(),
+    () => !!loadPendingGoogleUser() || !!sessionStorage.getItem(GOOGLE_PENDING_TOKEN_KEY),
   );
   const [errorKey, setErrorKey] = useState<string | null>(null);
 
   const clearError = useCallback(() => setErrorKey(null), []);
 
-  const beginProfileStep = useCallback((identity: PendingGoogleIdentity) => {
-    savePendingGoogleUser(identity);
-    setPendingGoogleIdentity(identity);
-    setNeedsProfileCompletion(true);
-    setUser(null);
+  useEffect(() => {
+    const stored = loadPendingGoogleUser();
+    if (stored) {
+      setPendingGoogleIdentity(stored);
+      setNeedsProfileCompletion(true);
+    }
+    const onPending = () => {
+      const identity = loadPendingGoogleUser();
+      if (identity) {
+        setPendingGoogleIdentity(identity);
+        setNeedsProfileCompletion(true);
+      }
+    };
+    window.addEventListener('mestigo-google-pending', onPending);
+    return () => window.removeEventListener('mestigo-google-pending', onPending);
   }, []);
 
-  const finishWithBackend = useCallback(async (
-    identity: PendingGoogleIdentity,
-    fullName: string,
-    phone?: string,
-  ): Promise<{ token: string } | { needsPhone: true }> => {
-    const result = await exchangeGoogleForApiToken({
-      email: identity.email,
-      full_name: fullName,
-      phone: phone || undefined,
-      firebase_uid: identity.uid,
-    });
-    if ('needsPhone' in result) {
-      return { needsPhone: true };
-    }
-    const token = result.token;
-    localStorage.setItem('user_name', fullName);
-    if (phone) localStorage.setItem('user_phone', phone);
-    clearPendingGoogleUser();
-    setPendingGoogleIdentity(null);
-    setNeedsProfileCompletion(false);
-    setRole('customer');
-    setProfile({
-      uid: identity.uid,
-      email: identity.email,
-      displayName: fullName,
-      phone: phone || '',
-      photoURL: identity.photoURL || '',
-      provider: 'google',
-      role: 'customer',
-    });
+  const signInWithGoogle = useCallback(async (): Promise<GoogleSignInResult> => {
+    setErrorKey(null);
+    let idToken: string;
+    let email = '';
+    let name = '';
     try {
-      await signOut(auth);
-    } catch {
-      /* ignore */
+      const got = await signInWithGoogleIdToken();
+      idToken = got.idToken;
+      email = got.email;
+      name = got.name;
+    } catch (err: any) {
+      if (err?.message === 'redirecting') {
+        return { status: 'redirecting' };
+      }
+      throw err;
     }
-    setUser(null);
-    return { token };
+
+    return exchangeGoogleIdToken(idToken, name, email);
   }, []);
-
-  const ingestGoogleUser = useCallback(async (firebaseUser: User): Promise<GoogleSignInResult> => {
-    const identity = identityFromFirebaseUser(firebaseUser);
-    if (!identity) throw new Error('Google account has no email');
-
-    savePendingGoogleUser(identity);
-    try {
-      await signOut(auth);
-    } catch {
-      /* ignore */
-    }
-
-    const savedPhone = localStorage.getItem('user_phone') || '';
-    const savedName = localStorage.getItem('user_name') || identity.displayName || '';
-
-    const result = await finishWithBackend(
-      identity,
-      savedName || identity.displayName || 'User',
-      savedPhone && isValidInternationalPhone(savedPhone) ? normalizePhone(savedPhone) : undefined,
-    );
-
-    if ('needsPhone' in result) {
-      beginProfileStep(identity);
-      return { status: 'needs_profile' };
-    }
-    return { status: 'ready', token: result.token };
-  }, [beginProfileStep, finishWithBackend]);
 
   const completeCustomerProfile = useCallback(async (displayName: string, phone: string) => {
     setErrorKey(null);
     const identity = pendingGoogleIdentity || loadPendingGoogleUser();
-    if (!identity?.email) {
+    const pendingToken = sessionStorage.getItem(GOOGLE_PENDING_TOKEN_KEY);
+    if (!pendingToken) {
       setErrorKey('auth.errors.generic');
-      throw new Error('No user');
+      throw new Error('No pending Google auth');
     }
 
-    const name = displayName.trim() || identity.displayName || 'User';
+    const name = displayName.trim() || identity?.displayName || 'User';
     if (!name.trim()) {
       setErrorKey('auth.errors.name_required');
       throw new Error('name');
@@ -197,178 +149,68 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw new Error('phone');
     }
 
-    try {
-      const result = await finishWithBackend(identity, name, normalizePhone(phone));
-      if ('needsPhone' in result) {
-        throw new Error('phone_required');
-      }
-      return result.token;
-    } catch (err) {
+    const res = await fetch(`${apiBase()}/api/auth/customer/google/complete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pending_token: pendingToken,
+        full_name: name,
+        phone: normalizePhone(phone),
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    const detail = typeof data.detail === 'string'
+      ? data.detail
+      : typeof data.error === 'string'
+        ? data.error
+        : '';
+
+    if (!res.ok) {
       setErrorKey('auth.errors.generic');
-      throw err;
+      throw new Error(detail || 'Google auth failed');
     }
-  }, [pendingGoogleIdentity, finishWithBackend]);
-
-  // Boot: restore modal from sessionStorage; consume one-shot redirect if any
-  useEffect(() => {
-    let cancelled = false;
-
-    const boot = async () => {
-      const stored = loadPendingGoogleUser();
-      if (stored) {
-        setPendingGoogleIdentity(stored);
-        setNeedsProfileCompletion(true);
-      }
-
-      try {
-        const redirect = await getRedirectResult(auth);
-        if (!cancelled && redirect?.user) {
-          const result = await ingestGoogleUser(redirect.user);
-          if (result.status === 'ready') {
-            sessionStorage.setItem(GOOGLE_TOKEN_KEY, result.token);
-            window.dispatchEvent(new CustomEvent('mestigo-google-token', { detail: result.token }));
-          }
-        }
-      } catch (err) {
-        console.warn('Google redirect result failed', err);
-      }
-
-      // Drop any leftover Firebase session that isn't part of admin/partner flow
-      if (!cancelled && auth.currentUser) {
-        try {
-          await signOut(auth);
-        } catch {
-          /* ignore */
-        }
-      }
-
-      if (!cancelled) setLoading(false);
-    };
-
-    void boot();
-    return () => {
-      cancelled = true;
-    };
-  }, [ingestGoogleUser]);
-
-  useEffect(() => {
-    const pending = sessionStorage.getItem(GOOGLE_TOKEN_KEY);
-    if (!pending) return;
-    sessionStorage.removeItem(GOOGLE_TOKEN_KEY);
-    window.dispatchEvent(new CustomEvent('mestigo-google-token', { detail: pending }));
-  }, []);
-
-  const signInWithGoogle = useCallback(async (): Promise<GoogleSignInResult> => {
-    setErrorKey(null);
-
-    const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
-    provider.addScope('email');
-    provider.addScope('profile');
-
-    try {
-      // POPUP ONLY — redirect was dumping users on home with a wiped session
-      const result = await signInWithPopup(auth, provider);
-      return await ingestGoogleUser(result.user);
-    } catch (err) {
-      // COOP / window.closed noise: popup often still signed the user in
-      if (auth.currentUser?.email) {
-        try {
-          return await ingestGoogleUser(auth.currentUser);
-        } catch {
-          /* fall through to real error */
-        }
-      }
-      const code = getFirebaseErrorCode(err);
-      setErrorKey(firebaseAuthErrorKey(code));
-      throw err;
+    if (!data.token) {
+      setErrorKey('auth.errors.generic');
+      throw new Error('No token');
     }
-  }, [ingestGoogleUser]);
 
-  const signInAdmin = useCallback(async (email: string, password: string) => {
-    setErrorKey(null);
-    try {
-      const result = await signInWithEmailAndPassword(auth, email.trim(), password);
-      const adminSnap = await getDoc(doc(db, 'admins', result.user.uid));
-      if (!adminSnap.exists()) {
-        await signOut(auth);
-        setErrorKey('auth.errors.insufficient_rights');
-        throw new Error('insufficient_rights');
-      }
-    } catch (err) {
-      if (err instanceof Error && err.message === 'insufficient_rights') {
-        setErrorKey('auth.errors.insufficient_rights');
-      } else {
-        setErrorKey(firebaseAuthErrorKey(getFirebaseErrorCode(err)));
-      }
-      throw err;
-    }
-  }, []);
-
-  const signInPartner = useCallback(async (email: string, password: string) => {
-    setErrorKey(null);
-    try {
-      const result = await signInWithEmailAndPassword(auth, email.trim(), password);
-      const partnerSnap = await getDoc(doc(db, 'partners', result.user.uid));
-      if (!partnerSnap.exists()) {
-        await signOut(auth);
-        setErrorKey('auth.errors.insufficient_rights');
-        throw new Error('insufficient_rights');
-      }
-      const data = partnerSnap.data();
-      if (!data.partnerId) {
-        await signOut(auth);
-        setErrorKey('auth.errors.insufficient_rights');
-        throw new Error('insufficient_rights');
-      }
-    } catch (err) {
-      const code = getFirebaseErrorCode(err);
-      if (err instanceof Error && err.message === 'insufficient_rights') {
-        setErrorKey('auth.errors.insufficient_rights');
-      } else {
-        setErrorKey(firebaseAuthErrorKey(code));
-      }
-      throw err;
-    }
-  }, []);
-
-  const clearFirebaseSession = useCallback(async () => {
-    setErrorKey(null);
-    try {
-      await signOut(auth);
-    } catch {
-      /* ignore */
-    }
-    setUser(null);
-  }, []);
-
-  const logout = useCallback(async () => {
-    setErrorKey(null);
+    localStorage.setItem('user_name', name);
+    localStorage.setItem('user_phone', normalizePhone(phone));
+    sessionStorage.removeItem(GOOGLE_PENDING_TOKEN_KEY);
     clearPendingGoogleUser();
     setPendingGoogleIdentity(null);
     setNeedsProfileCompletion(false);
-    try {
-      await signOut(auth);
-    } catch {
-      /* ignore */
+    setRole('customer');
+    if (identity) {
+      setProfile({
+        uid: identity.uid || identity.email,
+        email: identity.email,
+        displayName: name,
+        phone: normalizePhone(phone),
+        photoURL: identity.photoURL || '',
+        provider: 'google',
+        role: 'customer',
+      });
     }
+    return data.token as string;
+  }, [pendingGoogleIdentity]);
+
+  const logout = useCallback(() => {
+    setErrorKey(null);
+    clearPendingGoogleUser();
+    sessionStorage.removeItem(GOOGLE_PENDING_TOKEN_KEY);
+    setPendingGoogleIdentity(null);
+    setNeedsProfileCompletion(false);
     localStorage.removeItem('token');
     localStorage.removeItem('user_name');
     localStorage.removeItem('user_phone');
     localStorage.removeItem('admin_token');
     localStorage.removeItem('admin_user');
-    setUser(null);
     setProfile(null);
     setRole(null);
   }, []);
 
-  const getIdToken = useCallback(async () => {
-    if (!auth.currentUser) return null;
-    return auth.currentUser.getIdToken();
-  }, []);
-
   const value = useMemo<AuthContextValue>(() => ({
-    user,
     pendingGoogleIdentity,
     profile,
     role,
@@ -378,13 +220,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearError,
     signInWithGoogle,
     completeCustomerProfile,
-    signInAdmin,
-    signInPartner,
     logout,
-    clearFirebaseSession,
-    getIdToken,
   }), [
-    user,
     pendingGoogleIdentity,
     profile,
     role,
@@ -394,11 +231,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearError,
     signInWithGoogle,
     completeCustomerProfile,
-    signInAdmin,
-    signInPartner,
     logout,
-    clearFirebaseSession,
-    getIdToken,
   ]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -408,4 +241,29 @@ export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
+}
+
+/** Called from AuthGoogleDone after backend OAuth redirect. */
+export function ingestGoogleOAuthResult(params: {
+  token?: string | null;
+  pending?: string | null;
+  email?: string | null;
+  name?: string | null;
+  picture?: string | null;
+}): 'logged_in' | 'needs_profile' | 'none' {
+  if (params.token) {
+    sessionStorage.setItem('pending_google_token', params.token);
+    return 'logged_in';
+  }
+  if (params.pending && params.email) {
+    sessionStorage.setItem(GOOGLE_PENDING_TOKEN_KEY, params.pending);
+    savePendingGoogleUser({
+      uid: '',
+      email: params.email,
+      displayName: params.name || '',
+      photoURL: params.picture || '',
+    });
+    return 'needs_profile';
+  }
+  return 'none';
 }

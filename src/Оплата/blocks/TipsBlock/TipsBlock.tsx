@@ -14,7 +14,7 @@ const TipsBlock: React.FC<TipsBlockProps> = ({ tipAmount, setTipAmount, onOpenCu
   const [isSaved, setIsSaved] = useState<boolean>(false);
 
   // Список фиксированных чаевых
-  const presets: number[] = [0, 0.70, 1.20, 1.70];
+  const presets: number[] = [0, 2.00, 4.00, 7.00];
 
   // Проверяем, является ли текущее значение одним из пресетов
   const isCustom: boolean = !presets.includes(tipAmount);

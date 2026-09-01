@@ -33,7 +33,7 @@ const GlassBottomPanel: React.FC<GlassBottomPanelProps> = ({
     const [isConditionsOpen, setIsConditionsOpen] = useState(false);
 
     const fee = deliveryFeeProp ?? delivery?.fee ?? null;
-    const eta = deliveryTime || delivery?.etaLabel || '25–35 мин';
+    const eta = deliveryTime || delivery?.etaLabel || t('cart.time');
     const preliminary = delivery?.preliminary;
 
     const deliveryLine = (() => {
@@ -153,31 +153,31 @@ const GlassBottomPanel: React.FC<GlassBottomPanelProps> = ({
                                     <div className="v2-price-desc">{t('delivery.outside_zone')}</div>
                                 )}
                                 <div className="v2-info-row-item">
-                                    <span className="info-label">Центр</span>
+                                    <span className="info-label">{t('delivery.zone_center')}</span>
                                     <span className="info-value">8 ₾</span>
                                 </div>
                                 <div className="v2-info-row-item">
-                                    <span className="info-label">Аэропорт</span>
+                                    <span className="info-label">{t('delivery.zone_airport')}</span>
                                     <span className="info-value">12 ₾</span>
                                 </div>
                                 <div className="v2-info-row-item">
-                                    <span className="info-label">Ближайшие деревни</span>
+                                    <span className="info-label">{t('delivery.zone_villages')}</span>
                                     <span className="info-value">20 ₾</span>
                                 </div>
                             </div>
 
                             <div className="v2-modal-card">
-                                <h2 className="v2-sheet-title compact" style={{ marginBottom: '8px' }}>Детали</h2>
+                                <h2 className="v2-sheet-title compact" style={{ marginBottom: '8px' }}>{t('delivery.details_title')}</h2>
                                 <div className="v2-info-row-item">
-                                    <span className="info-label">Максимальный вес заказа</span>
+                                    <span className="info-label">{t('delivery.max_weight')}</span>
                                     <span className="info-value">45 кг</span>
                                 </div>
                                 <div className="v2-info-row-item">
-                                    <span className="info-label">Работа сервиса</span>
+                                    <span className="info-label">{t('delivery.service_work')}</span>
                                     <span className="info-value">от 0.99 GEL</span>
                                 </div>
                                 <div className="v2-sheet-legal-alt" style={{ padding: '12px 0 0 0', marginTop: '4px' }}>
-                                    <p>Сервисный сбор составляет 6% от суммы заказа, но не более 2.00 GEL и не менее 0.99 GEL.</p>
+                                    <p>{t('delivery.service_fee_legal')}</p>
                                 </div>
                             </div>
                         </div>

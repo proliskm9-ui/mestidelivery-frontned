@@ -93,7 +93,11 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
         let errorMsg = `Error ${res.status}`;
         try {
             const err = await res.json();
-            errorMsg = JSON.stringify(err);
+            errorMsg =
+                (typeof err?.error === 'string' && err.error) ||
+                (typeof err?.detail === 'string' && err.detail) ||
+                (typeof err?.message === 'string' && err.message) ||
+                JSON.stringify(err);
         } catch (_) {
             // JSON parse failed, use generic error
         }
@@ -269,6 +273,7 @@ export type Order = {
     courier_id?: number;
     delivery_lat?: number;
     delivery_lng?: number;
+    refund_initiated_at?: string;
 };
 
 export type Product = {
@@ -319,6 +324,7 @@ export type Restaurant = {
     latitude?: number;
     longitude?: number;
     address?: string;
+    working_hours?: string;
     poster_api_token?: string;
     spot_id?: string;
     poster_token?: string;

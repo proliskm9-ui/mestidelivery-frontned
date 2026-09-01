@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import './MobileRestaurantCard.css';
 import { Restaurant, Store } from '../../services/api';
 import { useLanguage, formatDuration } from '../../translations/LanguageContext';
+import { pickI18nText } from '../../utils/i18nContent';
+import { closedBadgeText } from '../../utils/workingHours';
 import './cardImageSkeleton.css';
 
 interface MobileRestaurantCardProps {
@@ -16,13 +18,14 @@ const MobileRestaurantCard: React.FC<MobileRestaurantCardProps> = ({ item, onCli
     const [imageOk, setImageOk] = useState(true);
     const hasImage = Boolean(item.img && item.img.trim());
     const showSkeleton = !hasImage || !imageOk;
+    const closedText = closedBadgeText((item as Restaurant).working_hours, language);
 
     useEffect(() => {
         setImageOk(true);
     }, [item.img]);
 
     return (
-        <div className="allRestaurantCard" onClick={onClick}>
+        <div className={`allRestaurantCard${closedText ? ' allRestaurantCard--closed' : ''}`} onClick={onClick}>
             <div className={`allRestaurantPreview ${showSkeleton ? 'allRestaurantPreview--skeleton' : ''}`}>
                 {hasImage && imageOk && (
                     <img
@@ -33,6 +36,26 @@ const MobileRestaurantCard: React.FC<MobileRestaurantCardProps> = ({ item, onCli
                     />
                 )}
                 {showSkeleton && <div className="card-img-skeleton" aria-hidden="true" />}
+                {closedText && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            left: 8,
+                            bottom: 8,
+                            zIndex: 2,
+                            background: 'rgba(15,17,23,0.82)',
+                            color: '#fff',
+                            fontSize: 11,
+                            fontWeight: 700,
+                            padding: '4px 8px',
+                            borderRadius: 8,
+                            maxWidth: '90%',
+                            lineHeight: 1.25,
+                        }}
+                    >
+                        {closedText}
+                    </div>
+                )}
                 {onToggleFavorite && (
                     <button
                         className={`allRestaurantFavorite ${isFavorite ? 'fav-active' : ''}`}
@@ -46,7 +69,7 @@ const MobileRestaurantCard: React.FC<MobileRestaurantCardProps> = ({ item, onCli
             </div>
                     <div className="allRestaurantInfo">
                 <div className="allRestaurantNameRow">
-                    <span className="allRestaurantName">{item.name}</span>
+                    <span className="allRestaurantName">{pickI18nText(item.name, language).replace(/Restaraunt/gi, 'Restaurant')}</span>
                     <span className="allRestaurantRating">
                         <span style={{ fontSize: '13px', lineHeight: '13px' }}>★</span>
                         {(item as Restaurant).rating || '4.8'}

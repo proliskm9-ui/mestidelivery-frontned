@@ -5,6 +5,7 @@ import {
     DeliveryIcon, StarIcon, CancelIcon, WalletIcon
 } from '../../components/icons/StatusIcons';
 import FullPageLoader from '../../components/UI/FullPageLoader';
+import { pickKitchenText } from '../../utils/i18nContent';
 import './AdminStyles.css';
 
 const STATUS_MAP: Record<string, { label: string; color: string; Icon: any; step: number }> = {
@@ -34,6 +35,7 @@ export function AdminOrders() {
     const [assigning, setAssigning] = useState<number | null>(null);
     const [activeDropdownId, setActiveDropdownId] = useState<number | null>(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [refundingId, setRefundingId] = useState<number | null>(null);
     const prevCountRef = useRef(0);
     const user = adminAuth.getUser();
 
@@ -108,12 +110,29 @@ export function AdminOrders() {
     };
 
     const cancelOrder = async (id: number) => {
-        if (!confirm('Отменить заказ?')) return;
+        if (!confirm('Отменить заказ? Заказ останется в разделе «Отменённые», где можно инициировать возврат.')) return;
         try {
-            await adminApi.delete(`/orders/${id}`);
+            await adminApi.patch(`/orders/${id}/status`, { status: 'cancelled' });
             setOrders(prev => prev.map(o => o.id === id ? { ...o, status: 'cancelled' } : o));
+            setFilter('cancelled');
         } catch (err: any) {
             alert(err.message || 'Ошибка отмены');
+            load();
+        }
+    };
+
+    const initiateRefund = async (id: number) => {
+        if (!confirm('Инициировать возврат средств? Клиенту придёт письмо, что деньги вернутся в течение суток.')) return;
+        setRefundingId(id);
+        try {
+            const res = await adminApi.post<{ success: boolean; refund_initiated_at?: string }>(`/admin/orders/${id}/refund`, {});
+            setOrders(prev => prev.map(o => o.id === id
+                ? { ...o, refund_initiated_at: res.refund_initiated_at || new Date().toISOString() }
+                : o));
+        } catch (err: any) {
+            alert(err.message || 'Не удалось инициировать возврат');
+        } finally {
+            setRefundingId(null);
         }
     };
 
@@ -503,7 +522,7 @@ export function AdminOrders() {
                                                                 fontSize: '0.78rem', 
                                                                 fontWeight: 800 
                                                             }}>{item.quantity}×</span>
-                                                            <span>{item.name}</span>
+                                                            <span>{pickKitchenText(item.name)}</span>
                                                         </span>
                                                         <span style={{ color: '#fff', fontWeight: 700 }}>
                                                             {Number(item.price * item.quantity || 0).toFixed(2)} <span style={{ color: 'var(--admin-primary)', fontSize: '0.82rem' }}>₾</span>
@@ -655,6 +674,47 @@ export function AdminOrders() {
                                                 >
                                                     ✕ Отменить заказ
                                                 </button>
+                                            )}
+
+                                            {/* Refund button */}
+                                            {order.status === 'cancelled' && (
+                                                order.refund_initiated_at ? (
+                                                    <div style={{
+                                                        marginTop: '10px',
+                                                        padding: '12px',
+                                                        borderRadius: '14px',
+                                                        background: 'rgba(33,234,124,0.05)',
+                                                        border: '1px solid rgba(33,234,124,0.15)',
+                                                        color: '#21ea7c',
+                                                        fontSize: '0.85rem',
+                                                        fontWeight: 700,
+                                                        textAlign: 'center',
+                                                    }}>
+                                                        ✓ Возврат инициирован
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        className="admin-btn"
+                                                        style={{
+                                                            width: '100%',
+                                                            marginTop: '10px',
+                                                            padding: '12px',
+                                                            fontSize: '0.9rem',
+                                                            fontWeight: 700,
+                                                            borderRadius: '14px',
+                                                            background: 'rgba(33, 234, 124, 0.05)',
+                                                            color: '#21ea7c',
+                                                            border: '1px solid rgba(33, 234, 124, 0.15)',
+                                                            transition: 'all 0.2s ease',
+                                                            cursor: refundingId === order.id ? 'wait' : 'pointer',
+                                                            opacity: refundingId === order.id ? 0.7 : 1,
+                                                        }}
+                                                        disabled={refundingId === order.id}
+                                                        onClick={() => initiateRefund(order.id)}
+                                                    >
+                                                        {refundingId === order.id ? 'Отправка…' : '↩ Вернуть средства'}
+                                                    </button>
+                                                )
                                             )}
 
                                             {/* Courier info */}

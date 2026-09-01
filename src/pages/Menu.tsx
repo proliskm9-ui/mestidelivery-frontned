@@ -9,6 +9,7 @@ import PromoBanner from '../components/UI/PromoBanner';
 import AddressDeliveryPrompt from '../components/UI/AddressDeliveryPrompt';
 import MobileRestaurantCard from '../components/UI/MobileRestaurantCard';
 import NetworkErrorState from '../components/UI/NetworkErrorState';
+import { matchesI18nContent } from '../utils/i18nContent';
 
 const CATEGORY_ICONS = [
     { key: 'fast_food', img: '/Assets/Ellipse 18.png', label: 'Фастфуд' },
@@ -197,7 +198,7 @@ const MenuPage: React.FC<{
     };
 
     const baseFiltered = taggedRestaurants.filter(r => {
-        const matchesSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = matchesI18nContent(r.name, searchQuery);
         const matchesCategory = activeCategories.length === 0
             ? true
             : activeCategories.some(cat => r.tags?.includes(cat));
@@ -235,13 +236,13 @@ const MenuPage: React.FC<{
         .map(r => ({ ...r, promo: r.promo_text || r.promo || t('menu.promo_first_order') }));
 
     const worthTryingFiltered = worthTryingRestaurants.filter(r =>
-        r.name.toLowerCase().includes(searchQuery.toLowerCase())
+        matchesI18nContent(r.name, searchQuery)
     );
     const mustTryFiltered = mustTryRestaurants.filter(r =>
-        r.name.toLowerCase().includes(searchQuery.toLowerCase())
+        matchesI18nContent(r.name, searchQuery)
     );
     const filteredStores = stores.filter(s =>
-        s.name.toLowerCase().includes(searchQuery.toLowerCase())
+        matchesI18nContent(s.name, searchQuery)
     );
     const hasStores = filteredStores.length > 0;
 

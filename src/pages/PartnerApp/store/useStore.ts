@@ -36,15 +36,8 @@ const stopLocationTracking = () => {
   }
 };
 
-const triggerHaptic = (type: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' = 'medium') => {
-  const tgWebApp = (window as any).Telegram?.WebApp;
-  if (tgWebApp?.HapticFeedback) {
-    if (['light', 'medium', 'heavy'].includes(type)) {
-      tgWebApp.HapticFeedback.impactOccurred(type as 'light' | 'medium' | 'heavy');
-    } else if (['success', 'warning', 'error'].includes(type)) {
-      tgWebApp.HapticFeedback.notificationOccurred(type as 'success' | 'warning' | 'error');
-    }
-  }
+const triggerHaptic = (_type: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' = 'medium') => {
+  // Partner app is standalone — no Telegram WebApp coupling.
 };
 
 interface AppState {
@@ -73,7 +66,7 @@ interface AppState {
   setActiveTab: (tab: string) => void;
   
   login: (username: string, password?: string) => Promise<void>;
-  telegramLogin: (telegramId: number, username?: string, name?: string) => Promise<void>;
+  hydrateSession: () => void;
   logout: () => void;
   
   toggleOnline: () => void;
@@ -83,7 +76,7 @@ interface AppState {
   
   // Действия курьера
   acceptOrder: (orderId: string) => Promise<void>;
-  advanceCourierOrder: (orderId: string) => Promise<void>;
+  advanceCourierOrder: (orderId: string, status?: Order['status'], atRestaurant?: boolean) => Promise<void>;
   
   // Действия ресторана
   advanceRestaurantOrder: (orderId: string) => Promise<void>;
@@ -119,6 +112,7 @@ export const useStore = create<AppState>((set, get) => ({
     try {
       const res = await api.login(username, password);
       triggerHaptic('success');
+      localStorage.setItem('partner_auth_method', 'password');
       
       const isRestaurant = res.user.role === 'restaurant_admin' || res.user.role === 'super_admin';
       const role = isRestaurant ? 'restaurant' : 'courier';
@@ -141,34 +135,73 @@ export const useStore = create<AppState>((set, get) => ({
     }
   },
 
-  telegramLogin: async (telegramId, username, name) => {
-    set({ isLoading: true });
-    try {
-      const res = await api.telegramLogin(telegramId, username, name);
-      triggerHaptic('success');
-      
+  hydrateSession: () => {
+    const method = localStorage.getItem('partner_auth_method');
+    const token = localStorage.getItem('delivery_jwt_token');
+    const refresh = localStorage.getItem('partner_refresh_token');
+
+    // Drop Telegram-linked leftover sessions — partner app is password-only.
+    if (method !== 'password') {
+      api.clearSession();
       set({
-        userRole: 'courier',
-        userName: res.user.username,
+        userRole: 'none',
+        userName: '',
         userPhone: '',
-        currentScreen: 'courier-dashboard',
-        activeTab: 'available',
-        isLoading: false
+        currentScreen: 'login',
+        activeOrders: [],
+        historicOrders: [],
       });
-      
-      await get().fetchOrders();
-    } catch (error) {
-      set({ isLoading: false });
-      triggerHaptic('error');
-      console.error("Telegram login failed:", error);
-      throw error;
+      return;
+    }
+
+    // Old sessions without refresh_token will 401 after ~15m — force re-login.
+    if (!token && !refresh) return;
+    if (!refresh) {
+      api.clearSession();
+      set({
+        userRole: 'none',
+        userName: '',
+        userPhone: '',
+        currentScreen: 'login',
+        activeOrders: [],
+        historicOrders: [],
+      });
+      return;
+    }
+
+    try {
+      const raw = localStorage.getItem('admin_user');
+      const user = raw ? JSON.parse(raw) : null;
+      if (!user?.username) {
+        get().logout();
+        return;
+      }
+      const isRestaurant = user.role === 'restaurant_admin' || user.role === 'super_admin';
+      const role = isRestaurant ? 'restaurant' : 'courier';
+      set({
+        userRole: role,
+        userName: user.username,
+        userPhone: '',
+        currentScreen: role === 'courier' ? 'courier-dashboard' : 'restaurant-dashboard',
+        activeTab: role === 'courier' ? 'available' : 'active',
+      });
+      void (async () => {
+        const ok = await api.ensureSession();
+        if (!ok) {
+          get().logout();
+          return;
+        }
+        await get().fetchOrders();
+      })();
+    } catch {
+      get().logout();
     }
   },
 
   logout: () => {
     stopLocationTracking();
     triggerHaptic('light');
-    localStorage.removeItem('delivery_jwt_token');
+    api.clearSession();
     set({
       userRole: 'none',
       userName: '',
@@ -277,19 +310,26 @@ export const useStore = create<AppState>((set, get) => ({
     }
   },
 
-  advanceCourierOrder: async (orderId) => {
-    const order = get().activeOrders.find(o => o.id === orderId);
-    if (!order) return;
+  advanceCourierOrder: async (orderId, status?, atRestaurant?) => {
+    const fromStore = get().activeOrders.find((o) => o.id === orderId);
+    const currentStatus = status || fromStore?.status;
+    if (!currentStatus) return;
+
+    const atRest =
+      typeof atRestaurant === 'boolean'
+        ? atRestaurant
+        : Boolean(fromStore?.atRestaurant) || localStorage.getItem(`order_at_restaurant_${orderId}`) === '1';
 
     set({ isLoading: true });
     try {
-      await api.advanceOrderCourier(orderId, order.status);
+      await api.advanceOrderCourier(orderId, currentStatus, atRest);
       triggerHaptic('success');
       await get().fetchOrders();
     } catch (error) {
       set({ isLoading: false });
       triggerHaptic('error');
       console.error(error);
+      throw error;
     }
   },
 

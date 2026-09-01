@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './TimeModal.css';
 import { useLanguage } from '../../../translations/LanguageContext';
+import { generateRestaurantSlots, type TimeSlot } from '../../../utils/workingHours';
 
 interface TimeModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentTime: string | null;
   onSelect: (timeSlot: string | null) => void;
+  workingHours?: string | null;
 }
 
-const TimeModal: React.FC<TimeModalProps> = ({ isOpen, onClose, currentTime, onSelect }) => {
+const TimeModal: React.FC<TimeModalProps> = ({ isOpen, onClose, currentTime, onSelect, workingHours }) => {
   const { t } = useLanguage();
   const [localSelection, setLocalSelection] = useState<string | null>(currentTime);
 
@@ -19,39 +21,20 @@ const TimeModal: React.FC<TimeModalProps> = ({ isOpen, onClose, currentTime, onS
     }
   }, [isOpen, currentTime]);
 
-  const slots = useMemo<string[]>(() => {
-    const timeSlots: string[] = [];
-    for (let hour = 10; hour <= 21; hour++) {
-      for (let min = 0; min < 60; min += 30) {
-        const startHour = hour.toString().padStart(2, '0');
-        const startMin = min.toString().padStart(2, '0');
-
-        const endMinRaw = min + 20;
-        let endHour = hour;
-        let endMinVal = endMinRaw;
-
-        if (endMinRaw >= 60) {
-          endHour = hour + 1;
-          endMinVal = endMinRaw - 60;
-        }
-
-        if (endHour <= 22) {
-          const endHourStr = endHour.toString().padStart(2, '0');
-          const endMinStr = endMinVal.toString().padStart(2, '0');
-          timeSlots.push(`${startHour}:${startMin}-${endHourStr}:${endMinStr}`);
-        }
-      }
-    }
-    return timeSlots;
-  }, []);
+  const slots = useMemo<TimeSlot[]>(() => generateRestaurantSlots(workingHours), [workingHours, isOpen]);
 
   if (!isOpen) return null;
 
-  const handleSlotClick = (slot: string): void => {
-    if (localSelection === slot) {
+  const selectedLabel =
+    slots.find((s) => s.value === localSelection)?.label ||
+    localSelection ||
+    '—';
+
+  const handleSlotClick = (slot: TimeSlot): void => {
+    if (localSelection === slot.value) {
       setLocalSelection(null);
     } else {
-      setLocalSelection(slot);
+      setLocalSelection(slot.value);
     }
   };
 
@@ -68,22 +51,28 @@ const TimeModal: React.FC<TimeModalProps> = ({ isOpen, onClose, currentTime, onS
           <div>
             <h2 className="tm-title">{t('checkout.choose_time_title')}</h2>
             <p className="tm-subtitle">
-              {t('checkout.current_selection')} {localSelection || '—'}
+              {t('checkout.current_selection')} {selectedLabel}
             </p>
           </div>
         </div>
 
         <div className="tm-slots-grid">
-          {slots.map((slot) => (
-            <button
-              key={slot}
-              type="button"
-              className={`tm-slot-btn ${localSelection === slot ? 'active' : ''}`}
-              onClick={() => handleSlotClick(slot)}
-            >
-              {slot}
-            </button>
-          ))}
+          {slots.length === 0 ? (
+            <p style={{ gridColumn: '1 / -1', color: '#9ca3af', fontSize: 14, margin: 0 }}>
+              Нет доступных слотов в ближайшие дни
+            </p>
+          ) : (
+            slots.map((slot) => (
+              <button
+                key={slot.value}
+                type="button"
+                className={`tm-slot-btn ${localSelection === slot.value ? 'active' : ''}`}
+                onClick={() => handleSlotClick(slot)}
+              >
+                {slot.label}
+              </button>
+            ))
+          )}
         </div>
 
         <button type="button" className="tm-confirm-btn" onClick={handleFinalize}>

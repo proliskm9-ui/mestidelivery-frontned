@@ -1,0 +1,81 @@
+{
+  "batch": "sunset-hot-v3-pilot-01",
+  "category": "Горячее",
+  "system_prompt": "gemini-code-1785848380021.md",
+  "size": 1024,
+  "notes": "All 8 volumetric → 45° template. No ketsi/clay pots — Matte Graphite V1/V2 only.",
+  "items": [
+    {
+      "stem": "sunset-31-fried-chicken",
+      "ru": "Цыплёнок табака",
+      "en": "Chicken tabaka",
+      "vessel": "V1",
+      "angle": "45",
+      "weight": "350 г",
+      "subject": "Whole Georgian chicken tabaka (tsitsila tabaka): pressed flat whole young chicken, deep golden crispy skin, juicer meat at joints, lightly seasoned, served bone-in on a matte graphite flat plate. No extra sides. Appetizing natural gloss on skin fat, plate stays fully matte."
+    },
+    {
+      "stem": "sunset-33-chkmeruli",
+      "ru": "Курица чкмерули",
+      "en": "Chicken chkmeruli",
+      "vessel": "V2",
+      "angle": "45",
+      "weight": "450 г",
+      "subject": "Georgian chicken chkmeruli: roasted chicken pieces swimming in glossy creamy garlic sauce, visible pepper flakes, generous sauce pooling in a deep matte graphite bowl. Food sauce has realistic specular highlights; bowl is completely matte charcoal. No clay pot."
+    },
+    {
+      "stem": "sunset-34-stewed-beef",
+      "ru": "Тушёная говядина",
+      "en": "Stewed beef",
+      "vessel": "V2",
+      "angle": "45",
+      "weight": "350 г",
+      "subject": "Slow-stewed beef chunks in a rich brown gravy, fork-tender meat with soft onion, served in a deep matte graphite bowl. Natural juice gloss on the stew surface; bowl fully matte. No rustic clayware."
+    },
+    {
+      "stem": "sunset-35-stewed-tashmijabi",
+      "ru": "Тушёное мясо с ташмиджаби",
+      "en": "Stewed meat with tashmijabi",
+      "vessel": "V2",
+      "angle": "45",
+      "weight": "450 г",
+      "subject": "Georgian plate composition in one deep matte graphite bowl: stewed meat in savory sauce beside a generous scoop of cheesy tashmijabi (Svan mashed potato with cheese), rustic but clean plating, appetizing steam-sheen on food, dishware zero gloss."
+    },
+    {
+      "stem": "sunset-36-khashlama",
+      "ru": "Хашлама из говядины",
+      "en": "Beef khashlama",
+      "vessel": "V2",
+      "angle": "45",
+      "weight": "400 г",
+      "subject": "Beef khashlama: large pieces of boiled beef with potato, carrot and onion in a clear aromatic broth inside a deep matte graphite bowl. Broth has subtle oily sheen; meat looks tender; bowl stays matte charcoal."
+    },
+    {
+      "stem": "sunset-37-pork-mtsvadi",
+      "ru": "Шашлык из свинины",
+      "en": "Pork mtsvadi",
+      "vessel": "V1",
+      "angle": "45",
+      "weight": "280 г",
+      "subject": "Georgian pork mtsvadi: chunky grilled pork cubes with charred edges and juicy pinkish interior highlights, stacked appetizingly on a matte graphite flat plate. Light oil sheen on meat only. No skewers sticking out of frame, no white plate, no clay pot."
+    },
+    {
+      "stem": "sunset-38-pork-ribs",
+      "ru": "Свиные рёбра",
+      "en": "Pork ribs",
+      "vessel": "V1",
+      "angle": "45",
+      "weight": "350 г",
+      "subject": "Juicy glazed pork ribs, fall-off-the-bone look, caramelized edges, arranged neatly on a matte graphite flat plate. Natural sticky glaze shine on the meat; plate completely matte. No extra cutlery on the dish."
+    },
+    {
+      "stem": "sunset-39-trout",
+      "ru": "Форель с овощным салатом",
+      "en": "Trout with vegetable salad",
+      "vessel": "V1",
+      "angle": "45",
+      "weight": "350 г",
+      "subject": "Whole or large fillet of pan-seared mountain trout with crispy golden skin, served on a matte graphite flat plate with a fresh vegetable salad (tomato, cucumber, herbs) beside the fish. Light oil gloss on fish skin; plate matte; nothing floating outside the plate rim."
+    }
+  ]
+}

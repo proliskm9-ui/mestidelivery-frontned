@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { obfuscateData, deobfuscateData, isJwtTokenValid } from '../utils/security';
+import { getMinimumOrderQuantity } from '../utils/minimumOrderQuantity';
 
 // ==========================================
 // 1. Favorites Store
@@ -159,7 +160,7 @@ export const useCartStore = create<CartState>((set) => ({
                       ? { ...item, quantity: item.quantity + 1 }
                       : item
               )
-            : [...state.cart, { product, quantity: 1 }];
+            : [...state.cart, { product, quantity: getMinimumOrderQuantity(product) }];
 
         return {
             cart: nextCart,
@@ -167,13 +168,14 @@ export const useCartStore = create<CartState>((set) => ({
         };
     }),
     updateQuantity: (productId, delta) => set((state) => {
-        const nextCart = state.cart
-            .map((item) =>
-                item.product.id === productId
-                    ? { ...item, quantity: item.quantity + delta }
-                    : item
-            )
-            .filter((item) => item.quantity > 0);
+        const nextCart = state.cart.flatMap((item) => {
+            if (item.product.id !== productId) return [item];
+
+            const minimum = getMinimumOrderQuantity(item.product);
+            if (delta < 0 && item.quantity <= minimum) return [];
+
+            return [{ ...item, quantity: Math.max(minimum, item.quantity + delta) }];
+        });
 
         return {
             cart: nextCart,

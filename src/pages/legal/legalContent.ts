@@ -170,7 +170,7 @@ const ru: DocsByLang = {
                 id: 't-pay',
                 title: '4. Оплата',
                 paragraphs: [
-                    '4.1. Оплата производится способами, доступными в интерфейсе Сервиса на момент оформления заказа: банковской картой через сертифицированные платёжные шлюзы и/или по платёжной ссылке либо QR-коду (в том числе через платёжных партнёров, таких как BOG Pay и TBC Pay), наличными курьеру при получении, а также иными способами (включая криптовалюту), если они явно предложены для конкретной зоны и заказа.',
+                    '4.1. Оплата производится способами, доступными в интерфейсе Сервиса на момент оформления заказа: банковской картой через сертифицированные платёжные шлюзы и/или по платёжной ссылке либо QR-коду (в том числе через платёжных партнёров, таких как BOG Pay, TBC Pay и Keepz), наличными курьеру при получении, а также иными способами, если они явно предложены для конкретной зоны и заказа.',
                     '4.2. Компания не хранит и не обрабатывает реквизиты банковских карт Пользователя. Платёжные операции проводятся платёжным провайдером в соответствии с применимыми стандартами безопасности, включая PCI DSS.',
                     '4.3. Цены, указанные в Сервисе, включают применимые налоги, если иное прямо не указано.',
                     '4.4. При сбое платежа либо повторном списании Пользователь вправе обратиться в службу поддержки Сервиса, а также в банк-эмитент. Компания содействует проверке статуса операции.',
@@ -429,7 +429,7 @@ const ru: DocsByLang = {
                 paragraphs: [
                     '7.1. Пользователь направляет обращение в службу поддержки с указанием номера заказа, существа требования и желаемого результата.',
                     '7.2. Компания подтверждает получение обращения и сообщает о принятом решении.',
-                    '7.3. При одобрении возврата на банковскую карту денежные средства возвращаются в срок до 5 рабочих дней со стороны Компании; дальнейшие сроки зависят от банка-эмитента. По заказам, оплаченным наличными, способ возврата согласуется с Пользователем. По заказам, оплаченным криптовалютой либо иным альтернативным способом, возврат осуществляется тем же способом либо иным согласованным способом с учётом технических ограничений платёжного провайдера.',
+                    '7.3. При одобрении возврата на банковскую карту денежные средства возвращаются в срок до 5 рабочих дней со стороны Компании; дальнейшие сроки зависят от банка-эмитента. По заказам, оплаченным наличными или иным альтернативным способом, способ возврата согласуется с Пользователем с учётом технических ограничений платёжного провайдера.',
                 ],
             },
             {
@@ -501,7 +501,7 @@ const en: DocsByLang = {
                 id: 't-pay',
                 title: '4. Payment',
                 paragraphs: [
-                    '4.1. Payment may be made using the methods offered in the Service at checkout: bank card via certified payment gateways and/or payment link or QR code (including payment partners such as BOG Pay and TBC Pay), cash to the courier upon delivery, and other methods (including cryptocurrency) where explicitly offered for the relevant zone and order.',
+                    '4.1. Payment may be made using the methods offered in the Service at checkout: bank card via certified payment gateways and/or payment link or QR code (including payment partners such as BOG Pay, TBC Pay and Keepz), cash to the courier upon delivery, and other methods where explicitly offered for the relevant zone and order.',
                     '4.2. The Company does not store or process bank card details. Payments are processed by the payment provider in accordance with applicable security standards, including PCI DSS.',
                     '4.3. Prices shown in the Service include applicable taxes unless expressly stated otherwise.',
                     '4.4. In case of a failed or duplicate charge, the User may contact Service support and the issuing bank. The Company will assist in verifying the transaction status.',
@@ -760,7 +760,7 @@ const en: DocsByLang = {
                 paragraphs: [
                     '7.1. The User submits a request to support stating the order number, the nature of the claim and the desired outcome.',
                     '7.2. The Company confirms receipt and communicates its decision.',
-                    '7.3. Approved card refunds are processed within up to 5 business days by the Company; subsequent timing depends on the issuing bank. For cash orders, the refund method is agreed with the User. For cryptocurrency or other alternative payment methods, refunds are made via the same method or another agreed method, subject to the payment provider’s technical constraints.',
+                    '7.3. Approved card refunds are processed within up to 5 business days by the Company; subsequent timing depends on the issuing bank. For cash or other alternative payment methods, the refund method is agreed with the User, subject to the payment provider’s technical constraints.',
                 ],
             },
             {
@@ -832,7 +832,7 @@ const ka: DocsByLang = {
                 id: 't-pay',
                 title: '4. გადახდა',
                 paragraphs: [
-                    '4.1. გადახდა ხდება შეკვეთის დროს სერვისში ხელმისაწვდომი საშუალებებით: ბარათით სერტიფიცირებული შლუზებით და/ან გადახდის ბმულით ან QR კოდით (მათ შორის BOG Pay, TBC Pay), ნაღდით კურიერთან, ასევე სხვა საშუალებებით (მათ შორის კრიპტოვალუტით), თუ ეს ხელმისაწვდომია კონკრეტული ზონისა და შეკვეთისთვის.',
+                    '4.1. გადახდა ხდება შეკვეთის დროს სერვისში ხელმისაწვდომი საშუალებებით: ბარათით სერტიფიცირებული შლუზებით და/ან გადახდის ბმულით ან QR კოდით (მათ შორის BOG Pay, TBC Pay და Keepz), ნაღდით კურიერთან, ასევე სხვა საშუალებებით, თუ ეს ხელმისაწვდომია კონკრეტული ზონისა და შეკვეთისთვის.',
                     '4.2. ბარათის რეკვიზიტებს კომპანია არ ინახავს; ოპერაციას ახორციელებს გადახდის პროვაიდერი PCI DSS სტანდარტის შესაბამისად.',
                     '4.3. ფასები მოიცავს გამოსაყენებელ გადასახადებს, თუ სხვა რამ პირდაპირ არ არის მითითებული.',
                     '4.4. გადახდის შეფერხებისას მომხმარებელს შეუძლია მიმართოს მხარდაჭერას და ბანკს.',
@@ -1091,7 +1091,7 @@ const ka: DocsByLang = {
                 paragraphs: [
                     '7.1. მიმართეთ მხარდაჭერას შეკვეთის ნომრითა და მოთხოვნით.',
                     '7.2. კომპანია ადასტურებს მიღებას და აცნობებს გადაწყვეტილებას.',
-                    '7.3. ბარათზე დაბრუნება — 5 სამუშაო დღე კომპანიის მხრიდან, შემდეგ ბანკი. ნაღდით გადახდისას საშუალება თანხმდება. კრიპტოვალუტით ან სხვა ალტერნატიული გადახდისას დაბრუნება იმავე ან შეთანხმებული საშუალებით, პროვაიდერის შეზღუდვების გათვალისწინებით.',
+                    '7.3. ბარათზე დაბრუნება — 5 სამუშაო დღე კომპანიის მხრიდან, შემდეგ ბანკი. ნაღდით ან სხვა ალტერნატიული გადახდისას დაბრუნების საშუალება თანხმდება მომხმარებელთან, პროვაიდერის შეზღუდვების გათვალისწინებით.',
                 ],
             },
             {
@@ -1122,7 +1122,20 @@ export const LEGAL_CONTENT: Record<LegalLang, DocsByLang> = {
     ka: withDocumentMeta(ka, 'ka'),
 };
 
-export function resolveLegalDocId(hash: string): LegalDocId {
+export function legalDocPath(id: LegalDocId, lang?: LegalLang): string {
+    return lang ? `/${lang}/${id}` : `/${id}`;
+}
+
+export function isLegalPath(pathname: string): boolean {
+    return /^\/(?:(?:ru|en|ka)\/)?(legal|terms|privacy|returns|refunds|contact|support)\/?$/.test(pathname || '');
+}
+
+export function resolveLegalDocId(pathname: string, hash = ''): LegalDocId {
+    const last = (pathname || '').replace(/\/+$/, '').split('/').pop()?.toLowerCase() || '';
+    if (last === 'privacy') return 'privacy';
+    if (last === 'returns' || last === 'refunds') return 'returns';
+    if (last === 'terms' || last === 'contact' || last === 'support') return 'terms';
+
     const h = (hash || '').replace(/^#/, '').toLowerCase();
     if (!h || h === 'terms') return 'terms';
     if (h === 'privacy' || h.startsWith('p-')) return 'privacy';

@@ -13,6 +13,7 @@ export interface Restaurant {
     latitude?: number;
     longitude?: number;
     address?: string;
+    working_hours?: string;
     promo?: string;
     promo_text?: string;
     has_promo?: boolean;

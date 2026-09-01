@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { api, Product } from '../services/api';
 import './Cart.css';
 import { useLanguage } from '../translations/LanguageContext';
+import { pickI18nText } from '../utils/i18nContent';
+import { formatPortionWeight } from '../utils/formatProductMeta';
 
 // SVG Icons
 const IconTrash = () => (
@@ -36,7 +38,16 @@ interface CartPageProps {
 }
 
 const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onClearCart, onUpdateQuantity, onAddToCart, onCheckout, deliveryFee = 6.00 }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+    const locName = (raw?: string | null) => pickI18nText(raw, language);
+    const portionLabels = {
+        grams: String(t('restaurant.grams')),
+        ml: String(t('restaurant.ml')),
+        liter: String(t('restaurant.liter')),
+        pcs: String(t('restaurant.pcs')),
+        kcal: String(t('restaurant.kcal')),
+    };
+    const formatWeight = (w?: string | number | null) => formatPortionWeight(w, portionLabels);
 
     // Local state for cutlery and comment
     const [comment, setComment] = useState('');
@@ -156,21 +167,19 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                                     className={`cart-premium-item${index < initialCartItems.length - 1 ? ' cart-premium-item--divided' : ''}`}
                                 >
                                     <div className="item-image-container">
-                                        <img src={product.img || '/Assets/default-food.png'} alt={product.name} />
+                                        <img src={product.img || '/Assets/default-food.png'} alt={locName(product.name)} />
                                     </div>
 
                                     <div className="item-details">
                                         <div className="item-main-info">
-                                            <h3>{product.name}</h3>
+                                            <h3>{locName(product.name)}</h3>
                                             <div className="item-meta-row">
                                                 <span className="item-pricing">
                                                     {(Number(product.price) * quantity).toFixed(2)} ₾
                                                 </span>
                                                 <span className="item-sep">·</span>
                                                 <span className="item-weight">
-                                                    {product.weight
-                                                        ? `${product.weight}${t('restaurant.grams')}`
-                                                        : `350 ${t('restaurant.grams')}`}
+                                                    {formatWeight(product.weight) || `350 ${portionLabels.grams}`}
                                                 </span>
                                             </div>
                                         </div>
@@ -231,10 +240,10 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                                     {recommendations.map(prod => (
                                         <div key={prod.id} className="rec-card">
                                             <div className="rec-img-wrapper">
-                                                <img src={prod.img || '/Assets/default-food.png'} alt={prod.name} />
+                                                <img src={prod.img || '/Assets/default-food.png'} alt={locName(prod.name)} />
                                             </div>
                                             <div className="rec-info">
-                                                <div className="rec-name">{prod.name}</div>
+                                                <div className="rec-name">{locName(prod.name)}</div>
                                                 <div className="rec-price">{Number(prod.price).toFixed(0)} ₾</div>
                                             </div>
                                             <button type="button" className="rec-add-btn" onClick={() => onAddToCart && onAddToCart(prod)}>

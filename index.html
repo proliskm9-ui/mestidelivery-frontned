@@ -1,30 +1,222 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" class="notranslate" translate="no">
 
 <head>
+  <!-- Disable automatic browser translation corruption on dynamic multi-lang SPA -->
+  <meta name="google" content="notranslate" />
+  <meta name="googlebot" content="notranslate" />
+  <script>
+    (function() {
+      try {
+        var path = window.location.pathname;
+        var match = path.match(/^\/(ru|en|ka)(?:\/|$)/);
+        var lang = match ? match[1] : null;
+        if (!lang) {
+          var cookieMatch = document.cookie.match(/(?:^|; )i18next=([^;]*)/);
+          if (cookieMatch) {
+            lang = decodeURIComponent(cookieMatch[1]);
+          }
+        }
+        if (!lang) {
+          var stored = localStorage.getItem('app_language');
+          if (stored && (stored === 'ru' || stored === 'en' || stored === 'ka')) {
+            lang = stored;
+          }
+        }
+        if (!lang) {
+          var nav = (navigator.language || '').toLowerCase();
+          if (nav.startsWith('ru')) lang = 'ru';
+          else if (nav.startsWith('ka')) lang = 'ka';
+          else if (nav.startsWith('en')) lang = 'en';
+          else lang = 'ru';
+        }
+        if (lang) {
+          document.documentElement.lang = lang;
+        }
+      } catch (e) {}
+    })();
+  </script>
+
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/Assets/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/Assets/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/Assets/icon-512.png" />
   <link rel="manifest" href="/manifest.json" />
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#151514" />
+  <meta name="google-site-verification" content="hhX4Nr--QBcee0Gf3oAtcMxsXu5o9CoG5S9zcDBGwn8" />
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://mestidelivery.firebaseapp.com" />
+  <link rel="preconnect" href="https://accounts.google.com" />
+  <link rel="preconnect" href="https://apis.google.com" />
+
+  <!-- ===== Google Analytics 4 (gtag.js) =====
+       Активен. Measurement ID задаётся одной строкой ниже.
+       Смена ID: заменить значение window.GA_MEASUREMENT_ID. -->
+  <script>
+    window.GA_MEASUREMENT_ID = 'G-N7J87SHC40';
+    (function (id) {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { dataLayer.push(arguments); };
+      // Хелпер для событий из приложения: window.gtagEvent('add_to_cart', {...})
+      window.gtagEvent = function (name, params) { window.gtag('event', name, params || {}); };
+      if (!id || id.indexOf('XXXX') !== -1) {
+        if (window.console) console.info('[GA4] Measurement ID is a placeholder — analytics disabled until a real G-ID is set.');
+        return;
+      }
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+      document.head.appendChild(s);
+      gtag('js', new Date());
+      gtag('config', id, { send_page_view: true });
+    })(window.GA_MEASUREMENT_ID);
+  </script>
 
   <!-- iOS PWA settings -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Mestigo" />
-  <link rel="apple-touch-icon" href="/vite.svg" />
+  <meta name="apple-mobile-web-app-title" content="MestiDelivery" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/Assets/apple-touch-icon.png" />
 
-  <title>Mestigo</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@300;400;500;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
-  </style>
-  <!-- Telegram WebApp API -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <title>MestiDelivery — Food Delivery in Mestia, Svaneti, Georgia</title>
+
+  <!-- ===== SEO: primary ===== -->
+  <meta name="description" content="Order food delivery in Mestia, Svaneti, Georgia. Best local restaurants — BBQ Garden, Sunset, Luizastan, BURGERS. Fast delivery straight to your door. შეუკვეთეთ საკვები მესტიაში." />
+  <meta name="keywords" content="ресторан Местиа, ресторан Сванетия, доставка Местиа, доставка еды Местиа, доставка еды Сванетия, заказать еду Местиа, еда Местиа, рестораны Местиа, сванская кухня, грузинская кухня доставка, доставка еды Грузия, доставка в Грузии, доставка еды Тбилиси, рестораны Грузии, заказать еду Грузия, MestiDelivery, Mestia restaurant, Svaneti restaurant, restaurant in Mestia, food delivery Mestia, Mestia delivery, food delivery Svaneti, order food Mestia, food delivery Georgia, delivery in Georgia, Georgian cuisine delivery, Georgian food delivery, restaurants in Georgia, მესტიის რესტორანი, სვანეთის რესტორანი, საკვების მიწოდება მესტია, მიწოდება საქართველოში" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta name="author" content="MestiDelivery" />
+  <meta name="geo.region" content="GE-SZ" />
+  <meta name="geo.placename" content="Mestia, Svaneti" />
+  <link rel="canonical" href="https://mestidelivery.com/" />
+
+  <!-- ===== hreflang ===== -->
+  <link rel="alternate" hreflang="ru" href="https://mestidelivery.com/ru" />
+  <link rel="alternate" hreflang="en" href="https://mestidelivery.com/en" />
+  <link rel="alternate" hreflang="ka" href="https://mestidelivery.com/ka" />
+  <link rel="alternate" hreflang="x-default" href="https://mestidelivery.com/en" />
+
+  <!-- ===== Open Graph ===== -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="MestiDelivery" />
+  <meta property="og:title" content="MestiDelivery — Food Delivery in Mestia, Svaneti, Georgia" />
+  <meta property="og:description" content="Order food from the best restaurants in Mestia and Svaneti. Fast delivery of Georgian and Svan cuisine to your door." />
+  <meta property="og:url" content="https://mestidelivery.com/" />
+  <meta property="og:image" content="https://mestidelivery.com/Assets/banner_en.jpeg" />
+  <meta property="og:image:alt" content="MestiDelivery — Food Delivery in Mestia, Georgia" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="ru_RU" />
+  <meta property="og:locale:alternate" content="ka_GE" />
+
+  <!-- ===== Twitter ===== -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="MestiDelivery — Food Delivery in Mestia, Svaneti" />
+  <meta name="twitter:description" content="Order food from the best restaurants in Mestia, Georgia. Fast delivery of Georgian and Svan cuisine." />
+  <meta name="twitter:image" content="https://mestidelivery.com/Assets/banner_en.jpeg" />
+
+  <!-- ===== JSON-LD structured data ===== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FoodEstablishment",
+    "name": "MestiDelivery",
+    "description": "Food delivery from restaurants in Mestia, Svaneti, Georgia. Georgian and Svan cuisine delivered to your door.",
+    "url": "https://mestidelivery.com/",
+    "image": "https://mestidelivery.com/Assets/banner_ru.jpg",
+    "servesCuisine": ["Georgian", "Svan", "Грузинская кухня"],
+    "priceRange": "$$",
+    "areaServed": [
+      { "@type": "Place", "name": "Mestia" },
+      { "@type": "Place", "name": "Svaneti" },
+      { "@type": "Country", "name": "Georgia" }
+    ],
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Mestia",
+      "addressRegion": "Svaneti",
+      "addressCountry": "GE"
+    },
+    "potentialAction": {
+      "@type": "OrderAction",
+      "target": "https://mestidelivery.com/"
+    }
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@300;400;500;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" /></noscript>
+  <!-- Telegram WebApp API (Partners Mini App only) -->
+  <script>
+    if (/^\/partners(\/|$)/.test(window.location.pathname)) {
+      var s = document.createElement('script');
+      s.src = 'https://telegram.org/js/telegram-web-app.js';
+      document.head.appendChild(s);
+      s.onload = function () {
+        try {
+          var tg = window.Telegram && window.Telegram.WebApp;
+          if (!tg) return;
+          if (typeof tg.ready === 'function') tg.ready();
+          if (typeof tg.expand === 'function') tg.expand();
+          if (typeof tg.disableVerticalSwipes === 'function') tg.disableVerticalSwipes();
+        } catch (e) {}
+      };
+    }
+  </script>
 </head>
 
 <body>
   <div id="root"></div>
+  <script>
+    (function () {
+      if (!/^\/partners(\/|$)/.test(window.location.pathname)) return;
+
+      var root = document.getElementById('root');
+      if (!root) return;
+
+      var boot = document.createElement('div');
+      boot.id = 'md-boot';
+      boot.style.cssText = 'min-height:100dvh;display:flex;align-items:center;justify-content:center;background:#151514;color:#9ca3af;font:600 14px/1.4 -apple-system,system-ui,sans-serif;padding:24px;text-align:center';
+      boot.textContent = 'Загрузка Partners…';
+      root.appendChild(boot);
+
+      function clearBoot() {
+        var el = document.getElementById('md-boot');
+        if (el) el.remove();
+      }
+
+      if (window.MutationObserver) {
+        var mo = new MutationObserver(function () {
+          if (!document.getElementById('md-boot')) { mo.disconnect(); return; }
+          if (root.childElementCount > 1 || (root.firstElementChild && root.firstElementChild.id !== 'md-boot')) {
+            clearBoot();
+            mo.disconnect();
+          }
+        });
+        mo.observe(root, { childList: true, subtree: true });
+      }
+
+      setTimeout(function () {
+        var el = document.getElementById('md-boot');
+        if (!el) return;
+        el.innerHTML = 'Не удалось загрузить приложение.<br/>Закройте и откройте снова.<br/><span style="opacity:.6;font-size:12px">boot timeout</span>';
+        try {
+          var tg = window.Telegram && window.Telegram.WebApp;
+          if (tg && tg.ready) tg.ready();
+          if (tg && tg.expand) tg.expand();
+        } catch (e) {}
+      }, 12000);
+
+      window.addEventListener('error', function (ev) {
+        var el = document.getElementById('md-boot');
+        if (!el) return;
+        var msg = (ev && ev.message) ? String(ev.message) : 'script error';
+        el.innerHTML = 'Ошибка загрузки:<br/>' + msg.replace(/[<>]/g, '');
+      });
+    })();
+  </script>
   <script type="module" src="/src/main.tsx"></script>
   <script>
     if ('serviceWorker' in navigator) {
@@ -39,3 +231,4 @@
 </body>
 
 </html>
+

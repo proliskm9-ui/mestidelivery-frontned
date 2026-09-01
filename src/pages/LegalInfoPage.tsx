@@ -6,6 +6,7 @@ import { useLanguage } from '../translations/LanguageContext';
 import {
     DOC_NAV,
     getLegalDoc,
+    legalDocPath,
     resolveLegalDocId,
     type LegalDocId,
 } from './legal/legalContent';
@@ -77,7 +78,7 @@ const LegalInfoPage: React.FC = () => {
     const [activeSectionId, setActiveSectionId] = useState<string>('');
     const mobileChromeRef = useRef<HTMLDivElement | null>(null);
 
-    const activeDocId: LegalDocId = resolveLegalDocId(location.hash);
+    const activeDocId: LegalDocId = resolveLegalDocId(location.pathname, location.hash);
     const doc = getLegalDoc(language, activeDocId);
     const docNav = DOC_NAV[language as keyof typeof DOC_NAV] || DOC_NAV.ru;
     const sLabels = SETTINGS_LOCALIZATION[language] || SETTINGS_LOCALIZATION.ru;
@@ -141,23 +142,32 @@ const LegalInfoPage: React.FC = () => {
 
     useEffect(() => {
         const handleScroll = () => {
+            const path = (location.pathname || '').replace(/\/+$/, '').toLowerCase();
+            if (path === '/contact' || path === '/support') {
+                const contacts = document.getElementById('t-contacts');
+                if (contacts) {
+                    contacts.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    setActiveSectionId('t-contacts');
+                }
+                return;
+            }
+
             const hash = window.location.hash;
             if (!hash) return;
-                const id = hash.replace('#', '');
-            // Doc-level hashes (#privacy / #terms / #returns) — scroll to top of content
+            const id = hash.replace('#', '');
             if (id === 'privacy' || id === 'terms' || id === 'returns' || id === 'refunds') {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 return;
             }
-                const element = document.getElementById(id);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         };
 
         const timer = setTimeout(handleScroll, 100);
         return () => clearTimeout(timer);
-    }, [location.hash, language, activeDocId]);
+    }, [location.hash, location.pathname, language, activeDocId]);
 
     // Esc key listener to exit reading mode
     useEffect(() => {
@@ -1383,7 +1393,7 @@ const LegalInfoPage: React.FC = () => {
                             {(['terms', 'privacy', 'returns'] as LegalDocId[]).map((id) => (
                                 <Link
                                     key={id}
-                                    to={`/legal#${id}`}
+                                    to={legalDocPath(id, language)}
                                     className={activeDocId === id ? 'is-active' : undefined}
                                     onClick={() => {
                                         setDocMenuOpen(false);
@@ -1452,7 +1462,7 @@ const LegalInfoPage: React.FC = () => {
                         {(['terms', 'privacy', 'returns'] as LegalDocId[]).map((id) => (
                             <Link
                                 key={id}
-                                to={`/legal#${id}`}
+                                to={legalDocPath(id, language)}
                                 className={activeDocId === id ? 'is-active' : undefined}
                                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                             >

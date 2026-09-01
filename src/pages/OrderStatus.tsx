@@ -5,6 +5,7 @@ import FullPageLoader from '../components/UI/FullPageLoader';
 import NetworkErrorState from '../components/UI/NetworkErrorState';
 import './OrderStatus.css';
 import { useLanguage } from '../translations/LanguageContext';
+import { pickI18nText } from '../utils/i18nContent';
 import {
     Clock,
     ClipboardCheck,
@@ -12,8 +13,25 @@ import {
     ShoppingBag,
     Bike,
     MapPin,
-    CheckCircle
+    CheckCircle,
+    Utensils,
+    Flame,
+    Package,
+    Leaf,
+    Zap,
+    UserCheck,
+    Snowflake,
+    PackageX,
+    UtensilsCrossed,
+    AlertTriangle,
+    Check,
+    X,
+    Coins,
+    HeartHandshake,
+    ThumbsDown,
 } from 'lucide-react';
+
+const KEEPZ_PAY_URL = 'https://app.keepz.me/pay?qrType=DEFAULT&receiverType=USER&receiverId=6ea6970c-20ee-4119-b25f-6ebcc8a888c6';
 
 const IconChevronLeft = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -22,11 +40,64 @@ const IconChevronLeft = () => (
     </svg>
 );
 
-const IconStar = ({ filled = false, onClick }: { filled?: boolean; onClick?: () => void }) => (
-    <svg width="100%" height="100%" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth={filled ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round" onClick={onClick}>
+const StarIcon = ({ filled = false, size = 38 }: { filled?: boolean; size?: number }) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill={filled ? "#FFB800" : "none"}
+        stroke={filled ? "#FFB800" : "rgba(255, 255, 255, 0.22)"}
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{ filter: filled ? "drop-shadow(0 0 10px rgba(255, 184, 0, 0.55))" : "none", transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)" }}
+    >
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
     </svg>
 );
+
+// Smart tags: click → appended to comment textarea
+const REST_TAGS_POSITIVE = [
+    { id: 'tasty',       label: 'Очень вкусно',       icon: Utensils },
+    { id: 'hot',         label: 'Горячее',             icon: Flame },
+    { id: 'packaging',   label: 'Отличная упаковка',   icon: Package },
+    { id: 'fresh',       label: 'Свежие продукты',     icon: Leaf },
+    { id: 'big_portion', label: 'Большая порция',      icon: ChefHat },
+];
+
+const REST_TAGS_NEGATIVE = [
+    { id: 'cold',        label: 'Холодное',            icon: Snowflake },
+    { id: 'not_tasty',   label: 'Не понравился вкус',  icon: ThumbsDown },
+    { id: 'no_cutlery',  label: 'Не положили приборы', icon: UtensilsCrossed },
+    { id: 'damaged_pkg', label: 'Помялась упаковка',   icon: PackageX },
+    { id: 'wrong_order', label: 'Не тот заказ',        icon: AlertTriangle },
+];
+
+const COURIER_TAGS_POSITIVE = [
+    { id: 'fast',    label: 'Быстро привезли',     icon: Zap },
+    { id: 'polite',  label: 'Вежливый',            icon: UserCheck },
+    { id: 'careful', label: 'Аккуратная доставка', icon: Package },
+    { id: 'called',  label: 'Позвонил заранее',    icon: CheckCircle },
+];
+
+const COURIER_TAGS_NEGATIVE = [
+    { id: 'slow',    label: 'Долгая доставка', icon: Clock },
+    { id: 'rude',    label: 'Был грубым',      icon: ThumbsDown },
+    { id: 'spilled', label: 'Пролил / помял',  icon: PackageX },
+    { id: 'lost',    label: 'Заблудился',      icon: AlertTriangle },
+];
+
+const TIP_PRESETS = [2, 4, 7, 10];
+
+const RATING_CAPTIONS: Record<number, string> = {
+    1: 'Ужасно \u{1F61E}',
+    2: 'Плохо \u{1F615}',
+    3: 'Нормально \u{1F610}',
+    4: 'Хорошо \u{1F60A}',
+    5: 'Превосходно! \u{1F929}',
+};
+
+type RatingStep = 'restaurant' | 'courier' | 'success';
 
 interface Props {
     orderId: number;
@@ -35,14 +106,36 @@ interface Props {
 }
 
 const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isNetworkError, setIsNetworkError] = useState(false);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     const [showRatingModal, setShowRatingModal] = useState(false);
+    const [showTipsModal, setShowTipsModal] = useState(false);
     const [prevStatus, setPrevStatus] = useState<string | null>(null);
+
+    // Multi-step state
+    const [ratingStep, setRatingStep] = useState<RatingStep>('restaurant');
+    const [restRating, setRestRating] = useState(0);
+    const [restHover, setRestHover] = useState(0);
+    const [restComment, setRestComment] = useState('');
+    const [courierRating, setCourierRating] = useState(0);
+    const [courierHover, setCourierHover] = useState(0);
+    const [courierComment, setCourierComment] = useState('');
+
+    // Tips state (shared between modal step and standalone modal)
+    const [selectedTip, setSelectedTip] = useState<number>(0);
+    const [customTip, setCustomTip] = useState<string>('');
+    const [isCustomTipActive, setIsCustomTipActive] = useState<boolean>(false);
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [ratingSubmitted, setRatingSubmitted] = useState(false);
+    const [tipsSent, setTipsSent] = useState<boolean>(false);
+    const [isSubmittingTips, setIsSubmittingTips] = useState<boolean>(false);
+
+    const stepsRef = useRef<(HTMLDivElement | null)[]>([]);
 
     useEffect(() => {
         if (order) {
@@ -53,21 +146,13 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
         }
     }, [order, prevStatus]);
 
-    const stepsRef = useRef<(HTMLDivElement | null)[]>([]);
-
-    const [rating, setRating] = useState(0);
-    const [hoverRating, setHoverRating] = useState(0);
-
-    const [isSubmittingRating, setIsSubmittingRating] = useState(false);
-    const [ratingSubmitted, setRatingSubmitted] = useState(false);
-
     const STATUS_STEPS = useMemo(() => [
-        { key: 'pending', label: t('status.pending'), icon: <Clock strokeWidth={1.5} /> },
-        { key: 'confirmed', label: t('status.confirmed'), icon: <ClipboardCheck strokeWidth={1.5} /> },
-        { key: 'preparing', label: t('status.preparing'), icon: <ChefHat strokeWidth={1.5} /> },
-        { key: 'ready', label: t('status.ready'), icon: <ShoppingBag strokeWidth={1.5} /> },
+        { key: 'pending',    label: t('status.pending'),    icon: <Clock strokeWidth={1.5} /> },
+        { key: 'confirmed',  label: t('status.confirmed'),  icon: <ClipboardCheck strokeWidth={1.5} /> },
+        { key: 'preparing',  label: t('status.preparing'),  icon: <ChefHat strokeWidth={1.5} /> },
+        { key: 'ready',      label: t('status.ready'),      icon: <ShoppingBag strokeWidth={1.5} /> },
         { key: 'delivering', label: t('status.delivering'), icon: <Bike strokeWidth={1.5} /> },
-        { key: 'delivered', label: t('status.delivered'), icon: <MapPin strokeWidth={1.5} /> },
+        { key: 'delivered',  label: t('status.delivered'),  icon: <MapPin strokeWidth={1.5} /> },
     ], [t]);
 
     useEffect(() => {
@@ -77,38 +162,27 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                 setOrder(data);
                 setIsNetworkError(false);
             } catch (error) {
-                console.error("Order fetch failed", error);
+                console.error('Order fetch failed', error);
                 setIsNetworkError(true);
             } finally {
                 setLoading(false);
             }
         };
-
         fetchOrder();
 
-        // WebSocket Integration
         let activeSocket: any = null;
         let isMounted = true;
-        
+
         import('../services/trackingSocket').then(({ TrackingSocket }) => {
             if (!isMounted) return;
             const socket = new TrackingSocket(orderId);
             activeSocket = socket;
             socket.connect();
-
-            // Subscribe to updates
             socket.subscribe((msg: any) => {
                 if (msg.type === 'location_update') {
-                    // Update order courier coords locally
                     setOrder((prev: any) => {
                         if (!prev) return prev;
-                        return {
-                            ...prev,
-                            courier_coords: {
-                                latitude: msg.latitude,
-                                longitude: msg.longitude
-                            }
-                        };
+                        return { ...prev, courier_coords: { latitude: msg.latitude, longitude: msg.longitude } };
                     });
                 } else if (msg.type === 'status_update') {
                     setOrder((prev: any) => {
@@ -119,85 +193,147 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
             });
         });
 
-        // Cleanup
         return () => {
             isMounted = false;
             if (activeSocket) activeSocket.disconnect();
         };
     }, [orderId]);
 
-    // Determine current step index
-    const currentStepIndex = order ? STATUS_STEPS.findIndex(s => s.key === order.status || (order.status === 'pending_payment' && s.key === 'pending')) : 0;
+    const currentStepIndex = order
+        ? STATUS_STEPS.findIndex(s => s.key === order.status || (order.status === 'pending_payment' && s.key === 'pending'))
+        : 0;
     const activeStepIndex = currentStepIndex === -1 ? 0 : currentStepIndex;
 
-    // Scroll active step into view (mobile carousel only)
     useEffect(() => {
         if (typeof window !== 'undefined' && window.innerWidth > 1024) return;
         if (stepsRef.current[activeStepIndex] && scrollContainerRef.current) {
-            stepsRef.current[activeStepIndex]?.scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest',
-                inline: 'center'
-            });
+            stepsRef.current[activeStepIndex]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         }
     }, [activeStepIndex, loading]);
 
-    const handleModalSubmit = async () => {
-        if (!rating) return;
-        setIsSubmittingRating(true);
+    // Tag click appends label text to the comment field
+    const appendTag = (label: string, setter: React.Dispatch<React.SetStateAction<string>>) => {
+        setter(prev => {
+            const trimmed = prev.trim();
+            if (!trimmed) return label;
+            if (trimmed.toLowerCase().includes(label.toLowerCase())) return trimmed;
+            return `${trimmed}, ${label}`;
+        });
+    };
+
+    const isTagUsed = (label: string, comment: string) =>
+        comment.toLowerCase().includes(label.toLowerCase());
+
+    const handleSubmitRating = async () => {
+        if (restRating === 0) return;
+        setIsSubmitting(true);
         try {
-            await api.rateOrder(orderId, { rating, rating_comment: "" });
+            const parts: string[] = [];
+            if (restComment.trim()) parts.push(restComment.trim());
+            if (courierComment.trim()) parts.push(`Курьер: ${courierComment.trim()}`);
+            const fullComment = parts.join('\n\n');
+
+            await api.rateOrder(orderId, { rating: restRating, rating_comment: fullComment });
+
+            try {
+                const BOT_BASE = (import.meta as any).env?.VITE_API_URL
+                    ? `${(import.meta as any).env.VITE_API_URL}/bot/v1/orders/review`
+                    : '/api/bot/v1/orders/review';
+                fetch(BOT_BASE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order_id: orderId, rating: restRating, courier_rating: courierRating, comment: fullComment }),
+                }).catch(() => {});
+            } catch (_) {}
+
+            const effectiveTip = isCustomTipActive ? (parseFloat(customTip) || 0) : selectedTip;
+            if (effectiveTip > 0) {
+                window.open(KEEPZ_PAY_URL, '_blank', 'noopener,noreferrer');
+                try {
+                    const BOT_BASE2 = (import.meta as any).env?.VITE_API_URL
+                        ? `${(import.meta as any).env.VITE_API_URL}/bot/v1/orders/tips`
+                        : '/api/bot/v1/orders/tips';
+                    fetch(BOT_BASE2, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ order_id: orderId, tips: effectiveTip }),
+                    }).catch(() => {});
+                } catch (_) {}
+                setTipsSent(true);
+            }
+
             setRatingSubmitted(true);
-            setOrder((prev: any) => ({ ...prev, rating, rating_comment: "" }));
-            setShowRatingModal(false);
+            setOrder((prev: any) => ({ ...prev, rating: restRating, rating_comment: fullComment }));
+            setRatingStep('success');
+            setTimeout(() => { setShowRatingModal(false); setRatingStep('restaurant'); }, 2400);
         } catch (err) {
-            console.error(err);
+            console.error('Rate order failed', err);
+            setShowRatingModal(false);
         } finally {
-            setIsSubmittingRating(false);
+            setIsSubmitting(false);
+        }
+    };
+
+    const effectiveTipModal = isCustomTipActive ? (parseFloat(customTip) || 0) : selectedTip;
+
+    const closeAndResetModal = () => {
+        setShowRatingModal(false);
+        setTimeout(() => setRatingStep('restaurant'), 300);
+    };
+
+    const effectiveTipStandalone = isCustomTipActive ? (parseFloat(customTip) || 0) : selectedTip;
+
+    const handleDirectTipsPay = async () => {
+        if (effectiveTipStandalone <= 0) return;
+        setIsSubmittingTips(true);
+        try {
+            window.open(KEEPZ_PAY_URL, '_blank', 'noopener,noreferrer');
+            const BOT_BASE = (import.meta as any).env?.VITE_API_URL
+                ? `${(import.meta as any).env.VITE_API_URL}/bot/v1/orders/tips`
+                : '/api/bot/v1/orders/tips';
+            fetch(BOT_BASE, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ order_id: orderId, tips: effectiveTipStandalone }),
+            }).catch(() => {});
+            setTipsSent(true);
+            setTimeout(() => { setShowTipsModal(false); setTipsSent(false); }, 2200);
+        } finally {
+            setIsSubmittingTips(false);
         }
     };
 
     if (loading) return <FullPageLoader variant="order" />;
-    
+
     if (isNetworkError) {
         return (
             <div className="order-status-page" style={{ display: 'flex', flexDirection: 'column' }}>
                 <header className="os-header" style={{ position: 'relative' }}>
-                    <div className="os-back-btn" onClick={onBack}>
-                        <IconChevronLeft />
-                    </div>
+                    <div className="os-back-btn" onClick={onBack}><IconChevronLeft /></div>
                 </header>
                 <NetworkErrorState />
             </div>
         );
     }
 
-    if (!order) return <div className="order-status-page" style={{ paddingTop: 100, textAlign: 'center' }}>Order not found</div>;
+    if (!order) return <div className="order-status-page" style={{ paddingTop: 100, textAlign: 'center' }}>{t('order.not_found')}</div>;
 
     const currentStatusLabel = STATUS_STEPS[activeStepIndex]?.label || order.status;
 
-    // Parse items — API may return string or array
     const parseItems = (items: any): { name: string; price: number; quantity: number }[] => {
         if (!items) return [];
         if (Array.isArray(items)) return items;
-        try {
-            const parsed = JSON.parse(items);
-            return Array.isArray(parsed) ? parsed : [];
-        } catch {
-            return [];
-        }
+        try { const p = JSON.parse(items); return Array.isArray(p) ? p : []; } catch { return []; }
     };
 
     const items = parseItems(order.items);
-    const itemsTotal = items.reduce((s, i) => s + (i.price * i.quantity), 0);
+    const itemsTotal = items.reduce((s: number, i: any) => s + (i.price * i.quantity), 0);
     const serviceFee = itemsTotal > 0 ? +(Math.max(0.99, Math.min(2.00, itemsTotal * 0.06)).toFixed(2)) : 0;
     const hasServiceFee = order.total >= (itemsTotal + serviceFee);
     const calculatedServiceFee = hasServiceFee ? serviceFee : 0;
-    const deliveryFee = order.total > (itemsTotal + calculatedServiceFee) 
-        ? +(order.total - itemsTotal - calculatedServiceFee).toFixed(2) 
+    const deliveryFee = order.total > (itemsTotal + calculatedServiceFee)
+        ? +(order.total - itemsTotal - calculatedServiceFee).toFixed(2)
         : 0;
-
-
 
     return (
         <div className="order-status-page page-layout">
@@ -240,162 +376,406 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
 
             <div className="os-block-bottom">
                 <div className="info-section">
-                    {/* Items */}
                     <h3 className="od-section-label">{t('order.items_structure')}</h3>
                     <div className="od-items-card">
-                        {items.map((item, i) => (
+                        {items.map((item: any, i: number) => (
                             <div className="od-item-row" key={i}>
                                 <span className="od-item-name">
-                                    {item.name}
+                                    {pickI18nText(item.name, language)}
                                     <span className="od-item-qty"> {item.quantity}x</span>
                                 </span>
-                                <span className="od-item-price">{(item.price * item.quantity).toFixed(2)} ₾</span>
+                                <span className="od-item-price">{(item.price * item.quantity).toFixed(2)} &#8382;</span>
                             </div>
                         ))}
                         {deliveryFee > 0 && (
-                            <div className="od-item-row">
+                            <div className="od-item-row fee-row">
                                 <span className="od-item-name">{t('order.delivery')}</span>
-                                <span className="od-item-price">{deliveryFee.toFixed(2)} ₾</span>
+                                <span className="od-item-price">{deliveryFee.toFixed(2)} &#8382;</span>
                             </div>
                         )}
-                    </div>
-
-                    {/* Cost Summary */}
-                    <h3 className="od-section-label">{t('order.cost')}</h3>
-                    <div className="od-cost-card">
-                        <div className="od-cost-row">
-                            <span>{t('order.goods')}</span>
-                            <span className="od-cost-value">{itemsTotal.toFixed(2)} ₾</span>
-                        </div>
-                        <div className="od-cost-row">
-                            <span>{t('order.delivery')}</span>
-                            <span className="od-cost-value">{deliveryFee > 0 ? `${deliveryFee.toFixed(2)} ₾` : t('favorites.free')}</span>
-                        </div>
                         {calculatedServiceFee > 0 && (
-                            <div className="od-cost-row">
-                                <span>{t('order.service_fee')}</span>
-                                <span className="od-cost-value">{calculatedServiceFee.toFixed(2)} ₾</span>
+                            <div className="od-item-row fee-row">
+                                <span className="od-item-name">{t('order.service_fee')}</span>
+                                <span className="od-item-price">{calculatedServiceFee.toFixed(2)} &#8382;</span>
                             </div>
                         )}
                         <div className="od-cost-row total">
                             <span>{t('order.total')}</span>
-                            <span className="od-cost-value">{order.total?.toFixed(2)} ₾</span>
+                            <span className="od-cost-value">{order.total?.toFixed(2)} &#8382;</span>
                         </div>
                     </div>
 
-                    {/* Detailed Info Button */}
                     <button type="button" className="od-details-btn" onClick={() => onViewDetails?.(order.id)}>
                         {t('order.detailed_info')}
                     </button>
 
-                {/* Rating Section (only if delivered) */}
-                {order.status === 'delivered' && (
-                    <div className="os-rating-card">
-                        {ratingSubmitted || order.rating ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                                <span style={{ fontWeight: 'bold' }}>{t('order.evaluation')}</span>
-                                <div className="os-stars">
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                        <div key={star} className={`os-star ${(order.rating || rating) >= star ? 'active' : ''}`} style={{ cursor: 'default' }}>
-                                            <IconStar filled={(order.rating || rating) >= star} />
+                    {order.status === 'delivered' && (
+                        <div className="os-rating-card">
+                            {ratingSubmitted || order.rating ? (
+                                <div className="os-rating-submitted-box">
+                                    <div className="os-rating-submitted-header">
+                                        <span className="os-rating-done-title">{t('order.rating_title') || 'Ваша оценка'}</span>
+                                        <div className="os-rating-submitted-stars">
+                                            {[1,2,3,4,5].map((star) => (
+                                                <StarIcon key={star} filled={(order.rating || restRating) >= star} size={20} />
+                                            ))}
                                         </div>
-                                    ))}
+                                    </div>
+                                    <span className="os-rating-done-desc">{t('order.thanks_rating') || 'Спасибо за оценку!'}</span>
+                                    {!tipsSent ? (
+                                        <button type="button" className="os-post-tip-btn" onClick={() => setShowTipsModal(true)}>
+                                            <Coins size={16} strokeWidth={2.2} />
+                                            <span>Оставить чаевые курьеру</span>
+                                        </button>
+                                    ) : (
+                                        <span className="os-tips-sent-label">
+                                            <Check size={14} /> Чаевые отправлены
+                                        </span>
+                                    )}
                                 </div>
-                                <span style={{ color: '#21EA7C', fontSize: '14px' }}>{t('order.rating_thank_you')}</span>
-
-                            </div>
-                        ) : (
-                            <button 
-                                onClick={() => setShowRatingModal(true)}
-                                style={{
-                                    width: '100%',
-                                    padding: '16px',
-                                    background: 'rgba(33, 234, 124, 0.1)',
-                                    borderRadius: '16px',
-                                    border: '1px solid rgba(33, 234, 124, 0.3)',
-                                    color: '#21EA7C',
-                                    fontWeight: 'bold',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '8px',
-                                    cursor: 'pointer',
-                                    fontSize: '16px',
-                                    transition: 'background 0.2s'
-                                }}
-                            >
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-                                {t('order.rating_btn')}
-                            </button>
-                        )}
-                    </div>
-                )}
+                            ) : (
+                                <button
+                                    type="button"
+                                    className="os-rate-trigger-btn"
+                                    onClick={() => { setRatingStep('restaurant'); setShowRatingModal(true); }}
+                                >
+                                    <StarIcon filled={true} size={20} />
+                                    <span>{t('order.rate_order') || 'Оценить заказ'}</span>
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
 
+            {/* ═══════ DUAL-STEP PREMIUM RATING MODAL ═══════ */}
             {showRatingModal && createPortal(
-                <div className="premium-modal-overlay-global" onClick={() => setShowRatingModal(false)}>
-                    <div className="premium-modal-content-global" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px', padding: '40px 24px 32px' }}>
-                        <div style={{ marginBottom: '16px' }}>
-                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="icon-star-sparkle">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="rgba(245, 158, 11, 0.2)"></path>
-                            </svg>
-                        </div>
-                        <h2 className="pam-title" style={{ fontSize: '24px', marginBottom: '8px' }}>{t('order.delivered_title')}</h2>
-                        <p className="pam-subtitle" style={{ marginBottom: '24px', color: '#888' }}>{t('order.delivered_subtitle')}</p>
-                        
-                        <div className="stars-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}>
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                    key={star}
-                                    type="button"
-                                    className="star-btn"
-                                    onClick={() => setRating(star)}
-                                    onTouchStart={() => setRating(star)}
-                                    onMouseEnter={() => setHoverRating(star)}
-                                    onMouseLeave={() => setHoverRating(0)}
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0', transition: 'transform 0.2s' }}
-                                >
-                                    <svg
-                                        width="40" height="40" viewBox="0 0 24 24"
-                                        fill={(hoverRating || rating) >= star ? "#f59e0b" : "none"}
-                                        stroke={(hoverRating || rating) >= star ? "#f59e0b" : "#555"}
-                                        strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-                                        style={{ transform: (hoverRating || rating) >= star ? 'scale(1.1)' : 'scale(1)' }}
-                                    >
-                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                    </svg>
+                <div
+                    className="y-rate-overlay"
+                    onClick={() => { if (ratingStep !== 'success') closeAndResetModal(); }}
+                >
+                    <div className="y-rate-sheet" onClick={e => e.stopPropagation()}>
+                        <div className="y-rate-drag-handle" />
+
+                        {/* Header */}
+                        <div className="y-rate-header">
+                            <div className="y-rate-badge">
+                                <span>
+                                    {ratingStep === 'restaurant' && '\u{1F37D}\uFE0F'}
+                                    {ratingStep === 'courier' && '\u{1F6F5}'}
+                                    {ratingStep === 'success' && '\u2705'}
+                                </span>
+                                <span className="y-rate-badge-rest">
+                                    {ratingStep === 'restaurant' && 'Оцените ресторан'}
+                                    {ratingStep === 'courier' && 'Как прошла доставка?'}
+                                    {ratingStep === 'success' && 'Спасибо!'}
+                                </span>
+                            </div>
+                            {ratingStep !== 'success' && (
+                                <button type="button" className="y-rate-close-btn" onClick={closeAndResetModal}>
+                                    <X size={16} />
                                 </button>
-                            ))}
+                            )}
                         </div>
 
-                        <div style={{ display: 'flex', gap: '12px' }}>
-                            <button
-                                className="pam-save-btn ct-confirm-btn"
-                                onClick={() => setShowRatingModal(false)}
-                                style={{ background: '#3A3A3C', color: '#fff', flex: 1 }}
-                            >
-                                {t('order.later_btn')}
-                            </button>
-                            <button
-                                className="pam-save-btn ct-confirm-btn"
-                                onClick={handleModalSubmit}
-                                disabled={rating === 0 || isSubmittingRating}
-                                style={{
-                                    flex: 1,
-                                    background: rating > 0 ? '#21EA7C' : '#3A3A3C',
-                                    color: rating > 0 ? '#000' : '#888',
-                                    opacity: rating > 0 ? 1 : 0.5,
-                                    cursor: rating > 0 ? 'pointer' : 'not-allowed'
-                                }}
-                            >
-                                {isSubmittingRating ? t('menu.order_status_rating.submit_loading') : t('order.submit_rating')}
-                            </button>
-                        </div>
+                        {/* Step progress dots */}
+                        {ratingStep !== 'success' && (
+                            <div className="y-rate-stepper">
+                                <div className={`y-rate-step-indicator ${ratingStep === 'restaurant' ? 'active' : 'completed'}`}>
+                                    {ratingStep === 'courier' ? <Check size={13} /> : <span>1</span>}
+                                    <span>Ресторан</span>
+                                </div>
+                                <div className="y-rate-step-dot" />
+                                <div className={`y-rate-step-indicator ${ratingStep === 'courier' ? 'active' : ''}`}>
+                                    <span>2</span>
+                                    <span>Курьер</span>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ── Step 1: Restaurant ── */}
+                        {ratingStep === 'restaurant' && (
+                            <div className="y-rate-step-body">
+                                <div className="y-rate-entity-icon y-rate-entity-icon--rest">
+                                    <span style={{ fontSize: 28 }}>&#127869;&#65039;</span>
+                                </div>
+                                <h2 className="y-rate-title">Оцените ресторан</h2>
+                                <p className="y-rate-subtitle">
+                                    Как вам блюда{order.restaurant_name ? ` от ${order.restaurant_name}` : ''}?
+                                </p>
+
+                                <div className="y-rate-stars-wrapper">
+                                    <div className="y-rate-stars">
+                                        {[1,2,3,4,5].map(star => (
+                                            <button key={star} type="button" className="y-star-btn"
+                                                onClick={() => setRestRating(star)}
+                                                onMouseEnter={() => setRestHover(star)}
+                                                onMouseLeave={() => setRestHover(0)}
+                                            >
+                                                <StarIcon filled={(restHover || restRating) >= star} size={44} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                    {(restHover || restRating) > 0 && (
+                                        <span className="y-rate-rating-caption">
+                                            {RATING_CAPTIONS[restHover || restRating]}
+                                        </span>
+                                    )}
+                                </div>
+
+                                {restRating > 0 && (
+                                    <div className="y-rate-tags-block">
+                                        <div className="y-rate-tags-grid">
+                                            {(restRating >= 4 ? REST_TAGS_POSITIVE : REST_TAGS_NEGATIVE).map(tag => {
+                                                const IconComp = tag.icon;
+                                                const used = isTagUsed(tag.label, restComment);
+                                                return (
+                                                    <button key={tag.id} type="button"
+                                                        className={`y-rate-chip ${used ? 'used' : ''}`}
+                                                        onClick={() => !used && appendTag(tag.label, setRestComment)}
+                                                        disabled={used}
+                                                    >
+                                                        <IconComp size={13} strokeWidth={2.2} />
+                                                        <span>{tag.label}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                        <div className="y-rate-input-wrap">
+                                            <textarea className="y-rate-textarea" rows={2}
+                                                placeholder="Напишите пару слов о блюдах (необязательно)"
+                                                value={restComment}
+                                                onChange={e => setRestComment(e.target.value)}
+                                                maxLength={400}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="y-rate-actions" style={{ marginTop: restRating > 0 ? 0 : 24 }}>
+                                    <button type="button" className="y-rate-skip-btn" onClick={closeAndResetModal}>
+                                        Не сейчас
+                                    </button>
+                                    <button type="button"
+                                        className={`y-rate-primary-btn ${restRating > 0 ? 'active' : ''}`}
+                                        disabled={restRating === 0}
+                                        onClick={() => setRatingStep('courier')}
+                                    >
+                                        Далее &#8594;
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ── Step 2: Courier ── */}
+                        {ratingStep === 'courier' && (
+                            <div className="y-rate-step-body">
+                                <div className="y-rate-entity-icon y-rate-entity-icon--courier">
+                                    <span style={{ fontSize: 28 }}>&#128693;</span>
+                                </div>
+                                <h2 className="y-rate-title">Как прошла доставка?</h2>
+                                <p className="y-rate-subtitle">Оцените работу и скорость вашего курьера</p>
+
+                                <div className="y-rate-stars-wrapper">
+                                    <div className="y-rate-stars">
+                                        {[1,2,3,4,5].map(star => (
+                                            <button key={star} type="button" className="y-star-btn"
+                                                onClick={() => setCourierRating(star)}
+                                                onMouseEnter={() => setCourierHover(star)}
+                                                onMouseLeave={() => setCourierHover(0)}
+                                            >
+                                                <StarIcon filled={(courierHover || courierRating) >= star} size={44} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                    {(courierHover || courierRating) > 0 && (
+                                        <span className="y-rate-rating-caption">
+                                            {RATING_CAPTIONS[courierHover || courierRating]}
+                                        </span>
+                                    )}
+                                </div>
+
+                                {courierRating > 0 && (
+                                    <div className="y-rate-tags-block">
+                                        <div className="y-rate-tags-grid">
+                                            {(courierRating >= 4 ? COURIER_TAGS_POSITIVE : COURIER_TAGS_NEGATIVE).map(tag => {
+                                                const IconComp = tag.icon;
+                                                const used = isTagUsed(tag.label, courierComment);
+                                                return (
+                                                    <button key={tag.id} type="button"
+                                                        className={`y-rate-chip ${used ? 'used' : ''}`}
+                                                        onClick={() => !used && appendTag(tag.label, setCourierComment)}
+                                                        disabled={used}
+                                                    >
+                                                        <IconComp size={13} strokeWidth={2.2} />
+                                                        <span>{tag.label}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                        <div className="y-rate-input-wrap">
+                                            <textarea className="y-rate-textarea" rows={2}
+                                                placeholder="Напишите пару слов о курьере (необязательно)"
+                                                value={courierComment}
+                                                onChange={e => setCourierComment(e.target.value)}
+                                                maxLength={400}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Tips inside courier step */}
+                                <div className="y-rate-tips-section">
+                                    <div className="y-rate-tips-header">
+                                        <HeartHandshake size={15} color="#21EA7C" />
+                                        <span>Чаевые курьеру</span>
+                                        <span className="y-rate-tips-caption">100% курьеру</span>
+                                    </div>
+                                    <div className="y-rate-tips-grid">
+                                        {TIP_PRESETS.map(preset => (
+                                            <button key={preset} type="button"
+                                                className={`y-rate-tip-chip ${!isCustomTipActive && selectedTip === preset ? 'active' : ''}`}
+                                                onClick={() => { setIsCustomTipActive(false); setSelectedTip(preset); }}
+                                            >
+                                                {preset} &#8382;
+                                            </button>
+                                        ))}
+                                        <button type="button"
+                                            className={`y-rate-tip-chip ${isCustomTipActive ? 'active' : ''}`}
+                                            onClick={() => { setIsCustomTipActive(true); setSelectedTip(0); }}
+                                        >
+                                            Своя
+                                        </button>
+                                    </div>
+                                    {isCustomTipActive && (
+                                        <div className="y-rate-custom-tip-wrap">
+                                            <input type="number" step="0.5" min="1" max="50"
+                                                placeholder="Сумма (&#8382;)"
+                                                className="y-rate-custom-tip-input"
+                                                value={customTip}
+                                                onChange={e => setCustomTip(e.target.value)}
+                                                autoFocus
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="y-rate-actions" style={{ marginTop: 16 }}>
+                                    <button type="button" className="y-rate-skip-btn y-rate-back-btn"
+                                        onClick={() => setRatingStep('restaurant')}
+                                    >
+                                        &#8592; Назад
+                                    </button>
+                                    <button type="button"
+                                        className={`y-rate-primary-btn ${courierRating > 0 ? 'active' : ''}`}
+                                        disabled={courierRating === 0 || isSubmitting}
+                                        onClick={handleSubmitRating}
+                                    >
+                                        {isSubmitting
+                                            ? 'Отправка...'
+                                            : effectiveTipModal > 0
+                                                ? `Отправить + ${effectiveTipModal.toFixed(2)} &#8382;`
+                                                : 'Отправить отзыв'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ── Success ── */}
+                        {ratingStep === 'success' && (
+                            <div className="y-rate-success-body">
+                                <div className="y-rate-success-icon-wrap">
+                                    <div className="y-rate-success-glow" />
+                                    <Check size={36} color="#21EA7C" strokeWidth={3} />
+                                </div>
+                                <h2 className="y-rate-success-title">Спасибо за отзыв!</h2>
+                                <p className="y-rate-success-desc">
+                                    Ваша оценка помогает нам и ресторану становиться лучше.
+                                    {effectiveTipModal > 0 && ' Чаевые переданы курьеру.'}
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>,
                 document.body
             )}
-            </div>
+
+            {/* ═══════ STANDALONE TIPS MODAL ═══════ */}
+            {showTipsModal && createPortal(
+                <div className="y-rate-overlay" onClick={() => setShowTipsModal(false)}>
+                    <div className="y-rate-sheet" onClick={e => e.stopPropagation()}>
+                        <div className="y-rate-drag-handle" />
+                        <div className="y-rate-header">
+                            <div className="y-rate-badge">
+                                <span>Чаевые курьеру &#183; Заказ #{order.id}</span>
+                            </div>
+                            <button type="button" className="y-rate-close-btn" onClick={() => setShowTipsModal(false)}>
+                                <X size={16} />
+                            </button>
+                        </div>
+                        {!tipsSent ? (
+                            <div className="y-rate-step-body">
+                                <div className="y-rate-tip-icon-big">
+                                    <HeartHandshake size={32} color="#21EA7C" />
+                                </div>
+                                <h2 className="y-rate-title" style={{ marginBottom: '8px' }}>Поблагодарить курьера</h2>
+                                <p className="y-rate-tip-subtitle">100% чаевых поступают напрямую курьеру</p>
+                                <div className="y-rate-tips-grid" style={{ marginTop: '16px', marginBottom: '16px' }}>
+                                    {TIP_PRESETS.map(preset => (
+                                        <button key={preset} type="button"
+                                            className={`y-rate-tip-chip ${!isCustomTipActive && selectedTip === preset ? 'active' : ''}`}
+                                            onClick={() => { setIsCustomTipActive(false); setSelectedTip(preset); }}
+                                        >
+                                            {preset} &#8382;
+                                        </button>
+                                    ))}
+                                    <button type="button"
+                                        className={`y-rate-tip-chip ${isCustomTipActive ? 'active' : ''}`}
+                                        onClick={() => { setIsCustomTipActive(true); setSelectedTip(0); }}
+                                    >
+                                        Своя сумма
+                                    </button>
+                                </div>
+                                {isCustomTipActive && (
+                                    <div className="y-rate-custom-tip-wrap" style={{ marginBottom: '16px' }}>
+                                        <input type="number" step="0.5" min="1" max="50"
+                                            placeholder="Введите сумму (&#8382;)"
+                                            className="y-rate-custom-tip-input"
+                                            value={customTip}
+                                            onChange={e => setCustomTip(e.target.value)}
+                                            autoFocus
+                                        />
+                                    </div>
+                                )}
+                                <div className="y-rate-actions">
+                                    <button type="button" className="y-rate-skip-btn" onClick={() => setShowTipsModal(false)}>
+                                        Отмена
+                                    </button>
+                                    <button type="button"
+                                        className={`y-rate-primary-btn ${effectiveTipStandalone > 0 ? 'active' : ''}`}
+                                        onClick={handleDirectTipsPay}
+                                        disabled={effectiveTipStandalone <= 0 || isSubmittingTips}
+                                    >
+                                        {isSubmittingTips
+                                            ? 'Отправка...'
+                                            : `Оплатить ${effectiveTipStandalone > 0 ? `${effectiveTipStandalone.toFixed(2)} \u20BE` : ''}`}
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="y-rate-success-body">
+                                <div className="y-rate-success-icon-wrap">
+                                    <div className="y-rate-success-glow" />
+                                    <Check size={36} color="#21EA7C" strokeWidth={3} />
+                                </div>
+                                <h2 className="y-rate-success-title">Спасибо за щедрость!</h2>
+                                <p className="y-rate-success-desc">Мы передали ваши чаевые и благодарность курьеру.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>,
+                document.body
+            )}
         </div>
     );
 };

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { api, Product, Restaurant } from '../services/api';
 import './MobileCart.css';
 import { useLanguage } from '../translations/LanguageContext';
+import { pickI18nText } from '../utils/i18nContent';
+import { formatPortionCalories, formatPortionWeight } from '../utils/formatProductMeta';
 import GlassBottomPanel from '../components/UI/GlassBottomPanel';
 
 const IconBack = () => (
@@ -42,7 +44,17 @@ interface MobileCartProps {
 }
 
 const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], onClearCart, onUpdateQuantity, onAddToCart, onCheckout, deliveryFee = 6.00 }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+    const locName = (raw?: string | null) => pickI18nText(raw, language);
+    const portionLabels = {
+        grams: String(t('restaurant.grams')),
+        ml: String(t('restaurant.ml')),
+        liter: String(t('restaurant.liter')),
+        pcs: String(t('restaurant.pcs')),
+        kcal: String(t('restaurant.kcal')),
+    };
+    const formatWeight = (w?: string | number | null) => formatPortionWeight(w, portionLabels);
+    const formatCalories = (c?: string | number | null) => formatPortionCalories(c, portionLabels.kcal);
 
     const [comment, setComment] = useState('');
     const [isCommentOpen, setIsCommentOpen] = useState(false);
@@ -200,14 +212,14 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                     {initialCartItems.map(({ product, quantity }) => (
                         <div key={product.id} className="mc-item-card">
                             <div className="mc-item-img">
-                                <img src={product.img || '/Assets/default-food.png'} alt={product.name} />
+                                <img src={product.img || '/Assets/default-food.png'} alt={locName(product.name)} />
                             </div>
                             <div className="mc-item-info">
-                                <div className="mc-item-name">{product.name}</div>
+                                <div className="mc-item-name">{locName(product.name)}</div>
                                 <div className="mc-item-meta-row">
                                     <span className="mc-item-price">{(product.price).toFixed(2)} GEL</span>
                                     <span className="mc-item-sep">·</span>
-                                    <span className="mc-item-weight">{product.weight ? product.weight + t('restaurant.grams') : ''}</span>
+                                    <span className="mc-item-weight">{formatWeight(product.weight) || ''}</span>
                                 </div>
                             </div>
                             <div className="mc-qty-control-v2">
@@ -263,7 +275,7 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                             {recommendations.map(prod => (
                                 <div key={prod.id} className="mc-rec-card">
                                     <div className="mc-rec-img-container">
-                                        <img src={prod.img || '/Assets/default-food.png'} alt={prod.name} className="mc-rec-img" />
+                                        <img src={prod.img || '/Assets/default-food.png'} alt={locName(prod.name)} className="mc-rec-img" />
                                         <button className="mc-rec-add-btn-round" onClick={() => onAddToCart && onAddToCart(prod)}>
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                                 <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -272,8 +284,8 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                                         </button>
                                     </div>
                                     <div className="mc-rec-price-green">{prod.price.toFixed(2)} GEL</div>
-                                    <div className="mc-rec-name-white">{prod.name}</div>
-                                    <div className="mc-rec-meta">{prod.weight ? `${prod.weight} ${t('restaurant.grams')}` : `200 ${t('restaurant.grams')}`} · {prod.calories ? `${prod.calories} ${t('restaurant.kcal')}` : `430 ${t('restaurant.kcal')}`}</div>
+                                    <div className="mc-rec-name-white">{locName(prod.name)}</div>
+                                    <div className="mc-rec-meta">{formatWeight(prod.weight) || `200 ${portionLabels.grams}`} · {formatCalories(prod.calories) || `430 ${portionLabels.kcal}`}</div>
                                 </div>
                             ))}
                         </div>

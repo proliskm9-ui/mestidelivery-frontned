@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Restaurant } from '../../services/api';
 import { useLanguage, formatDuration } from '../../translations/LanguageContext';
+import { pickI18nText } from '../../utils/i18nContent';
+import { closedBadgeText } from '../../utils/workingHours';
 import './favBtn.css';
 import './cardImageSkeleton.css';
 
@@ -17,13 +19,14 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ item, onClick, isVertic
     const [imageOk, setImageOk] = useState(true);
     const hasImage = Boolean(item.img && item.img.trim());
     const showSkeleton = !hasImage || !imageOk;
+    const closedText = closedBadgeText(item.working_hours, language);
 
     useEffect(() => {
         setImageOk(true);
     }, [item.img]);
 
     return (
-        <div className={`rest-card ${isVertical ? 'rest-card-vertical' : ''}`} onClick={onClick}>
+        <div className={`rest-card ${isVertical ? 'rest-card-vertical' : ''}${closedText ? ' rest-card--closed' : ''}`} onClick={onClick}>
             <div
                 className={`rest-img ${showSkeleton ? 'rest-img--skeleton' : ''}`}
                 style={{ transition: 'transform 0.3s ease', position: 'relative' }}
@@ -37,6 +40,26 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ item, onClick, isVertic
                     />
                 )}
                 {showSkeleton && <div className="card-img-skeleton" aria-hidden="true" />}
+                {closedText && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            left: 8,
+                            bottom: 8,
+                            zIndex: 2,
+                            background: 'rgba(15,17,23,0.82)',
+                            color: '#fff',
+                            fontSize: 11,
+                            fontWeight: 700,
+                            padding: '4px 8px',
+                            borderRadius: 8,
+                            maxWidth: '90%',
+                            lineHeight: 1.25,
+                        }}
+                    >
+                        {closedText}
+                    </div>
+                )}
                 {onToggleFavorite && (
                     <button
                         type="button"
@@ -52,7 +75,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ item, onClick, isVertic
             </div>
             <div className="rest-details" style={{ marginTop: '0px', position: 'relative' }}>
                 <div className="rest-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                    <h3 style={{ margin: 0, padding: 0, lineHeight: '1.2' }}>{item.name}</h3>
+                    <h3 style={{ margin: 0, padding: 0, lineHeight: '1.2' }}>{pickI18nText(item.name, language).replace(/Restaraunt/gi, 'Restaurant')}</h3>
                     <span className="rest-rating" style={{ fontWeight: 600 }}>
                         <span className="star-icon">★</span> {item.rating}
                     </span>

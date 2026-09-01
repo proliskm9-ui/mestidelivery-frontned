@@ -1,10 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Login.css';
 import { useLanguage } from '../translations/LanguageContext';
 import { useAuth } from '../auth/AuthContext';
+import { preloadGoogleAuth } from '../auth/googleSignIn';
 
 interface LoginPageProps {
     onLogin: (token: string) => void;
+    onForgotPassword?: () => void;
 }
 
 const IconMail = () => (
@@ -57,9 +59,9 @@ const GoogleIcon = () => (
     </svg>
 );
 
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onForgotPassword }) => {
     const { t } = useLanguage();
-    const { signInWithGoogle, clearError } = useAuth();
+    const { signInWithGoogle, clearError, errorKey } = useAuth();
 
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
@@ -70,22 +72,48 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
-    const onLoginRef = useRef(onLogin);
-    onLoginRef.current = onLogin;
 
     useEffect(() => {
-        const pending = sessionStorage.getItem('pending_google_token');
-        if (pending) {
-            sessionStorage.removeItem('pending_google_token');
-            onLoginRef.current(pending);
-        }
-        const onToken = (e: Event) => {
-            const token = (e as CustomEvent<string>).detail;
-            if (token) onLoginRef.current(token);
-        };
-        window.addEventListener('mestigo-google-token', onToken);
-        return () => window.removeEventListener('mestigo-google-token', onToken);
+        void preloadGoogleAuth();
     }, []);
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const authError = params.get('error');
+        if (authError) {
+            setError(t('auth.errors.generic'));
+        }
+
+        const waitingRedirect = sessionStorage.getItem('mesti_google_redirect') === '1';
+        if (waitingRedirect) {
+            setGoogleLoading(true);
+        }
+
+        const stopWait = () => setGoogleLoading(false);
+        window.addEventListener('mestigo-google-token', stopWait);
+        window.addEventListener('mestigo-google-pending', stopWait);
+        window.addEventListener('mestigo-google-failed', stopWait);
+
+        // Safety net: never spin forever if redirect/auth consume stalls
+        let watchdog: number | undefined;
+        if (waitingRedirect) {
+            watchdog = window.setTimeout(() => {
+                sessionStorage.removeItem('mesti_google_redirect');
+                setGoogleLoading(false);
+            }, 12000);
+        }
+
+        return () => {
+            if (watchdog !== undefined) window.clearTimeout(watchdog);
+            window.removeEventListener('mestigo-google-token', stopWait);
+            window.removeEventListener('mestigo-google-pending', stopWait);
+            window.removeEventListener('mestigo-google-failed', stopWait);
+        };
+    }, [t]);
+
+    useEffect(() => {
+        if (errorKey) setError(t(errorKey));
+    }, [errorKey, t]);
 
     const switchMode = (login: boolean) => {
         setIsLogin(login);
@@ -150,18 +178,30 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         setError('');
         clearError();
         setGoogleLoading(true);
+        let keepLoading = false;
         try {
             const result = await signInWithGoogle();
             if (result.status === 'ready') {
                 onLogin(result.token);
+            } else if (result.status === 'redirecting') {
+                keepLoading = true;
+                return;
             }
         } catch (err: any) {
-            const msg = err?.message || '';
-            setError(!msg || /unexpected error|Google auth failed/i.test(msg)
-                ? t('auth.errors.generic')
-                : msg);
+            const code = String(err?.code || err?.message || '');
+            if (code === 'redirecting') {
+                keepLoading = true;
+                return;
+            }
+            if (/unauthorized-domain/i.test(code)) {
+                setError('Google пока не подключён к mestidelivery.com. Войдите по email и паролю — это работает.');
+            } else {
+                setError(!code || /unexpected error|Google auth failed/i.test(code)
+                    ? t('auth.errors.generic')
+                    : code);
+            }
         } finally {
-            setGoogleLoading(false);
+            if (!keepLoading) setGoogleLoading(false);
         }
     };
 
@@ -261,25 +301,38 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                             />
                         </label>
 
-                        <label className="auth-field auth-field--full">
-                            <span className="auth-field-icon"><IconLock /></span>
-                            <input
-                                type={showPassword ? 'text' : 'password'}
-                                placeholder={t('auth.password')}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                autoComplete={isLogin ? 'current-password' : 'new-password'}
-                            />
-                            <button
-                                type="button"
-                                className="auth-eye"
-                                onClick={() => setShowPassword(!showPassword)}
-                                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                            >
-                                {showPassword ? <IconEyeOff /> : <IconEye />}
-                            </button>
-                        </label>
+                        <div className="auth-password-group">
+                            <label className="auth-field auth-field--full">
+                                <span className="auth-field-icon"><IconLock /></span>
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    placeholder={t('auth.password')}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    autoComplete={isLogin ? 'current-password' : 'new-password'}
+                                />
+                                <button
+                                    type="button"
+                                    className="auth-eye"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    aria-label={showPassword ? t('auth.hide_password') : t('auth.show_password')}
+                                >
+                                    {showPassword ? <IconEyeOff /> : <IconEye />}
+                                </button>
+                            </label>
+                            {isLogin && onForgotPassword ? (
+                                <div className="auth-password-meta">
+                                    <button
+                                        type="button"
+                                        className="auth-forgot-link"
+                                        onClick={onForgotPassword}
+                                    >
+                                        {t('auth.forgot_password')}
+                                    </button>
+                                </div>
+                            ) : null}
+                        </div>
 
                         {error ? <div className="auth-error" role="alert">{error}</div> : null}
 
@@ -300,11 +353,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                         aria-busy={googleLoading}
                     >
                         {googleLoading ? <IconLoader /> : <GoogleIcon />}
-                        <span>
-                            {googleLoading
-                                ? t('auth.please_wait')
-                                : t('auth.google_continue')}
-                        </span>
+                        <span>{t('auth.google_continue')}</span>
                     </button>
 
                     <p className="auth-legal">{t('auth.terms_privacy')}</p>

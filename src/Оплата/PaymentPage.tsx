@@ -6,9 +6,10 @@ import IsometricBoxLoader from '../components/UI/IsometricBoxLoader';
 import { Clock } from 'lucide-react';
 import { useLanguage } from '../translations/LanguageContext';
 import { formatCheckoutAddress, formatCourierComment } from '../utils/checkoutAddress';
+import { ENABLE_CRYPTO_PAY } from '../config/features';
 
 /** Keepz payment link — Tribute removed. */
-const PAYMENT_URL = 'https://tiny.keepz.me/5ab2hxer';
+const PAYMENT_URL = 'https://app.keepz.me/pay?qrType=DEFAULT&receiverType=USER&receiverId=6ea6970c-20ee-4119-b25f-6ebcc8a888c6';
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 
@@ -73,7 +74,6 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
     const [method, setMethod]             = useState<string | null>(null);
     const [orderId, setOrderId]           = useState<number | null>(null);
     const [elapsed, setElapsed]           = useState(0);      // секунды ожидания
-    const [paymentLinkOpened, setPaymentLinkOpened] = useState(false);
 
     const orderCreatedRef  = useRef(false);
     const pollTimerRef     = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -246,8 +246,11 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
         if (orderCreatedRef.current) return;
         orderCreatedRef.current = true;
 
+        // Synchronously open payment URL immediately on click so Safari/Chrome never blocks it
+        openPaymentUrl(PAYMENT_URL);
+
         setMethod('card');
-        setScreen('creating');
+        setScreen('pending_confirmation');
 
         try {
             const userId      = localStorage.getItem('user_id') || 'anonymous';
@@ -284,7 +287,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                 floor:            addr.floor || '',
                 intercom:         addr.intercom || '',
                 place_type:       addr.type || 'home',
-                scheduled_time:   null, // Backend expects full timestamp, passing string range causes 22007 error
+                scheduled_time:   orderData?.deliveryType === 'scheduled' ? orderData?.scheduledTime : null,
                 promo_code:       orderData?.promoCode || '',
                 tips:             orderData?.tip || 0,
                 delivery_fee:     Number(orderData?.deliveryFee ?? 0) || 0,
@@ -315,12 +318,6 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
             }
 
             setScreen('pending_confirmation');
-            await new Promise(r => setTimeout(r, 3000));
-            try {
-                onPaymentComplete('card', result.id);
-            } catch (navError) {
-                console.error('Order created but post-success navigation failed', navError);
-            }
 
         } catch (e: any) {
             console.error('Order creation error:', e);
@@ -450,7 +447,33 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                                     )}
                                 </p>
                                 {orderId && (
-                                    <div className="mp-premium-badge">{t('common.order').toUpperCase()} #{orderId}</div>
+                                    <div className="mp-premium-badge">{t('common.order')} #{orderId}</div>
+                                )}
+                                {method !== 'cash' && orderId && (
+                                    <div className="mp-pending-actions">
+                                        <button
+                                            type="button"
+                                            className="mp-btn-view-order-clean"
+                                            onClick={() => onPaymentComplete('card', orderId)}
+                                        >
+                                            <span>Открыть заказ</span>
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                <line x1="5" y1="12" x2="19" y2="12" />
+                                                <polyline points="12 5 19 12 12 19" />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="mp-btn-reopen-link"
+                                            onClick={() => openPaymentUrl(PAYMENT_URL)}
+                                        >
+                                            <span>{t('checkout.open_payment_page')}</span>
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M7 17L17 7" />
+                                                <path d="M8 7h9v9" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 )}
                             </div>
                         )}
@@ -491,61 +514,35 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                                         </div>
                                         <p className="mp-qr-hint">{t('checkout.qr_hint')}</p>
                                     </div>
-                                    {!paymentLinkOpened ? (
-                                        <button 
-                                            className="mp-pay-button-primary"
-                                            onClick={() => {
-                                                openPaymentUrl(PAYMENT_URL);
-                                                setPaymentLinkOpened(true);
-                                            }}
-                                        >
-                                            {t('checkout.pay_online')}
-                                        </button>
-                                    ) : (
-                                        <>
-                                            <button 
-                                                className="mp-pay-button-primary mp-pay-confirmed"
-                                                onClick={handleConfirmPaid}
-                                            >
-                                                <svg className="mp-pay-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                                                    <polyline points="20 6 9 17 4 12" />
-                                                </svg>
-                                                {t('checkout.i_paid')}
-                                            </button>
-                                            <button
-                                                className="mp-pay-button-secondary"
-                                                onClick={() => openPaymentUrl(PAYMENT_URL)}
-                                            >
-                                                {t('checkout.open_payment_page')}
-                                                <svg className="mp-pay-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                                                    <path d="M7 17L17 7" />
-                                                    <path d="M8 7h9v9" />
-                                                </svg>
-                                            </button>
-                                        </>
-                                    )}
+                                    <button 
+                                        type="button"
+                                        className="mp-pay-button-primary"
+                                        onClick={handleConfirmPaid}
+                                    >
+                                        {t('checkout.pay_online')}
+                                    </button>
                                 </div>
 
                                 <div className="mp-separator">
                                     <span>{t('checkout.or_other_methods')}</span>
                                 </div>
 
-                                <div className="mp-method-btn" onClick={() => {
-                                    openPaymentUrl(PAYMENT_URL);
-                                    setPaymentLinkOpened(true);
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                }}>
-                                    <div className="mp-method-icon"><IconCrypto /></div>
-                                    <div className="mp-method-info">
-                                        <span className="mp-method-name">{t('checkout.crypto')}</span>
-                                        <span className="mp-method-desc">Crypto Pay (USDT, TON)</span>
+                                {ENABLE_CRYPTO_PAY ? (
+                                    <div className="mp-method-btn" onClick={() => {
+                                        handleConfirmPaid();
+                                    }}>
+                                        <div className="mp-method-icon"><IconCrypto /></div>
+                                        <div className="mp-method-info">
+                                            <span className="mp-method-name">{t('checkout.crypto')}</span>
+                                            <span className="mp-method-desc">Crypto Pay (USDT, TON)</span>
+                                        </div>
+                                        <div className="mp-method-arrow">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <polyline points="9 18 15 12 9 6" />
+                                            </svg>
+                                        </div>
                                     </div>
-                                    <div className="mp-method-arrow">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <polyline points="9 18 15 12 9 6" />
-                                        </svg>
-                                    </div>
-                                </div>
+                                ) : null}
 
                                 <div className="mp-method-btn" onClick={() => handlePaymentSelect('cash')}>
                                     <div className="mp-method-icon"><IconCash /></div>

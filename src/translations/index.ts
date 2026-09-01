@@ -1,5 +1,7 @@
 export type Language = 'ru' | 'en' | 'ka';
 
+import { partnerAppRu, partnerAppEn, partnerAppKa } from './partnerApp';
+
 export const translations = {
     ru: {
         common: {
@@ -129,6 +131,8 @@ export const translations = {
             footer_popular_brands: 'Популярные бренды',
             footer_popular_categories: 'Популярные категории',
             footer_rights: 'Все права защищены.',
+            footer_company: 'ИП Анастасия Вербицкая · рег. № 335897747 · Местиа, Грузия',
+            footer_support: 'Поддержка: support@mestidelivery.ge · +995 551 58 43 76',
             language: 'Язык'
         },
         menu: {
@@ -188,6 +192,7 @@ export const translations = {
             seller_info: 'Информация о продавце',
             seller_info_legal: 'Исполнитель (продавец): ООО "{name}", Грузия, г. Местия. Информация о потребительских свойствах продукции доступна в ресторане.',
             seller_info_hours: 'Режим работы: с 08:00 до 23:00',
+            hours_label: 'Режим работы: {hours} (ежедневно)',
             search_placeholder: 'Поиск в {name}',
             search_empty: 'Ничего не найдено',
             kbju: 'КБЖУ',
@@ -195,9 +200,14 @@ export const translations = {
             proteins: 'белки',
             fats: 'жиры',
             carbs: 'угли',
-            grams: 'г.',
+            grams: 'г',
+            ml: 'мл',
+            liter: 'л',
+            pcs: 'шт',
             added: 'Добавлено',
-            add: 'Добавить'
+            add: 'Добавить',
+            address_fallback: 'Грузия, Тбилиси, проспект Александра Казбеги, 25',
+            category_fallback: 'Грузинская кухня • Горячие блюда • Выпечка'
         },
         checkout: {
             title: 'Оформление',
@@ -237,7 +247,8 @@ export const translations = {
             order_placed: 'Заказ оформлен!',
             pay_cash_on_delivery: 'Оплатите наличными при получении, мы уведомим вас, когда всё будет готово.',
             order_sent_to_restaurant: 'Заказ передан в ресторан',
-            waiting_payment_confirm: 'Ожидаем подтверждения оплаты. Мы уведомим вас, когда всё будет готово.',
+            waiting_payment_confirm: 'Завершите оплату в открывшемся окне Keepz. Мы уже приняли ваш заказ и проверяем поступление оплаты.',
+            view_order: 'Посмотреть заказ',
             waiting_timeout: 'Время ожидания истекло',
             check_telegram_status: 'Проверьте статус оплаты в приложении Telegram. Если деньги списались — обратитесь в поддержку.',
             try_again: 'Попробовать снова',
@@ -308,7 +319,8 @@ export const translations = {
             wait_seconds: 'Это займет всего пару секунд',
             tribute_desc: 'Оплата через Tribute (SBP/Stars)',
             cash: 'Наличными',
-            safe_payments_desc: 'Безопасные платежи через Telegram API'
+            safe_payments_desc: 'Безопасные платежи через Telegram API',
+            use_saved: 'Использовать сохраненные данные'
         },
         profile: {
             title: 'Профиль',
@@ -432,7 +444,14 @@ export const translations = {
             geo_denied_desc: 'Укажите точку на карте в оформлении заказа — посчитаем доставку.',
             need_location: 'Укажите точку на карте',
             fee_with_eta: 'Доставка {fee}₾ · {eta}',
-            conditions: 'Подробные условия'
+            conditions: 'Подробные условия',
+            zone_center: 'Центр',
+            zone_airport: 'Аэропорт',
+            zone_villages: 'Ближайшие деревни',
+            details_title: 'Детали',
+            max_weight: 'Максимальный вес заказа',
+            service_work: 'Работа сервиса',
+            service_fee_legal: 'Сервисный сбор составляет 6% от суммы заказа, но не более 2.00 GEL и не менее 0.99 GEL.'
         },
         categories: {
             fast_food: 'Фастфуд',
@@ -452,7 +471,18 @@ export const translations = {
             bbq: 'Шашлык',
             pasta: 'Паста',
             soups: 'Супы',
-            coffee: 'Кофе'
+            coffee: 'Кофе',
+            salads: 'Салаты',
+            appetizers: 'Закуски',
+            breakfast: 'Завтрак',
+            mains: 'Основные',
+            extras: 'Дополнения',
+            snacks: 'Снеки',
+            hot: 'Горячее',
+            svan: 'Сванские блюда',
+            sides: 'Гарниры',
+            sauces: 'Соусы',
+            drinks: 'Напитки'
         },
         favorites: {
             title: 'Избранное',
@@ -539,8 +569,73 @@ export const translations = {
                 name_required: 'Укажите имя',
                 phone_invalid: 'Введите телефон в международном формате',
                 generic: 'Не удалось войти. Попробуйте ещё раз'
+            },
+            hide_password: 'Скрыть пароль',
+            show_password: 'Показать пароль',
+            forgot_password: 'Забыли пароль?',
+            forgot_title: 'Восстановление пароля',
+            forgot_desc: 'Введите email — мы отправим ссылку для сброса пароля.',
+            forgot_submit: 'Отправить ссылку',
+            forgot_sent: 'Если аккаунт с таким email существует, мы отправили письмо со ссылкой.',
+            forgot_sent_to: 'Письмо отправлено на',
+            forgot_spam_hint: 'Не видите письмо? Проверьте «Спам» или подождите пару минут. Ссылка действует 30 минут.',
+            forgot_error: 'Не удалось отправить письмо. Попробуйте позже.',
+            back_to_login: 'Вернуться ко входу',
+            verify_title: 'Подтверждение email',
+            verify_check_email_title: 'Проверьте почту',
+            verify_check_email_desc: 'Мы отправили письмо со ссылкой для подтверждения. Откройте его и нажмите «Подтвердить email», чтобы получать чеки и статусы заказов.',
+            verify_sent_to: 'Письмо отправлено на',
+            verify_spam_hint: 'Не видите письмо? Проверьте папку «Спам» или подождите пару минут.',
+            verify_go_to_login: 'Перейти ко входу',
+            verify_success: 'Email успешно подтверждён. Теперь можно войти.',
+            verify_error: 'Ссылка недействительна или устарела.',
+            verify_missing_token: 'В ссылке нет токена подтверждения.',
+            reset_title: 'Новый пароль',
+            reset_desc: 'Придумайте новый пароль для входа.',
+            reset_submit: 'Сохранить пароль',
+            reset_success: 'Пароль обновлён. Теперь можно войти.',
+            reset_error: 'Не удалось сменить пароль.',
+            reset_missing_token: 'Ссылка для сброса недействительна.',
+            reset_password_short: 'Пароль должен быть не короче 6 символов.',
+            reset_password_mismatch: 'Пароли не совпадают.',
+            new_password: 'Новый пароль',
+            confirm_password: 'Повторите пароль'
+        },
+        referral: {
+            title: 'Пригласи друга!',
+            desc: 'Поделись своим кодом с друзьями и получите по {bonuses} на следующий заказ!',
+            bonuses: '500 бонусов',
+            copied: 'Скопировано!',
+            copy: 'Копировать'
+        },
+        partner: {
+            form: {
+                badge_restaurant: 'ПАРТНЁРСТВО',
+                badge_courier: 'КУРЬЕРАМ',
+                title_restaurant: 'Разместите ваш ресторан',
+                title_courier: 'Станьте курьером MestiDelivery',
+                desc_restaurant: 'MestiDelivery объединяет все рестораны Местии в одном приложении. Разместите меню — и станьте видны каждому, кто ищет, где заказать еду в городе.',
+                desc_courier: 'Доставляйте заказы в свободное время и получайте выплаты, когда удобно вам.',
+                name_label: 'Как вас зовут?',
+                name_ph: 'Имя Фамилия',
+                phone_label: 'Телефон для связи',
+                email_label: 'Ваш Email (необяз.)',
+                company_label: 'Название заведения',
+                company_ph: 'Напр. Cafe Laila',
+                extra_label: 'Дополнительно',
+                extra_ph_restaurant: 'Адрес заведения, кухня, пожелания...',
+                extra_ph_courier: 'Наличие транспорта, удобное время для работы...',
+                submit: 'Отправить заявку',
+                submitting: 'Отправляем данные...',
+                success_title: 'Заявка принята!',
+                success_text: 'Наш менеджер свяжется с вами в ближайшее время для уточнения деталей.',
+                close: 'Закрыть',
+                terms: 'Нажимая на кнопку, вы соглашаетесь с условиями оферты и политикой конфиденциальности.',
+                error_submit: 'Ошибка отправки заявки',
+                error_generic: 'Произошла ошибка. Попробуйте позже.'
             }
-        }
+        },
+        partnerApp: partnerAppRu
     },
     en: {
         common: {
@@ -670,6 +765,8 @@ export const translations = {
             footer_popular_brands: 'Popular Brands',
             footer_popular_categories: 'Popular Categories',
             footer_rights: 'All rights reserved.',
+            footer_company: 'IE Anastasiya Viarbitskaya · Reg. No. 335897747 · Mestia, Georgia',
+            footer_support: 'Support: support@mestidelivery.ge · +995 551 58 43 76',
             language: 'Language'
         },
         menu: {
@@ -729,6 +826,7 @@ export const translations = {
             seller_info: 'Seller information',
             seller_info_legal: 'Seller: LLC "{name}", Mestia, Georgia. Information about product properties is available at the restaurant.',
             seller_info_hours: 'Working hours: from 08:00 to 23:00',
+            hours_label: 'Working hours: {hours} (daily)',
             search_placeholder: 'Search in {name}',
             search_empty: 'Nothing found',
             kbju: 'KBJU',
@@ -737,8 +835,13 @@ export const translations = {
             fats: 'fats',
             carbs: 'carbs',
             grams: 'g',
+            ml: 'ml',
+            liter: 'L',
+            pcs: 'pcs',
             added: 'Added',
-            add: 'Add'
+            add: 'Add',
+            address_fallback: 'Georgia, Tbilisi, Alexander Kazbegi Avenue, 25',
+            category_fallback: 'Georgian cuisine • Hot dishes • Bakery'
         },
         checkout: {
             title: 'Checkout',
@@ -778,7 +881,8 @@ export const translations = {
             order_placed: 'Order Placed!',
             pay_cash_on_delivery: 'Pay with cash on delivery, we will notify you when everything is ready.',
             order_sent_to_restaurant: 'Order sent to restaurant',
-            waiting_payment_confirm: 'Awaiting payment confirmation. We will notify you when everything is ready.',
+            waiting_payment_confirm: 'Complete payment in the opened Keepz window. We have already received your order and are verifying the payment.',
+            view_order: 'View order',
             waiting_timeout: 'Waiting time expired',
             check_telegram_status: 'Check payment status in Telegram app. If funds were charged, contact support.',
             try_again: 'Try again',
@@ -849,7 +953,8 @@ export const translations = {
             wait_seconds: 'This will only take a couple of seconds',
             tribute_desc: 'Payment via Tribute (SBP/Stars)',
             cash: 'Cash',
-            safe_payments_desc: 'Secure payments via Telegram API'
+            safe_payments_desc: 'Secure payments via Telegram API',
+            use_saved: 'Use saved data'
         },
         profile: {
             title: 'Profile',
@@ -973,7 +1078,14 @@ export const translations = {
             geo_denied_desc: 'Pick a point on the map at checkout and we’ll calculate delivery.',
             need_location: 'Set your location on the map',
             fee_with_eta: 'Delivery {fee}₾ · {eta}',
-            conditions: 'Detailed conditions'
+            conditions: 'Detailed conditions',
+            zone_center: 'Center',
+            zone_airport: 'Airport',
+            zone_villages: 'Nearby villages',
+            details_title: 'Details',
+            max_weight: 'Maximum order weight',
+            service_work: 'Service fee',
+            service_fee_legal: 'The service fee is 6% of the order amount, but no more than 2.00 GEL and no less than 0.99 GEL.'
         },
         categories: {
             fast_food: 'Fast Food',
@@ -993,7 +1105,18 @@ export const translations = {
             bbq: 'BBQ',
             pasta: 'Pasta',
             soups: 'Soups',
-            coffee: 'Coffee'
+            coffee: 'Coffee',
+            salads: 'Salads',
+            appetizers: 'Appetizers',
+            breakfast: 'Breakfast',
+            mains: 'Main dishes',
+            extras: 'Add-ons',
+            snacks: 'Snacks',
+            hot: 'Hot dishes',
+            svan: 'Svan dishes',
+            sides: 'Sides',
+            sauces: 'Sauces',
+            drinks: 'Drinks'
         },
         favorites: {
             title: 'Favorites',
@@ -1080,8 +1203,73 @@ export const translations = {
                 name_required: 'Please enter your name',
                 phone_invalid: 'Enter a phone number in international format',
                 generic: 'Could not sign in. Please try again'
+            },
+            hide_password: 'Hide password',
+            show_password: 'Show password',
+            forgot_password: 'Forgot password?',
+            forgot_title: 'Password recovery',
+            forgot_desc: 'Enter your email and we will send a reset link.',
+            forgot_submit: 'Send reset link',
+            forgot_sent: 'If an account exists for this email, we sent a reset link.',
+            forgot_sent_to: 'Email sent to',
+            forgot_spam_hint: 'Don’t see it? Check spam or wait a few minutes. The link expires in 30 minutes.',
+            forgot_error: 'Could not send the email. Please try again later.',
+            back_to_login: 'Back to sign in',
+            verify_title: 'Email verification',
+            verify_check_email_title: 'Check your email',
+            verify_check_email_desc: 'We sent a confirmation link. Open the email and tap “Confirm email” to receive receipts and order updates.',
+            verify_sent_to: 'Email sent to',
+            verify_spam_hint: 'Don’t see it? Check your spam folder or wait a few minutes.',
+            verify_go_to_login: 'Go to sign in',
+            verify_success: 'Email verified. You can sign in now.',
+            verify_error: 'This link is invalid or expired.',
+            verify_missing_token: 'Verification token is missing from the link.',
+            reset_title: 'New password',
+            reset_desc: 'Choose a new password for your account.',
+            reset_submit: 'Save password',
+            reset_success: 'Password updated. You can sign in now.',
+            reset_error: 'Could not reset the password.',
+            reset_missing_token: 'Reset link is invalid.',
+            reset_password_short: 'Password must be at least 6 characters.',
+            reset_password_mismatch: 'Passwords do not match.',
+            new_password: 'New password',
+            confirm_password: 'Confirm password'
+        },
+        referral: {
+            title: 'Invite a friend!',
+            desc: 'Share your code with friends and get {bonuses} on your next order!',
+            bonuses: '500 bonuses each',
+            copied: 'Copied!',
+            copy: 'Copy'
+        },
+        partner: {
+            form: {
+                badge_restaurant: 'PARTNERSHIP',
+                badge_courier: 'FOR COURIERS',
+                title_restaurant: 'List your restaurant',
+                title_courier: 'Become a MestiDelivery courier',
+                desc_restaurant: 'MestiDelivery brings all Mestia restaurants into one app. List your menu — and become visible to everyone looking for food delivery in town.',
+                desc_courier: 'Deliver orders in your free time and get paid when it works for you.',
+                name_label: 'What is your name?',
+                name_ph: 'Full name',
+                phone_label: 'Contact phone',
+                email_label: 'Your email (optional)',
+                company_label: 'Venue name',
+                company_ph: 'E.g. Cafe Laila',
+                extra_label: 'Additional info',
+                extra_ph_restaurant: 'Venue address, cuisine, notes...',
+                extra_ph_courier: 'Vehicle availability, preferred schedule...',
+                submit: 'Submit application',
+                submitting: 'Sending...',
+                success_title: 'Application received!',
+                success_text: 'Our manager will contact you shortly to discuss the details.',
+                close: 'Close',
+                terms: 'By clicking the button, you agree to the offer terms and privacy policy.',
+                error_submit: 'Failed to submit application',
+                error_generic: 'Something went wrong. Please try again later.'
             }
-        }
+        },
+        partnerApp: partnerAppEn
     },
     ka: {
         common: {
@@ -1211,6 +1399,8 @@ export const translations = {
             footer_popular_brands: 'პოპულარული ბრენდები',
             footer_popular_categories: 'პოპულარული კატეგორიები',
             footer_rights: 'ყველა უფლება დაცულია.',
+            footer_company: 'ინდ. მეწარმე ანასტასია ვერბიცკაია · რეგ. № 335897747 · მესტია, საქართველო',
+            footer_support: 'მხარდაჭერა: support@mestidelivery.ge · +995 551 58 43 76',
             language: 'ენა'
         },
         menu: {
@@ -1270,6 +1460,7 @@ export const translations = {
             seller_info: 'ინფორმაცია გამყიდველზე',
             seller_info_legal: 'გამყიდველი: შპს "{name}", მესტია, საქართველო. პროდუქციის თვისებების შესახებ ინფორმაცია ხელმისაწვდომია რესტორანში.',
             seller_info_hours: 'სამუშაო საათები: 08:00-დან 23:00-მდე',
+            hours_label: 'სამუშაო საათები: {hours} (ყოველდღე)',
             search_placeholder: 'ძებნა {name}-ში',
             search_empty: 'ვერაფერი მოიძებნა',
             kbju: 'კბჟუ',
@@ -1277,9 +1468,14 @@ export const translations = {
             proteins: 'ცილები',
             fats: 'ცხიმები',
             carbs: 'ნახშირწყლები',
-            grams: 'გ.',
+            grams: 'გ',
+            ml: 'მლ',
+            liter: 'ლ',
+            pcs: 'ც',
             added: 'დამატებულია',
-            add: 'დამატება'
+            add: 'დამატება',
+            address_fallback: 'საქართველო, თბილისი, ალექსანდრე ყაზბეგის გამზირი, 25',
+            category_fallback: 'ქართული სამზარეულო • ცხელი კერძები • ცხობილა'
         },
         checkout: {
             title: 'გაფორმება',
@@ -1319,7 +1515,8 @@ export const translations = {
             order_placed: 'შეკვეთა გაფორმდა!',
             pay_cash_on_delivery: 'გადაიხადეთ ნაღდი ფულით მიღებისას, შეგატყობინებთ როდესაც ყველაფერი მზად იქნება.',
             order_sent_to_restaurant: 'შეკვეთა გადაეცა რესტორანს',
-            waiting_payment_confirm: 'ველოდებით გადახდის დადასტურებას. შეგატყობინებთ როდესაც ყველაფერი მზად იქნება.',
+            waiting_payment_confirm: 'დაასრულეთ გადახდა გახსნილ Keepz-ის ფანჯარაში. თქვენი შეკვეთა მიღებულია და ველოდებით გადახდის დადასტურებას.',
+            view_order: 'შეკვეთის ნახვა',
             waiting_timeout: 'ლოდინის დრო ამოიწურა',
             check_telegram_status: 'შეამოწმეთ გადახდის სტატუსი Telegram აპლიკაციაში. თუ თანხა ჩამოგეჭრათ, მიმართეთ მხარდაჭერას.',
             try_again: 'სცადეთ თავიდან',
@@ -1390,7 +1587,8 @@ export const translations = {
             wait_seconds: 'ამას სულ რამდენიმე წამი დასჭირდება',
             tribute_desc: 'გადახდა Tribute-ის საშუალებით (SBP/Stars)',
             cash: 'ნაღდი ფულით',
-            safe_payments_desc: 'უსაფრთხო გადახდები Telegram API-ის საშუალებით'
+            safe_payments_desc: 'უსაფრთხო გადახდები Telegram API-ის საშუალებით',
+            use_saved: 'შენახული მონაცემების გამოყენება'
         },
         profile: {
             title: 'პროფილი',
@@ -1514,7 +1712,14 @@ export const translations = {
             geo_denied_desc: 'მიუთითეთ წერტილი რუკაზე შეკვეთისას — დავითვლით მიწოდებას.',
             need_location: 'მიუთითეთ წერტილი რუკაზე',
             fee_with_eta: 'მიწოდება {fee}₾ · {eta}',
-            conditions: 'დეტალური პირობები'
+            conditions: 'დეტალური პირობები',
+            zone_center: 'ცენტრი',
+            zone_airport: 'აეროპორტი',
+            zone_villages: 'ახლომდებარე სოფლები',
+            details_title: 'დეტალები',
+            max_weight: 'შეკვეთის მაქსიმალური წონა',
+            service_work: 'სერვისის მუშაობა',
+            service_fee_legal: 'სერვისის საკომისიო შეადგენს შეკვეთის თანხის 6%-ს, მაგრამ არაუმეტეს 2.00 GEL და არანაკლებ 0.99 GEL.'
         },
         categories: {
             fast_food: 'სწრაფი კვება',
@@ -1534,7 +1739,18 @@ export const translations = {
             bbq: 'მწვადი',
             pasta: 'პასტა',
             soups: 'სუპები',
-            coffee: 'ყავა'
+            coffee: 'ყავა',
+            salads: 'სალათები',
+            appetizers: 'წასახემსებელი',
+            breakfast: 'საუზმე',
+            mains: 'ძირითადი კერძები',
+            extras: 'დანამატები',
+            snacks: 'სნექები',
+            hot: 'ცხელი კერძები',
+            svan: 'სვანური კერძები',
+            sides: 'გარნირები',
+            sauces: 'სოუსები',
+            drinks: 'სასმელები'
         },
         favorites: {
             title: 'რჩეულები',
@@ -1621,7 +1837,72 @@ export const translations = {
                 name_required: 'მიუთითეთ სახელი',
                 phone_invalid: 'შეიყვანეთ ტელეფონი საერთაშორისო ფორმატში',
                 generic: 'შესვლა ვერ მოხერხდა. სცადეთ თავიდან'
+            },
+            hide_password: 'პაროლის დამალვა',
+            show_password: 'პაროლის ჩვენება',
+            forgot_password: 'დაგავიწყდათ პაროლი?',
+            forgot_title: 'პაროლის აღდგენა',
+            forgot_desc: 'შეიყვანეთ email — გამოგიგზავნით აღდგენის ბმულს.',
+            forgot_submit: 'ბმულის გაგზავნა',
+            forgot_sent: 'თუ ასეთი email არსებობს, გამოგიგზავნეთ აღდგენის ბმული.',
+            forgot_sent_to: 'წერილი გაიგზავნა',
+            forgot_spam_hint: 'არ ჩანს? შეამოწმეთ სპამი ან დაელოდეთ რამდენიმე წუთს. ბმული 30 წუთით მოქმედებს.',
+            forgot_error: 'წერილი ვერ გაიგზავნა. სცადეთ მოგვიანებით.',
+            back_to_login: 'შესვლაზე დაბრუნება',
+            verify_title: 'Email-ის დადასტურება',
+            verify_check_email_title: 'შეამოწმეთ ელფოსტა',
+            verify_check_email_desc: 'გამოგიგზავნეთ დადასტურების ბმული. გახსენით წერილი და დააჭირეთ «Email-ის დადასტურება», რომ მიიღოთ ქვითრები და შეკვეთის სტატუსები.',
+            verify_sent_to: 'წერილი გაიგზავნა',
+            verify_spam_hint: 'არ ჩანს? შეამოწმეთ სპამის საქაღალდე ან დაელოდეთ რამდენიმე წუთს.',
+            verify_go_to_login: 'შესვლაზე გადასვლა',
+            verify_success: 'Email დადასტურდა. ახლა შეგიძლიათ შესვლა.',
+            verify_error: 'ბმული არასწორია ან ვადაგასულია.',
+            verify_missing_token: 'ბმულში არ არის დადასტურების ტოკენი.',
+            reset_title: 'ახალი პაროლი',
+            reset_desc: 'აირჩიეთ ახალი პაროლი.',
+            reset_submit: 'პაროლის შენახვა',
+            reset_success: 'პაროლი განახლდა. შეგიძლიათ შესვლა.',
+            reset_error: 'პაროლი ვერ შეიცვალა.',
+            reset_missing_token: 'აღდგენის ბმული არასწორია.',
+            reset_password_short: 'პაროლი უნდა იყოს მინიმუმ 6 სიმბოლო.',
+            reset_password_mismatch: 'პაროლები არ ემთხვევა.',
+            new_password: 'ახალი პაროლი',
+            confirm_password: 'გაიმეორეთ პაროლი'
+        },
+        referral: {
+            title: 'მოიწვიე მეგობარი!',
+            desc: 'გაუზიარე შენი კოდი მეგობრებს და მიიღეთ {bonuses} შემდეგ შეკვეთაზე!',
+            bonuses: '500 ბონუსი',
+            copied: 'დაკოპირებულია!',
+            copy: 'კოპირება'
+        },
+        partner: {
+            form: {
+                badge_restaurant: 'პარტნიორობა',
+                badge_courier: 'კურიერებს',
+                title_restaurant: 'განათავსეთ თქვენი რესტორანი',
+                title_courier: 'გახდი MestiDelivery-ის კურიერი',
+                desc_restaurant: 'MestiDelivery აერთიანებს მესტიის ყველა რესტორანს ერთ აპლიკაციაში. განათავსეთ მენიუ — და გახდით ხილული ყველასთვის, ვინც ქალაქში საჭმლის შეკვეთას ეძებს.',
+                desc_courier: 'მიიტანეთ შეკვეთები თავისუფალ დროს და მიიღეთ ანაზღაურება თქვენთვის ხელსაყრელ დროს.',
+                name_label: 'როგორ გქვიათ?',
+                name_ph: 'სახელი გვარი',
+                phone_label: 'საკონტაქტო ტელეფონი',
+                email_label: 'თქვენი Email (არასავალდებულო)',
+                company_label: 'დაწესებულების სახელი',
+                company_ph: 'მაგ. Cafe Laila',
+                extra_label: 'დამატებით',
+                extra_ph_restaurant: 'დაწესებულების მისამართი, სამზარეულო, სურვილები...',
+                extra_ph_courier: 'ტრანსპორტის არსებობა, ხელსაყრელი სამუშაო დრო...',
+                submit: 'განაცხადის გაგზავნა',
+                submitting: 'მონაცემები იგზავნება...',
+                success_title: 'განაცხადი მიღებულია!',
+                success_text: 'ჩვენი მენეჯერი მალე დაგიკავშირდებათ დეტალების გასარკვევად.',
+                close: 'დახურვა',
+                terms: 'ღილაკზე დაჭერით თქვენ ეთანხმებით შეთავაზების პირობებს და კონფიდენციალურობის პოლიტიკას.',
+                error_submit: 'განაცხადის გაგზავნის შეცდომა',
+                error_generic: 'მოხდა შეცდომა. სცადეთ მოგვიანებით.'
             }
-        }
+        },
+        partnerApp: partnerAppKa
     }
 };

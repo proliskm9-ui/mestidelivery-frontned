@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { api, Product, Restaurant } from '../services/api';
+import { api, Product, Restaurant, resolveImageUrl } from '../services/api';
 import FullPageLoader from '../components/UI/FullPageLoader';
 import NetworkErrorState from '../components/UI/NetworkErrorState';
 import { useLanguage } from '../translations/LanguageContext';
 import { useDeliveryLocationOptional } from '../delivery/DeliveryLocationContext';
+import { matchesI18nContent, pickI18nText } from '../utils/i18nContent';
+import { formatPortionCalories, formatPortionWeight, isVisibleMenuProduct, localizeMenuCategory, sortMenuCategories, sortProductsInCategory } from '../utils/formatProductMeta';
+import { getMinimumOrderQuantity } from '../utils/minimumOrderQuantity';
+import { closedBadgeText, isRestaurantOpenNow, nextOpenAt } from '../utils/workingHours';
 import './Restaurant.css';
 import './MobileRestaurant.css';
 
@@ -30,23 +34,50 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     onClearCart, 
     onNavigateToCart 
 }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const deliveryLoc = useDeliveryLocationOptional();
     const deliveryFee = deliveryLoc?.fee;
-
-    const formatWeight = (w?: string | number) => {
-        if (w == null || w === '') return null;
-        const str = String(w).trim();
-        // If it already has letters (except Russian/Georgian suffixes), keep as is
-        if (/[a-zA-Z]/.test(str)) return str;
-        return `${str} ${t('restaurant.grams')}`;
+    const locName = (raw?: string | null) => pickI18nText(raw, language);
+    const locDesc = (raw?: string | null) => pickI18nText(raw, language);
+    const portionLabels = {
+        grams: String(t('restaurant.grams')),
+        ml: String(t('restaurant.ml')),
+        liter: String(t('restaurant.liter')),
+        pcs: String(t('restaurant.pcs')),
+        kcal: String(t('restaurant.kcal')),
     };
-
-    const formatCalories = (c?: string | number) => {
-        if (c == null || c === '') return null;
-        const str = String(c).trim();
-        if (/[a-zA-Z]/.test(str)) return str;
-        return `${str} ${t('restaurant.kcal')}`;
+    const formatWeight = (w?: string | number) => formatPortionWeight(w, portionLabels);
+    const formatCalories = (c?: string | number) => formatPortionCalories(c, portionLabels.kcal);
+    const getReviewsLabel = (r: Restaurant) => {
+        const fromTags = String(r.filter_tags || '').match(/reviews:([^,]+)/i)?.[1]?.trim();
+        if (fromTags) return fromTags;
+        const byName: Record<string, string> = {
+            Luizastan: '55+',
+            'Sunset Restaraunt': '980+',
+            'Sunset Restaurant': '980+',
+            'BBQ Garden': '230+',
+        };
+        return byName[r.name] || '100+';
+    };
+    const getHoursLabel = (r: Restaurant) => {
+        if (r.working_hours) {
+            try {
+                const parsed = JSON.parse(r.working_hours);
+                const todayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][new Date().getDay()];
+                const today = parsed?.[todayKey];
+                if (today) return t('restaurant.hours_label').replace('{hours}', today);
+            } catch { /* fall through */ }
+        }
+        const fromTags = String(r.filter_tags || '').match(/hours:([^,]+)/i)?.[1]?.trim();
+        const byName: Record<string, string> = {
+            Luizastan: '10:00-23:00',
+            'Sunset Restaraunt': '10:30-23:00',
+            'Sunset Restaurant': '10:30-23:00',
+            'BBQ Garden': '10:00-23:00',
+        };
+        const hours = fromTags || byName[r.name];
+        if (!hours) return t('restaurant.seller_info_hours');
+        return t('restaurant.hours_label').replace('{hours}', hours);
     };
 
     const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
@@ -61,6 +92,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     const [mobileSearchQuery, setMobileSearchQuery] = useState('');
     const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
     const cartWidgetRef = useRef<HTMLDivElement>(null);
+    const infoCardRef = useRef<HTMLDivElement>(null);
 
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
@@ -108,7 +140,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
             (fromEl?.closest('.dish-card-new, .pc-dish-modal')?.querySelector('img') as HTMLImageElement | null)
             || fromEl;
         const imgEl = img instanceof HTMLImageElement ? img : null;
-        flyDishToCart(imgEl || fromEl, product.img || '/Assets/default-food.png');
+        flyDishToCart(imgEl || fromEl, resolveImageUrl(product.img || '') || '/Assets/default-food.png');
         onAddToCart(product);
     };
 
@@ -118,26 +150,45 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Scroll detection for compact header (mobile + desktop)
+    // Desktop: compact title appears when info card leaves — categories are a single sticky nav (never duplicated).
+    // Mobile: classic scroll threshold for v2-compact-header.
     useEffect(() => {
         let ticking = false;
         const handleScroll = () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    const scrollY = window.scrollY;
-                    setIsScrolled((prev) => {
-                        if (!prev && scrollY > 90) return true;
-                        if (prev && scrollY < 10) return false;
-                        return prev;
-                    });
-                    ticking = false;
-                });
-                ticking = true;
-            }
+            if (ticking) return;
+            ticking = true;
+            window.requestAnimationFrame(() => {
+                if (isMobile) {
+                    setIsScrolled(window.scrollY > 90);
+                } else {
+                    const info = infoCardRef.current;
+                    if (info) {
+                        // 24 = sticky top offset, so compact turns on exactly when the chrome sticks
+                        const bottom = info.getBoundingClientRect().bottom;
+                        setIsScrolled((prev) => {
+                            if (!prev && bottom <= 24) return true;
+                            if (prev && bottom > 72) return false;
+                            return prev;
+                        });
+                    }
+                }
+                ticking = false;
+            });
         };
+        handleScroll();
         window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+        window.addEventListener('resize', handleScroll, { passive: true });
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('resize', handleScroll);
+        };
+    }, [isMobile, restaurantId]);
+
+    useEffect(() => {
+        if (restaurant?.name) {
+            document.title = `${locName(restaurant.name).replace(/Restaraunt/gi, 'Restaurant')} — MestiDelivery`;
+        }
+    }, [restaurant?.name, language]);
 
     // Fetch Data
     useEffect(() => {
@@ -167,7 +218,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                     };
                 }
 
-                const prodData = await api.getProducts(restaurantId).catch(() => []);
+                const prodData = (await api.getProducts(restaurantId).catch(() => [])).filter(isVisibleMenuProduct);
                 const cats = Array.from(new Set(prodData.map(p => p.category))).filter(Boolean) as string[];
 
                 setRestaurant(restData);
@@ -192,20 +243,25 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     };
 
     // ----- MOBILE HOOKS (must be called unconditionally, before any early returns) -----
-    const mobileCategories = Array.from(new Set(products.map(p => p.category))).filter(Boolean);
+    const mobileCategories = sortMenuCategories(
+        Array.from(new Set(products.map(p => p.category))).filter(Boolean) as string[],
+    );
     const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-    // Group products by category (preserving order)
+    // Group products by category (drinks: coffee/tea first)
     const productsByCategory: Record<string, Product[]> = {};
     for (const cat of mobileCategories) {
-        productsByCategory[cat] = products.filter(p => p.category === cat);
+        productsByCategory[cat] = sortProductsInCategory(
+            cat,
+            products.filter(p => p.category === cat),
+        );
     }
 
     // Scroll-to-category handler
     const scrollToCategory = (cat: string) => {
         const el = sectionRefs.current[cat];
         if (el) {
-            const offset = 130; // account for sticky compact header height
+            const offset = 150; // mobile v2 compact header
             const y = el.getBoundingClientRect().top + window.scrollY - offset;
             window.scrollTo({ top: y, behavior: 'smooth' });
         }
@@ -217,7 +273,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
         if (mobileCategories.length === 0) return;
         const observerOptions = {
             root: null,
-            rootMargin: isMobile ? '-140px 0px -60% 0px' : '-130px 0px -55% 0px',
+            rootMargin: isMobile ? '-140px 0px -60% 0px' : '-145px 0px -55% 0px',
             threshold: 0,
         };
         const observer = new IntersectionObserver((entries) => {
@@ -238,38 +294,28 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     const scrollToCategoryDesktop = (cat: string) => {
         const el = sectionRefs.current[cat];
         if (el) {
-            const offset = isScrolled ? 130 : 24;
+            const offset = isScrolled ? 150 : 72; // sticky chrome: title+cats or cats only
             const y = el.getBoundingClientRect().top + window.scrollY - offset;
             window.scrollTo({ top: y, behavior: 'smooth' });
         }
         setActiveCategory(cat);
     };
 
-    const getCategoryDisplayName = (cat: string) => {
-        if (cat === 'Что нового') return t('restaurant.what_new');
-        if (cat === 'Выбор пользователей') return t('restaurant.user_choice');
-        if (cat === 'Акции') return t('restaurant.promotions');
-        
-        // Translate database categories
-        const lowerCat = cat.toLowerCase();
-        if (lowerCat === 'супы' || lowerCat === 'soups') return t('categories.soups');
-        if (lowerCat === 'бургеры' || lowerCat === 'burgers') return t('categories.burgers');
-        if (lowerCat === 'пицца' || lowerCat === 'pizza') return t('categories.pizza');
-        if (lowerCat === 'шаурма' || lowerCat === 'shawarma') return t('categories.shawarma');
-        if (lowerCat === 'сэндвичи' || lowerCat === 'sandwiches') return t('categories.sandwiches');
-        if (lowerCat === 'выпечка' || lowerCat === 'bakery') return t('categories.bakery');
-        if (lowerCat === 'блины' || lowerCat === 'pancakes') return t('categories.pancakes');
-        if (lowerCat === 'десерты' || lowerCat === 'desserts') return t('categories.desserts');
-        if (lowerCat === 'шашлык' || lowerCat === 'bbq') return t('categories.bbq');
-        if (lowerCat === 'паста' || lowerCat === 'pasta') return t('categories.pasta');
-        if (lowerCat === 'кофе' || lowerCat === 'coffee') return t('categories.coffee');
-        if (lowerCat === 'ქართული' || lowerCat === 'грузинская' || lowerCat === 'georgian') return t('categories.georgian');
-        
-        return cat;
-    };
-
     if (loading) return <FullPageLoader variant="restaurant" />;
     if (isNetworkError || !restaurant) return <NetworkErrorState />;
+
+    const getCategoryDisplayName = (cat: string) => localizeMenuCategory(cat, t);
+    const restaurantDisplayName = locName(restaurant.name).replace(/Restaraunt/gi, 'Restaurant');
+
+    const restaurantClosedHint = closedBadgeText(restaurant.working_hours, language);
+    const restaurantIsOpen = isRestaurantOpenNow(restaurant.working_hours);
+    const hasNextOpen = Boolean(nextOpenAt(restaurant.working_hours));
+    const closedBanner = !restaurantIsOpen && restaurantClosedHint ? (
+        <div className="rest-closed-banner" role="status">
+            <strong>{restaurantClosedHint}</strong>
+            {hasNextOpen && <span>Можно собрать корзину и оформить ко времени на открытие.</span>}
+        </div>
+    ) : null;
 
     // ----- DESKTOP RENDER -----
     if (!isMobile) {
@@ -277,7 +323,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
 
         const desktopFilteredProducts = mobileSearchQuery.trim()
             ? products.filter(p =>
-                p.name.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
+                matchesI18nContent(p.name, mobileSearchQuery) ||
                 (p.category && p.category.toLowerCase().includes(mobileSearchQuery.toLowerCase()))
             )
             : products;
@@ -286,7 +332,10 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
             : mobileCategories;
         const desktopByCategory: Record<string, Product[]> = {};
         for (const cat of desktopFilteredCategories) {
-            desktopByCategory[cat] = desktopFilteredProducts.filter(p => p.category === cat);
+            desktopByCategory[cat] = sortProductsInCategory(
+                cat,
+                desktopFilteredProducts.filter(p => p.category === cat),
+            );
         }
 
         const renderDishCard = (product: Product) => {
@@ -294,7 +343,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
             return (
                 <div key={product.id} className="dish-card-new" onClick={() => setSelectedProduct(product)}>
                     <div className="dcn-image">
-                        <img src={product.img || '/Assets/default-food.png'} alt={product.name} />
+                        <img src={resolveImageUrl(product.img || '') || '/Assets/default-food.png'} alt={locName(product.name)} />
                         <div className="dcn-controls">
                             <div className={`dcn-qty ${count === 0 ? 'collapsed' : ''}`}>
                                 <button
@@ -318,7 +367,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                         </div>
                     </div>
                     <div className="dcn-price">{product.price.toFixed(0)} ₾</div>
-                    <div className="dcn-title">{product.name}</div>
+                    <div className="dcn-title">{locName(product.name)}</div>
                     <div className="dcn-meta">
                         {formatWeight(product.weight) && <span>{formatWeight(product.weight)}</span>}
                         {formatWeight(product.weight) && formatCalories(product.calories) && <span className="dcn-meta-dot">·</span>}
@@ -366,7 +415,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                 <input
                     className="rest-search-input"
                     type="text"
-                    placeholder={t('restaurant.search_placeholder').replace('{name}', restaurant.name)}
+                    placeholder={t('restaurant.search_placeholder').replace('{name}', restaurantDisplayName)}
                     value={mobileSearchQuery}
                     onChange={(e) => setMobileSearchQuery(e.target.value)}
                     autoFocus={autoFocus}
@@ -393,102 +442,103 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
 
         return (
             <div className={`restaurant-page-container desktop-restaurant ${isScrolled ? 'is-scrolled' : ''}`}>
-                {/* Compact header — appears on scroll (mobile pattern, desktop glass) */}
-                <div className={`rest-compact-header ${isScrolled ? 'visible' : ''}`}>
-                    <div className="rest-compact-inner">
-                        <div className="rest-compact-main">
-                            {isSearchOpen ? (
-                                <div className="rest-compact-nav rest-compact-nav--search">
-                                    <button type="button" className="ui-circle-btn" onClick={onBack} aria-label={t('common.back')}>
-                                        {iconBack}
-                                    </button>
-                                    {renderSearchField(true)}
-                                </div>
-                            ) : (
-                                <div className="rest-compact-nav">
-                                    <button type="button" className="ui-circle-btn" onClick={onBack} aria-label={t('common.back')}>
-                                        {iconBack}
-                                    </button>
-                                    <h2 className="rest-compact-title">{restaurant.name}</h2>
-                                    <div className="ric-actions-right">
-                                        <button type="button" className="ui-circle-btn" onClick={() => setIsSearchOpen(true)} aria-label="search">
-                                            {iconSearch}
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="ui-circle-btn"
-                                            onClick={() => onToggleFavorite && restaurantId && onToggleFavorite(restaurantId)}
-                                            aria-label="favorite"
-                                        >
-                                            {iconHeart}
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                            {renderCategoryNav('rest-compact-cats')}
-                        </div>
-                        <div className="rest-compact-side" aria-hidden="true" />
-                    </div>
-                </div>
-
                 <div className="rest-content-wrapper">
                     <div className="rest-main-column">
-                        <div className="rest-info-card">
-                            {isSearchOpen && !isScrolled ? (
-                                <div className="ric-actions-row">
-                                    <button type="button" className="ui-circle-btn" onClick={onBack} aria-label={t('common.back')}>
-                                        {iconBack}
-                                    </button>
-                                    {renderSearchField(true)}
-                                </div>
-                            ) : (
-                                <div className="ric-actions-row">
-                                    <button type="button" className="ui-circle-btn" onClick={onBack} aria-label={t('common.back')}>
-                                        {iconBack}
-                                    </button>
-                                    <div className="ric-actions-right">
-                                        <button type="button" className="ui-circle-btn" onClick={() => setIsSearchOpen(true)} aria-label="search">
-                                            {iconSearch}
+                        <div className="rest-header-block">
+                            <div className="rest-info-card" ref={infoCardRef}>
+                                {isSearchOpen && !isScrolled ? (
+                                    <div className="ric-actions-row">
+                                        <button type="button" className="ui-circle-btn" onClick={onBack} aria-label={t('common.back')}>
+                                            {iconBack}
                                         </button>
-                                        <button
-                                            type="button"
-                                            className="ui-circle-btn"
-                                            onClick={() => onToggleFavorite && restaurantId && onToggleFavorite(restaurantId)}
-                                            aria-label="favorite"
-                                        >
-                                            {iconHeart}
+                                        {renderSearchField(true)}
+                                    </div>
+                                ) : (
+                                    <div className="ric-actions-row">
+                                        <button type="button" className="ui-circle-btn" onClick={onBack} aria-label={t('common.back')}>
+                                            {iconBack}
                                         </button>
+                                        <div className="ric-actions-right">
+                                            <button type="button" className="ui-circle-btn" onClick={() => setIsSearchOpen(true)} aria-label="search">
+                                                {iconSearch}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="ui-circle-btn"
+                                                onClick={() => onToggleFavorite && restaurantId && onToggleFavorite(restaurantId)}
+                                                aria-label="favorite"
+                                            >
+                                                {iconHeart}
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
 
-                            <h1 className="ric-title">{restaurant.name}</h1>
+                                <h1 className="ric-title">{restaurantDisplayName}</h1>
+                                {closedBanner}
 
-                            <div className="ric-meta-row">
-                                <div className="ric-meta-item">
-                                    <img src="/Assets/звезда-removebg-preview 48.png" alt="" style={{ width: 29, height: 29, objectFit: 'contain', opacity: 0.8 }} />
-                                    <div className="ric-meta-text">
-                                        <span className="ric-meta-val">{restaurant.rating}</span>
-                                        <span className="ric-meta-sub">919 {t('restaurant.reviews_count')}</span>
+                                <div className="ric-meta-row">
+                                    <div className="ric-meta-item">
+                                        <img src="/Assets/звезда-removebg-preview 48.png" alt="" style={{ width: 29, height: 29, objectFit: 'contain', opacity: 0.8 }} />
+                                        <div className="ric-meta-text">
+                                            <span className="ric-meta-val">{restaurant.rating}</span>
+                                            <span className="ric-meta-sub">{getReviewsLabel(restaurant)} {t('restaurant.reviews_count')}</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="ric-meta-divider" />
-                                <div className="ric-meta-item">
-                                    <img src="/Assets/иконка_человек_2 пнг 32.png" alt="" style={{ width: 32, height: 32, objectFit: 'contain' }} />
-                                    <div className="ric-meta-text">
-                                        <span className="ric-meta-val">{restaurant.delivery || '20-30 мин'}</span>
-                                        <span className="ric-meta-sub">{t('restaurant.delivery')}</span>
+                                    <div className="ric-meta-divider" />
+                                    <div className="ric-meta-item">
+                                        <img src="/Assets/иконка_человек_2 пнг 32.png" alt="" style={{ width: 32, height: 32, objectFit: 'contain' }} />
+                                        <div className="ric-meta-text">
+                                            <span className="ric-meta-val">{restaurant.delivery || t('cart.time')}</span>
+                                            <span className="ric-meta-sub">{t('restaurant.delivery')}</span>
+                                        </div>
                                     </div>
+                                    <div className="ric-meta-divider" />
+                                    <button type="button" className="ric-dots-btn" onClick={() => setIsInfoModalOpen(true)} aria-label="info">
+                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" />
+                                        </svg>
+                                    </button>
                                 </div>
-                                <div className="ric-meta-divider" />
-                                <button type="button" className="ric-dots-btn" onClick={() => setIsInfoModalOpen(true)} aria-label="info">
-                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" />
-                                    </svg>
-                                </button>
                             </div>
+                        </div>
 
-                            {renderCategoryNav('rest-card-cats')}
+                        {/* One category nav only — sticks; title row appears after info card leaves.
+                            Must stay outside .rest-header-block: a sticky element cannot travel past its parent's box. */}
+                        <div className={`rest-sticky-chrome ${isScrolled ? 'is-compact' : ''}`}>
+                            <div className="rest-sticky-card">
+                                {isScrolled && (
+                                    isSearchOpen ? (
+                                        <div className="rest-sticky-title-row rest-sticky-title-row--search">
+                                            <button type="button" className="ui-circle-btn" onClick={onBack} aria-label={t('common.back')}>
+                                                {iconBack}
+                                            </button>
+                                            {renderSearchField(true)}
+                                        </div>
+                                    ) : (
+                                        <div className="rest-sticky-title-row">
+                                            <button type="button" className="ui-circle-btn" onClick={onBack} aria-label={t('common.back')}>
+                                                {iconBack}
+                                            </button>
+                                            <h2 className="rest-sticky-title">{restaurantDisplayName}</h2>
+                                            <div className="ric-actions-right">
+                                                <button type="button" className="ui-circle-btn" onClick={() => setIsSearchOpen(true)} aria-label="search">
+                                                    {iconSearch}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="ui-circle-btn"
+                                                    onClick={() => onToggleFavorite && restaurantId && onToggleFavorite(restaurantId)}
+                                                    aria-label="favorite"
+                                                >
+                                                    {iconHeart}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )
+                                )}
+                                {renderCategoryNav('rest-sticky-cats')}
+                            </div>
                         </div>
 
                         {desktopFilteredCategories.map((cat) => (
@@ -535,9 +585,9 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                 <div className="cw-items">
                                     {cart.map(item => (
                                         <div key={item.product.id} className="cw-item">
-                                            <img src={item.product.img || '/Assets/default-food.png'} className="cw-item-img" alt={item.product.name} />
+                                            <img src={resolveImageUrl(item.product.img || '') || '/Assets/default-food.png'} className="cw-item-img" alt={locName(item.product.name)} />
                                             <div className="cw-item-info">
-                                                <div className="cw-item-name">{item.product.name}</div>
+                                                <div className="cw-item-name">{locName(item.product.name)}</div>
                                                 <div className="cw-item-price-val">{item.product.price} ₾</div>
                                             </div>
                                             <div className="cw-item-counter">
@@ -556,7 +606,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                         {deliveryFee != null
                                             ? t('delivery.fee_with_eta')
                                                 .replace('{fee}', String(Math.round(deliveryFee)))
-                                                .replace('{eta}', deliveryLoc?.etaLabel || restaurant.delivery || '25–35 мин')
+                                                .replace('{eta}', deliveryLoc?.etaLabel || restaurant.delivery || t('cart.time'))
                                             : t('delivery.need_location')}
                                     </div>
                                     {restaurant.address && (
@@ -580,25 +630,33 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             <button type="button" className="pc-dish-modal-close ui-circle-btn" onClick={() => setSelectedProduct(null)}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
                             </button>
-                            <img src={selectedProduct.img || '/Assets/default-food.png'} alt={selectedProduct.name} className="pc-dish-modal-img" />
+                            <img src={resolveImageUrl(selectedProduct.img || '') || '/Assets/default-food.png'} alt={locName(selectedProduct.name)} className="pc-dish-modal-img" />
                             <div className="pc-dish-modal-body">
                                 <div className="pc-dish-modal-header">
-                                    <h2>{selectedProduct.name}</h2>
+                                    <h2>{locName(selectedProduct.name)}</h2>
                                     <span>{selectedProduct.price.toFixed(0)} ₾</span>
                                 </div>
-                                <p className="pc-dish-modal-desc">{selectedProduct.description || ''}</p>
+                                <p className="pc-dish-modal-desc">{locDesc(selectedProduct.description) || ''}</p>
                                 {(formatWeight(selectedProduct.weight) || formatCalories(selectedProduct.calories)) && (
                                     <div className="pc-dish-modal-meta">
                                         {formatWeight(selectedProduct.weight)}
                                         {formatWeight(selectedProduct.weight) && formatCalories(selectedProduct.calories) ? ' · ' : ''}
                                         {formatCalories(selectedProduct.calories)}
+                                        {getMinimumOrderQuantity(selectedProduct) > 1
+                                            ? ` · минимум ${getMinimumOrderQuantity(selectedProduct)} шт.`
+                                            : ''}
                                     </div>
                                 )}
                                 <button type="button" className="pc-dish-modal-add" onClick={(e) => {
                                     addToCartAnimated(selectedProduct, e.currentTarget);
                                     setSelectedProduct(null);
                                 }}>
-                                    {t('restaurant.add')} • {selectedProduct.price.toFixed(0)} ₾
+                                    {t('restaurant.add')}
+                                    {getMinimumOrderQuantity(selectedProduct) > 1
+                                        ? ` ${getMinimumOrderQuantity(selectedProduct)} шт.`
+                                        : ''}
+                                    {' • '}
+                                    {(selectedProduct.price * getMinimumOrderQuantity(selectedProduct)).toFixed(0)} ₾
                                 </button>
                             </div>
                         </div>
@@ -610,7 +668,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                         <div className="v2-info-sheet pc-info-sheet" onClick={(e) => e.stopPropagation()}>
                             <div className="v2-sheet-handle" onClick={() => setIsInfoModalOpen(false)} />
                             <div className="v2-sheet-content">
-                                <h2 className="v2-sheet-title">{restaurant.name}</h2>
+                                <h2 className="v2-sheet-title">{restaurantDisplayName}</h2>
                                 <div className="v2-sheet-section">
                                     <p className="v2-sheet-address">{restaurant.address || ''}</p>
                                 </div>
@@ -619,8 +677,8 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                 </div>
                                 <div className="v2-sheet-divider" />
                                 <div className="v2-sheet-legal">
-                                    <p>{t('restaurant.seller_info_legal').replace('{name}', restaurant.name)}</p>
-                                    <p>{t('restaurant.seller_info_hours')}</p>
+                                    <p>{t('restaurant.seller_info_legal').replace('{name}', restaurantDisplayName)}</p>
+                                    <p>{getHoursLabel(restaurant)}</p>
                                 </div>
                             </div>
                         </div>
@@ -635,7 +693,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     // Filter products when search is active
     const filteredProducts = mobileSearchQuery.trim()
         ? products.filter(p =>
-            p.name.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
+            matchesI18nContent(p.name, mobileSearchQuery) ||
             (p.category && p.category.toLowerCase().includes(mobileSearchQuery.toLowerCase()))
         )
         : products;
@@ -644,7 +702,10 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
         : mobileCategories;
     const filteredByCategory: Record<string, Product[]> = {};
     for (const cat of filteredCategories) {
-        filteredByCategory[cat] = filteredProducts.filter(p => p.category === cat);
+        filteredByCategory[cat] = sortProductsInCategory(
+            cat,
+            filteredProducts.filter(p => p.category === cat),
+        );
     }
 
     return (
@@ -663,7 +724,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             <input
                                 className="v2-search-input"
                                 type="text"
-                                placeholder={t('restaurant.search_placeholder').replace('{name}', restaurant.name)}
+                                placeholder={t('restaurant.search_placeholder').replace('{name}', restaurantDisplayName)}
                                 value={mobileSearchQuery}
                                 onChange={(e) => setMobileSearchQuery(e.target.value)}
                                 autoFocus={isScrolled}
@@ -686,7 +747,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                         </button>
                         <div className="v2-compact-title-wrapper">
                             <h2 className="v2-compact-title">
-                                {restaurant.name.toLowerCase().includes('sunset') ? 'Sunset' : (restaurant.name.length > 18 ? restaurant.name.substring(0, 16) + '...' : restaurant.name)}
+                                {restaurantDisplayName.toLowerCase().includes('sunset') ? 'Sunset' : (restaurantDisplayName.length > 18 ? restaurantDisplayName.substring(0, 16) + '...' : restaurantDisplayName)}
                             </h2>
                         </div>
                         <div className="v2-compact-nav-right">
@@ -732,7 +793,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             <input
                                 className="v2-search-input"
                                 type="text"
-                                placeholder={t('restaurant.search_placeholder').replace('{name}', restaurant.name)}
+                                placeholder={t('restaurant.search_placeholder').replace('{name}', restaurantDisplayName)}
                                 value={mobileSearchQuery}
                                 onChange={(e) => setMobileSearchQuery(e.target.value)}
                                 autoFocus={!isScrolled}
@@ -771,7 +832,8 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
 
                 {/* Restaurant info always stays visible */}
                 <div className="v2-title-section">
-                    <h1 className="v2-header-title">{restaurant.name}</h1>
+                    <h1 className="v2-header-title">{restaurantDisplayName}</h1>
+                    {closedBanner}
                 </div>
 
                 <div className="v2-meta-row">
@@ -783,7 +845,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                         />
                         <div className="v2-meta-text">
                             <span className="v2-meta-val" style={{ color: '#21EA7C' }}>{restaurant.rating}</span>
-                            <span className="v2-meta-sub">919 {t('restaurant.reviews_count')}</span>
+                            <span className="v2-meta-sub">{getReviewsLabel(restaurant)} {t('restaurant.reviews_count')}</span>
                         </div>
                     </div>
                     <div className="v2-meta-divider" />
@@ -794,7 +856,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             style={{ width: '32px', height: '32px', objectFit: 'contain' }}
                         />
                         <div className="v2-meta-text">
-                            <span className="v2-meta-val" style={{ color: '#21EA7C' }}>{restaurant.delivery || '20-30 мин'}</span>
+                            <span className="v2-meta-val" style={{ color: '#21EA7C' }}>{restaurant.delivery || t('cart.time')}</span>
                             <span className="v2-meta-sub">{t('restaurant.delivery')}</span>
                         </div>
                     </div>
@@ -814,25 +876,25 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                         <div className="v2-sheet-handle" onClick={() => setIsInfoModalOpen(false)} />
 
                         <div className="v2-sheet-content">
-                            <h2 className="v2-sheet-title">{restaurant.name}</h2>
+                            <h2 className="v2-sheet-title">{restaurantDisplayName}</h2>
 
                             <div className="v2-sheet-section">
                                 <p className="v2-sheet-address">
-                                    {restaurant.address || 'Грузия, Тбилиси, проспект Александра Казбеги, 25'}
+                                    {restaurant.address || t('restaurant.address_fallback')}
                                 </p>
                             </div>
 
                             <div className="v2-sheet-section">
                                 <p className="v2-sheet-tags">
-                                    {restaurant.category || 'Грузинская кухня • Горячие блюда • Выпечка'} • $$$
+                                    {restaurant.category || t('restaurant.category_fallback')} • $$$
                                 </p>
                             </div>
 
                             <div className="v2-sheet-divider" />
 
                             <div className="v2-sheet-legal">
-                                <p>{t('restaurant.seller_info_legal').replace('{name}', restaurant.name)}</p>
-                                <p>{t('restaurant.seller_info_hours')}</p>
+                                <p>{t('restaurant.seller_info_legal').replace('{name}', restaurantDisplayName)}</p>
+                                <p>{getHoursLabel(restaurant)}</p>
                             </div>
                         </div>
                     </div>
@@ -872,7 +934,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                         return (
                                             <div key={product.id} className="dish-card" onClick={() => setSelectedProduct(product)}>
                                                 <div className="dish-photo">
-                                                    <img src={product.img || '/Assets/default-food.png'} alt={product.name} />
+                                                    <img src={resolveImageUrl(product.img || '') || '/Assets/default-food.png'} alt={locName(product.name)} />
                                                     <div className="dish-controls">
                                                         <div className={`quantity-counter ${count === 0 ? 'collapsed' : ''}`}>
                                                             <button
@@ -897,7 +959,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
 
                                                 <div className="dish-text">
                                                     <div className="dish-price">{product.price.toFixed(2)} GEL</div>
-                                                    <div className="dish-title">{product.name}</div>
+                                                    <div className="dish-title">{locName(product.name)}</div>
                                                     <div className="dish-meta">
                                                         {formatWeight(product.weight) && <span>{formatWeight(product.weight)}</span>}
                                                         {formatWeight(product.weight) && formatCalories(product.calories) && <span style={{ margin: '0 4px' }}>·</span>}
@@ -918,7 +980,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                 <div className="dish-modal-overlay" onClick={() => setSelectedProduct(null)}>
                     <div className="dish-modal-content" onClick={e => e.stopPropagation()}>
                         <div className="modal-top">
-                            <img src={selectedProduct.img || '/Assets/default-food.png'} alt={selectedProduct.name} className="modal-hero-img" />
+                            <img src={resolveImageUrl(selectedProduct.img || '') || '/Assets/default-food.png'} alt={locName(selectedProduct.name)} className="modal-hero-img" />
                             <button className="modal-close-btn" onClick={() => setSelectedProduct(null)}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -927,7 +989,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                         </div>
 
                         <div className="modal-body">
-                            <p className="modal-description">{selectedProduct.description || ''}</p>
+                            <p className="modal-description">{locDesc(selectedProduct.description) || ''}</p>
 
                             <div className="kbju-section-v2">
                                 <h3 className="section-label-v3">{t('restaurant.kbju')}</h3>
@@ -955,8 +1017,11 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                         <div className="modal-footer-v3">
                             <div className="footer-info-row">
                                 <h2 className="footer-dish-name">
-                                    {selectedProduct.name}
+                                    {locName(selectedProduct.name)}
                                     {formatWeight(selectedProduct.weight) && <span className="footer-dish-weight">{formatWeight(selectedProduct.weight)}</span>}
+                                    {getMinimumOrderQuantity(selectedProduct) > 1 && (
+                                        <span className="footer-dish-weight">мин. {getMinimumOrderQuantity(selectedProduct)} шт.</span>
+                                    )}
                                 </h2>
                                 <span className="footer-dish-price">{selectedProduct.price.toFixed(0)} GEL</span>
                             </div>
@@ -966,9 +1031,11 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                     <button
                                         className="modal-qty-btn"
                                         onClick={() => onUpdateQuantity && onUpdateQuantity(selectedProduct.id, -1)}
-                                        disabled={getQuantity(selectedProduct.id) <= 1}
+                                        disabled={getQuantity(selectedProduct.id) === 0}
                                     >−</button>
-                                    <span className="modal-qty-val">{getQuantity(selectedProduct.id) || 1}</span>
+                                    <span className="modal-qty-val">
+                                        {getQuantity(selectedProduct.id) || getMinimumOrderQuantity(selectedProduct)}
+                                    </span>
                                     <button
                                         className="modal-qty-btn"
                                         onClick={() => {

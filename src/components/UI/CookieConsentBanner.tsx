@@ -107,7 +107,7 @@ const CookieConsentBanner: React.FC = () => {
                 }}>
                     {l.text}{' '}
                     <Link
-                        to="/legal#privacy"
+                        to={`/${language}/privacy`}
                         style={{ color: '#21EA7C', textDecoration: 'none', fontWeight: 600 }}
                         onClick={handleAccept}
                     >

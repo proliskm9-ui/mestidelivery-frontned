@@ -1,5 +1,12 @@
+# Dependencies & Build
 node_modules/
 dist/
+dist.rar
+Frontend.rar
+*.rar
+*.zip
+
+# Environment & Config
 .env*
 !.env.example
 !.env.localhost
@@ -8,3 +15,39 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .DS_Store
+*.pyc
+__pycache__/
+*.bak*
+*.mjs
+.claude/
+.cursor/
+
+# Large temporary generation directories & photo archives
+Assets/
+hero-frames/
+BBQ Garden/
+BURGERS/
+Sunset restaraunt/
+Luizastan/
+courier_bot/
+scratch/
+deps/
+static/
+scripts/menu_photos/
+scripts/__pycache__/
+server/__pycache__/
+
+# One-off / debug scripts and intermediate dumps
+scripts/_*
+_*.py
+build_*.py
+render_*.py
+clean_*.py
+composite_*.py
+dump_*.py
+get_*.py
+read_*.py
+test_*.py
+_*.txt
+_*.json
+*.log

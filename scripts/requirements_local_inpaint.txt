@@ -1,0 +1,17 @@
+# Local low-VRAM SD1.5 inpainting for scripts/sunset_v3_hot_batch.py
+#
+# CRITICAL: CUDA wheels require Python 3.10–3.12. Python 3.14 gets CPU-only torch.
+# This machine has Python 3.12 — use that for generate.
+#
+# PowerShell:
+#   pip uninstall -y torch torchvision torchaudio xformers
+#   py -3.12 -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+#   py -3.12 -m pip install -r scripts/requirements_local_inpaint.txt
+#   py -3.12 -m pip install xformers
+#   py -3.12 -c "import torch; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+#   py -3.12 scripts/sunset_v3_hot_batch.py generate --force
+
+diffusers>=0.27.0
+transformers>=4.38.0
+accelerate>=0.27.0
+safetensors>=0.4.0

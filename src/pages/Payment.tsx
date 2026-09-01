@@ -6,9 +6,10 @@ import { api, restaurantCache } from '../services/api';
 import IsometricBoxLoader from '../components/UI/IsometricBoxLoader';
 import { useLanguage } from '../translations/LanguageContext';
 import { formatCheckoutAddress, formatCourierComment } from '../utils/checkoutAddress';
+import { ENABLE_CRYPTO_PAY } from '../config/features';
 
 /** Keepz payment link — same as mobile (no Tribute). */
-const PAYMENT_URL = 'https://tiny.keepz.me/5ab2hxer';
+const PAYMENT_URL = 'https://app.keepz.me/pay?qrType=DEFAULT&receiverType=USER&receiverId=6ea6970c-20ee-4119-b25f-6ebcc8a888c6';
 
 const IconBack = () => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -53,7 +54,6 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
     const [screen, setScreen] = useState<ScreenState>('select');
     const [method, setMethod] = useState<string | null>(null);
     const [orderId, setOrderId] = useState<number | null>(null);
-    const [paymentLinkOpened, setPaymentLinkOpened] = useState(false);
 
     const orderCreatedRef = useRef(false);
     const shellRef = useRef<HTMLDivElement>(null);
@@ -180,8 +180,11 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
         if (orderCreatedRef.current) return;
         orderCreatedRef.current = true;
 
+        // Synchronously open payment URL immediately on click so Safari/Chrome never blocks it
+        openPaymentUrl(PAYMENT_URL);
+
         setMethod('card');
-        setScreen('creating');
+        setScreen('pending_confirmation');
 
         try {
             const isScheduled = orderData?.deliveryType === 'scheduled' && orderData?.scheduledTime;
@@ -211,12 +214,6 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
             }
 
             setScreen('pending_confirmation');
-            await new Promise(r => setTimeout(r, 3000));
-            try {
-                onPaymentComplete('card', result.id);
-            } catch (navError) {
-                console.error('Order created but post-success navigation failed', navError);
-            }
         } catch (e: any) {
             console.error('Order creation error:', e);
             alert(t('common.error') + ': ' + (e.message || t('checkout.order_failed')));
@@ -278,6 +275,34 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
                                     {orderId && (
                                         <div className="pc-order-badge">{t('common.order').toUpperCase()} #{orderId}</div>
                                     )}
+                                    {method !== 'cash' && orderId && (
+                                        <div className="pc-pending-actions">
+                                            <button
+                                                type="button"
+                                                className="pc-btn-view-order"
+                                                onClick={() => onPaymentComplete('card', orderId)}
+                                            >
+                                                <span>{t('checkout.view_order') || 'Посмотреть заказ'}</span>
+                                                <div className="pc-btn-arrow">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                                        <polyline points="12 5 19 12 12 19" />
+                                                    </svg>
+                                                </div>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="pc-btn-reopen-link"
+                                                onClick={() => openPaymentUrl(PAYMENT_URL)}
+                                            >
+                                                <span>{t('checkout.open_payment_page')}</span>
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M7 17L17 7" />
+                                                    <path d="M8 7h9v9" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    )}
                                 </>
                             )}
 
@@ -320,62 +345,38 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
                                     <h2 className="pc-amount-value">{totalAmount.toFixed(2)} ₾</h2>
                                 </div>
 
-                                {!paymentLinkOpened ? (
-                                    <button
-                                        type="button"
-                                        className="pc-pay-btn primary"
-                                        onClick={() => {
-                                            openPaymentUrl(PAYMENT_URL);
-                                            setPaymentLinkOpened(true);
-                                        }}
-                                    >
-                                        {t('checkout.pay_online')}
-                                    </button>
-                                ) : (
-                                    <div className="pc-pay-actions">
-                                        <button type="button" className="pc-pay-btn primary confirmed" onClick={handleConfirmPaid}>
-                                            <svg className="pc-pay-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                                                <polyline points="20 6 9 17 4 12" />
-                                            </svg>
-                                            {t('checkout.i_paid')}
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="pc-pay-btn secondary"
-                                            onClick={() => openPaymentUrl(PAYMENT_URL)}
-                                        >
-                                            {t('checkout.open_payment_page')}
-                                            <svg className="pc-pay-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                                                <path d="M7 17L17 7" />
-                                                <path d="M8 7h9v9" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                )}
+                                <button
+                                    type="button"
+                                    className="pc-pay-btn primary"
+                                    onClick={handleConfirmPaid}
+                                >
+                                    {t('checkout.pay_online')}
+                                </button>
 
                                 <div className="pc-pay-separator">
                                     <span>{t('checkout.or_other_methods')}</span>
                                 </div>
 
-                                <button
-                                    type="button"
-                                    className="pc-method-row"
-                                    onClick={() => {
-                                        openPaymentUrl(PAYMENT_URL);
-                                        setPaymentLinkOpened(true);
-                                    }}
-                                >
-                                    <div className="pc-method-icon crypto"><IconCrypto /></div>
-                                    <div className="pc-method-info">
-                                        <span className="pc-method-name">{t('checkout.crypto')}</span>
-                                        <span className="pc-method-desc">Crypto Pay (USDT, TON)</span>
-                                    </div>
-                                    <span className="pc-method-arrow">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <polyline points="9 18 15 12 9 6" />
-                                        </svg>
-                                    </span>
-                                </button>
+                                {ENABLE_CRYPTO_PAY ? (
+                                    <button
+                                        type="button"
+                                        className="pc-method-row"
+                                        onClick={() => {
+                                            handleConfirmPaid();
+                                        }}
+                                    >
+                                        <div className="pc-method-icon crypto"><IconCrypto /></div>
+                                        <div className="pc-method-info">
+                                            <span className="pc-method-name">{t('checkout.crypto')}</span>
+                                            <span className="pc-method-desc">Crypto Pay (USDT, TON)</span>
+                                        </div>
+                                        <span className="pc-method-arrow">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <polyline points="9 18 15 12 9 6" />
+                                            </svg>
+                                        </span>
+                                    </button>
+                                ) : null}
 
                                 <button type="button" className="pc-method-row" onClick={handleCashSelect}>
                                     <div className="pc-method-icon cash"><IconCash /></div>

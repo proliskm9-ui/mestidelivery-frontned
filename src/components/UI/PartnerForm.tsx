@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './PartnerForm.css';
+import { useLanguage } from '../../translations/LanguageContext';
 
 interface PartnerFormProps {
     type: 'restaurant' | 'courier';
@@ -7,6 +8,7 @@ interface PartnerFormProps {
 }
 
 const PartnerForm: React.FC<PartnerFormProps> = ({ type, onClose }) => {
+    const { t } = useLanguage();
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
@@ -45,7 +47,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ type, onClose }) => {
 
             if (!response.ok) {
                 const detail = data?.detail ?? data?.error ?? data?.message;
-                let message = 'Ошибка отправки заявки';
+                let message = t('partner.form.error_submit');
                 if (typeof detail === 'string' && detail.trim()) {
                     message = detail;
                 } else if (Array.isArray(detail) && detail.length > 0) {
@@ -59,7 +61,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ type, onClose }) => {
 
             setSuccess(true);
         } catch (err: any) {
-            setError(err.message || 'Произошла ошибка. Попробуйте позже.');
+            setError(err.message || t('partner.form.error_generic'));
         } finally {
             setLoading(false);
         }
@@ -87,12 +89,12 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ type, onClose }) => {
                                 <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                         </div>
-                        <h2 className="partner-success-title">Заявка принята!</h2>
+                        <h2 className="partner-success-title">{t('partner.form.success_title')}</h2>
                         <p className="partner-success-text">
-                            Наш менеджер свяжется с вами в ближайшее время для уточнения деталей.
+                            {t('partner.form.success_text')}
                         </p>
                         <button type="button" className="partner-success-btn" onClick={onClose}>
-                            Закрыть
+                            {t('partner.form.close')}
                         </button>
                     </div>
                 </div>
@@ -108,7 +110,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ type, onClose }) => {
                     type="button"
                     className="partner-form-close"
                     onClick={onClose}
-                    aria-label="Close"
+                    aria-label={t('partner.form.close')}
                 >
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M18 6L6 18M6 6l12 12" />
@@ -117,38 +119,38 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ type, onClose }) => {
                 
                 <div className="form-head">
                     <div className="form-badge">
-                        {type === 'restaurant' ? 'ПАРТНЁРСТВО' : 'КУРЬЕРАМ'}
+                        {type === 'restaurant' ? t('partner.form.badge_restaurant') : t('partner.form.badge_courier')}
                     </div>
                     <h1>
                         {type === 'restaurant'
-                            ? 'Разместите ваш ресторан'
-                            : 'Станьте курьером MestiDelivery'}
+                            ? t('partner.form.title_restaurant')
+                            : t('partner.form.title_courier')}
                     </h1>
                     <p>
                         {type === 'restaurant'
-                            ? 'MestiDelivery объединяет все рестораны Местии в одном приложении. Разместите меню — и станьте видны каждому, кто ищет, где заказать еду в городе.'
-                            : 'Доставляйте заказы в свободное время и получайте выплаты, когда удобно вам.'}
+                            ? t('partner.form.desc_restaurant')
+                            : t('partner.form.desc_courier')}
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="premium-form">
                     <div className="input-row">
                         <div className="premium-input-group">
-                            <label>Как вас зовут?</label>
+                            <label>{t('partner.form.name_label')}</label>
                             <input
                                 type="text"
                                 name="name"
                                 value={formData.name}
                                 onChange={handleChange}
                                 required
-                                placeholder="Имя Фамилия"
+                                placeholder={t('partner.form.name_ph')}
                             />
                         </div>
                     </div>
 
                     <div className="input-row side-by-side">
                         <div className="premium-input-group">
-                            <label>Телефон для связи</label>
+                            <label>{t('partner.form.phone_label')}</label>
                             <input
                                 type="tel"
                                 name="phone"
@@ -159,7 +161,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ type, onClose }) => {
                             />
                         </div>
                         <div className="premium-input-group">
-                            <label>Ваш Email (необяз.)</label>
+                            <label>{t('partner.form.email_label')}</label>
                             <input
                                 type="email"
                                 name="email"
@@ -174,14 +176,14 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ type, onClose }) => {
                     {type === 'restaurant' && (
                         <div className="input-row">
                             <div className="premium-input-group">
-                                <label>Название заведения</label>
+                                <label>{t('partner.form.company_label')}</label>
                                 <input
                                     type="text"
                                     name="company_name"
                                     value={formData.company_name}
                                     onChange={handleChange}
                                     required
-                                    placeholder="Напр. Cafe Laila"
+                                    placeholder={t('partner.form.company_ph')}
                                 />
                             </div>
                         </div>
@@ -189,15 +191,15 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ type, onClose }) => {
 
                     <div className="input-row">
                         <div className="premium-input-group">
-                            <label>Дополнительно</label>
+                            <label>{t('partner.form.extra_label')}</label>
                             <textarea
                                 name="message"
                                 value={formData.message}
                                 onChange={handleChange}
                                 rows={3}
-                                placeholder={type === 'restaurant' 
-                                    ? 'Адрес заведения, кухня, пожелания...'
-                                    : 'Наличие транспорта, удобное время для работы...'}
+                                placeholder={type === 'restaurant'
+                                    ? t('partner.form.extra_ph_restaurant')
+                                    : t('partner.form.extra_ph_courier')}
                             />
                         </div>
                     </div>
@@ -214,11 +216,11 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ type, onClose }) => {
                         className={`premium-submit-btn${isFormReady ? ' is-ready' : ''}`}
                         disabled={loading || !isFormReady}
                     >
-                        {loading ? 'Отправляем данные...' : 'Отправить заявку'}
+                        {loading ? t('partner.form.submitting') : t('partner.form.submit')}
                     </button>
                     
                     <p className="form-footer-note">
-                        Нажимая на кнопку, вы соглашаетесь с условиями оферты и политикой конфиденциальности.
+                        {t('partner.form.terms')}
                     </p>
                 </form>
             </div>

@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import './Checkout.css';
 import './MobileCheckout.css';
 import { useLanguage } from '../translations/LanguageContext';
+import { api } from '../services/api';
 import { getDeliveryFeeForAddress } from '../utils/deliveryCalculator';
+import {
+    closedBadgeText,
+    generateRestaurantSlots,
+    isRestaurantOpenNow,
+} from '../utils/workingHours';
 import TimeModal from '../Оплата/modals/TimeModal/TimeModal';
 import PlaceTypeModal from '../Оплата/modals/PlaceTypeModal/PlaceTypeModal';
 import MapModal from '../Оплата/modals/MapModal/MapModal';
@@ -47,12 +53,42 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
     onBack, totalAmount: _totalAmount, onOrderPlaced, initialAddress, restaurantId,
     cartItems, comment: restaurantComment, cutleryCount
 }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [deliveryType, setDeliveryType] = useState<'standard' | 'scheduled'>('standard');
     const [isTimeModalOpen, setTimeModalOpen] = useState(false);
     const [isPlaceModalOpen, setPlaceModalOpen] = useState(false);
     const [isMapModalOpen, setMapModalOpen] = useState(false);
     const [scheduledTime, setScheduledTime] = useState<string | null>(null);
+    const [workingHours, setWorkingHours] = useState<string>('');
+
+    const rid = restaurantId || cartItems?.[0]?.product?.restaurant_id || null;
+
+    useEffect(() => {
+        if (!rid) return;
+        let cancelled = false;
+        api.getRestaurant(String(rid))
+            .then((r) => {
+                if (cancelled || !r) return;
+                const hours = r.working_hours || '';
+                setWorkingHours(hours);
+                if (!isRestaurantOpenNow(hours)) {
+                    setDeliveryType('scheduled');
+                    const slots = generateRestaurantSlots(hours);
+                    if (slots[0]) setScheduledTime(slots[0].value);
+                }
+            })
+            .catch(() => { /* ignore */ });
+        return () => { cancelled = true; };
+    }, [rid]);
+
+    const restaurantOpen = useMemo(() => isRestaurantOpenNow(workingHours), [workingHours]);
+    const closedHint = useMemo(() => closedBadgeText(workingHours, language), [workingHours, language]);
+
+    const scheduledDisplay = useMemo(() => {
+        if (!scheduledTime) return null;
+        const slots = generateRestaurantSlots(workingHours);
+        return slots.find((s) => s.value === scheduledTime)?.label || scheduledTime;
+    }, [scheduledTime, workingHours]);
 
     const savedAddressRaw = localStorage.getItem('user_address');
     const savedAddress = savedAddressRaw ? (() => { try { return JSON.parse(savedAddressRaw) } catch { return null } })() : null;
@@ -81,6 +117,15 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
 
         if (!hasLocation || !address.phone?.trim()) {
             alert(t('checkout.fill_alert'));
+            return;
+        }
+
+        if (!restaurantOpen && deliveryType !== 'scheduled') {
+            alert(closedHint || 'Ресторан закрыт. Выберите доставку ко времени.');
+            return;
+        }
+        if (deliveryType === 'scheduled' && !scheduledTime) {
+            alert('Выберите время доставки');
             return;
         }
 
@@ -113,11 +158,12 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                 isOpen={isTimeModalOpen}
                 onClose={() => setTimeModalOpen(false)}
                 currentTime={scheduledTime}
+                workingHours={workingHours}
                 onSelect={(time) => {
                     if (time) {
                         setScheduledTime(time);
                         setDeliveryType('scheduled');
-                    } else {
+                    } else if (restaurantOpen) {
                         setScheduledTime(null);
                         setDeliveryType('standard');
                     }
@@ -166,13 +212,24 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                             {/* 1. Delivery Section */}
                             <div className="premium-card">
                                 <h3 className="card-title">
-                                    {scheduledTime ? `${t('checkout.time')}: ${scheduledTime}` : t('checkout.time')}
+                                    {scheduledDisplay ? `${t('checkout.time')}: ${scheduledDisplay}` : t('checkout.time')}
                                 </h3>
+                                {!restaurantOpen && closedHint && (
+                                    <p style={{ margin: '0 0 12px', color: '#f87171', fontSize: 14, fontWeight: 600 }}>
+                                        {closedHint}. Сейчас оформить нельзя — выберите время на открытие.
+                                    </p>
+                                )}
                                 <div className="delivery-options">
                                     <button
                                         type="button"
                                         className={`option-btn ${deliveryType === 'standard' ? 'active' : ''}`}
-                                        onClick={() => { setDeliveryType('standard'); setScheduledTime(null); }}
+                                        disabled={!restaurantOpen}
+                                        onClick={() => {
+                                            if (!restaurantOpen) return;
+                                            setDeliveryType('standard');
+                                            setScheduledTime(null);
+                                        }}
+                                        style={!restaurantOpen ? { opacity: 0.45, cursor: 'not-allowed' } : undefined}
                                     >
                                         <span className="title">{t('checkout.standard')}</span>
                                         <span className="subtitle">
@@ -186,7 +243,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                                     >
                                         <span className="title">{t('checkout.scheduled')}</span>
                                         <span className="subtitle">
-                                            {scheduledTime || t('checkout.scheduled_desc')}
+                                            {scheduledDisplay || t('checkout.scheduled_desc')}
                                         </span>
                                     </button>
                                 </div>
@@ -216,14 +273,14 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                                     >
                                         <span className="saved-address-chip-icon"><IconMapPin /></span>
                                         <span className="saved-address-chip-text">
-                                            <strong>Использовать сохраненные данные</strong>
+                                            <strong>{t('checkout.use_saved')}</strong>
                                             <small>
                                                 {savedAddress?.street ? `${savedAddress.street}, ${savedAddress.house || ''}` : ''}
                                                 {savedAddress?.street && savedPhone ? ' • ' : ''}
                                                 {savedPhone}
                                             </small>
                                         </span>
-                                        <span className="saved-address-chip-action">Применить</span>
+                                        <span className="saved-address-chip-action">{t('menu.apply')}</span>
                                     </button>
                                 )}
 

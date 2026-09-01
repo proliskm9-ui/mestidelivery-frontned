@@ -1,6 +1,7 @@
 import React from 'react';
 import './PaymentBlock.css';
 import { useLanguage } from '../../../translations/LanguageContext';
+import { ENABLE_CRYPTO_PAY } from '../../../config/features';
 
 import cashGreenIcon from '../../assets/banknote1.png';
 import cashGrayIcon from '../../assets/banknote2.png';
@@ -62,28 +63,29 @@ const PaymentBlock: React.FC<PaymentBlockProps> = ({
             </div>
           </button>
 
-          {/* Кнопка Карта EU (Дубликат) */}
-          <button
-            type="button"
-            className={`payment-btn ${paymentMethod === 'card-eu' ? 'active' : ''}`}
-            onClick={() => setPaymentMethod('card-eu')}
-          >
-            <div className="payment-btn-icon-crypto">
-              <img
-                src="/Assets/cryptowallet_icon.png"
-                alt="Crypto"
-                style={{
-                  filter: paymentMethod === 'card-eu' ? 'none' : 'grayscale(1) brightness(0.7)'
-                }}
-              />
-            </div>
-            <div className="payment-btn-bottom">
-              <span className="payment-btn-text">{t('checkout.crypto')}</span>
-              <div className="payment-btn-logo">
-                <img src="/Assets/apple-touch-icon.png" alt="Card" />
+          {ENABLE_CRYPTO_PAY ? (
+            <button
+              type="button"
+              className={`payment-btn ${paymentMethod === 'card-eu' ? 'active' : ''}`}
+              onClick={() => setPaymentMethod('card-eu')}
+            >
+              <div className="payment-btn-icon-crypto">
+                <img
+                  src="/Assets/cryptowallet_icon.png"
+                  alt="Crypto"
+                  style={{
+                    filter: paymentMethod === 'card-eu' ? 'none' : 'grayscale(1) brightness(0.7)'
+                  }}
+                />
               </div>
-            </div>
-          </button>
+              <div className="payment-btn-bottom">
+                <span className="payment-btn-text">{t('checkout.crypto')}</span>
+                <div className="payment-btn-logo">
+                  <img src="/Assets/apple-touch-icon.png" alt="Card" />
+                </div>
+              </div>
+            </button>
+          ) : null}
         </div>
 
         {/* Строка Промокоды */}

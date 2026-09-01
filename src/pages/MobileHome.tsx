@@ -18,7 +18,7 @@ const MobileHome: React.FC<{ onNavigate: (page: string) => void }> = ({ onNaviga
     ];
 
     const currentLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0];
-    const registerText = language === 'ru' ? 'Зарегистрироваться' : language === 'ka' ? 'რეგისტრაცია' : 'Register';
+    const registerText = t('auth.register');
     const supportText = t('profile.support') || 'Поддержка';
 
     const openPartnerForm = (type: 'restaurant' | 'courier') => {

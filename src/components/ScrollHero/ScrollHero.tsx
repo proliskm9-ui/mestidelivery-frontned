@@ -4,8 +4,8 @@ import { useLanguage } from '../../translations/LanguageContext';
 
 const FRAME_COUNT = 240;
 const PAD = 4;
-const POSTER = '/hero-frames/poster.webp?v=wm6';
-const FRAME_VERSION = 'wm6';
+const POSTER = '/hero-frames/poster.webp?v=wm7';
+const FRAME_VERSION = 'wm7';
 
 // Chapter definitions — title appears left or right as frames progress
 const CHAPTERS = [

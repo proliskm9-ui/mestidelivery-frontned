@@ -1,3 +1,4 @@
+
 /* Restaurant.css — Desktop + shared tokens (mobile styles live in MobileRestaurant.css) */
 :root {
     --bg-dark: var(--bg);
@@ -97,13 +98,14 @@ body:has(.desktop-restaurant)::-webkit-scrollbar {
     flex-shrink: 0;
 }
 
-/* Info card — full header, scrolls away */
+/* Info card — title/meta; categories live in sticky chrome below */
 .rest-info-card {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: 28px;
-    padding: 12px 20px 20px;
-    margin-bottom: 24px;
+    border-radius: 28px 28px 0 0;
+    border-bottom: none;
+    padding: 12px 20px 16px;
+    margin-bottom: 0;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 }
@@ -134,6 +136,36 @@ body:has(.desktop-restaurant)::-webkit-scrollbar {
     letter-spacing: -0.4px;
     line-height: 1.15;
     text-transform: uppercase;
+}
+
+.rest-closed-banner {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(248, 113, 113, 0.12);
+    border: 1px solid rgba(248, 113, 113, 0.35);
+    color: #fecaca;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+    transform: none;
+    position: relative;
+    z-index: 1;
+}
+
+.rest-closed-banner strong {
+    font-weight: 800;
+    color: #fecaca;
+}
+
+.rest-closed-banner span {
+    font-weight: 500;
+    color: rgba(254, 202, 202, 0.9);
 }
 
 .ric-meta-row {
@@ -188,16 +220,18 @@ body:has(.desktop-restaurant)::-webkit-scrollbar {
 }
 
 /* Categories — left gap to card edge = bottom gap (20px) */
-.rest-card-cats {
+.rest-card-cats,
+.rest-sticky-cats {
     display: flex;
     gap: 6px;
     overflow-x: auto;
     scrollbar-width: none;
-    margin: 28px 0 0;
+    margin: 0;
     padding: 0;
 }
 
-.rest-card-cats::-webkit-scrollbar { display: none; }
+.rest-card-cats::-webkit-scrollbar,
+.rest-sticky-cats::-webkit-scrollbar { display: none; }
 
 .mn-item {
     appearance: none;
@@ -215,7 +249,8 @@ body:has(.desktop-restaurant)::-webkit-scrollbar {
     transition: color 0.2s, background 0.2s;
 }
 
-.rest-card-cats .mn-item:first-child {
+.rest-card-cats .mn-item:first-child,
+.rest-sticky-cats .mn-item:first-child {
     padding-left: 0;
 }
 
@@ -242,69 +277,74 @@ body:has(.desktop-restaurant)::-webkit-scrollbar {
     border-radius: 2px;
 }
 
-.rest-card-cats .mn-item:first-child.active::after {
+.rest-card-cats .mn-item:first-child.active::after,
+.rest-sticky-cats .mn-item:first-child.active::after {
     left: -1px;
 }
 
-/* Compact sticky header on scroll */
-.rest-compact-header {
-    position: fixed;
-    top: 0;
+/* Header = info card + single sticky category chrome (no duplicate nav) */
+.rest-header-block {
+    margin-bottom: 0;
+}
+
+/* Sibling of the info card, not its child — sticky can never leave its parent's box.
+   top matches .cart-widget so both stick to the same line. Carries no backdrop-filter
+   of its own: that would clip the band drawn above it. */
+.rest-sticky-chrome {
+    position: sticky;
+    top: 24px;
+    z-index: 40;
+    margin-bottom: 24px;
+}
+
+/* Hides menu cards in the gap between the window edge and the stuck card.
+   1px of it tucks under the card so no hairline seam shows. */
+.rest-sticky-chrome.is-compact::before {
+    content: '';
+    position: absolute;
     left: 0;
     right: 0;
-    z-index: 80;
-    transform: translateY(-110%);
-    opacity: 0;
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
-    pointer-events: none;
+    bottom: calc(100% - 1px);
+    height: 25px;
+    background: var(--bg-dark, #151514);
 }
 
-.rest-compact-header.visible {
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: auto;
+.rest-sticky-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-top: none;
+    border-radius: 0 0 28px 28px;
+    padding: 4px 20px 14px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
-.rest-compact-inner {
-    max-width: 1420px;
-    margin: 0 auto;
-    padding: 24px 32px 0;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 360px;
-    gap: 28px;
-    box-sizing: border-box;
-    width: 100%;
-}
-
-.rest-compact-main {
-    min-width: 0;
+/* Detached from the info card — proportions of the original compact header */
+.rest-sticky-chrome.is-compact .rest-sticky-card {
     background: rgba(21, 21, 20, 0.88);
-    backdrop-filter: blur(22px) saturate(160%);
-    -webkit-backdrop-filter: blur(22px) saturate(160%);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 22px;
     padding: 10px 14px 8px;
-    margin-bottom: 10px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
 }
 
-.rest-compact-side {
-    min-width: 0;
-}
-
-.rest-compact-nav {
+.rest-sticky-title-row {
     display: flex;
     align-items: center;
     gap: 12px;
     min-height: 44px;
+    margin-bottom: 6px;
     position: relative;
 }
 
-.rest-compact-nav--search {
-    gap: 10px;
+.rest-sticky-title-row--search {
+    margin-bottom: 8px;
 }
 
-.rest-compact-title {
+/* Absolute so it centers against the card, not against the button rows */
+.rest-sticky-title {
     position: absolute;
     left: 56px;
     right: 108px;
@@ -320,39 +360,35 @@ body:has(.desktop-restaurant)::-webkit-scrollbar {
     pointer-events: none;
 }
 
-.rest-compact-cats {
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    margin-top: 6px;
+.rest-sticky-cats .mn-item {
+    padding-top: 8px;
+}
+
+.rest-sticky-chrome.is-compact .rest-sticky-cats {
     padding: 2px 0 4px;
 }
 
-.rest-compact-cats::-webkit-scrollbar { display: none; }
-
-.rest-compact-cats .mn-item {
+.rest-sticky-chrome.is-compact .mn-item {
     padding: 10px 14px;
     font-size: 16px;
 }
 
-.rest-compact-cats .mn-item.active::after {
-    left: 13px;
-    right: 13px;
-    bottom: 4px;
+.rest-sticky-chrome.is-compact .rest-sticky-cats .mn-item:first-child {
+    padding-left: 0;
 }
 
-@media (max-width: 1100px) {
-    .rest-compact-inner {
-        grid-template-columns: minmax(0, 1fr) 320px;
-        gap: 20px;
-        padding: 20px 20px 0;
-    }
+.rest-sticky-chrome.is-compact .mn-item.active::after {
+    bottom: 4px;
 }
 
 /* Sections + grid */
 .menu-section {
     margin-bottom: 36px;
+}
+
+/* Keep section titles below sticky chrome */
+.desktop-restaurant .menu-section {
+    scroll-margin-top: 150px;
 }
 
 .ms-title {

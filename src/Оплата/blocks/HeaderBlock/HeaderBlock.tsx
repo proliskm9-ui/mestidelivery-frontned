@@ -6,13 +6,27 @@ interface HeaderBlockProps {
   deliveryType: 'standard' | 'scheduled';
   setDeliveryType: (type: 'standard' | 'scheduled') => void;
   scheduledTime: string | null;
+  scheduledDisplay?: string | null;
   setScheduledTime?: (val: string) => void;
   onOpenTimeModal: () => void;
   onBack?: () => void;
+  asapDisabled?: boolean;
+  closedHint?: string | null;
 }
 
-const HeaderBlock: React.FC<HeaderBlockProps> = ({ deliveryType, setDeliveryType, scheduledTime, setScheduledTime, onOpenTimeModal, onBack }) => {
+const HeaderBlock: React.FC<HeaderBlockProps> = ({
+  deliveryType,
+  setDeliveryType,
+  scheduledTime,
+  scheduledDisplay,
+  setScheduledTime,
+  onOpenTimeModal,
+  onBack,
+  asapDisabled,
+  closedHint,
+}) => {
   const { t } = useLanguage();
+  const timeLabel = scheduledDisplay || scheduledTime;
   return (
     <section className="checkout-top">
       <header className="ho-header">
@@ -25,14 +39,23 @@ const HeaderBlock: React.FC<HeaderBlockProps> = ({ deliveryType, setDeliveryType
         <div style={{ width: 44 }}></div>
       </header>
 
+      {asapDisabled && closedHint && (
+        <p style={{ margin: '0 16px 10px', color: '#f87171', fontSize: 13, fontWeight: 600 }}>
+          {closedHint}. Сейчас оформить нельзя — выберите время на открытие.
+        </p>
+      )}
+
       <div className="time-buttons">
         <button
           className={`time-btn time-btn--standard ${deliveryType === 'standard' ? 'active' : ''}`}
           onClick={() => {
+            if (asapDisabled) return;
             setDeliveryType('standard');
             if (setScheduledTime) setScheduledTime('');
           }}
           type="button"
+          disabled={asapDisabled}
+          style={asapDisabled ? { opacity: 0.45, cursor: 'not-allowed' } : undefined}
         >
           <span className="btn-title">{t('checkout.standard')}</span>
           <span className="btn-sub">25-30 {t('checkout.min_short')}</span>
@@ -45,7 +68,7 @@ const HeaderBlock: React.FC<HeaderBlockProps> = ({ deliveryType, setDeliveryType
         >
           <span className="btn-title">{t('checkout.scheduled')}</span>
           <span className="btn-sub">
-            {scheduledTime ? scheduledTime : t('checkout.scheduled_desc')}
+            {timeLabel ? timeLabel : t('checkout.scheduled_desc')}
           </span>
         </button>
       </div>

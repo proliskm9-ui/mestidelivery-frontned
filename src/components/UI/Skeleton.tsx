@@ -335,21 +335,39 @@ export const SkeletonList: React.FC = () => (
   </div>
 );
 
-/** Order status page */
+/** Order status page — realistic mirror of OrderStatus */
 export const SkeletonOrder: React.FC = () => (
   <div className="sk-page sk-order" role="status" aria-label="Loading">
     <div className="sk-only-mobile">
-      <div className="sk-list-header">
-        <Bone width={44} height={44} radius="50%" className="sk-list-back" />
-        <Bone width={120} height={18} radius={8} />
+      <div className="sk-order-top-block">
+        <div className="sk-order-header-row">
+          <Bone width={44} height={44} radius="50%" />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <Bone width={110} height={18} radius={8} />
+            <Bone width={70} height={12} radius={6} />
+          </div>
+          <div style={{ width: 44 }} />
+        </div>
+        <div style={{ textAlign: 'center', margin: '20px 0 16px' }}>
+          <Bone width="55%" height={26} radius={8} style={{ margin: '0 auto' }} />
+        </div>
+        <div className="sk-order-steps-mobile">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="sk-order-step-mobile-item">
+              <Bone width={48} height={48} radius="50%" />
+              <Bone width={44} height={8} radius={4} style={{ marginTop: 8 }} />
+            </div>
+          ))}
+        </div>
       </div>
-      <Bone width="70%" height={28} radius={10} style={{ margin: '24px auto 20px' }} />
-      <div className="sk-order-steps-mobile">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <Bone key={i} width={88} height={88} radius={20} />
-        ))}
+
+      <div className="sk-order-bottom-block">
+        <Bone width={120} height={14} radius={6} style={{ marginBottom: 10 }} />
+        <Bone width="100%" height={100} radius={20} style={{ marginBottom: 20 }} />
+        <Bone width={90} height={14} radius={6} style={{ marginBottom: 10 }} />
+        <Bone width="100%" height={120} radius={20} style={{ marginBottom: 20 }} />
+        <Bone width="100%" height={52} radius={18} />
       </div>
-      <Bone width="100%" height={180} radius={24} style={{ marginTop: 24 }} />
     </div>
 
     <div className="sk-only-desktop sk-order-desktop">
@@ -357,16 +375,16 @@ export const SkeletonOrder: React.FC = () => (
         <Bone width={48} height={48} radius="50%" />
         <Bone width={160} height={18} radius={8} style={{ margin: '0 auto' }} />
       </div>
-      <Bone width="55%" height={36} radius={10} style={{ margin: '20px 0 24px' }} />
+      <Bone width="45%" height={32} radius={10} style={{ margin: '20px 0 24px' }} />
       <div className="sk-order-steps">
-        {[0, 1, 2, 3, 4, 5].map((i) => (
+        {[0, 1, 2, 3, 4].map((i) => (
           <div key={i} className="sk-order-step">
-            <Bone width={56} height={56} radius={16} />
-            <Bone width={72} height={12} radius={6} style={{ marginTop: 10 }} />
+            <Bone width={52} height={52} radius="50%" />
+            <Bone width={64} height={10} radius={6} style={{ marginTop: 8 }} />
           </div>
         ))}
       </div>
-      <Bone width="100%" height={220} radius={28} style={{ marginTop: 24 }} />
+      <Bone width="100%" height={200} radius={28} style={{ marginTop: 24 }} />
     </div>
   </div>
 );

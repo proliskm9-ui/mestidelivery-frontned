@@ -224,14 +224,16 @@ const Header: React.FC<HeaderProps> = (props) => {
                 <div className="modal-overlay pam-overlay" onClick={() => setReferralModalOpen(false)}>
                     <div className="premium-address-modal" onClick={e => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
                         <div style={{ fontSize: '64px', marginBottom: '20px' }}>🎁</div>
-                        <h2 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '12px', color: '#fff' }}>Пригласи друга!</h2>
+                        <h2 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '12px', color: '#fff' }}>{t('referral.title')}</h2>
                         <p style={{ color: '#8E8E93', marginBottom: '32px', lineHeight: 1.5 }}>
-                            Поделись своим кодом с друзьями и получите по <span style={{ color: '#21EA7C', fontWeight: 700 }}>500 бонусов</span> на следующий заказ!
+                            {t('referral.desc').split('{bonuses}')[0]}
+                            <span style={{ color: '#21EA7C', fontWeight: 700 }}>{t('referral.bonuses')}</span>
+                            {t('referral.desc').split('{bonuses}')[1]}
                         </p>
                         <div style={{ background: 'rgba(255,255,255,0.05)', border: '2px dashed rgba(33, 234, 124, 0.3)', borderRadius: '16px', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px' }}>
                             <span style={{ color: '#fff', fontSize: '20px', fontWeight: 700, letterSpacing: '2px' }}>MESTIGO500</span>
                             <button onClick={() => { navigator.clipboard.writeText('MESTIGO500'); setShareCopied(true); setTimeout(() => setShareCopied(false), 2000); }} style={{ background: '#21EA7C', border: 'none', borderRadius: '10px', padding: '8px 16px', fontWeight: 700, cursor: 'pointer' }}>
-                                {shareCopied ? 'Скопировано!' : 'Копировать'}
+                                {shareCopied ? t('referral.copied') : t('referral.copy')}
                             </button>
                         </div>
                     </div>
@@ -241,7 +243,7 @@ const Header: React.FC<HeaderProps> = (props) => {
             {paymentModalOpen && (
                 <div className="modal-overlay pam-overlay" onClick={() => setPaymentModalOpen(false)}>
                     <div className="premium-address-modal" style={{ padding: '24px' }}>
-                        <h3 className="pam-title">Способы оплаты</h3>
+                        <h3 className="pam-title">{t('checkout.payment_method_title')}</h3>
                         {/* Simplified methods */}
                     </div>
                 </div>

@@ -630,15 +630,15 @@ body:has(.mobile-payment-wrapper),
 .mp-premium-badge {
   display: inline-flex;
   align-items: center;
-  padding: 6px 12px;
+  padding: 6px 14px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.6);
   font-weight: 600;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.5px;
-  margin-top: 5px;
+  margin-top: 4px;
 }
 
 .mp-simple-spinner {
@@ -658,4 +658,68 @@ body:has(.mobile-payment-wrapper),
 
 @keyframes mp-simple-spin {
   to { transform: rotate(360deg); }
+}
+
+/* Premium Pending Actions */
+.mp-pending-actions {
+  width: 100%;
+  max-width: 330px;
+  margin: 54px auto 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.mp-btn-view-order-clean {
+  width: 100%;
+  height: 56px;
+  padding: 0 24px;
+  background: #21ea7c;
+  border: none;
+  border-radius: 20px;
+  color: #05140A;
+  font-size: 16px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(33, 234, 124, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.mp-btn-view-order-clean:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(33, 234, 124, 0.45);
+}
+
+.mp-btn-view-order-clean:active {
+  transform: scale(0.98);
+}
+
+.mp-btn-reopen-link {
+  background: none;
+  border: none;
+  padding: 6px 14px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.mp-btn-reopen-link:hover {
+  color: #21ea7c;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mp-btn-reopen-link:active {
+  transform: scale(0.97);
 }

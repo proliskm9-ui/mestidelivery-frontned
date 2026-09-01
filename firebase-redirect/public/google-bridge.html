@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MestiDelivery</title>
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #151514; }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <script>
+    var DEFAULT_RETURN = "https://mestidelivery.com/auth/google/done";
+    var RETURN_KEY = "mesti_bridge_return";
+    var LANG_KEY = "mesti_bridge_lang";
+
+    firebase.initializeApp({
+      apiKey: "AIzaSyBrnQdbF_RJhBTJmxSKPOsQWwZ9An_mML8",
+      authDomain: "mestidelivery.firebaseapp.com",
+      projectId: "mestidelivery",
+      appId: "1:472806415041:web:078453811a8cf1ea93d240"
+    });
+
+    var params = new URLSearchParams(location.search);
+    var returnTo = params.get("return") || sessionStorage.getItem(RETURN_KEY) || DEFAULT_RETURN;
+    var lang = params.get("lang") || sessionStorage.getItem(LANG_KEY) || "ru";
+    sessionStorage.setItem(RETURN_KEY, returnTo);
+    sessionStorage.setItem(LANG_KEY, lang);
+
+    function goBack(query) {
+      var url = new URL(returnTo);
+      Object.keys(query).forEach(function (k) {
+        if (query[k]) url.searchParams.set(k, query[k]);
+      });
+      url.searchParams.set("lang", lang);
+      sessionStorage.removeItem(RETURN_KEY);
+      sessionStorage.removeItem(LANG_KEY);
+      location.replace(url.toString());
+    }
+
+    async function finish(user) {
+      var idToken = await user.getIdToken();
+      goBack({
+        id_token: idToken,
+        email: user.email || "",
+        name: user.displayName || ""
+      });
+    }
+
+    function startRedirect() {
+      var provider = new firebase.auth.GoogleAuthProvider();
+      provider.addScope("email");
+      provider.addScope("profile");
+      return firebase.auth().signInWithRedirect(provider);
+    }
+
+    (async function start() {
+      try {
+        await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+        // First hop from mestidelivery.com: skip getRedirectResult (extra round-trip).
+        if (params.get("return")) {
+          await startRedirect();
+          return;
+        }
+
+        var redirect = await firebase.auth().getRedirectResult();
+        if (redirect && redirect.user) {
+          await finish(redirect.user);
+          return;
+        }
+        if (firebase.auth().currentUser) {
+          await finish(firebase.auth().currentUser);
+          return;
+        }
+        await startRedirect();
+      } catch (err) {
+        var code = (err && err.code) || "";
+        if (code === "auth/redirect-cancelled-by-user" || code === "auth/popup-closed-by-user") {
+          goBack({ error: "google_cancelled" });
+          return;
+        }
+        goBack({ error: code || "google_auth_failed" });
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -3,54 +3,81 @@ import { useStore } from './store/useStore';
 import { LoginScreen } from './components/LoginScreen';
 import { CourierOrders } from './components/CourierOrders';
 import { CourierStats } from './components/CourierStats';
-import { CourierSchedule } from './components/CourierSchedule';
-import { CourierProfile } from './components/CourierProfile';
-import { CourierSupport } from './components/CourierSupport';
+import { CourierGuide } from './components/CourierGuide';
+import { PartnerProfile } from './components/PartnerProfile';
+import { PartnerSupport } from './components/PartnerSupport';
 import { RestaurantOrders } from './components/RestaurantOrders';
 import { RestaurantMenu } from './components/RestaurantMenu';
-
-import { 
-  RestaurantHome, 
-  RestaurantStats, 
-  RestaurantReviews, 
-  RestaurantSettings, 
-  RestaurantHelp,
-  RestaurantNews,
-  RestaurantSupport
-} from './components/DashboardViews';
+import { RestaurantStatsPage } from './components/RestaurantStatsPage';
+import { RestaurantHome } from './components/DashboardViews';
+import { useLanguage, type Language } from '../../translations/LanguageContext';
 
 import {
   Home,
   BarChart2,
-  MessageSquare,
   ShoppingBag,
   History,
-  Store,
   Utensils,
   LogOut,
-  Menu,
   ChevronRight,
-  Calendar,
+  BookOpen,
   User,
-  LifeBuoy
+  LifeBuoy,
+  MoreHorizontal,
 } from 'lucide-react';
 import './index.css';
 import '../Admin/AdminStyles.css';
+import './partner-ui.css';
 
 
-type CourierPage = 'orders' | 'stats' | 'finance' | 'schedule' | 'profile' | 'support';
-type RestaurantPage = 
-  | 'home' 
-  | 'orders' 
-  | 'stats' 
-  | 'reviews' 
-  | 'restaurant' 
-  | 'menu' 
-  | 'help' 
-  | 'history' 
-  | 'news' 
+type CourierPage = 'orders' | 'stats' | 'guide' | 'profile' | 'support';
+type RestaurantPage =
+  | 'home'
+  | 'orders'
+  | 'stats'
+  | 'menu'
+  | 'history'
+  | 'profile'
   | 'support';
 type PartnerPage = CourierPage | RestaurantPage;
+
+const PAGE_ALIASES: Record<string, PartnerPage> = {
+  orders: 'orders',
+  stats: 'stats',
+  statistics: 'stats',
+  guide: 'guide',
+  shifts: 'guide',
+  schedule: 'guide',
+  profile: 'profile',
+  support: 'support',
+  home: 'home',
+  menu: 'menu',
+  history: 'history',
+};
+
+function pageFromUrl(role: 'courier' | 'restaurant'): PartnerPage | null {
+  try {
+    const raw = new URLSearchParams(window.location.search).get('page')?.toLowerCase() || '';
+    const mapped = PAGE_ALIASES[raw];
+    if (!mapped) return null;
+    if (role === 'courier') {
+      return (['orders', 'stats', 'guide', 'profile', 'support'] as PartnerPage[]).includes(mapped)
+        ? mapped
+        : null;
+    }
+    return (['home', 'orders', 'stats', 'menu', 'history', 'profile', 'support'] as PartnerPage[]).includes(mapped)
+      ? mapped
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function ensurePartnerDefaultLang(setLanguage: (lang: Language) => void) {
+  // Partners market default: Georgian, unless user explicitly chose a language.
+  if (localStorage.getItem('partner_lang_explicit') === '1') return;
+  setLanguage('ka');
+}
 
 interface SidebarItem {
   id: PartnerPage;
@@ -84,6 +111,7 @@ function PartnerSidebar({
   onClose: () => void;
 }) {
   const { userName, logout } = useStore();
+  const { t } = useLanguage();
 
   const [avatar, setAvatar] = useState<string>(
     () => localStorage.getItem('partner_avatar') || localStorage.getItem('admin_avatar') || PRESET_AVATARS[0].img
@@ -109,34 +137,24 @@ function PartnerSidebar({
     ? [
         {
           items: [
-            { id: 'orders' as PartnerPage, label: 'Заказы', Icon: ShoppingBag },
-            { id: 'stats' as PartnerPage, label: 'Статистика', Icon: BarChart2 },
-            { id: 'schedule' as PartnerPage, label: 'График смен', Icon: Calendar },
-            { id: 'profile' as PartnerPage, label: 'Мой профиль', Icon: User },
-            { id: 'support' as PartnerPage, label: 'Поддержка', Icon: LifeBuoy }
+            { id: 'orders' as PartnerPage, label: t('partnerApp.nav.orders'), Icon: ShoppingBag },
+            { id: 'stats' as PartnerPage, label: t('partnerApp.nav.stats_full'), Icon: BarChart2 },
+            { id: 'guide' as PartnerPage, label: t('partnerApp.nav.guide'), Icon: BookOpen },
+            { id: 'profile' as PartnerPage, label: t('partnerApp.nav.profile'), Icon: User },
+            { id: 'support' as PartnerPage, label: t('partnerApp.nav.support'), Icon: LifeBuoy }
           ]
         }
       ]
     : [
         {
           items: [
-            { id: 'home' as PartnerPage, label: 'Главная', Icon: Home },
-            { id: 'stats' as PartnerPage, label: 'Статистика', Icon: BarChart2 },
-            { id: 'reviews' as PartnerPage, label: 'Отзывы', Icon: MessageSquare }
-          ]
-        },
-        {
-          title: 'РАБОТА С ЗАКАЗАМИ',
-          items: [
-            { id: 'orders' as PartnerPage, label: 'Заказы', Icon: ShoppingBag },
-            { id: 'history' as PartnerPage, label: 'История', Icon: History }
-          ]
-        },
-        {
-          title: 'УПРАВЛЕНИЕ',
-          items: [
-            { id: 'restaurant' as PartnerPage, label: 'Ресторан', Icon: Store },
-            { id: 'menu' as PartnerPage, label: 'Меню', Icon: Utensils }
+            { id: 'home' as PartnerPage, label: t('partnerApp.nav.home'), Icon: Home },
+            { id: 'orders' as PartnerPage, label: t('partnerApp.nav.orders'), Icon: ShoppingBag },
+            { id: 'history' as PartnerPage, label: t('partnerApp.nav.history'), Icon: History },
+            { id: 'menu' as PartnerPage, label: t('partnerApp.nav.menu'), Icon: Utensils },
+            { id: 'stats' as PartnerPage, label: t('partnerApp.nav.stats_full'), Icon: BarChart2 },
+            { id: 'profile' as PartnerPage, label: t('partnerApp.nav.profile'), Icon: User },
+            { id: 'support' as PartnerPage, label: t('partnerApp.nav.support'), Icon: LifeBuoy }
           ]
         }
       ];
@@ -207,7 +225,7 @@ function PartnerSidebar({
           style={{ color: '#ff4444' }}
         >
           <LogOut size={20} className="nav-icon" />
-          <span>Выйти</span>
+          <span>{t('partnerApp.profile.logout')}</span>
         </button>
       </div>
 
@@ -254,17 +272,19 @@ function MobileMoreMenu({
   onNavigate: (p: PartnerPage) => void;
   onClose: () => void;
 }) {
+  const { t } = useLanguage();
+
   const courierItems = [
-    { id: 'schedule' as PartnerPage, label: 'График смен', icon: Calendar, desc: 'Бронирование зон и выходы', color: '#3b82f6' },
-    { id: 'profile' as PartnerPage, label: 'Мой профиль', icon: User, desc: 'Личные данные, транспорт', color: '#f59e0b' },
-    { id: 'support' as PartnerPage, label: 'Поддержка', icon: LifeBuoy, desc: 'Связаться с диспетчером', color: '#ef4444' },
+    { id: 'guide' as PartnerPage, label: t('partnerApp.nav.guide'), icon: BookOpen, desc: t('partnerApp.more.guide_desc'), color: '#3b82f6' },
+    { id: 'profile' as PartnerPage, label: t('partnerApp.nav.profile'), icon: User, desc: t('partnerApp.more.profile_desc'), color: '#f59e0b' },
+    { id: 'support' as PartnerPage, label: t('partnerApp.nav.support'), icon: LifeBuoy, desc: t('partnerApp.more.support_desc'), color: '#ef4444' },
   ];
 
   const restaurantItems = [
-    { id: 'history' as PartnerPage, label: 'История заказов', icon: History, desc: 'Завершённые смены и продажи', color: '#3b82f6' },
-    { id: 'stats' as PartnerPage, label: 'Статистика', icon: BarChart2, desc: 'Финансовая аналитика', color: '#a855f7' },
-    { id: 'restaurant' as PartnerPage, label: 'Ресторан', icon: Store, desc: 'Настройки заведения', color: '#f59e0b' },
-    { id: 'reviews' as PartnerPage, label: 'Отзывы ресторана', icon: MessageSquare, desc: 'Управление отзывами клиентов', color: '#21EA7C' },
+    { id: 'history' as PartnerPage, label: t('partnerApp.nav.history'), icon: History, desc: t('partnerApp.more.history_desc'), color: '#3b82f6' },
+    { id: 'stats' as PartnerPage, label: t('partnerApp.nav.stats_full'), icon: BarChart2, desc: t('partnerApp.more.stats_desc'), color: '#21EA7C' },
+    { id: 'profile' as PartnerPage, label: t('partnerApp.nav.profile'), icon: User, desc: t('partnerApp.more.profile_rest_desc'), color: '#f59e0b' },
+    { id: 'support' as PartnerPage, label: t('partnerApp.nav.support'), icon: LifeBuoy, desc: t('partnerApp.more.support_rest_desc'), color: '#ef4444' },
   ];
 
   const items = role === 'courier' ? courierItems : restaurantItems;
@@ -277,33 +297,12 @@ function MobileMoreMenu({
       }}
       onClick={onClose}
     >
-      {/* Backdrop */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        background: 'rgba(0,0,0,0.6)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-      }} />
-      {/* Sheet */}
-      <div
-        style={{
-          position: 'relative',
-          borderRadius: '28px 28px 0 0',
-          background: '#111614',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderBottom: 'none',
-          boxShadow: '0 -20px 60px rgba(0,0,0,0.8)',
-          animation: 'slideUp 0.28s cubic-bezier(0.32,0.72,0,1)',
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Handle bar */}
-        <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 12, paddingBottom: 4 }}>
-          <div style={{ width: 40, height: 4, borderRadius: 99, background: 'rgba(255,255,255,0.12)' }} />
-        </div>
+      <div className="partner-sheet-backdrop" />
+      <div className="partner-sheet" onClick={e => e.stopPropagation()}>
+        <div className="partner-sheet__handle" />
 
         <div style={{ padding: '8px 20px 16px' }}>
-          <p style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '1.5px', margin: '0 0 12px' }}>Прочее</p>
+          <p className="partner-page-kicker" style={{ marginBottom: 0 }}>{t('partnerApp.nav.other')}</p>
         </div>
 
         <div style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -312,28 +311,22 @@ function MobileMoreMenu({
             return (
               <button
                 key={id}
+                type="button"
+                className="partner-action-row"
                 onClick={() => { onNavigate(id); onClose(); }}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 14,
-                  width: '100%', textAlign: 'left',
-                  padding: '14px 16px',
-                  borderRadius: 18,
-                  background: active ? `${color}10` : 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${active ? `${color}30` : 'rgba(255,255,255,0.05)'}`,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s',
+                  background: active ? `${color}12` : undefined,
+                  borderColor: active ? `${color}40` : undefined,
                 }}
               >
-                <div style={{
-                  width: 42, height: 42, borderRadius: 14, flexShrink: 0,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                <div className="partner-action-row__icon" style={{
                   background: active ? `${color}18` : 'rgba(255,255,255,0.06)',
                 }}>
                   <Icon size={19} style={{ color: active ? color : 'rgba(255,255,255,0.5)' }} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 14, fontWeight: 700, margin: 0, color: active ? color : '#fff' }}>{label}</p>
-                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', margin: '2px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{desc}</p>
+                  <p className="partner-action-row__label" style={{ color: active ? color : undefined }}>{label}</p>
+                  <p className="partner-action-row__desc">{desc}</p>
                 </div>
                 <ChevronRight size={15} style={{ color: 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
               </button>
@@ -341,16 +334,12 @@ function MobileMoreMenu({
           })}
         </div>
 
-        {/* Safe area */}
-        <div style={{ height: 'calc(20px + env(safe-area-inset-bottom, 0px))' }} />
+        <div style={{ height: 'calc(88px + env(safe-area-inset-bottom, 0px))' }} />
       </div>
-
-      <style>{`@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }`}</style>
     </div>
   );
 }
 
-// Premium 5-tab mobile bottom navigation
 function MobileBottomNav({
   role,
   activePage,
@@ -363,65 +352,28 @@ function MobileBottomNav({
   hasOrderBadge?: boolean;
 }) {
   const [moreOpen, setMoreOpen] = useState(false);
+  const { t } = useLanguage();
 
-  type NavItem = { id: PartnerPage; label: string; Icon: React.ElementType | any; badge?: boolean; targetSize?: number };
-
-  const courierItems: NavItem[] = [
-    { id: 'orders', label: 'Заказы', Icon: ShoppingBag, targetSize: 24 },
-    { id: 'stats', label: 'Статистика', Icon: BarChart2, targetSize: 24 },
-  ];
+  type NavItem = { id: PartnerPage; label: string; Icon: React.ElementType; badge?: boolean };
 
   const morePages = role === 'courier'
-    ? ['schedule', 'profile', 'support']
-    : ['history', 'stats', 'restaurant', 'reviews'];
+    ? ['guide', 'profile', 'support']
+    : ['history', 'stats', 'profile', 'support'];
   const isMoreActive = morePages.includes(activePage);
 
+  const courierItems: NavItem[] = [
+    { id: 'orders', label: t('partnerApp.nav.orders'), Icon: ShoppingBag },
+    { id: 'stats', label: t('partnerApp.nav.stats'), Icon: BarChart2 },
+  ];
+
   const restaurantItems: NavItem[] = [
-    { id: 'home', label: 'Главная', Icon: Home, targetSize: 26 }, // Visually matched to ShoppingBag
-    { id: 'orders', label: 'Заказы', Icon: ShoppingBag, targetSize: 24, badge: hasOrderBadge }, // Base reference
-    { id: 'menu', label: 'Меню', Icon: Utensils, targetSize: 22 }, // Slightly smaller because it's tall
+    { id: 'home', label: t('partnerApp.nav.home'), Icon: Home },
+    { id: 'orders', label: t('partnerApp.nav.orders'), Icon: ShoppingBag, badge: hasOrderBadge },
+    { id: 'menu', label: t('partnerApp.nav.menu'), Icon: Utensils },
   ];
 
   const items = role === 'courier' ? courierItems : restaurantItems;
-
-  const TabBtn = ({ id, Icon, badge, targetSize = 24 }: { id: PartnerPage; label: string; Icon: React.ElementType; badge?: boolean; targetSize?: number }) => {
-    const active = activePage === id && !isMoreActive;
-    // Calculate precise strokeWidth so all lines are exactly visually 2px thick regardless of SVG scale
-    const computedStroke = 2 * (24 / targetSize);
-    
-    return (
-      <button
-        onClick={() => { setMoreOpen(false); onNavigate(id); }}
-        style={{
-          flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'transparent', border: 'none', cursor: 'pointer',
-          position: 'relative', height: '100%', WebkitTapHighlightColor: 'transparent',
-        }}
-      >
-        {badge && (
-          <span style={{
-            position: 'absolute', top: '16px', right: 'calc(50% - 14px)',
-            width: 8, height: 8, borderRadius: '50%', background: '#ef4444',
-            boxShadow: '0 0 0 2px rgba(60,60,60,0.8)', zIndex: 2,
-          }} />
-        )}
-        <div style={{
-          display: 'flex', justifyContent: 'center', alignItems: 'center',
-          width: 32, height: 32, transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
-        }}>
-          <Icon
-            size={targetSize}
-            strokeWidth={computedStroke}
-            style={{
-              color: active ? '#21EA7C' : '#9ca3af',
-              transition: 'all 0.2s ease',
-              filter: active ? 'drop-shadow(0 0 8px rgba(33,234,124,0.3))' : 'none',
-            }}
-          />
-        </div>
-      </button>
-    );
-  };
+  const moreActive = isMoreActive || moreOpen;
 
   return (
     <>
@@ -434,63 +386,75 @@ function MobileBottomNav({
         />
       )}
 
-      <div 
-        className="mobile-only-nav"
-        style={{
-          position: 'fixed',
-          bottom: 'calc(14px + env(safe-area-inset-bottom, 0px))',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '90%',
-          maxWidth: '360px',
-          height: '72px',
-          zIndex: 9000,
-          background: 'rgba(60, 60, 60, 0.3)',
-          backdropFilter: 'blur(20px) saturate(150%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(150%)',
-          borderRadius: '40px',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: 'inset 0 4px 6px -2px rgba(255, 255, 255, 0.2), inset 0 -4px 8px -2px rgba(0, 0, 0, 0.4), 0 8px 32px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '0 16px',
-        }}
-      >
-        {items.map(item => (
-          <TabBtn key={item.id} id={item.id} label={item.label} Icon={item.Icon} badge={'badge' in item ? item.badge : undefined} targetSize={item.targetSize} />
-        ))}
-
-        {/* More button */}
-        {(() => {
-          const moreActive = isMoreActive || moreOpen;
+      <nav className="partner-bottom-nav" aria-label="Навигация">
+        {items.map(({ id, label, Icon, badge }) => {
+          const active = activePage === id && !isMoreActive;
           return (
             <button
-              onClick={() => setMoreOpen(prev => !prev)}
-              style={{
-                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: 'transparent', border: 'none', cursor: 'pointer',
-                position: 'relative', height: '100%', WebkitTapHighlightColor: 'transparent',
-              }}
+              key={id}
+              type="button"
+              className={`partner-tab${active ? ' is-active' : ''}`}
+              onClick={() => { setMoreOpen(false); onNavigate(id); }}
+              aria-label={label}
+              aria-current={active ? 'page' : undefined}
             >
-              <div style={{
-                display: 'flex', justifyContent: 'center', alignItems: 'center',
-                width: 32, height: 32, transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              }}>
-                <Menu
-                  size={26}
-                  strokeWidth={2}
-                  style={{
-                    color: moreActive ? '#21EA7C' : '#9ca3af',
-                    transition: 'all 0.2s ease',
-                    filter: moreActive ? 'drop-shadow(0 0 8px rgba(33,234,124,0.3))' : 'none'
-                  }}
-                />
-              </div>
+              {badge ? <span className="partner-tab-badge" /> : null}
+              <Icon size={24} strokeWidth={active ? 2.35 : 1.9} />
+              <span>{label}</span>
             </button>
           );
-        })()}
-      </div>
+        })}
+        <button
+          type="button"
+          className={`partner-tab${moreActive ? ' is-active' : ''}`}
+          onClick={() => setMoreOpen((prev) => !prev)}
+          aria-label={t('partnerApp.nav.more')}
+          aria-expanded={moreOpen}
+        >
+          <MoreHorizontal size={24} strokeWidth={moreActive ? 2.35 : 1.9} />
+          <span>{t('partnerApp.nav.more')}</span>
+        </button>
+      </nav>
+    </>
+  );
+}
+
+function MobileTopChrome({
+  role,
+}: {
+  role: 'courier' | 'restaurant';
+  userName?: string;
+}) {
+  const { isOnline, toggleOnline } = useStore();
+  const { t } = useLanguage();
+  return (
+    <>
+      <header className="partner-mobile-chrome">
+        <div className="partner-chrome-brand" aria-label="MestiDelivery Partners">
+          <p className="partner-chrome-wordmark">
+            <span className="partner-chrome-wordmark__mesti">Mesti</span>
+            <span className="partner-chrome-wordmark__delivery">Delivery</span>
+          </p>
+          <p className="partner-chrome-partners">Partners</p>
+        </div>
+        {role === 'courier' ? (
+          <button
+            type="button"
+            className={`partner-online-toggle${isOnline ? ' is-on' : ''}`}
+            onClick={() => toggleOnline()}
+            aria-pressed={isOnline}
+          >
+            <span className="partner-online-dot" />
+            {isOnline ? t('partnerApp.chrome.online') : t('partnerApp.chrome.offline')}
+          </button>
+        ) : (
+          <span className="partner-online-toggle is-on" aria-label={t('partnerApp.chrome.open')}>
+            <span className="partner-online-dot" />
+            {t('partnerApp.chrome.open')}
+          </span>
+        )}
+      </header>
+      <div className="partner-chrome-spacer" />
     </>
   );
 }
@@ -498,26 +462,62 @@ function MobileBottomNav({
 function PartnerApp() {
   const { 
     currentScreen, userRole, userName, 
-    restaurantRevenue, activeOrders, historicOrders
+    restaurantRevenue, activeOrders, historicOrders,
+    hydrateSession,
   } = useStore();
+  const { setLanguage } = useLanguage();
   const [activePage, setActivePage] = useState<PartnerPage>('home');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    hydrateSession();
+  }, [hydrateSession]);
+
+  useEffect(() => {
+    try {
+      const tg = (window as any).Telegram?.WebApp;
+      if (!tg) return;
+      tg.ready?.();
+      tg.expand?.();
+      tg.setHeaderColor?.('#0b120e');
+      tg.setBackgroundColor?.('#0b120e');
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    ensurePartnerDefaultLang(setLanguage);
+  }, [setLanguage]);
+
+  useEffect(() => {
+    const onExpired = () => useStore.getState().logout();
+    window.addEventListener('partner-auth-expired', onExpired);
+    return () => window.removeEventListener('partner-auth-expired', onExpired);
+  }, []);
 
   useEffect(() => {
     setSidebarOpen(false);
   }, [activePage]);
 
-  // Set default page based on role when entering the app
+  // Default page from role, or ?page= deep link from Telegram bot buttons
   useEffect(() => {
-    if (userRole === 'restaurant') {
-      setActivePage('home');
-    } else {
-      setActivePage('orders');
+    if (userRole !== 'restaurant' && userRole !== 'courier') return;
+    const role = userRole === 'restaurant' ? 'restaurant' : 'courier';
+    const fromUrl = pageFromUrl(role);
+    if (fromUrl) {
+      setActivePage(fromUrl);
+      return;
     }
+    setActivePage(role === 'restaurant' ? 'home' : 'orders');
   }, [userRole]);
 
   if (currentScreen === 'login') {
-    return <LoginScreen />;
+    return (
+      <div className="partner-app">
+        <LoginScreen />
+      </div>
+    );
   }
 
   const role = userRole === 'restaurant' ? 'restaurant' : 'courier';
@@ -527,8 +527,7 @@ function PartnerApp() {
   const hasOrderBadge = newOrderCount > 0;
 
   return (
-    <div className="admin-layout">
-      {/* Mobile overlay for sidebar */}
+    <div className="admin-layout partner-app partner-app--mobile-pad">
       {sidebarOpen && (
         <div className="sidebar-overlay visible" onClick={() => setSidebarOpen(false)} />
       )}
@@ -541,66 +540,17 @@ function PartnerApp() {
         onClose={() => setSidebarOpen(false)}
       />
 
-      <main
-        className="admin-main"
-        style={{ paddingBottom: 'calc(72px + env(safe-area-inset-bottom, 0px))' }}
-      >
-        {/* ─── MOBILE TOP HEADER ─── Fixed at top, only on small screens (Couriers only) */}
-        {role === 'courier' && (
-          <>
-            <div
-              className="mobile-only-header"
-              style={{
-                position: 'fixed', top: 0, left: 0, right: 0,
-                zIndex: 8000,
-                background: 'rgba(8,12,10,0.88)',
-                backdropFilter: 'blur(24px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-                borderBottom: '1px solid rgba(255,255,255,0.06)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '12px 16px',
-                  paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))',
-                  gap: 12,
-                }}
-              >
-
-                {/* Logo + Title */}
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <img
-                    src="/Assets/general-green.png"
-                    alt="MestiDelivery"
-                    className="w-7 h-7 object-contain flex-shrink-0"
-                  />
-                  <div className="min-w-0">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-zinc-500 leading-none">ПАНЕЛЬ УПРАВЛЕНИЯ</p>
-                    <p className="text-xs font-bold text-white truncate leading-tight">{userName}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Spacer for fixed mobile header — only on mobile */}
-            <div className="mobile-only-header" style={{ height: 'calc(60px + env(safe-area-inset-top, 0px))' }} />
-          </>
-        )}
+      <main className="admin-main">
+        <MobileTopChrome role={role} />
 
         {role === 'courier' && activePage === 'orders' && <CourierOrders />}
-
         {role === 'courier' && activePage === 'stats' && <CourierStats />}
+        {role === 'courier' && activePage === 'guide' && <CourierGuide />}
+        {role === 'courier' && activePage === 'profile' && <PartnerProfile role="courier" />}
+        {role === 'courier' && activePage === 'support' && <PartnerSupport role="courier" />}
 
-        {role === 'courier' && activePage === 'schedule' && <CourierSchedule />}
-
-        {role === 'courier' && activePage === 'profile' && <CourierProfile />}
-
-        {role === 'courier' && activePage === 'support' && <CourierSupport />}
-        
         {role === 'restaurant' && activePage === 'home' && (
-          <RestaurantHome 
+          <RestaurantHome
             userName={userName}
             restaurantRevenue={restaurantRevenue}
             activeOrders={activeOrders}
@@ -609,22 +559,18 @@ function PartnerApp() {
           />
         )}
         {role === 'restaurant' && activePage === 'stats' && (
-          <RestaurantStats 
-            userName={userName}
+          <RestaurantStatsPage
             restaurantRevenue={restaurantRevenue}
             activeOrders={activeOrders}
             historicOrders={historicOrders}
-            onNavigate={setActivePage}
+            onNavigate={(page) => setActivePage(page as typeof activePage)}
           />
         )}
-        {role === 'restaurant' && activePage === 'reviews' && <RestaurantReviews />}
-        {role === 'restaurant' && activePage === 'restaurant' && <RestaurantSettings />}
-        {role === 'restaurant' && activePage === 'help' && <RestaurantHelp />}
         {role === 'restaurant' && activePage === 'orders' && <RestaurantOrders defaultTab="active" />}
         {role === 'restaurant' && activePage === 'history' && <RestaurantOrders defaultTab="history" />}
         {role === 'restaurant' && activePage === 'menu' && <RestaurantMenu />}
-        {role === 'restaurant' && activePage === 'news' && <RestaurantNews />}
-        {role === 'restaurant' && activePage === 'support' && <RestaurantSupport />}
+        {role === 'restaurant' && activePage === 'profile' && <PartnerProfile role="restaurant" />}
+        {role === 'restaurant' && activePage === 'support' && <PartnerSupport role="restaurant" />}
       </main>
 
       <MobileBottomNav

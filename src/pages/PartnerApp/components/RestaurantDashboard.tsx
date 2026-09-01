@@ -4,6 +4,7 @@ import { Toggle } from './UI/Toggle';
 import { Button } from './UI/Button';
 import { Store, Clock, ChefHat, Check, User, AlertCircle, Plus } from 'lucide-react';
 import type { OrderItem } from '../api';
+import { pickKitchenText } from '../../../utils/i18nContent';
 
 export const RestaurantDashboard: React.FC = () => {
   const {
@@ -187,7 +188,7 @@ export const RestaurantDashboard: React.FC = () => {
                           <span className="bg-emerald-500/10 text-[#00C853] text-xs font-black px-2.5 py-1 rounded-lg mr-3 min-w-8 text-center">
                             {item.quantity}
                           </span>
-                          <span className="font-semibold text-zinc-200">{item.name}</span>
+                          <span className="font-semibold text-zinc-200">{pickKitchenText(item.name)}</span>
                         </div>
                         <span className="text-xs text-zinc-500 font-medium">{item.price * item.quantity} ₾</span>
                       </div>

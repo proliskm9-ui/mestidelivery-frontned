@@ -1,5 +1,5 @@
 import { Suspense, useState, useEffect, useCallback, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import './App.css';
 import { api, restaurantCache } from './services/api';
 import LiquidNavBar from './components/UI/LiquidNavBar';
@@ -12,9 +12,15 @@ import CompleteProfileModal from './components/auth/CompleteProfileModal';
 const HomePage = lazy(() => import('./pages/Home'));
 const MenuPage = lazy(() => import('./pages/Menu'));
 const LoginPage = lazy(() => import('./pages/Login'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPassword'));
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
+const AuthGoogleDonePage = lazy(() => import('./pages/AuthGoogleDone'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 // @ts-ignore
 const AdminPanel = lazy(() => import('./pages/Admin/AdminPanel').then(m => ({ default: m.AdminPanel })));
-const PartnerApp = lazy(() => import('./pages/PartnerApp/PartnerMain'));
+// Partners is a Telegram Mini App entry — load eagerly so iOS WebView does not
+// stick on Suspense/Telegram placeholder when the lazy chunk is slow.
+import PartnerApp from './pages/PartnerApp/PartnerMain';
 const RestaurantPage = lazy(() => import('./pages/Restaurant'));
 const CartPage = lazy(() => import('./pages/Cart'));
 const CheckoutPage = lazy(() => import('./pages/Checkout'));
@@ -32,6 +38,15 @@ import CookieConsentBanner from './components/UI/CookieConsentBanner';
 import { DeliveryLocationProvider, useDeliveryLocation } from './delivery/DeliveryLocationContext';
 import { getDeliveryFeeForAddress } from './utils/deliveryCalculator';
 import { isBackendApiToken } from './utils/security';
+import { getMinimumOrderQuantity } from './utils/minimumOrderQuantity';
+import {
+    pagePath,
+    parseCustomerPath,
+    restaurantIdFromSlug,
+    resolveRestaurantId,
+    isServicePath,
+} from './routing/paths';
+import SeoHead from './routing/SeoHead';
 
 import type { CheckoutOrderData } from './Оплата/CheckoutPage';
 
@@ -43,6 +58,10 @@ const DEFAULT_AVATARS = [
 ];
 
 import { LanguageProvider, useLanguage } from './translations/LanguageContext';
+
+function isLegalPath(pathname: string) {
+    return /^\/(?:(?:ru|en|ka)\/)?(legal|terms|privacy|returns|refunds|contact|support)\/?$/.test(pathname || '');
+}
 
 function useIsMobile(breakpoint = 1024) {
     const [isMobile, setIsMobile] = useState(() => window.innerWidth <= breakpoint);
@@ -58,8 +77,10 @@ function useIsMobile(breakpoint = 1024) {
 
 function AppContent() {
     const { t, language } = useLanguage();
+    const location = useLocation();
+    const navigate = useNavigate();
     const isMobile = useIsMobile();
-    const { logout: firebaseLogout, needsProfileCompletion } = useAuth();
+    const { logout: authLogout, needsProfileCompletion } = useAuth();
     const deliveryLoc = useDeliveryLocation();
     // Auth State — reject leftover Firebase ID tokens (they break profile/orders)
     const [token, setToken] = useState<string | null>(() => {
@@ -76,33 +97,125 @@ function AppContent() {
 
     // Basic navigation state - If auth, go to menu, else home
     // Check for admin route
-    const [currentPage, setCurrentPage] = useState(() => {
+    const initialRoute = parseCustomerPath(window.location.pathname);
+    const [currentPage, setCurrentPageState] = useState(() => {
         if (window.location.pathname.startsWith('/partners')) return 'partner';
-        if (window.location.pathname === '/admin') return 'admin';
-        return token ? 'menu' : 'home';
+        if (window.location.pathname.startsWith('/admin')) return 'admin';
+        return initialRoute.page || (token ? 'menu' : 'home');
     });
 
     // Removal of redundant timer, LoadingScreen handles its own timing
 
-    const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+    const [selectedOrderId, setSelectedOrderId] = useState<number | null>(
+        () => initialRoute.orderId || null,
+    );
+
+    const [selectedRestaurantId, setSelectedRestaurantId] = useState<string | null>(
+        () => initialRoute.restaurantSlug ? restaurantIdFromSlug(initialRoute.restaurantSlug) : null,
+    );
+    const setCurrentPage = useCallback((
+        page: string,
+        extras?: { restaurant?: string; orderId?: number },
+    ) => {
+        const restaurant = extras?.restaurant ?? selectedRestaurantId;
+        const orderId = extras?.orderId ?? selectedOrderId;
+        if (extras?.restaurant) setSelectedRestaurantId(extras.restaurant);
+        if (extras?.orderId) setSelectedOrderId(extras.orderId);
+        setCurrentPageState(page);
+        if (isServicePath(location.pathname) || isLegalPath(location.pathname)) return;
+        if (page === 'contact') {
+            navigate(`/${language}/contact`);
+            return;
+        }
+        if (page === 'restaurant' && !restaurant) return;
+        if ((page === 'order_status' || page === 'order_details') && !orderId) return;
+        navigate(pagePath(language, page as any, {
+            restaurant: restaurant || undefined,
+            orderId: orderId || undefined,
+        }));
+    }, [language, location.pathname, navigate, selectedOrderId, selectedRestaurantId]);
 
     // Redirect auth users from home
     useEffect(() => {
         if (token && (currentPage === 'home' || currentPage === 'login')) {
             setCurrentPage('menu');
         }
-    }, [token, currentPage]);
+    }, [token, currentPage, setCurrentPage]);
 
-    const handleNavigate = (page: string) => {
+    const handleNavigate = (page: string, extras?: { restaurant?: string; orderId?: number }) => {
         const protectedRoutes = ['profile', 'favorites', 'cart', 'checkout', 'payment', 'order_status', 'order_details'];
         if (!token && protectedRoutes.includes(page)) {
             setCurrentPage('login');
         } else {
-            setCurrentPage(page);
+            setCurrentPage(page, extras);
         }
     };
 
-    const [selectedRestaurantId, setSelectedRestaurantId] = useState<string | null>(null);
+    // URL → UI state. This keeps refresh, pasted restaurant links and browser
+    // Back/Forward working while the checkout/cart data itself stays in memory.
+    useEffect(() => {
+        if (isServicePath(location.pathname) || isLegalPath(location.pathname)) return;
+        const parsed = parseCustomerPath(location.pathname);
+        if (!parsed.language) return; // LanguageProvider will add the prefix.
+
+        const protectedRoutes = ['profile', 'favorites', 'cart', 'checkout', 'payment', 'order_status', 'order_details'];
+        if (parsed.page && !token && protectedRoutes.includes(parsed.page)) {
+            setCurrentPageState('login');
+            navigate(pagePath(parsed.language, 'login'), { replace: true });
+            return;
+        }
+
+        if (!parsed.page) {
+            setCurrentPageState('home');
+            navigate(pagePath(parsed.language, 'home'), { replace: true });
+            return;
+        }
+
+        if (parsed.orderId) setSelectedOrderId(parsed.orderId);
+
+        if (parsed.page === 'restaurant' && parsed.restaurantSlug) {
+            const knownId = restaurantIdFromSlug(parsed.restaurantSlug);
+            if (knownId) {
+                setSelectedRestaurantId(knownId);
+                setCurrentPageState('restaurant');
+                return;
+            }
+
+            let cancelled = false;
+            api.getRestaurants()
+                .then((restaurants) => {
+                    if (cancelled) return;
+                    const restaurantId = resolveRestaurantId(parsed.restaurantSlug!, restaurants);
+                    if (!restaurantId) {
+                        setCurrentPageState('menu');
+                        navigate(pagePath(parsed.language!, 'menu'), { replace: true });
+                        return;
+                    }
+                    setSelectedRestaurantId(restaurantId);
+                    setCurrentPageState('restaurant');
+                })
+                .catch(() => {
+                    if (!cancelled) setCurrentPageState('menu');
+                });
+            return () => { cancelled = true; };
+        }
+
+        setCurrentPageState(parsed.page);
+    }, [location.pathname, navigate, token]);
+
+    // Canonicalize detail URLs after selecting entities from state-driven
+    // screens. Known restaurant IDs map to stable, readable slugs.
+    useEffect(() => {
+        if (currentPage !== 'restaurant' || !selectedRestaurantId || isLegalPath(location.pathname)) return;
+        const expected = pagePath(language, 'restaurant', { restaurant: selectedRestaurantId });
+        if (location.pathname !== expected) navigate(expected);
+    }, [currentPage, language, location.pathname, navigate, selectedRestaurantId]);
+
+    useEffect(() => {
+        if (!selectedOrderId || (currentPage !== 'order_status' && currentPage !== 'order_details')) return;
+        const expected = pagePath(language, currentPage, { orderId: selectedOrderId });
+        if (location.pathname !== expected) navigate(expected);
+    }, [currentPage, language, location.pathname, navigate, selectedOrderId]);
     const [cart, setCart] = useState<{ product: any, quantity: number }[]>([]);
     const [pendingProductToAdd, setPendingProductToAdd] = useState<any>(null);
     const [pendingOrderData, setPendingOrderData] = useState<any>(null);
@@ -298,8 +411,7 @@ function AppContent() {
     }, [currentPage]);
 
     const handleNavigateToRestaurant = (id: string) => {
-        setSelectedRestaurantId(id);
-        setCurrentPage('restaurant');
+        setCurrentPage('restaurant', { restaurant: id });
     };
 
     const handleAddToCart = (product: any) => {
@@ -323,8 +435,19 @@ function AppContent() {
                         : item
                 );
             }
-            return [...prev, { product, quantity: 1 }];
+            return [...prev, { product, quantity: getMinimumOrderQuantity(product) }];
         });
+    };
+
+    const handleUpdateCartQuantity = (productId: string, delta: number) => {
+        setCart(prev => prev.flatMap(item => {
+            if (item.product.id !== productId) return [item];
+
+            const minimum = getMinimumOrderQuantity(item.product);
+            if (delta < 0 && item.quantity <= minimum) return [];
+
+            return [{ ...item, quantity: Math.max(minimum, item.quantity + delta) }];
+        }));
     };
 
     // Favorites State
@@ -353,7 +476,10 @@ function AppContent() {
     useEffect(() => {
         const onToken = (e: Event) => {
             const token = (e as CustomEvent<string>).detail;
-            if (token) handleLogin(token);
+            if (token) {
+                sessionStorage.removeItem('pending_google_token');
+                handleLogin(token);
+            }
         };
         window.addEventListener('mestigo-google-token', onToken);
         const pending = sessionStorage.getItem('pending_google_token');
@@ -372,7 +498,7 @@ function AppContent() {
     }, [needsProfileCompletion]);
 
     const handleLogout = async () => {
-        await firebaseLogout();
+        authLogout();
         localStorage.removeItem('token');
         localStorage.removeItem('user_avatar');
         localStorage.removeItem('user_id');
@@ -401,11 +527,7 @@ function AppContent() {
     }
 
     if (currentPage === 'partner') {
-        return (
-            <Suspense fallback={<PageSkeleton variant="generic" />}>
-                <PartnerApp />
-            </Suspense>
-        );
+        return <PartnerApp />;
     }
 
 
@@ -418,6 +540,7 @@ function AppContent() {
             }
         >
             <div className="app-container">
+                <SeoHead />
                 {needsProfileCompletion && <CompleteProfileModal onSuccess={handleLogin} />}
                 {isLoading && (
                     <LoadingScreen onComplete={() => {
@@ -431,7 +554,7 @@ function AppContent() {
                     So mostly hidden?
                     Let's update exclusion list to include 'login'.
                 */}
-                {!['home', 'login', 'menu', 'restaurant', 'cart', 'checkout', 'profile', 'favorites', 'payment', 'admin'].includes(currentPage) && window.location.pathname !== '/legal' && (
+                {!['home', 'login', 'forgot_password', 'menu', 'restaurant', 'cart', 'checkout', 'profile', 'favorites', 'payment', 'admin'].includes(currentPage) && !isLegalPath(window.location.pathname) && (
                     <nav style={{ padding: '0 2rem', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 100 }}>
                         <div className="logo" onClick={() => setCurrentPage(token ? 'menu' : 'home')} style={{ cursor: 'pointer' }}>
                             <img src="/Assets/general-green.png" alt="MESTIGO" style={{ height: '40px' }} />
@@ -447,7 +570,24 @@ function AppContent() {
                 {/* Page Content */}
                 <main style={{ minHeight: 'calc(100vh - 80px)' }}>
                     <Routes>
+                        <Route path="/verify" element={<VerifyEmailPage />} />
+                        <Route path="/auth/google/done" element={<AuthGoogleDonePage />} />
+                        <Route path="/:lang/auth/google/done" element={<AuthGoogleDonePage />} />
+                        <Route path="/reset-password" element={<ResetPasswordPage />} />
                         <Route path="/legal" element={<LegalInfoPage />} />
+                        <Route path="/terms" element={<LegalInfoPage />} />
+                        <Route path="/privacy" element={<LegalInfoPage />} />
+                        <Route path="/returns" element={<LegalInfoPage />} />
+                        <Route path="/refunds" element={<LegalInfoPage />} />
+                        <Route path="/contact" element={<LegalInfoPage />} />
+                        <Route path="/support" element={<LegalInfoPage />} />
+                        <Route path="/:lang/legal" element={<LegalInfoPage />} />
+                        <Route path="/:lang/terms" element={<LegalInfoPage />} />
+                        <Route path="/:lang/privacy" element={<LegalInfoPage />} />
+                        <Route path="/:lang/returns" element={<LegalInfoPage />} />
+                        <Route path="/:lang/refunds" element={<LegalInfoPage />} />
+                        <Route path="/:lang/contact" element={<LegalInfoPage />} />
+                        <Route path="/:lang/support" element={<LegalInfoPage />} />
                         <Route path="*" element={
                             <>
                                 {currentPage === 'home' && (
@@ -457,7 +597,14 @@ function AppContent() {
                                 )}
 
                                 {currentPage === 'login' && (
-                                    <LoginPage onLogin={handleLogin} />
+                                    <LoginPage
+                                        onLogin={handleLogin}
+                                        onForgotPassword={() => setCurrentPage('forgot_password')}
+                                    />
+                                )}
+
+                                {currentPage === 'forgot_password' && (
+                                    <ForgotPasswordPage onBack={() => setCurrentPage('login')} />
                                 )}
 
                                 {currentPage === 'menu' && (
@@ -469,7 +616,7 @@ function AppContent() {
                                         onUpdateAddress={handleUpdateAddress}
                                         userProfile={userProfile}
                                         onProfileClick={() => handleNavigate('profile')}
-                                        onOrderClick={(id) => { setSelectedOrderId(id); handleNavigate('order_status'); }}
+                                        onOrderClick={(id) => handleNavigate('order_status', { orderId: id })}
                                         onLogout={handleLogout}
                                         onNavigate={handleNavigate}
                                     />
@@ -493,7 +640,7 @@ function AppContent() {
                                         orderHistory={orderHistory}
                                         onLogout={handleLogout}
                                         onBack={() => setCurrentPage('menu')}
-                                        onOrderClick={(id: number) => { setSelectedOrderId(id); setCurrentPage('order_details'); }}
+                                        onOrderClick={(id: number) => setCurrentPage('order_details', { orderId: id })}
                                     />
                                 )}
                                 {/* Restaurant Page - Kept visible under Cart for overlay effect */}
@@ -505,14 +652,7 @@ function AppContent() {
                                         isFavorite={selectedRestaurantId ? favorites.includes(selectedRestaurantId) : false}
                                         onToggleFavorite={handleToggleFavorite}
                                         cart={cart}
-                                        onUpdateQuantity={(pid, delta) => {
-                                            setCart(prev => prev.map(item => {
-                                                if (item.product.id === pid) {
-                                                    return { ...item, quantity: item.quantity + delta };
-                                                }
-                                                return item;
-                                            }).filter(i => i.quantity > 0));
-                                        }}
+                                        onUpdateQuantity={handleUpdateCartQuantity}
                                         onClearCart={() => setCart([])}
                                         onNavigateToCart={() => setCurrentPage('cart')}
                                     />
@@ -533,15 +673,14 @@ function AppContent() {
                                                 <MobileCart
                                                     onBack={() => {
                                                         if (cart.length > 0) {
-                                                            setSelectedRestaurantId(cart[0].product.restaurant_id);
-                                                            setCurrentPage('restaurant');
+                                                            setCurrentPage('restaurant', { restaurant: cart[0].product.restaurant_id });
                                                         } else {
                                                             setCurrentPage('menu');
                                                         }
                                                     }}
                                                     initialCartItems={cart}
                                                     onClearCart={() => setCart([])}
-                                                    onUpdateQuantity={(pid: string, delta: number) => setCart(prev => prev.map(item => item.product.id === pid ? { ...item, quantity: item.quantity + delta } : item).filter(i => i.quantity > 0))}
+                                                    onUpdateQuantity={handleUpdateCartQuantity}
                                                     onAddToCart={handleAddToCart}
                                                     onCheckout={(data: { comment: string; cutlery: number }) => {
                                                         setCheckoutExtras(data);
@@ -553,15 +692,14 @@ function AppContent() {
                                                 <CartPage
                                                     onBack={() => {
                                                         if (cart.length > 0) {
-                                                            setSelectedRestaurantId(cart[0].product.restaurant_id);
-                                                            setCurrentPage('restaurant');
+                                                            setCurrentPage('restaurant', { restaurant: cart[0].product.restaurant_id });
                                                         } else {
                                                             setCurrentPage('menu');
                                                         }
                                                     }}
                                                     initialCartItems={cart}
                                                     onClearCart={() => setCart([])}
-                                                    onUpdateQuantity={(pid: string, delta: number) => setCart(prev => prev.map(item => item.product.id === pid ? { ...item, quantity: item.quantity + delta } : item).filter(i => i.quantity > 0))}
+                                                    onUpdateQuantity={handleUpdateCartQuantity}
                                                     onAddToCart={handleAddToCart}
                                                     onCheckout={(data: { comment: string, cutlery: number }) => {
                                                         setCheckoutExtras(data);
@@ -650,8 +788,7 @@ function AppContent() {
 
                                                     setCart([]);
                                                     setPendingOrderData(null);
-                                                    setSelectedOrderId(orderId);
-                                                    setCurrentPage('order_status');
+                                                    setCurrentPage('order_status', { orderId });
                                                 }}
                                             />
                                         ) : (
@@ -678,8 +815,7 @@ function AppContent() {
 
                                                     setCart([]);
                                                     setPendingOrderData(null);
-                                                    setSelectedOrderId(orderId);
-                                                    setCurrentPage('order_status');
+                                                    setCurrentPage('order_status', { orderId });
                                                 }}
                                             />
                                         )}
@@ -691,10 +827,7 @@ function AppContent() {
                                         <OrderStatus 
                                             orderId={selectedOrderId} 
                                             onBack={() => setCurrentPage('menu')} 
-                                            onViewDetails={(id) => {
-                                                setSelectedOrderId(id);
-                                                setCurrentPage('order_details');
-                                            }}
+                                            onViewDetails={(id) => setCurrentPage('order_details', { orderId: id })}
                                         />
                                     </div>
                                 )}
@@ -721,7 +854,7 @@ function AppContent() {
                 </main>
 
                 {/* Bottom Navigation - Hidden on Cart, Checkout, Restaurant, Home, Login, Admin, Favorites, Profile, Order Details */}
-                {!['cart', 'checkout', 'restaurant', 'home', 'login', 'admin', 'favorites', 'profile', 'order_details'].includes(currentPage) && window.location.pathname !== '/legal' && (
+                {!['cart', 'checkout', 'restaurant', 'home', 'login', 'forgot_password', 'admin', 'favorites', 'profile', 'order_details'].includes(currentPage) && !isLegalPath(window.location.pathname) && (
                     <LiquidNavBar activePage={currentPage} onNavigate={handleNavigate} />
                 )}
             </div>
@@ -736,7 +869,10 @@ function AppContent() {
                         </p>
                         <button 
                             onClick={() => {
-                                setCart([{ product: pendingProductToAdd, quantity: 1 }]);
+                                setCart([{
+                                    product: pendingProductToAdd,
+                                    quantity: getMinimumOrderQuantity(pendingProductToAdd),
+                                }]);
                                 setPendingProductToAdd(null);
                             }}
                             className="panel-btn-next"

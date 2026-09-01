@@ -3,6 +3,7 @@ import { useStore } from '../store/useStore';
 import { Toggle } from './UI/Toggle';
 import { Button } from './UI/Button';
 import { Bike, Star, Phone, CheckCircle, Package } from 'lucide-react';
+import { pickKitchenText } from '../../../utils/i18nContent';
 
 export const CourierDashboard: React.FC = () => {
   const {
@@ -251,7 +252,7 @@ export const CourierDashboard: React.FC = () => {
                       {activeCourierOrder.items.map((item, idx) => (
                         <div key={idx} className="flex justify-between text-xs text-zinc-300">
                           <span>
-                            <span className="text-[#00C853] font-bold mr-1">{item.quantity}x</span> {item.name}
+                            <span className="text-[#00C853] font-bold mr-1">{item.quantity}x</span> {pickKitchenText(item.name)}
                           </span>
                           <span className="font-medium">{item.price * item.quantity} ₾</span>
                         </div>

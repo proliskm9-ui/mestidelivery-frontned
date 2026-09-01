@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import FullPageLoader from '../../components/UI/FullPageLoader';
-import { adminApi } from '../../services/adminService';
+import { adminApi, type Restaurant } from '../../services/adminService';
 import { TrashIcon } from '../../components/icons/StatusIcons';
 import './AdminStyles.css';
+
+type RestMode = 'new' | 'existing';
 
 interface PartnerRequest {
     id: number;
@@ -74,12 +76,16 @@ const AdminPartners: React.FC = () => {
     const [password, setPassword] = useState('');
     
     // Restaurant fields
+    const [restMode, setRestMode] = useState<RestMode>('new');
     const [restName, setRestName] = useState('');
     const [restAddress, setRestAddress] = useState('');
     const [restDelivery, setRestDelivery] = useState('30-45 min');
+    const [existingRestaurants, setExistingRestaurants] = useState<Restaurant[]>([]);
+    const [selectedRestId, setSelectedRestId] = useState('');
+    const [loadingRestaurants, setLoadingRestaurants] = useState(false);
     
     // Success Data
-    const [createdPartner, setCreatedPartner] = useState<{role: string, username: string, pass: string} | null>(null);
+    const [createdPartner, setCreatedPartner] = useState<{role: string, username: string, pass: string, restaurant?: string} | null>(null);
 
     // --- REQUESTS STATE ---
     const [requests, setRequests] = useState<PartnerRequest[]>([]);
@@ -93,6 +99,33 @@ const AdminPartners: React.FC = () => {
             fetchRequests();
         }
     }, [view, filter]);
+
+    useEffect(() => {
+        if (wizardStep === 2 && role === 'restaurant') {
+            loadExistingRestaurants();
+        }
+    }, [wizardStep, role]);
+
+    const loadExistingRestaurants = async () => {
+        setLoadingRestaurants(true);
+        try {
+            let data: Restaurant[] | null = null;
+            try {
+                data = await adminApi.get<Restaurant[]>('/restaurants/admin');
+            } catch {
+                data = await adminApi.get<Restaurant[]>('/restaurants/');
+            }
+            const list = Array.isArray(data) ? data : [];
+            setExistingRestaurants(
+                [...list].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ru'))
+            );
+        } catch (err) {
+            console.error('Error loading restaurants:', err);
+            setExistingRestaurants([]);
+        } finally {
+            setLoadingRestaurants(false);
+        }
+    };
 
     const fetchRequests = async () => {
         setRequestsLoading(true);
@@ -196,13 +229,21 @@ const AdminPartners: React.FC = () => {
             setError('Пароль должен быть минимум 6 символов');
             return;
         }
-        if (role === 'restaurant' && !restName.trim()) {
-            setError('Укажите название ресторана');
-            return;
+        if (role === 'restaurant') {
+            if (restMode === 'new' && !restName.trim()) {
+                setError('Укажите название ресторана');
+                return;
+            }
+            if (restMode === 'existing' && !selectedRestId) {
+                setError('Выберите ресторан из списка');
+                return;
+            }
         }
 
         setLoading(true);
         try {
+            let linkedRestName = '';
+
             if (role === 'courier') {
                 await adminApi.post('/admin/users', {
                     username,
@@ -210,22 +251,30 @@ const AdminPartners: React.FC = () => {
                     role: 'courier'
                 });
             } else if (role === 'restaurant') {
-                // 1. Создаем ресторан
-                const createdRest = await adminApi.post<any>('/restaurants/', {
-                    name: restName,
-                    address: restAddress,
-                    delivery: restDelivery,
-                    rating: '5.0',
-                    img: '', // Default empty image
-                    screen: 'restaurant-default'
-                });
-                
-                const actualRestId = createdRest?.restaurant?.id || createdRest?.id;
-                if (!actualRestId) {
-                    throw new Error('Не удалось получить ID созданного ресторана от сервера');
+                let actualRestId: string;
+
+                if (restMode === 'existing') {
+                    actualRestId = selectedRestId;
+                    linkedRestName =
+                        existingRestaurants.find(r => String(r.id) === String(selectedRestId))?.name ||
+                        selectedRestId;
+                } else {
+                    const createdRest = await adminApi.post<any>('/restaurants/', {
+                        name: restName,
+                        address: restAddress,
+                        delivery: restDelivery,
+                        rating: '5.0',
+                        img: '',
+                        screen: 'restaurant-default'
+                    });
+
+                    actualRestId = createdRest?.restaurant?.id || createdRest?.id;
+                    if (!actualRestId) {
+                        throw new Error('Не удалось получить ID созданного ресторана от сервера');
+                    }
+                    linkedRestName = restName;
                 }
 
-                // 2. Создаем пользователя-админа для этого ресторана
                 await adminApi.post('/admin/users', {
                     username,
                     password,
@@ -237,7 +286,8 @@ const AdminPartners: React.FC = () => {
             setCreatedPartner({
                 role: role === 'courier' ? 'Курьер' : 'Ресторан',
                 username,
-                pass: password
+                pass: password,
+                restaurant: linkedRestName || undefined
             });
             setWizardStep(3);
         } catch (err: any) {
@@ -251,9 +301,11 @@ const AdminPartners: React.FC = () => {
         setRole(null);
         setUsername('');
         setPassword('');
+        setRestMode('new');
         setRestName('');
         setRestAddress('');
         setRestDelivery('30-45 min');
+        setSelectedRestId('');
         setCreatedPartner(null);
         setError('');
         setWizardStep(1);
@@ -261,7 +313,8 @@ const AdminPartners: React.FC = () => {
 
     const copyCredentials = () => {
         if (!createdPartner) return;
-        const text = `Партнер: ${createdPartner.role}\nЛогин: ${createdPartner.username}\nПароль: ${createdPartner.pass}\nСсылка для входа: https://mestidelivery.web.app/partners`;
+        const restLine = createdPartner.restaurant ? `\nРесторан: ${createdPartner.restaurant}` : '';
+        const text = `Партнер: ${createdPartner.role}${restLine}\nЛогин: ${createdPartner.username}\nПароль: ${createdPartner.pass}\nСсылка для входа: https://mestidelivery.com/partners`;
         navigator.clipboard.writeText(text);
         alert('Данные партнера успешно скопированы!');
     };
@@ -402,19 +455,88 @@ const AdminPartners: React.FC = () => {
                                 {role === 'restaurant' && (
                                     <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', padding: '24px', borderRadius: '16px', marginBottom: '24px' }}>
                                         <h3 className="section-subtitle">Данные ресторана</h3>
-                                        
-                                        <div className="form-group">
-                                            <label className="form-label">Название ресторана</label>
-                                            <input className="admin-input" value={restName} onChange={e => setRestName(e.target.value)} placeholder="Например: Дом Кубдари" required />
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '20px' }}>
+                                            <button
+                                                type="button"
+                                                onClick={() => { setRestMode('new'); setError(''); }}
+                                                style={{
+                                                    background: restMode === 'new' ? 'rgba(33, 234, 124, 0.12)' : 'rgba(255,255,255,0.03)',
+                                                    color: restMode === 'new' ? '#21EA7C' : 'var(--admin-text-muted)',
+                                                    border: restMode === 'new' ? '1px solid rgba(33, 234, 124, 0.35)' : '1px solid rgba(255,255,255,0.08)',
+                                                    borderRadius: '12px',
+                                                    padding: '12px 14px',
+                                                    fontSize: '0.9rem',
+                                                    fontWeight: 700,
+                                                    cursor: 'pointer',
+                                                }}
+                                            >
+                                                Новый ресторан
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => { setRestMode('existing'); setError(''); }}
+                                                style={{
+                                                    background: restMode === 'existing' ? 'rgba(33, 234, 124, 0.12)' : 'rgba(255,255,255,0.03)',
+                                                    color: restMode === 'existing' ? '#21EA7C' : 'var(--admin-text-muted)',
+                                                    border: restMode === 'existing' ? '1px solid rgba(33, 234, 124, 0.35)' : '1px solid rgba(255,255,255,0.08)',
+                                                    borderRadius: '12px',
+                                                    padding: '12px 14px',
+                                                    fontSize: '0.9rem',
+                                                    fontWeight: 700,
+                                                    cursor: 'pointer',
+                                                }}
+                                            >
+                                                Существующий
+                                            </button>
                                         </div>
-                                        <div className="form-group">
-                                            <label className="form-label">Адрес</label>
-                                            <input className="admin-input" value={restAddress} onChange={e => setRestAddress(e.target.value)} placeholder="Например: ул. Ираклия Абашидзе 25" />
-                                        </div>
-                                        <div className="form-group">
-                                            <label className="form-label">Время доставки (текст)</label>
-                                            <input className="admin-input" value={restDelivery} onChange={e => setRestDelivery(e.target.value)} placeholder="30-45 min" />
-                                        </div>
+
+                                        {restMode === 'existing' ? (
+                                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                                <label className="form-label">Выберите ресторан</label>
+                                                {loadingRestaurants ? (
+                                                    <div style={{ color: 'var(--admin-text-muted)', fontSize: '0.9rem', padding: '10px 0' }}>
+                                                        Загрузка списка...
+                                                    </div>
+                                                ) : existingRestaurants.length === 0 ? (
+                                                    <div style={{ color: '#ef4444', fontSize: '0.9rem', padding: '10px 0' }}>
+                                                        Рестораны не найдены. Создайте новый или заполните профиль в разделе «Рестораны».
+                                                    </div>
+                                                ) : (
+                                                    <select
+                                                        className="admin-input"
+                                                        value={selectedRestId}
+                                                        onChange={e => setSelectedRestId(e.target.value)}
+                                                        required
+                                                    >
+                                                        <option value="">— Выберите ресторан —</option>
+                                                        {existingRestaurants.map(r => (
+                                                            <option key={r.id} value={String(r.id)}>
+                                                                {r.name}{r.address ? ` · ${r.address}` : ''} ({r.id})
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                )}
+                                                <p style={{ margin: '10px 0 0', fontSize: '0.8rem', color: 'var(--admin-text-muted)', lineHeight: 1.4 }}>
+                                                    Аккаунт партнёра будет привязан к уже заполненному профилю — дубль не создаётся.
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="form-group">
+                                                    <label className="form-label">Название ресторана</label>
+                                                    <input className="admin-input" value={restName} onChange={e => setRestName(e.target.value)} placeholder="Например: Дом Кубдари" required={restMode === 'new'} />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label className="form-label">Адрес</label>
+                                                    <input className="admin-input" value={restAddress} onChange={e => setRestAddress(e.target.value)} placeholder="Например: ул. Ираклия Абашидзе 25" />
+                                                </div>
+                                                <div className="form-group" style={{ marginBottom: 0 }}>
+                                                    <label className="form-label">Время доставки (текст)</label>
+                                                    <input className="admin-input" value={restDelivery} onChange={e => setRestDelivery(e.target.value)} placeholder="30-45 min" />
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                 )}
 
@@ -430,8 +552,12 @@ const AdminPartners: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <button type="submit" className="admin-btn admin-btn-primary" style={{ width: '100%', padding: '16px', fontSize: '1.05rem' }} disabled={loading}>
-                                    {loading ? 'Создание профиля...' : 'Создать партнера'}
+                                <button type="submit" className="admin-btn admin-btn-primary" style={{ width: '100%', padding: '16px', fontSize: '1.05rem' }} disabled={loading || (role === 'restaurant' && restMode === 'existing' && (loadingRestaurants || !selectedRestId))}>
+                                    {loading
+                                        ? 'Создание профиля...'
+                                        : role === 'restaurant' && restMode === 'existing'
+                                            ? 'Привязать партнера'
+                                            : 'Создать партнера'}
                                 </button>
                             </form>
                         </div>
@@ -469,6 +595,12 @@ const AdminPartners: React.FC = () => {
                                     <span style={{ color: 'var(--admin-text-muted)' }}>Роль:</span> 
                                     <strong style={{ color: '#fff' }}>{createdPartner.role}</strong>
                                 </div>
+                                {createdPartner.restaurant && (
+                                    <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+                                        <span style={{ color: 'var(--admin-text-muted)', flexShrink: 0 }}>Ресторан:</span>
+                                        <strong style={{ color: '#fff', textAlign: 'right' }}>{createdPartner.restaurant}</strong>
+                                    </div>
+                                )}
                                 <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <span style={{ color: 'var(--admin-text-muted)' }}>Логин:</span> 
                                     <strong style={{ color: '#21EA7C', fontSize: '1.1rem' }}>{createdPartner.username}</strong>
@@ -479,7 +611,7 @@ const AdminPartners: React.FC = () => {
                                 </div>
                                 <div style={{ padding: '12px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', fontSize: '0.85rem', color: 'var(--admin-text-muted)', lineHeight: '1.5' }}>
                                     Ссылка для входа: <br/>
-                                    <strong style={{ color: '#fff' }}>https://mestidelivery.web.app/partners</strong>
+                                    <strong style={{ color: '#fff' }}>https://mestidelivery.com/partners</strong>
                                 </div>
                             </div>
 

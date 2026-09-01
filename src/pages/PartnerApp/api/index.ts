@@ -5,14 +5,16 @@ export interface OrderItem {
 }
 
 export type OrderStatus =
-  | 'new'          // Ресторан: Новый заказ, ожидает подтверждения
-  | 'confirmed'    // Ресторан: Подтвержден, но еще не на кухне
-  | 'preparing'    // Ресторан: Готовится на кухне
-  | 'ready'        // Ресторан: Готов к выдаче (Курьер: Доступен для взятия)
-  | 'picked_up'    // Курьер: Забрал из ресторана, везет клиенту
-  | 'arrived'      // Курьер: Прибыл к клиенту, ожидает передачи
-  | 'delivered'    // Завершен: Успешно доставлен
-  | 'cancelled';   // Завершен: Отменен
+  | 'new'
+  | 'confirmed'
+  | 'preparing'
+  | 'ready'
+  | 'picked_up'
+  | 'arrived'
+  | 'delivered'
+  | 'cancelled';
+
+export type CourierAction = 'accept' | 'arrived_rest' | 'waiting' | 'pick_up' | 'complete';
 
 export interface Order {
   id: string;
@@ -26,23 +28,115 @@ export interface Order {
   items: OrderItem[];
   createdAt: string;
   assignedCourierName?: string;
+  phone?: string;
+  comment?: string;
+  atRestaurant?: boolean;
 }
 
-const BASE_URL = (import.meta.env.VITE_API_URL ?? 'https://mestigo.opik.net').replace(/\/$/, '');
+const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 
-// Вспомогательный метод для получения JWT токена
-const getHeaders = () => {
-  const token = localStorage.getItem('delivery_jwt_token');
-  const headers: HeadersInit = {
+const ACCESS_KEY = 'delivery_jwt_token';
+const REFRESH_KEY = 'partner_refresh_token';
+
+export class PartnerAuthError extends Error {
+  constructor(message = 'Сессия истекла') {
+    super(message);
+    this.name = 'PartnerAuthError';
+  }
+}
+
+const getHeaders = (extra?: HeadersInit): HeadersInit => {
+  const token = localStorage.getItem(ACCESS_KEY);
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers.Authorization = `Bearer ${token}`;
+  if (extra) {
+    const e = new Headers(extra);
+    e.forEach((v, k) => {
+      headers[k] = v;
+    });
   }
   return headers;
 };
 
-// Хелпер для маппинга заказов с бэкенда во фронтенд
+const clearAuthStorage = () => {
+  localStorage.removeItem(ACCESS_KEY);
+  localStorage.removeItem(REFRESH_KEY);
+  localStorage.removeItem('admin_token');
+  localStorage.removeItem('partner_auth_method');
+};
+
+const notifyAuthExpired = () => {
+  window.dispatchEvent(new CustomEvent('partner-auth-expired'));
+};
+
+let refreshPromise: Promise<boolean> | null = null;
+
+const refreshAccessToken = async (): Promise<boolean> => {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    const refresh = localStorage.getItem(REFRESH_KEY);
+    if (!refresh) return false;
+    try {
+      const response = await fetch(`${BASE_URL}/api/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: refresh }),
+      });
+      if (!response.ok) return false;
+      const data = await response.json();
+      const access = data.access_token || data.token;
+      const nextRefresh = data.refresh_token;
+      if (!access) return false;
+      localStorage.setItem(ACCESS_KEY, access);
+      localStorage.setItem('admin_token', access);
+      if (nextRefresh) localStorage.setItem(REFRESH_KEY, nextRefresh);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+};
+
+/** Authenticated fetch with one-shot refresh on 401. */
+const partnerFetch = async (path: string, init: RequestInit = {}): Promise<Response> => {
+  const url = path.startsWith('http') ? path : `${BASE_URL}${path}`;
+  const doFetch = () =>
+    fetch(url, {
+      ...init,
+      headers: getHeaders(init.headers),
+    });
+
+  let response = await doFetch();
+  if (response.status !== 401) return response;
+
+  const refreshed = await refreshAccessToken();
+  if (!refreshed) {
+    clearAuthStorage();
+    notifyAuthExpired();
+    throw new PartnerAuthError('Сессия истекла — войдите снова');
+  }
+
+  response = await doFetch();
+  if (response.status === 401) {
+    clearAuthStorage();
+    notifyAuthExpired();
+    throw new PartnerAuthError('Сессия истекла — войдите снова');
+  }
+  return response;
+};
+
+const asOrderArray = (data: unknown): Order[] => {
+  if (!Array.isArray(data)) return [];
+  return data.map(mapBackendOrderToFrontend);
+};
+
 export const mapBackendOrderToFrontend = (bo: any): Order => {
   let itemsParsed: OrderItem[] = [];
   if (bo.items) {
@@ -51,10 +145,10 @@ export const mapBackendOrderToFrontend = (bo: any): Order => {
       itemsParsed = itemsParsed.map((it: any) => ({
         name: it.name || it.product_id || 'Товар',
         quantity: it.quantity || 1,
-        price: it.price || 0
+        price: it.price || 0,
       }));
     } catch (e) {
-      console.error("Error parsing items:", e);
+      console.error('Error parsing items:', e);
     }
   }
 
@@ -63,44 +157,63 @@ export const mapBackendOrderToFrontend = (bo: any): Order => {
   else if (bo.status === 'confirmed' || bo.status === 'accepted') status = 'confirmed';
   else if (bo.status === 'preparing') status = 'preparing';
   else if (bo.status === 'ready') status = 'ready';
-  else if (bo.status === 'delivering') {
-    // Во время доставки курьер может быть в пути (picked_up) или уже у двери (arrived).
-    // Будем использовать локальное сохранение статуса 'arrived' для сохранения состояния на клиенте.
-    const localArrived = localStorage.getItem(`order_arrived_${bo.id}`);
-    status = localArrived === 'true' ? 'arrived' : 'picked_up';
-  }
+  else if (bo.status === 'delivering') status = 'picked_up';
   else if (bo.status === 'delivered') status = 'delivered';
   else if (bo.status === 'cancelled') status = 'cancelled';
 
+  const scrub = (v: unknown) => {
+    const s = String(v ?? '').trim();
+    if (!s) return '';
+    const low = s.toLowerCase();
+    if (low === 'unknown restaurant' || low === 'unknown address' || low === 'unknown') return '';
+    return s;
+  };
+
+  const atRestaurant =
+    localStorage.getItem(`order_at_restaurant_${bo.id}`) === '1' ||
+    Boolean(bo.courier_confirmed);
+
   return {
     id: String(bo.id),
-    restaurantName: bo.restaurant_name || 'SUNSET RESTAURANT',
-    pickupAddress: bo.restaurant_address || 'Тбилиси, ул. Ираклия Абашидзе 25',
-    deliveryAddress: bo.address || 'Не указан',
-    distanceKm: bo.distance_km || 2.4,
-    deliveryFee: bo.delivery_fee || 5.0,
+    restaurantName: scrub(bo.restaurant_name),
+    pickupAddress: scrub(bo.restaurant_address),
+    deliveryAddress: scrub(bo.address),
+    distanceKm: typeof bo.distance_km === 'number' ? bo.distance_km : 0,
+    deliveryFee: typeof bo.delivery_fee === 'number' ? bo.delivery_fee : 0,
     totalAmount: bo.total || bo.totalAmount || 0,
     status,
     items: itemsParsed,
     createdAt: bo.created_at || new Date().toISOString(),
-    assignedCourierName: bo.courier_id ? `Курьер #${bo.courier_id}` : undefined
-  };
+    assignedCourierName: bo.courier_id ? `Курьер #${bo.courier_id}` : undefined,
+    comment: typeof bo.comment === 'string' ? bo.comment : '',
+    atRestaurant,
+    ...(bo.phone || bo.customer_phone ? { phone: bo.phone || bo.customer_phone } : {}),
+  } as Order;
 };
 
+/** Next courier CTA matching bot next_allowed_action. */
+export function resolveCourierAction(
+  status: OrderStatus,
+  atRestaurant: boolean,
+): CourierAction {
+  if (status === 'picked_up' || status === 'arrived') return 'complete';
+  if (status === 'ready' && atRestaurant) return 'pick_up';
+  if (status === 'ready' && !atRestaurant) return 'arrived_rest';
+  if (!atRestaurant && ['new', 'confirmed', 'preparing'].includes(status)) return 'arrived_rest';
+  if (atRestaurant && status === 'preparing') return 'waiting';
+  if (atRestaurant && ['new', 'confirmed'].includes(status)) return 'waiting';
+  return 'waiting';
+}
+
 export const api = {
-  // Авторизация по логину и паролю
   login: async (username: string, password?: string): Promise<{ token: string; user: any }> => {
     let finalPassword = password || '123';
-    if (!password) {
-      if (username === 'admin') {
-        finalPassword = 'admin123';
-      }
-    }
-    
+    if (!password && username === 'admin') finalPassword = 'admin123';
+
     const response = await fetch(`${BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password: finalPassword })
+      body: JSON.stringify({ username, password: finalPassword }),
     });
 
     if (!response.ok) {
@@ -108,12 +221,15 @@ export const api = {
     }
 
     const data = await response.json();
-    localStorage.setItem('delivery_jwt_token', data.token);
+    localStorage.setItem(ACCESS_KEY, data.token);
     localStorage.setItem('admin_token', data.token);
+    if (data.refresh_token) {
+      localStorage.setItem(REFRESH_KEY, data.refresh_token);
+    }
     if (data.user) {
       localStorage.setItem('admin_user', JSON.stringify(data.user));
     }
-    
+
     if (data.user?.restaurant_id) {
       localStorage.setItem('partner_role_id', data.user.restaurant_id);
     } else if (data.user?.id) {
@@ -122,68 +238,62 @@ export const api = {
     return data;
   },
 
-  // Telegram Пароль-лес вход для Mini App
-  telegramLogin: async (telegramId: number, username?: string, name?: string): Promise<{ token: string; user: any }> => {
-    const response = await fetch(`${BASE_URL}/api/auth/telegram-login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        telegram_id: telegramId,
-        username: username || `courier_${telegramId}`,
-        first_name: name
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error('Ошибка Telegram-авторизации');
+  /** Ensure access token is valid (refresh if needed). Returns false if must re-login. */
+  ensureSession: async (): Promise<boolean> => {
+    const access = localStorage.getItem(ACCESS_KEY);
+    const refresh = localStorage.getItem(REFRESH_KEY);
+    if (!refresh) {
+      if (access) {
+        // Legacy session without refresh — force re-login once.
+        clearAuthStorage();
+      }
+      return false;
     }
 
-    const data = await response.json();
-    localStorage.setItem('delivery_jwt_token', data.token);
-    return data;
+    if (access) {
+      try {
+        const payload = JSON.parse(atob(access.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        const expMs = (payload?.exp ?? 0) * 1000;
+        if (expMs > Date.now() + 20_000) return true;
+      } catch {
+        // fall through to refresh
+      }
+    }
+
+    return refreshAccessToken();
   },
 
-  // Получить статистику курьера
+  clearSession: clearAuthStorage,
+
   getStats: async (): Promise<any> => {
-    const response = await fetch(`${BASE_URL}/api/courier/stats`, {
-      headers: getHeaders()
-    });
+    const response = await partnerFetch('/api/courier/stats');
     if (!response.ok) throw new Error('Ошибка загрузки статистики');
     return response.json();
   },
 
-  // Получить доступные (свободные) заказы для курьера
   getAvailableOrders: async (): Promise<Order[]> => {
-    const response = await fetch(`${BASE_URL}/api/courier/available-orders`, {
-      headers: getHeaders()
-    });
-    if (!response.ok) throw new Error('Ошибка загрузки свободных заказов');
+    const response = await partnerFetch('/api/courier/available-orders');
+    if (!response.ok) {
+      const detail = await response.text().catch(() => '');
+      throw new Error(detail || 'Ошибка загрузки свободных заказов');
+    }
     const data = await response.json();
-    return data
-      .map(mapBackendOrderToFrontend)
-      .filter((o: Order) => o.status === 'ready' || o.status === 'picked_up' || o.status === 'arrived');
+    return asOrderArray(data).filter((o) => !['delivered', 'cancelled'].includes(o.status));
   },
 
-  // Получить заказы текущего курьера
   getMyOrders: async (): Promise<Order[]> => {
-    const response = await fetch(`${BASE_URL}/api/courier/my-orders`, {
-      headers: getHeaders()
-    });
+    const response = await partnerFetch('/api/courier/my-orders');
     if (!response.ok) throw new Error('Ошибка загрузки моих заказов');
     const data = await response.json();
-    return data.map(mapBackendOrderToFrontend);
+    return asOrderArray(data);
   },
 
-  // Получить ВСЕ заказы (активные) для админа/ресторана
   getRestaurantActiveOrders: async (): Promise<Order[]> => {
     const roleId = localStorage.getItem('partner_role_id');
     const query = roleId ? `?role=restaurant_admin&role_id=${roleId}` : '?role=restaurant_admin';
-    const response = await fetch(`${BASE_URL}/api/orders${query}`, {
-      headers: getHeaders()
-    });
+    const response = await partnerFetch(`/api/orders${query}`);
     if (!response.ok) throw new Error('Ошибка загрузки заказов ресторана');
     const data = await response.json();
-    // Фильтруем только активные статусы, исключая те, что ожидают оплату
     return data
       .filter((o: any) => {
         const isOnlinePending = o.status === 'pending' && o.comment?.includes('[Оплата: Онлайн]');
@@ -193,13 +303,10 @@ export const api = {
       .map(mapBackendOrderToFrontend);
   },
 
-  // Получить историю выполненных/отмененных заказов
   getRestaurantHistoricOrders: async (): Promise<Order[]> => {
     const roleId = localStorage.getItem('partner_role_id');
     const query = roleId ? `?role=restaurant_admin&role_id=${roleId}` : '?role=restaurant_admin';
-    const response = await fetch(`${BASE_URL}/api/orders${query}`, {
-      headers: getHeaders()
-    });
+    const response = await partnerFetch(`/api/orders${query}`);
     if (!response.ok) throw new Error('Ошибка загрузки истории заказов');
     const data = await response.json();
     return data
@@ -207,84 +314,94 @@ export const api = {
       .map(mapBackendOrderToFrontend);
   },
 
-  // Курьер: Принять заказ
   takeOrder: async (orderId: string): Promise<void> => {
-    const response = await fetch(`${BASE_URL}/api/courier/take-order/${orderId}`, {
-      method: 'POST',
-      headers: getHeaders()
-    });
+    const response = await partnerFetch(`/api/courier/take-order/${orderId}`, { method: 'POST' });
     if (!response.ok) throw new Error('Не удалось принять заказ');
   },
 
-  // Курьер: Обновить статус онлайн/офлайн
   updateCourierStatus: async (isOnline: boolean): Promise<void> => {
-    const response = await fetch(`${BASE_URL}/api/courier/status`, {
+    const response = await partnerFetch('/api/courier/status', {
       method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ is_online: isOnline })
+      body: JSON.stringify({ is_online: isOnline }),
     });
     if (!response.ok) throw new Error('Не удалось изменить статус линии');
   },
 
-  // Обновить статус заказа (Ресторан)
-  updateOrderStatusRestaurant: async (orderId: string, status: 'confirmed' | 'preparing' | 'ready'): Promise<void> => {
-    const response = await fetch(`${BASE_URL}/api/orders/${orderId}/status`, {
+  updateOrderStatusRestaurant: async (
+    orderId: string,
+    status: 'confirmed' | 'preparing' | 'ready',
+  ): Promise<void> => {
+    const response = await partnerFetch(`/api/orders/${orderId}/status`, {
       method: 'PATCH',
-      headers: getHeaders(),
-      body: JSON.stringify({ status })
+      body: JSON.stringify({ status }),
     });
     if (!response.ok) throw new Error('Не удалось обновить статус заказа');
   },
 
-  // Отменить заказ (Ресторан)
   cancelOrder: async (orderId: string): Promise<void> => {
-    const response = await fetch(`${BASE_URL}/api/orders/${orderId}`, {
-      method: 'DELETE',
-      headers: getHeaders()
-    });
+    const response = await partnerFetch(`/api/orders/${orderId}`, { method: 'DELETE' });
     if (!response.ok) throw new Error('Не удалось отменить заказ');
   },
 
-  // Курьер: Локальное обновление до 'arrived' и отправка гео или статуса
-  advanceOrderCourier: async (orderId: string, currentStatus: OrderStatus): Promise<void> => {
-    if (currentStatus === 'ready') {
-      // Забираем заказ из ресторана
-      const response = await fetch(`${BASE_URL}/api/courier/pick-up/${orderId}`, {
-        method: 'POST',
-        headers: getHeaders()
-      });
-      if (!response.ok) throw new Error('Не удалось забрать заказ');
-    } else if (currentStatus === 'picked_up') {
-      // Сохраняем локально, что курьер прибыл к клиенту
-      localStorage.setItem(`order_arrived_${orderId}`, 'true');
-    } else if (currentStatus === 'arrived') {
-      // Завершаем заказ на бэкенде
-      const response = await fetch(`${BASE_URL}/api/courier/complete-delivery/${orderId}`, {
-        method: 'POST',
-        headers: getHeaders()
-      });
+  advanceOrderCourier: async (orderId: string, currentStatus: OrderStatus, atRestaurant = false): Promise<void> => {
+    const action = resolveCourierAction(currentStatus, atRestaurant);
+    if (action === 'arrived_rest') {
+      const response = await partnerFetch(`/api/courier/arrived-restaurant/${orderId}`, { method: 'POST' });
+      if (!response.ok) {
+        if (response.status === 404) {
+          await partnerFetch('/api/courier/confirm-handover', {
+            method: 'POST',
+            body: JSON.stringify({ order_id: Number(orderId), confirmed_by: 'courier' }),
+          }).catch(() => null);
+          localStorage.setItem(`order_at_restaurant_${orderId}`, '1');
+          return;
+        }
+        const detail = await response.text().catch(() => '');
+        throw new Error(detail || 'Не удалось отметить прибытие');
+      }
+      localStorage.setItem(`order_at_restaurant_${orderId}`, '1');
+      return;
+    }
+    if (action === 'pick_up') {
+      const response = await partnerFetch(`/api/courier/pick-up/${orderId}`, { method: 'POST' });
+      if (response.ok) return;
+      if (response.status === 404) {
+        const fallback = await partnerFetch(`/api/orders/${orderId}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: 'delivering' }),
+        });
+        if (!fallback.ok) {
+          const detail = await fallback.text().catch(() => '');
+          throw new Error(detail || 'Не удалось забрать заказ');
+        }
+        return;
+      }
+      const detail = await response.text().catch(() => '');
+      throw new Error(detail || 'Не удалось забрать заказ');
+    }
+    if (action === 'complete') {
+      const response = await partnerFetch(`/api/courier/complete-delivery/${orderId}`, { method: 'POST' });
       if (!response.ok) throw new Error('Не удалось завершить заказ');
+      localStorage.removeItem(`order_at_restaurant_${orderId}`);
       localStorage.removeItem(`order_arrived_${orderId}`);
     }
   },
 
-  // Создать новый заказ рестораном
   createOrderRestaurant: async (items: OrderItem[]): Promise<Order> => {
-    const response = await fetch(`${BASE_URL}/api/orders`, {
+    const response = await partnerFetch('/api/orders', {
       method: 'POST',
-      headers: getHeaders(),
       body: JSON.stringify({
         user_id: `partner_restaurant_${Date.now()}`,
         restaurant_id: 'kubdari',
         restaurant_name: 'ДОМ КУБДАРИ',
-        items: items,
-        total: items.reduce((sum, item) => sum + item.price * item.quantity, 0) + 5, // Сумма + доставка
+        items,
+        total: items.reduce((sum, item) => sum + item.price * item.quantity, 0) + 5,
         customer_name: 'Иван Курьерский',
         phone: '+79998887766',
         address: 'ул. Пушкина, д. 10, кв. 25',
         comment: 'Доставка через Mini App',
-        payment_method: 'cash'
-      })
+        payment_method: 'cash',
+      }),
     });
 
     if (!response.ok) throw new Error('Не удалось создать заказ');
@@ -292,20 +409,21 @@ export const api = {
     return mapBackendOrderToFrontend(data);
   },
 
-  // Отправка координат курьера
-  updateLocation: async (latitude: number, longitude: number, heading?: number, speed?: number): Promise<void> => {
-    const token = localStorage.getItem('delivery_jwt_token');
-    if (!token) return; // Не отправляем без токена
-    
-    await fetch(`${BASE_URL}/api/courier/location`, {
+  updateLocation: async (
+    latitude: number,
+    longitude: number,
+    heading?: number,
+    speed?: number,
+  ): Promise<void> => {
+    if (!localStorage.getItem(ACCESS_KEY)) return;
+    await partnerFetch('/api/courier/location', {
       method: 'POST',
-      headers: getHeaders(),
       body: JSON.stringify({
         latitude,
         longitude,
         heading: heading || 0,
-        speed: speed || 0
-      })
+        speed: speed || 0,
+      }),
     });
-  }
+  },
 };

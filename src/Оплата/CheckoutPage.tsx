@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import './CheckoutPage.css';
 import { useLanguage } from '../translations/LanguageContext';
+import { api } from '../services/api';
 import { getDeliveryFeeForAddress } from '../utils/deliveryCalculator';
 import { useDeliveryLocationOptional } from '../delivery/DeliveryLocationContext';
+import {
+  closedBadgeText,
+  generateRestaurantSlots,
+  isRestaurantOpenNow,
+} from '../utils/workingHours';
 
 // === БЛОКИ ===
 import HeaderBlock from './blocks/HeaderBlock/HeaderBlock';
@@ -77,8 +83,9 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
   initialAddress,
   cartItems
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const deliveryLoc = useDeliveryLocationOptional();
+  const [workingHours, setWorkingHours] = useState('');
   // Load saved address from prop or localStorage
   const savedAddressRaw = localStorage.getItem('user_address');
   const savedAddress = initialAddress || (savedAddressRaw ? (() => { try { return JSON.parse(savedAddressRaw); } catch { return null; } })() : null);
@@ -108,6 +115,34 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
     promoCode: '',
     tip: 0
   });
+
+  const rid = cartItems?.[0]?.product?.restaurant_id || null;
+  useEffect(() => {
+    if (!rid) return;
+    let cancelled = false;
+    api.getRestaurant(String(rid)).then((r) => {
+      if (cancelled || !r) return;
+      const hours = r.working_hours || '';
+      setWorkingHours(hours);
+      if (!isRestaurantOpenNow(hours)) {
+        const slots = generateRestaurantSlots(hours);
+        setOrderData((prev) => ({
+          ...prev,
+          deliveryType: 'scheduled',
+          scheduledTime: slots[0]?.value || prev.scheduledTime,
+        }));
+      }
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [rid]);
+
+  const restaurantOpen = useMemo(() => isRestaurantOpenNow(workingHours), [workingHours]);
+  const closedHint = useMemo(() => closedBadgeText(workingHours, language), [workingHours, language]);
+  const scheduledDisplay = useMemo(() => {
+    if (!orderData.scheduledTime) return null;
+    const slots = generateRestaurantSlots(workingHours);
+    return slots.find((s) => s.value === orderData.scheduledTime)?.label || orderData.scheduledTime;
+  }, [orderData.scheduledTime, workingHours]);
 
   // 2. СОСТОЯНИЕ МОДАЛОК
   const [modals, setModals] = useState<ModalState>({
@@ -140,6 +175,10 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
   // Логика выбора времени (сброс на Стандарт)
   const handleTimeSelect = (timeSlot: string | null): void => {
     if (timeSlot === null) {
+      if (!restaurantOpen) {
+        toggleModal('time', false);
+        return;
+      }
       setOrderData(prev => ({
         ...prev,
         scheduledTime: null,
@@ -192,6 +231,15 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
       return;
     }
 
+    if (!restaurantOpen && orderData.deliveryType !== 'scheduled') {
+      alert(closedHint || 'Ресторан закрыт. Выберите доставку ко времени.');
+      return;
+    }
+    if (orderData.deliveryType === 'scheduled' && !orderData.scheduledTime) {
+      alert('Выберите время доставки');
+      return;
+    }
+
     if (onProceedToPayment) {
       const geoParts = String(addr.geo || '')
         .split(',')
@@ -224,6 +272,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
           deliveryType={orderData.deliveryType}
           onBack={handleBack}
           setDeliveryType={(type: DeliveryType) => {
+            if (type === 'standard' && !restaurantOpen) return;
             setOrderData(prev => ({
               ...prev,
               deliveryType: type,
@@ -231,8 +280,11 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
             }));
           }}
           scheduledTime={orderData.scheduledTime}
+          scheduledDisplay={scheduledDisplay}
           setScheduledTime={(val: string) => updateOrder('scheduledTime', val || null)}
           onOpenTimeModal={() => toggleModal('time', true)}
+          asapDisabled={!restaurantOpen}
+          closedHint={closedHint}
         />
 
         <div className="checkout-content">
@@ -293,6 +345,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
             onClose={() => toggleModal('time', false)}
             currentTime={orderData.scheduledTime}
             onSelect={handleTimeSelect}
+            workingHours={workingHours}
           />
         )}
 

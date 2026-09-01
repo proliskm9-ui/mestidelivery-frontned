@@ -1,6 +1,7 @@
-/** Survives full page reload — Google identity after popup/redirect */
+/** Survives full page reload — Google identity after OAuth redirect */
 export const GOOGLE_USER_KEY = 'mestigo_google_user';
 export const GOOGLE_TOKEN_KEY = 'pending_google_token';
+export const GOOGLE_PENDING_TOKEN_KEY = 'google_pending_token';
 
 export interface PendingGoogleIdentity {
   uid: string;
@@ -27,19 +28,4 @@ export function loadPendingGoogleUser(): PendingGoogleIdentity | null {
 
 export function clearPendingGoogleUser() {
   sessionStorage.removeItem(GOOGLE_USER_KEY);
-}
-
-export function identityFromFirebaseUser(user: {
-  uid: string;
-  email: string | null;
-  displayName: string | null;
-  photoURL: string | null;
-}): PendingGoogleIdentity | null {
-  if (!user.email) return null;
-  return {
-    uid: user.uid,
-    email: user.email,
-    displayName: user.displayName || '',
-    photoURL: user.photoURL || '',
-  };
 }

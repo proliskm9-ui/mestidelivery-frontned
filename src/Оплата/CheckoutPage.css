@@ -4,7 +4,7 @@
 
 
 .mobile-checkout-wrapper .page {
-  width: 393px;
+  width: 100%; max-width: 600px;
   max-width: 100%;
   min-height: 100vh;
   margin: 0 auto;
@@ -38,7 +38,7 @@ body:has(.mobile-checkout-wrapper),
 }
 
 .mobile-checkout-wrapper .checkout-content {
-  width: 393px;
+  width: 100%; max-width: 600px;
   max-width: 100%;
   flex: 1;
   display: flex;

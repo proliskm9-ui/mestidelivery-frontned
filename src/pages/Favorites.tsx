@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api, Restaurant, Store } from '../services/api';
 import { useLanguage } from '../translations/LanguageContext';
+import { matchesI18nContent } from '../utils/i18nContent';
 import RestaurantCard from '../components/UI/RestaurantCard';
 import StoreCard from '../components/UI/StoreCard';
 import FullPageLoader from '../components/UI/FullPageLoader';
@@ -44,12 +45,12 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
 
     const favoriteRestaurants = allRestaurants.filter(r =>
         favorites.includes(r.id) &&
-        r.name.toLowerCase().includes(searchQuery.toLowerCase())
+        matchesI18nContent(r.name, searchQuery)
     );
 
     const favoriteStores = allStores.filter(s =>
         favorites.includes(s.id) &&
-        s.name.toLowerCase().includes(searchQuery.toLowerCase())
+        matchesI18nContent(s.name, searchQuery)
     );
 
     const totalFavoritesCount = favorites.length;

@@ -61,103 +61,10 @@ function MetricCard({ title, value, percentage, subtext, color }: { title: strin
   );
 }
 
-// Small circular progress for the 2x2 metric grid
-function SmallCircularProgress({ value, color }: { value: number; color: string }) {
-  const r = 14;
-  const circ = 2 * Math.PI * r;
-  const safe = isNaN(value) ? 0 : Math.max(0, Math.min(100, value));
-  const offset = circ - (safe / 100) * circ;
-  return (
-    <div style={{ position: 'relative', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
-      <svg width="36" height="36" style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx="18" cy="18" r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3" />
-        <circle cx="18" cy="18" r={r} fill="none" stroke={color} strokeWidth="3"
-          strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
-          style={{ transition: 'stroke-dashoffset 1s ease-out' }} />
-      </svg>
-      <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '9px', fontWeight: 800, color: '#fff', lineHeight: 1, marginTop: '0.5px' }}>{safe}%</span>
-    </div>
-  );
-}
 
-// Mobile metric tile for 2x2 grid
-function MobileMetricTile({
-  title, value, subtext, color, percentage, onClick
-}: {
-  title: string; value: React.ReactNode; subtext: string;
-  color: string; percentage: number; onClick?: () => void;
-}) {
-  return (
-    <div
-      onClick={onClick}
-      className={onClick ? 'cursor-pointer active:scale-[0.98] transition-all' : ''}
-      style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.07)',
-        borderRadius: 20,
-        padding: '14px 12px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 2,
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Accent glow corner */}
-      <div style={{
-        position: 'absolute', top: 0, right: 0,
-        width: 50, height: 50,
-        background: `radial-gradient(circle at top right, ${color}15, transparent 70%)`,
-        pointerEvents: 'none',
-      }} />
-      <span style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px', color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap' }}>
-        {title}
-      </span>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 2, gap: 4 }}>
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, lineHeight: 1.1, color: '#fff', letterSpacing: '-0.5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</div>
-          <div style={{ fontSize: '0.68rem', fontWeight: 600, color: color, marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{subtext}</div>
-        </div>
-        <SmallCircularProgress value={percentage} color={color} />
-      </div>
-    </div>
-  );
-}
 
-// Quick action row tile
-function QuickActionTile({
-  icon, iconBg, iconColor, label, desc, onClick
-}: {
-  icon: React.ReactNode; iconBg: string; iconColor: string;
-  label: string; desc: string; onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-4 w-full text-left active:scale-[0.98] transition-all"
-      style={{
-        padding: '16px',
-        borderRadius: 18,
-        background: 'rgba(255,255,255,0.02)',
-        border: '1px solid rgba(255,255,255,0.06)',
-      }}
-    >
-      <div style={{
-        width: 44, height: 44, borderRadius: 14,
-        background: iconBg, color: iconColor,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        flexShrink: 0,
-      }}>
-        {icon}
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontSize: '0.9rem', fontWeight: 700, margin: 0, color: '#fff' }}>{label}</p>
-        <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', margin: '3px 0 0 0' }}>{desc}</p>
-      </div>
-      <ArrowRight size={16} style={{ color: 'rgba(255,255,255,0.25)', flexShrink: 0 }} />
-    </button>
-  );
-}
+
+// --- Restaurant Home View ---
 
 // 1. HOME VIEW
 export const RestaurantHome: React.FC<ViewProps> = ({
@@ -169,257 +76,107 @@ export const RestaurantHome: React.FC<ViewProps> = ({
 }) => {
   const activeCount = activeOrders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length;
   const cancelledCount = [...activeOrders, ...historicOrders].filter(o => o.status === 'cancelled').length;
-
-  const revenueGoal = 5000;
-  const revenuePercent = Math.min(Math.round((restaurantRevenue / revenueGoal) * 100) || 0, 100);
-  const activePercent = Math.min(activeCount * 20, 100);
-
   const totalOrders = [...activeOrders, ...historicOrders].length;
-  const cancelledPercent = totalOrders > 0 ? Math.min(Math.round((cancelledCount / totalOrders) * 100), 100) : 0;
+  const deliveredCount = historicOrders.filter(o => o.status === 'delivered').length;
 
   return (
-    <div className="w-full flex flex-col gap-6">
-
-      {/* ── Page header (Shown on both mobile and desktop) ── */}
-      <div className="page-header flex flex-col items-start gap-1 lg:flex-row lg:items-center" style={{ marginBottom: 0 }}>
+    <div className="partner-page">
+      <div className="partner-page-head">
         <div>
-          <h1 className="page-title !text-2xl lg:!text-[2.2rem]">Панель управления</h1>
-          <p className="admin-subtitle !text-sm lg:!text-[1.15rem] opacity-70 lg:opacity-100" style={{ marginBottom: 0 }}>
-            Добро пожаловать в личный кабинет ресторана, {userName}! 👋
-          </p>
+          <p className="partner-page-kicker">Ресторан</p>
+          <h1 className="partner-page-title">Главная</h1>
+          <p className="partner-page-sub">Здравствуйте, {userName}</p>
         </div>
       </div>
 
-      {/* ── KPI METRICS — 2x2 grid on mobile, 4-col on desktop ── */}
-      <div>
-        {/* Mobile: 2x2 grid */}
-        <div className="grid grid-cols-2 gap-3 lg:hidden mb-8" style={{ marginTop: '-16px' }}>
-          <MobileMetricTile
-            title="Выручка"
-            value={<>{restaurantRevenue.toLocaleString()} <span style={{ fontSize: '1.15rem', color: '#21EA7C', marginLeft: '1px' }}>₾</span></>}
-            subtext="Чистый доход"
-            color="#21EA7C"
-            percentage={revenuePercent}
-          />
-          <MobileMetricTile
-            title="Заказы"
-            value={activeCount}
-            subtext="В работе"
-            color="#3b82f6"
-            percentage={activePercent}
-            onClick={() => onNavigate('orders')}
-          />
-          <MobileMetricTile
-            title="Отмены"
-            value={cancelledCount}
-            subtext="За сегодня"
-            color="#ef4444"
-            percentage={cancelledPercent}
-          />
-          {/* Rating tile — special layout */}
-          <div style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 20,
-            padding: '14px 12px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            position: 'relative',
-            overflow: 'hidden',
-          }}>
-            <div style={{
-              position: 'absolute', top: 0, right: 0, width: 50, height: 50,
-              background: 'radial-gradient(circle at top right, #a855f715, transparent 70%)',
-              pointerEvents: 'none',
-            }} />
-            <span style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px', color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap' }}>Рейтинг</span>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 2, gap: 4 }}>
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.5px', whiteSpace: 'nowrap' }}>4.9</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: 3 }}>
-                  <span style={{ fontSize: '0.68rem', color: '#f59e0b', whiteSpace: 'nowrap' }}>★★★★★</span>
-                  <span style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.3)', fontWeight: 600, whiteSpace: 'nowrap' }}>(128)</span>
-                </div>
-              </div>
-              <SmallCircularProgress value={98} color="#a855f7" />
-            </div>
+      <div className="partner-metric-grid lg:hidden">
+        <div className="partner-metric-tile">
+          <span className="partner-metric-tile__label">Выручка</span>
+          <div className="partner-metric-tile__value">
+            {restaurantRevenue.toLocaleString()} <span style={{ fontSize: '1rem', color: '#21EA7C' }}>₾</span>
           </div>
+          <div className="partner-metric-tile__sub">По доставленным</div>
         </div>
+        <button
+          type="button"
+          className="partner-metric-tile"
+          onClick={() => onNavigate('orders')}
+          style={{ cursor: 'pointer', textAlign: 'left', font: 'inherit', color: 'inherit' }}
+        >
+          <span className="partner-metric-tile__label">Заказы</span>
+          <div className="partner-metric-tile__value">{activeCount}</div>
+          <div className="partner-metric-tile__sub" style={{ color: '#60a5fa' }}>В работе</div>
+        </button>
+        <div className="partner-metric-tile">
+          <span className="partner-metric-tile__label">Доставлено</span>
+          <div className="partner-metric-tile__value">{deliveredCount}</div>
+          <div className="partner-metric-tile__sub">Завершённых</div>
+        </div>
+        <div className="partner-metric-tile">
+          <span className="partner-metric-tile__label">Отмены</span>
+          <div className="partner-metric-tile__value">{cancelledCount}</div>
+          <div className="partner-metric-tile__sub" style={{ color: '#ef4444' }}>Всего</div>
+        </div>
+      </div>
 
-        {/* Desktop: original 4-col grid */}
-        <div className="hidden lg:grid grid-cols-4 gap-6">
-          <MetricCard
-            title="Выручка"
-            value={<>{restaurantRevenue.toLocaleString()} <span style={{ color: 'var(--admin-primary)', fontSize: '1.8rem' }}>₾</span></>}
-            percentage={revenuePercent}
-            subtext="Чистый доход"
-            color="#21EA7C"
-          />
-          <div onClick={() => onNavigate('orders')} className="cursor-pointer">
-            <MetricCard
-              title="Заказы"
-              value={activeCount.toString()}
-              percentage={activePercent}
-              subtext="В работе"
-              color="#3b82f6"
-            />
+      <div className="hidden lg:grid grid-cols-4 gap-6" style={{ marginBottom: 24 }}>
+        <MetricCard
+          title="Выручка"
+          value={<>{restaurantRevenue.toLocaleString()} <span style={{ color: 'var(--admin-primary)', fontSize: '1.8rem' }}>₾</span></>}
+          percentage={Math.min(Math.round((restaurantRevenue / 5000) * 100) || 0, 100)}
+          subtext="По доставленным"
+          color="#21EA7C"
+        />
+        <div onClick={() => onNavigate('orders')} className="cursor-pointer">
+          <MetricCard title="Заказы" value={activeCount.toString()} percentage={Math.min(activeCount * 20, 100)} subtext="В работе" color="#3b82f6" />
+        </div>
+        <MetricCard title="Доставлено" value={deliveredCount.toString()} percentage={Math.min(deliveredCount * 5, 100)} subtext="Завершено" color="#21EA7C" />
+        <MetricCard title="Отмены" value={cancelledCount.toString()} percentage={totalOrders > 0 ? Math.min(Math.round((cancelledCount / totalOrders) * 100), 100) : 0} subtext="Всего" color="#ef4444" />
+      </div>
+
+      <p className="partner-page-kicker" style={{ marginBottom: 10 }}>Быстрые действия</p>
+      <div className="partner-action-list">
+        <button type="button" className="partner-action-row" onClick={() => onNavigate('orders')}>
+          <div className="partner-action-row__icon" style={{ background: 'rgba(33,234,124,0.14)', color: '#21EA7C' }}>
+            <Utensils size={18} />
           </div>
-          <MetricCard
-            title="Отмены"
-            value={cancelledCount.toString()}
-            percentage={cancelledPercent}
-            subtext="За сегодня"
-            color="#ef4444"
-          />
-          <MetricCard
-            title="Рейтинг"
-            value="4.9"
-            percentage={98}
-            subtext="★★★★★ 128 оценок"
-            color="#a855f7"
-          />
-        </div>
-      </div>
-
-      {/* ── БЫСТРЫЕ ДЕЙСТВИЯ — priority on mobile ── */}
-      <div className="mobile-only-section" style={{ marginTop: '16px' }}>
-        <h2 style={{
-          fontSize: '0.7rem', margin: '0 0 12px 0',
-          textTransform: 'uppercase', fontWeight: 800,
-          letterSpacing: '1px', color: 'rgba(255,255,255,0.3)'
-        }}>
-          Быстрые действия
-        </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <QuickActionTile
-            icon={<Utensils size={20} />}
-            iconBg="rgba(33,234,124,0.12)"
-            iconColor="#21EA7C"
-            label="Редактировать меню"
-            desc="Добавление, изменение цен и скрытие блюд"
-            onClick={() => onNavigate('menu')}
-          />
-          <QuickActionTile
-            icon={<History size={20} />}
-            iconBg="rgba(59,130,246,0.12)"
-            iconColor="#3b82f6"
-            label="История заказов"
-            desc="Посмотреть завершённые смены и продажи"
-            onClick={() => onNavigate('history')}
-          />
-          <QuickActionTile
-            icon={<Phone size={20} />}
-            iconBg="rgba(245,158,11,0.12)"
-            iconColor="#f59e0b"
-            label="Поддержка"
-            desc="Чат-бот технической поддержки в Telegram"
-            onClick={() => window.open('https://t.me/MestigoSupport_Bot', '_blank')}
-          />
-        </div>
-      </div>
-
-      {/* ── Desktop: Quick actions + Support side-by-side ── */}
-      <div className="hidden lg:grid grid-cols-3 gap-6">
-        {/* Quick actions */}
-        <div className="admin-card" style={{ padding: '32px', gridColumn: 'span 2 / span 2', display: 'flex', flexDirection: 'column', marginBottom: 0 }}>
-          <h2 style={{ fontSize: '1.3rem', margin: '0 0 24px 0', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.5px', color: '#fff' }}>
-            Быстрые действия
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <button
-              onClick={() => onNavigate('menu')}
-              style={{ display: 'flex', alignItems: 'center', textAlign: 'left', padding: '16px 20px', borderRadius: 'var(--admin-radius-md)', border: '1px solid var(--admin-card-border)', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'all 0.2s ease', gap: '16px', width: '100%' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'var(--admin-primary)'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor = 'var(--admin-card-border)'; e.currentTarget.style.transform = 'translateX(0)'; }}
-            >
-              <div style={{ padding: '10px', borderRadius: '10px', background: 'rgba(33,234,124,0.1)', color: 'var(--admin-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Utensils size={18} /></div>
-              <div style={{ flex: 1, textAlign: 'left' }}>
-                <h5 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, color: '#fff', textTransform: 'none' }}>Редактировать меню</h5>
-                <p style={{ fontSize: '0.75rem', color: 'var(--admin-text-muted)', margin: '4px 0 0 0' }}>Добавление, изменение цен и скрытие блюд</p>
-              </div>
-              <ArrowRight size={16} style={{ color: 'var(--admin-text-muted)', opacity: 0.6 }} />
-            </button>
-            <button
-              onClick={() => onNavigate('history')}
-              style={{ display: 'flex', alignItems: 'center', textAlign: 'left', padding: '16px 20px', borderRadius: 'var(--admin-radius-md)', border: '1px solid var(--admin-card-border)', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'all 0.2s ease', gap: '16px', width: '100%' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor = 'var(--admin-card-border)'; e.currentTarget.style.transform = 'translateX(0)'; }}
-            >
-              <div style={{ padding: '10px', borderRadius: '10px', background: 'rgba(59,130,246,0.1)', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><History size={18} /></div>
-              <div style={{ flex: 1, textAlign: 'left' }}>
-                <h5 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, color: '#fff', textTransform: 'none' }}>История заказов</h5>
-                <p style={{ fontSize: '0.75rem', color: 'var(--admin-text-muted)', margin: '4px 0 0 0' }}>Посмотреть завершенные смены и продажи</p>
-              </div>
-              <ArrowRight size={16} style={{ color: 'var(--admin-text-muted)', opacity: 0.6 }} />
-            </button>
-            <button
-              onClick={() => window.open('https://t.me/MestigoSupport_Bot', '_blank')}
-              style={{ display: 'flex', alignItems: 'center', textAlign: 'left', padding: '16px 20px', borderRadius: 'var(--admin-radius-md)', border: '1px solid var(--admin-card-border)', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'all 0.2s ease', gap: '16px', width: '100%' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = '#f59e0b'; e.currentTarget.style.transform = 'translateX(4px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor = 'var(--admin-card-border)'; e.currentTarget.style.transform = 'translateX(0)'; }}
-            >
-              <div style={{ padding: '10px', borderRadius: '10px', background: 'rgba(245,158,11,0.1)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Phone size={18} /></div>
-              <div style={{ flex: 1, textAlign: 'left' }}>
-                <h5 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, color: '#fff', textTransform: 'none' }}>Поддержка</h5>
-                <p style={{ fontSize: '0.75rem', color: 'var(--admin-text-muted)', margin: '4px 0 0 0' }}>Чат-бот технической поддержки в Telegram</p>
-              </div>
-              <ArrowRight size={16} style={{ color: 'var(--admin-text-muted)', opacity: 0.6 }} />
-            </button>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p className="partner-action-row__label">Заказы кухни</p>
+            <p className="partner-action-row__desc">Принять, готовить, передать курьеру</p>
           </div>
-        </div>
-        {/* Support */}
-        <div className="admin-card" style={{ padding: '32px', display: 'flex', flexDirection: 'column', marginBottom: 0 }}>
-          <h2 style={{ fontSize: '1.3rem', margin: '0 0 24px 0', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.5px', color: '#fff' }}>ТЕХ. ПОДДЕРЖКА</h2>
-          <p style={{ fontSize: '0.95rem', color: 'var(--admin-text-muted)', lineHeight: 1.6, margin: 0 }}>
-            Если у вас возникли вопросы по работе с заказами, задержками курьеров или выплатами, вы всегда можете написать нашему менеджеру в Telegram.
-          </p>
-          <a href="https://t.me/MestigoSupport_Bot" target="_blank" rel="noopener noreferrer"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '16px', borderRadius: 'var(--admin-radius-md)', background: 'rgba(33,234,124,0.03)', border: '1px solid rgba(33,234,124,0.2)', color: 'var(--admin-primary)', fontWeight: 700, fontSize: '0.95rem', textDecoration: 'none', transition: 'all 0.2s ease', marginTop: 'auto', boxShadow: 'none' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--admin-primary)'; e.currentTarget.style.borderColor = 'var(--admin-primary)'; e.currentTarget.style.color = '#0f1117'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(33,234,124,0.25)'; e.currentTarget.style.transform = 'translateY(-1.5px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(33,234,124,0.03)'; e.currentTarget.style.borderColor = 'rgba(33,234,124,0.2)'; e.currentTarget.style.color = 'var(--admin-primary)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: '8px' }}><path d="M11.944 0C5.344 0 0 5.344 0 12c0 6.656 5.344 12 11.944 12 6.656 0 12-5.344 12-12 0-6.656-5.344-12-12-12zm5.892 8.243l-1.897 8.93c-.14.627-.512.784-1.04.485l-2.895-2.136-1.396 1.343c-.155.155-.285.285-.585.285l.207-2.943 5.35-4.834c.232-.206-.05-.32-.36-.114l-6.616 4.16-2.855-.892c-.62-.193-.632-.62.13-.918l11.16-4.302c.518-.193.97.114.796.98z" /></svg>
-            Написать в Telegram
-          </a>
-        </div>
+          <ChevronRight size={16} style={{ color: 'rgba(255,255,255,0.25)' }} />
+        </button>
+        <button type="button" className="partner-action-row" onClick={() => onNavigate('menu')}>
+          <div className="partner-action-row__icon" style={{ background: 'rgba(96,165,250,0.14)', color: '#60a5fa' }}>
+            <Store size={18} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p className="partner-action-row__label">Меню</p>
+            <p className="partner-action-row__desc">Позиции, цены и доступность</p>
+          </div>
+          <ChevronRight size={16} style={{ color: 'rgba(255,255,255,0.25)' }} />
+        </button>
+        <button type="button" className="partner-action-row" onClick={() => onNavigate('stats')}>
+          <div className="partner-action-row__icon" style={{ background: 'rgba(168,85,247,0.14)', color: '#a855f7' }}>
+            <History size={18} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p className="partner-action-row__label">Статистика</p>
+            <p className="partner-action-row__desc">Выручка и итоги по заказам</p>
+          </div>
+          <ChevronRight size={16} style={{ color: 'rgba(255,255,255,0.25)' }} />
+        </button>
+        <button type="button" className="partner-action-row" onClick={() => onNavigate('support')}>
+          <div className="partner-action-row__icon" style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}>
+            <Phone size={18} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p className="partner-action-row__label">Поддержка</p>
+            <p className="partner-action-row__desc">Telegram и частые вопросы</p>
+          </div>
+          <ChevronRight size={16} style={{ color: 'rgba(255,255,255,0.25)' }} />
+        </button>
       </div>
-
-      {/* ── Mobile: Tech Support section ── */}
-      <div className="lg:hidden pb-24">
-        <div style={{
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px solid rgba(255,255,255,0.06)',
-          borderRadius: 20,
-          padding: '16px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 14,
-        }}>
-          <p style={{ margin: 0, fontSize: '0.8rem', color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>
-            Проблемы с заказами, курьерами или выплатами? Свяжитесь с нами.
-          </p>
-          <a
-            href="https://t.me/MestigoSupport_Bot"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full font-black active:scale-[0.97] transition-all"
-            style={{
-              padding: '12px 16px',
-              borderRadius: 12,
-              background: 'linear-gradient(135deg, rgba(33,234,124,0.12) 0%, rgba(33,234,124,0.06) 100%)',
-              border: '1px solid rgba(33,234,124,0.2)',
-              color: '#21EA7C',
-              textDecoration: 'none',
-              fontSize: '0.8rem',
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0C5.344 0 0 5.344 0 12c0 6.656 5.344 12 11.944 12 6.656 0 12-5.344 12-12 0-6.656-5.344-12-12-12zm5.892 8.243l-1.897 8.93c-.14.627-.512.784-1.04.485l-2.895-2.136-1.396 1.343c-.155.155-.285.285-.585.285l.207-2.943 5.35-4.834c.232-.206-.05-.32-.36-.114l-6.616 4.16-2.855-.892c-.62-.193-.632-.62.13-.918l11.16-4.302c.518-.193.97.114.796.98z" /></svg>
-            Написать в Telegram
-          </a>
-        </div>
-      </div>
-
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { api, restaurantCache } from '../services/api';
 import FullPageLoader from '../components/UI/FullPageLoader';
 import NetworkErrorState from '../components/UI/NetworkErrorState';
 import { useLanguage } from '../translations/LanguageContext';
+import { pickI18nText } from '../utils/i18nContent';
 
 // SVG Icons
 const IconBack = () => (
@@ -56,7 +57,7 @@ interface OrderDetailsProps {
 }
 
 const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isNetworkError, setIsNetworkError] = useState(false);
@@ -280,7 +281,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                                 {items.map((item, i) => (
                                     <div className="od-item-row" key={i}>
                                         <span className="od-item-name">
-                                            {item.name}
+                                            {pickI18nText(item.name, language)}
                                             <span className="od-item-qty od-item-qty-mobile"> {item.quantity}x</span>
                                             <span className="od-item-qty od-item-qty-pc"> ×{item.quantity}</span>
                                         </span>
