@@ -12,7 +12,7 @@ interface TimeModalProps {
 }
 
 const TimeModal: React.FC<TimeModalProps> = ({ isOpen, onClose, currentTime, onSelect, workingHours }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [localSelection, setLocalSelection] = useState<string | null>(currentTime);
 
   useEffect(() => {
@@ -29,6 +29,17 @@ const TimeModal: React.FC<TimeModalProps> = ({ isOpen, onClose, currentTime, onS
     slots.find((s) => s.value === localSelection)?.label ||
     localSelection ||
     '—';
+
+  // Slots span several days: label each day so 22:30 -> 10:00 isn't mistaken for today
+  const dayLabel = (d: Date): string => {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const day = new Date(d); day.setHours(0, 0, 0, 0);
+    const diff = Math.round((day.getTime() - today.getTime()) / 86400000);
+    if (diff === 0) return t('checkout.day_today');
+    if (diff === 1) return t('checkout.day_tomorrow');
+    const locale = language === 'ka' ? 'ka-GE' : language === 'en' ? 'en-GB' : 'ru-RU';
+    return d.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' });
+  };
 
   const handleSlotClick = (slot: TimeSlot): void => {
     if (localSelection === slot.value) {
@@ -50,28 +61,36 @@ const TimeModal: React.FC<TimeModalProps> = ({ isOpen, onClose, currentTime, onS
         <div className="tm-header">
           <div>
             <h2 className="tm-title">{t('checkout.choose_time_title')}</h2>
-            <p className="tm-subtitle">
-              {t('checkout.current_selection')} {selectedLabel}
-            </p>
+            {localSelection && selectedLabel && selectedLabel !== '—' && (
+              <p className="tm-subtitle">
+                {t('checkout.current_selection')} {selectedLabel}
+              </p>
+            )}
           </div>
         </div>
 
         <div className="tm-slots-grid">
           {slots.length === 0 ? (
             <p style={{ gridColumn: '1 / -1', color: '#9ca3af', fontSize: 14, margin: 0 }}>
-              Нет доступных слотов в ближайшие дни
+              {t('checkout.no_slots')}
             </p>
           ) : (
-            slots.map((slot) => (
-              <button
-                key={slot.value}
-                type="button"
-                className={`tm-slot-btn ${localSelection === slot.value ? 'active' : ''}`}
-                onClick={() => handleSlotClick(slot)}
-              >
-                {slot.label}
-              </button>
-            ))
+            slots.map((slot, i) => {
+              const dayKey = slot.value.slice(0, 10);
+              const newDay = i === 0 || slots[i - 1].value.slice(0, 10) !== dayKey;
+              return (
+                <React.Fragment key={slot.value}>
+                  {newDay && <p className="tm-day-label">{dayLabel(slot.start)}</p>}
+                  <button
+                    type="button"
+                    className={`tm-slot-btn ${localSelection === slot.value ? 'active' : ''}`}
+                    onClick={() => handleSlotClick(slot)}
+                  >
+                    {slot.label}
+                  </button>
+                </React.Fragment>
+              );
+            })
           )}
         </div>
 
