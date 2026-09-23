@@ -41,12 +41,12 @@
       title_phone: "Ваш номер телефона",
       sub_phone: "Проверьте код страны и введите номер телефона",
       title_otp: "Код из SMS",
-      sub_otp: "Мы отправили SMS с кодом на этот номер",
+      sub_otp: "Отправили код на",
       btn_send: "Далее",
       btn_verify: "Подтвердить",
-      resend_timer: "Повторная отправка через",
-      resend_action: "Отправить код повторно",
-      change_number: "Неверный номер?",
+      resend_timer: "Отправить ещё раз через",
+      resend_action: "Отправить код ещё раз",
+      change_number: "Изменить номер",
       country_label: "Страна",
       country_title: "Выберите страну",
       nothing_found: "Ничего не найдено",
@@ -67,12 +67,12 @@
       title_phone: "თქვენი ტელეფონის ნომერი",
       sub_phone: "შეამოწმეთ ქვეყნის კოდი და შეიყვანეთ ტელეფონის ნომერი",
       title_otp: "SMS კოდი",
-      sub_otp: "კოდი SMS-ით გამოგიგზავნეთ ამ ნომერზე",
+      sub_otp: "კოდი გაიგზავნა ნომერზე",
       btn_send: "შემდეგი",
       btn_verify: "დადასტურება",
       resend_timer: "ხელახლა გაგზავნა",
       resend_action: "კოდის ხელახლა გაგზავნა",
-      change_number: "არასწორი ნომერი?",
+      change_number: "ნომრის შეცვლა",
       country_label: "ქვეყანა",
       country_title: "აირჩიეთ ქვეყანა",
       nothing_found: "ვერაფერი მოიძებნა",
@@ -93,12 +93,12 @@
       title_phone: "Your phone number",
       sub_phone: "Confirm your country code and enter your phone number",
       title_otp: "SMS Code",
-      sub_otp: "We sent an SMS with a code to this number",
+      sub_otp: "We sent a code to",
       btn_send: "Next",
       btn_verify: "Verify",
       resend_timer: "Resend code in",
       resend_action: "Resend code",
-      change_number: "Wrong number?",
+      change_number: "Change number",
       country_label: "Country",
       country_title: "Choose a country",
       nothing_found: "Nothing found",
@@ -375,7 +375,11 @@
   function renderPhoneInputView(initialRaw, errorMsg, dir) {
     setBack(null);
 
-    var parsed = parseAndDetectCountry(initialRaw, selectedCountry);
+    var rawInit = String(initialRaw || '').trim();
+    var initDigits = rawInit.replace(/\D/g, '');
+    var parsed = (rawInit.charAt(0) === '+' || initDigits.length >= 11)
+      ? parseAndDetectCountry(rawInit, selectedCountry)
+      : { country: selectedCountry, digits: initDigits };
     selectedCountry = parsed.country;
     var formattedDigits = formatPhoneDigits(parsed.digits, selectedCountry.dial);
 
@@ -540,8 +544,8 @@
     setView([
       '<div class="mesti-phone-screen">',
       '  <div class="mesti-phone-header">',
-      '    <h3 class="mesti-phone-title mesti-otp-number">' + pretty + '</h3>',
-      '    <p class="mesti-phone-subtitle">' + t('sub_otp') + '</p>',
+      '    <h3 class="mesti-phone-title">' + t('title_otp') + '</h3>',
+      '    <p class="mesti-phone-subtitle">' + t('sub_otp') + ' <b class="mesti-otp-number">' + pretty + '</b></p>',
       '  </div>',
       '  <div class="mesti-otp-container" id="mesti-otp-boxes">' + cells + '</div>',
       errorMsg ? '  <div class="mesti-phone-error">' + errorMsg + '</div>' : '',
@@ -805,6 +809,59 @@
 
     getVerifiedToken: function () {
       return localStorage.getItem('phone_id_token') || "";
+    },
+
+    // Headless API: lets a page render the code step inline (e.g. the registration card).
+    // requestCode(phone) sends the SMS; confirmCode(code) verifies it and stores the token
+    // exactly like the modal flow does. Both reject with a localized message.
+    requestCode: function (rawPhone) {
+      var raw = String(rawPhone || '').trim();
+      var rawDigits = raw.replace(/\D/g, '');
+      // Without "+" a short number is national (e.g. Georgian 5XX XX XX XX): don't let the
+      // prefix detector read "55…" as Brazil. Detect only real international input.
+      var parsed = (raw.charAt(0) === '+' || rawDigits.length >= 11)
+        ? parseAndDetectCountry(raw, selectedCountry)
+        : { country: selectedCountry, digits: rawDigits };
+      selectedCountry = parsed.country;
+      var digits = parsed.digits.replace(/\D/g, '');
+      if (digits.length < 6) return Promise.reject(new Error(t('err_invalid_phone')));
+      var phoneE164 = selectedCountry.dial + digits;
+      currentFullNumber = phoneE164;
+      try {
+        initFirebase();
+        var appVerifier = getRecaptchaVerifier();
+        return window.firebase.auth().signInWithPhoneNumber(phoneE164, appVerifier).then(function (result) {
+          confirmationResult = result;
+          return { phone: phoneE164, display: selectedCountry.dial + ' ' + formatPhoneDigits(digits, selectedCountry.dial) };
+        }, function (err) {
+          var fullErr = String((err && (err.message || err.code)) || '');
+          var msg = t('err_generic');
+          if (fullErr.indexOf('SMS unable to be sent until this region enabled') !== -1 || fullErr.indexOf('OPERATION_NOT_ALLOWED') !== -1) msg = t('err_region_disabled');
+          else if (err && err.code === 'auth/invalid-phone-number') msg = t('err_invalid_phone');
+          else if (err && err.code === 'auth/too-many-requests') msg = t('err_too_many');
+          else if (err && err.code === 'auth/network-request-failed') msg = t('err_network');
+          throw new Error(msg);
+        });
+      } catch (e) {
+        return Promise.reject(new Error(t('err_generic')));
+      }
+    },
+
+    confirmCode: function (code) {
+      if (!confirmationResult) return Promise.reject(new Error(t('err_expired')));
+      return confirmationResult.confirm(String(code || '')).then(function (cred) {
+        return cred.user.getIdToken().then(function (idToken) {
+          localStorage.setItem('user_phone', currentFullNumber);
+          localStorage.setItem('phone_verified', '1');
+          localStorage.setItem('phone_id_token', idToken);
+          window.dispatchEvent(new CustomEvent('mestidelivery-phone-verified', {
+            detail: { phone: currentFullNumber, idToken: idToken, user: cred.user }
+          }));
+          return { phone: currentFullNumber, idToken: idToken };
+        });
+      }, function (err) {
+        throw new Error(err && err.code === 'auth/code-expired' ? t('err_expired') : t('err_invalid_code'));
+      });
     },
 
     close: closeModal

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './Login.css';
 import { useLanguage } from '../translations/LanguageContext';
 import { useAuth } from '../auth/AuthContext';
@@ -50,6 +50,15 @@ const IconLoader = () => (
     </svg>
 );
 
+const IconBack = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="15 18 9 12 15 6" />
+    </svg>
+);
+
+const OTP_LENGTH = 6;
+const RESEND_SECONDS = 60;
+
 const GoogleIcon = () => (
     <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
         <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
@@ -72,6 +81,23 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onForgotPassword }) => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
+
+    // Registration SMS step, rendered inside the same auth card
+    const [step, setStep] = useState<'form' | 'otp'>('form');
+    const [otpPhone, setOtpPhone] = useState('');
+    const [otpCode, setOtpCode] = useState('');
+    const [resendIn, setResendIn] = useState(0);
+    const otpInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (resendIn <= 0) return;
+        const id = window.setTimeout(() => setResendIn((sec) => sec - 1), 1000);
+        return () => window.clearTimeout(id);
+    }, [resendIn]);
+
+    useEffect(() => {
+        if (step === 'otp') window.setTimeout(() => otpInputRef.current?.focus(), 60);
+    }, [step]);
 
     useEffect(() => {
         void preloadGoogleAuth();
@@ -117,8 +143,27 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onForgotPassword }) => {
 
     const switchMode = (login: boolean) => {
         setIsLogin(login);
+        setStep('form');
         setError('');
         clearError();
+    };
+
+    const phoneAuth = (window as any).MestiPhoneAuth;
+
+    const requestSmsCode = async () => {
+        setError('');
+        setLoading(true);
+        try {
+            const sent = await phoneAuth.requestCode(phone);
+            setOtpPhone(sent.display);
+            setOtpCode('');
+            setResendIn(RESEND_SECONDS);
+            setStep('otp');
+        } catch (err: any) {
+            setError(err?.message || t('auth.errors.generic'));
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -126,15 +171,52 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onForgotPassword }) => {
         setError('');
         clearError();
 
-        // Registration requires a verified phone (Firebase SMS via /static/mesti-phone-auth.js)
-        const phoneAuth = (window as any).MestiPhoneAuth;
+        // Registration requires a verified phone (Firebase SMS via /static/mesti-phone-auth.js).
+        // With the headless API the code step appears inside this card; an older script falls back to its modal.
         if (!isLogin && phoneAuth && !phoneAuth.isVerified(phone)) {
+            if (typeof phoneAuth.requestCode === 'function') {
+                await requestSmsCode();
+                return;
+            }
             try {
                 await phoneAuth.open({ phone });
             } catch {
                 return;
             }
         }
+        await submitAuth();
+    };
+
+    const handleOtpSubmit = async (code: string) => {
+        if (code.length < OTP_LENGTH || loading) return;
+        setError('');
+        setLoading(true);
+        try {
+            await phoneAuth.confirmCode(code);
+        } catch (err: any) {
+            setError(err?.message || t('auth.errors.generic'));
+            setOtpCode('');
+            setLoading(false);
+            window.setTimeout(() => otpInputRef.current?.focus(), 30);
+            return;
+        }
+        await submitAuth();
+    };
+
+    const handleOtpChange = (value: string) => {
+        const digits = value.replace(/\D/g, '').slice(0, OTP_LENGTH);
+        setOtpCode(digits);
+        if (error) setError('');
+        if (digits.length === OTP_LENGTH) void handleOtpSubmit(digits);
+    };
+
+    const backToForm = () => {
+        setStep('form');
+        setError('');
+        setOtpCode('');
+    };
+
+    const submitAuth = async () => {
         setLoading(true);
 
         const endpoint = isLogin ? '/api/auth/customer/login' : '/api/auth/customer/register';
@@ -247,6 +329,69 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onForgotPassword }) => {
                 </header>
 
                 <div className={`auth-panel ${!isLogin ? 'auth-panel--register' : ''}`}>
+                    {step === 'otp' ? (
+                        <div className="auth-otp auth-step-enter">
+                            <button type="button" className="auth-link-btn auth-link-btn--muted auth-otp-back" onClick={backToForm}>
+                                <IconBack />
+                                <span>{t('auth.otp_change_number')}</span>
+                            </button>
+                            <h2 className="auth-otp-title">{t('auth.otp_title')}</h2>
+                            <p className="auth-otp-desc">
+                                {t('auth.otp_sent_to')} <strong>{otpPhone}</strong>
+                            </p>
+
+                            <label className="auth-otp-cells">
+                                <input
+                                    ref={otpInputRef}
+                                    className="auth-otp-input"
+                                    type="text"
+                                    inputMode="numeric"
+                                    autoComplete="one-time-code"
+                                    enterKeyHint="done"
+                                    maxLength={OTP_LENGTH}
+                                    value={otpCode}
+                                    onChange={(e) => handleOtpChange(e.target.value)}
+                                    aria-label={t('auth.otp_title')}
+                                    disabled={loading}
+                                />
+                                {Array.from({ length: OTP_LENGTH }, (_, i) => (
+                                    <span
+                                        key={i}
+                                        className={[
+                                            'auth-otp-cell',
+                                            otpCode[i] ? 'is-filled' : '',
+                                            i === Math.min(otpCode.length, OTP_LENGTH - 1) ? 'is-active' : '',
+                                        ].filter(Boolean).join(' ')}
+                                        aria-hidden="true"
+                                    >
+                                        {otpCode[i] || ''}
+                                    </span>
+                                ))}
+                            </label>
+
+                            {error ? <div className="auth-error" role="alert">{error}</div> : null}
+
+                            <button
+                                type="button"
+                                className="auth-cta"
+                                disabled={busy || otpCode.length < OTP_LENGTH}
+                                onClick={() => handleOtpSubmit(otpCode)}
+                            >
+                                {loading ? <IconLoader /> : t('auth.otp_confirm')}
+                            </button>
+
+                            <p className="auth-otp-resend">
+                                {resendIn > 0 ? (
+                                    <>{t('auth.otp_resend_in')} <b>0:{String(resendIn).padStart(2, '0')}</b></>
+                                ) : (
+                                    <button type="button" className="auth-link-btn" onClick={requestSmsCode} disabled={busy}>
+                                        {t('auth.otp_resend')}
+                                    </button>
+                                )}
+                            </p>
+                        </div>
+                    ) : (
+                    <>
                     <nav className="auth-tabs" role="tablist" aria-label="auth mode">
                         <button
                             type="button"
@@ -367,6 +512,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onForgotPassword }) => {
                     </button>
 
                     <p className="auth-legal">{t('auth.terms_privacy')}</p>
+                    </>
+                    )}
                 </div>
             </div>
         </div>
