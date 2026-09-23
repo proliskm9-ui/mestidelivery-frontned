@@ -158,7 +158,8 @@ const MobileHome: React.FC<{ onNavigate: (page: string) => void }> = ({ onNaviga
             <div className="mobile-container">
                 <header className="mobile-hero">
                     <div className="mobile-hero-content">
-                        <h1 className="mobile-hero-title">
+                        <h1 className={`mobile-hero-title sh-title sh-title--${language || "ru"}`}>
+
                             <span className="solid-text">{t('home.hero_title_1') || 'ДОСТАВКА'}</span>
                             <br />
                             <span className="outline-text">{t('home.hero_title_2') || 'НОВОГО УРОВНЯ'}</span>

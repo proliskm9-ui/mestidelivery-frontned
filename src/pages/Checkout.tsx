@@ -89,6 +89,29 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
         const slots = generateRestaurantSlots(workingHours);
         return slots.find((s) => s.value === scheduledTime)?.label || scheduledTime;
     }, [scheduledTime, workingHours]);
+    const [rushState, setRushState] = useState(() => {
+        try {
+            const H = parseInt(new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Tbilisi", hour: "numeric", hour12: false }).format(new Date()), 10);
+            return { isRush: H >= 18 && H < 22, reason: H >= 18 && H < 22 ? "evening_rush" : "normal" };
+        } catch {
+            const H = (new Date().getUTCHours() + 4) % 24;
+            return { isRush: H >= 18 && H < 22, reason: H >= 18 && H < 22 ? "evening_rush" : "normal" };
+        }
+    });
+
+    useEffect(() => {
+        let active = true;
+        fetch('/api/bot/v1/rush-status')
+            .then(r => r.ok ? r.json() : null)
+            .then(d => {
+                if (active && d && typeof d.is_rush === 'boolean') {
+                    setRushState({ isRush: d.is_rush, reason: d.reason || 'evening_rush' });
+                }
+            })
+            .catch(() => {});
+        return () => { active = false; };
+    }, []);
+
 
     const savedAddressRaw = localStorage.getItem('user_address');
     const savedAddress = savedAddressRaw ? (() => { try { return JSON.parse(savedAddressRaw) } catch { return null } })() : null;
@@ -233,7 +256,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                                     >
                                         <span className="title">{t('checkout.standard')}</span>
                                         <span className="subtitle">
-                                            30-45 {t('common.min')}
+                                            {rushState.isRush ? '45-65 ' : '30-45 '} {t('common.min')}
                                         </span>
                                     </button>
                                     <button
@@ -247,6 +270,29 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                                         </span>
                                     </button>
                                 </div>
+
+                                {rushState.isRush && (
+                                    <div className="rush-hour-badge">
+                                        <div className="rush-hour-header">
+                                            <span className="rush-flame">🔥</span>
+                                            <span>
+                                                {language === 'en'
+                                                    ? (rushState.reason === 'manual_on' ? 'High demand · Delivery ~45–65 min' : 'Evening rush hour · ~45–65 min')
+                                                    : language === 'ka'
+                                                    ? (rushState.reason === 'manual_on' ? 'მაღალი მოთხოვნა · მიტანა ~45–65 წთ' : 'საღამოს პიკის საათი · ~45–65 წთ')
+                                                    : (rushState.reason === 'manual_on' ? 'Высокий спрос · Доставка ~45–65 мин' : 'Вечерний час пик · ~45–65 мин')}
+                                            </span>
+                                        </div>
+                                        <p className="rush-hour-desc">
+                                            {language === 'en'
+                                                ? 'Kitchens and couriers in Mestia are busy right now. You can also schedule your order for later.'
+                                                : language === 'ka'
+                                                ? 'სამზარეულოები და კურიერები მესტიაში დაკავებულები არიან. შეგიძლიათ შეუკვეთოთ წინასწარ.'
+                                                : 'Кухни ресторанов и курьеры сейчас загружены. Вы также можете оформить предзаказ ко времени.'}
+                                        </p>
+                                    </div>
+                                )}
+
                             </div>
 
                             {/* 2. Address — same motion/UX as mobile */}

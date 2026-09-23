@@ -890,3 +890,8 @@ body:has(.desktop-restaurant)::-webkit-scrollbar {
         padding: 20px;
     }
 }
+/* Hide bottom glass navigation when dish modal is open */
+body.dish-modal-open .glass-panel-container,
+.dish-modal-open .glass-panel-container {
+    display: none !important;
+}

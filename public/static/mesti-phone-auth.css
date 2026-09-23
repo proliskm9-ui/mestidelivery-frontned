@@ -1,0 +1,619 @@
+/* ==========================================================================
+   MestiDelivery - Luxury International Phone Verification
+   Native MestiDelivery tokens: #141413 matte, #21EA7C emerald, Inter/Montserrat
+   ========================================================================== */
+
+#mesti-phone-modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(8, 8, 8, 0.78);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease-out;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #FFFFFF;
+}
+
+#mesti-phone-modal-root.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Card matching exact .auth-panel styling */
+.mesti-phone-card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: #141413;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top-color: rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  padding: 28px 24px 24px;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.08), 0 24px 48px rgba(0, 0, 0, 0.85);
+  box-sizing: border-box;
+  transform: translateY(12px) scale(0.98);
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#mesti-phone-modal-root.active .mesti-phone-card {
+  transform: translateY(0) scale(1);
+}
+
+/* Icon Buttons (Close & Back matching .ui-circle-btn on restaurant page) */
+.mesti-phone-btn-icon {
+  position: absolute;
+  top: 18px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  color: #21EA7C; /* Signature MestiDelivery green cross! */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 5;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.mesti-phone-btn-icon svg {
+  stroke: #21EA7C;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mesti-phone-btn-icon:hover {
+  background: rgba(33, 234, 124, 0.14);
+  border-color: rgba(33, 234, 124, 0.45);
+  color: #21EA7C;
+  transform: scale(1.06);
+}
+
+.mesti-phone-btn-close:hover svg {
+  transform: rotate(90deg);
+}
+
+.mesti-phone-btn-icon:active {
+  transform: scale(0.92);
+  background: rgba(33, 234, 124, 0.22);
+}
+
+.mesti-phone-btn-close { right: 18px; }
+.mesti-phone-btn-back { left: 18px; }
+
+
+/* Header */
+.mesti-phone-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-top: 4px;
+}
+
+.mesti-phone-brand-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  margin: 0 auto 12px;
+  display: block;
+}
+
+.mesti-phone-title {
+  margin: 0 0 6px;
+  font-family: inherit;
+  font-size: 1.32rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #FFFFFF;
+}
+
+.mesti-phone-subtitle {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 400;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.mesti-phone-highlight-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-top: 8px;
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Flag image styling */
+.mesti-flag-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.mesti-flag-img {
+  width: 22px;
+  height: 16px;
+  border-radius: 3px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.mesti-badge-flag {
+  width: 20px;
+  height: 14px;
+  border-radius: 2px;
+}
+
+.mesti-flag-emoji-fallback {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.mesti-picker-flag-slot {
+  display: inline-flex;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.mesti-picker-flag-slot.mesti-flag-pop {
+  animation: mestiFlagPop 0.24s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes mestiFlagPop {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+/* International Country + Phone Field */
+.mesti-phone-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 54px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+.mesti-phone-input-group:focus-within {
+  border-color: rgba(33, 234, 124, 0.55);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 0 3px rgba(33, 234, 124, 0.12);
+}
+
+/* Country Selector Button */
+.mesti-country-picker-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 0 14px;
+  height: 52px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.mesti-country-picker-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mesti-country-dial {
+  font-variant-numeric: tabular-nums;
+  color: #FFFFFF;
+  font-size: 0.95rem;
+}
+
+.mesti-country-arrow {
+  color: rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+/* Phone input field */
+.mesti-phone-main-input {
+  flex: 1;
+  height: 52px;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0 14px;
+  color: #FFFFFF;
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.mesti-phone-main-input::placeholder {
+  color: rgba(255, 255, 255, 0.28);
+}
+
+/* Country Dropdown Panel */
+.mesti-country-dropdown {
+  position: absolute;
+  top: 58px;
+  left: 0;
+  right: 0;
+  max-height: 290px;
+  background: #181817;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: mestiDropdownIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes mestiDropdownIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mesti-country-search-wrap {
+  padding: 10px 12px 6px;
+  background: #141413;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mesti-search-input-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.mesti-search-icon {
+  position: absolute;
+  left: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
+.mesti-country-search-input {
+  width: 100%;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0 10px 0 34px;
+  color: #FFFFFF;
+  font-family: inherit;
+  font-size: 0.86rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+
+.mesti-country-search-input:focus {
+  border-color: rgba(33, 234, 124, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Popular Chips */
+.mesti-popular-chips-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  overflow-x: auto;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: #161615;
+  scrollbar-width: none;
+}
+
+.mesti-popular-chips-wrap::-webkit-scrollbar {
+  display: none;
+}
+
+.mesti-country-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.mesti-country-chip:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+}
+
+.mesti-country-chip.active {
+  border-color: rgba(33, 234, 124, 0.6);
+  background: rgba(33, 234, 124, 0.1);
+  color: #21EA7C;
+}
+
+.mesti-chip-flag {
+  width: 16px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+/* Country List */
+.mesti-country-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 4px 0;
+  margin: 0;
+  list-style: none;
+  max-height: 200px;
+}
+
+.mesti-country-list::-webkit-scrollbar {
+  width: 5px;
+}
+.mesti-country-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+.mesti-country-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  font-size: 0.88rem;
+}
+
+.mesti-country-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mesti-country-item.selected {
+  background: rgba(33, 234, 124, 0.08);
+}
+
+.mesti-country-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mesti-country-item-name {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.mesti-country-item-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mesti-country-item-dial {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+}
+
+.mesti-country-check {
+  color: #21EA7C;
+  display: flex;
+  align-items: center;
+}
+
+.mesti-country-empty {
+  padding: 18px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.85rem;
+}
+
+/* Clean Native OTP 6-Digit Cells */
+.mesti-otp-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 20px 0 16px;
+}
+
+.mesti-otp-divider {
+  width: 6px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.mesti-otp-cell {
+  width: 44px;
+  height: 54px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  font-size: 1.45rem;
+  font-weight: 700;
+  text-align: center;
+  color: #FFFFFF;
+  outline: none;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.mesti-otp-cell:focus {
+  border-color: #21EA7C;
+  background: rgba(33, 234, 124, 0.04);
+  box-shadow: 0 0 0 3px rgba(33, 234, 124, 0.15);
+}
+
+.mesti-otp-cell.filled {
+  border-color: rgba(33, 234, 124, 0.45);
+}
+
+/* Primary Action CTA */
+.mesti-phone-cta {
+  width: 100%;
+  height: 52px;
+  border-radius: 16px;
+  background: #21EA7C;
+  border: none;
+  color: #0A0A0A;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  margin-top: 8px;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.3), 0 4px 14px rgba(33, 234, 124, 0.25);
+}
+
+.mesti-phone-cta:hover:not(:disabled) {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.mesti-phone-cta:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.mesti-phone-cta:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Meta & Timers */
+.mesti-phone-meta {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.mesti-phone-link {
+  background: none;
+  border: none;
+  color: #21EA7C;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 0;
+  transition: opacity 0.15s ease;
+}
+
+.mesti-phone-link:hover {
+  opacity: 0.85;
+}
+
+.mesti-phone-link-muted {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.mesti-phone-link-muted:hover {
+  color: #FFFFFF;
+}
+
+/* Error Notice */
+.mesti-phone-error {
+  padding: 11px 14px;
+  border-radius: 14px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  color: #FCA5A5;
+  font-size: 0.86rem;
+  text-align: center;
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+
+/* Success Checkmark Icon */
+.mesti-success-icon-wrap {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: rgba(33, 234, 124, 0.1);
+  border: 2px solid rgba(33, 234, 124, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+/* Spinner */
+.mesti-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(10, 10, 10, 0.25);
+  border-top-color: #0A0A0A;
+  border-radius: 50%;
+  animation: mestiSpin 0.7s linear infinite;
+}
+
+@keyframes mestiSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 440px) {
+  .mesti-phone-card {
+    padding: 24px 18px 20px;
+    border-radius: 20px;
+  }
+  .mesti-otp-cell {
+    width: 40px;
+    height: 50px;
+    font-size: 1.3rem;
+  }
+}

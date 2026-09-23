@@ -87,6 +87,17 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     const [loading, setLoading] = useState(true);
     const [isNetworkError, setIsNetworkError] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    useEffect(() => {
+        if (selectedProduct) {
+            document.body.classList.add('dish-modal-open');
+        } else {
+            document.body.classList.remove('dish-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('dish-modal-open');
+        };
+    }, [selectedProduct]);
+
     const [isScrolled, setIsScrolled] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [mobileSearchQuery, setMobileSearchQuery] = useState('');
