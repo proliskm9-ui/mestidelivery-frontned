@@ -182,7 +182,7 @@ button,
 .mobile-header-back-btn,
 .search-pill,
 .address-pill {
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+  transition: transform 120ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)), background 200ms ease, border-color 200ms ease, box-shadow 200ms ease !important;
 }
 
 /* Scale down on tap/click for a tactile feel */
@@ -193,7 +193,7 @@ button:active:not(.fav-btn):not(.allRestaurantFavorite):not(.ric-fav-btn):not(.f
 .mobile-header-back-btn:active,
 .address-pill:active,
 .search-pill:active {
-  transform: scale(0.94) !important;
+  transform: scale(0.97) !important;
 }
 
 /* Force favorite buttons to be entirely static without animations */
