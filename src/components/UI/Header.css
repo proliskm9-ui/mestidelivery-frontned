@@ -1572,3 +1572,23 @@
         to { transform: translateY(0); }
     }
 }
+
+/* Order-status icon: one calm "breathing" pulse for every status instead of
+   spinning / tada / bounce loops that run on every screen while an order is active. */
+.simple-anim-tada,
+.simple-anim-bounce,
+.simple-anim-spin,
+.simple-anim-drive {
+    animation: simplePulse 2.4s ease-in-out infinite alternate;
+    transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .simple-anim-pulse,
+    .simple-anim-tada,
+    .simple-anim-bounce,
+    .simple-anim-spin,
+    .simple-anim-drive {
+        animation: none;
+    }
+}

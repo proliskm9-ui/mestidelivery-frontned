@@ -32,7 +32,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ item, onClick, isVertic
                 style={{ transition: 'transform 0.3s ease', position: 'relative' }}
             >
                 {hasImage && imageOk && (
-                    <img
+                    <img loading="lazy" decoding="async"
                         src={item.img}
                         alt=""
                         className="rest-img-photo"

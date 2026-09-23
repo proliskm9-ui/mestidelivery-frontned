@@ -372,7 +372,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
             return (
                 <div key={product.id} className="dish-card-new" onClick={() => setSelectedProduct(product)}>
                     <div className="dcn-image">
-                        <img src={resolveImageUrl(product.img || '') || '/Assets/default-food.png'} alt={locName(product.name)} />
+                        <img loading="lazy" decoding="async" src={resolveImageUrl(product.img || '') || '/Assets/default-food.png'} alt={locName(product.name)} />
                         <div className="dcn-controls">
                             <div className={`dcn-qty ${count === 0 ? 'collapsed' : ''}`}>
                                 <button
@@ -614,7 +614,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                 <div className="cw-items">
                                     {cart.map(item => (
                                         <div key={item.product.id} className="cw-item">
-                                            <img src={resolveImageUrl(item.product.img || '') || '/Assets/default-food.png'} className="cw-item-img" alt={locName(item.product.name)} />
+                                            <img loading="lazy" decoding="async" src={resolveImageUrl(item.product.img || '') || '/Assets/default-food.png'} className="cw-item-img" alt={locName(item.product.name)} />
                                             <div className="cw-item-info">
                                                 <div className="cw-item-name">{locName(item.product.name)}</div>
                                                 <div className="cw-item-price-val">{item.product.price} ₾</div>
@@ -963,7 +963,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                         return (
                                             <div key={product.id} className="dish-card" onClick={() => setSelectedProduct(product)}>
                                                 <div className="dish-photo">
-                                                    <img src={resolveImageUrl(product.img || '') || '/Assets/default-food.png'} alt={locName(product.name)} />
+                                                    <img loading="lazy" decoding="async" src={resolveImageUrl(product.img || '') || '/Assets/default-food.png'} alt={locName(product.name)} />
                                                     <div className="dish-controls">
                                                         <div className={`quantity-counter ${count === 0 ? 'collapsed' : ''}`}>
                                                             <button

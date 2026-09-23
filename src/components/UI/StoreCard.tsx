@@ -26,7 +26,7 @@ const StoreCard: React.FC<StoreCardProps> = ({ item, onClick, isFavorite, onTogg
         <div className="store-card" onClick={onClick}>
             <div className={`store-bg ${showSkeleton ? 'store-bg--skeleton' : 'store-bg--image'}`}>
                 {hasImage && imageOk && (
-                    <img
+                    <img loading="lazy" decoding="async"
                         src={item.img}
                         alt=""
                         className="store-bg-img"

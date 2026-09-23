@@ -28,7 +28,7 @@ const MobileRestaurantCard: React.FC<MobileRestaurantCardProps> = ({ item, onCli
         <div className={`allRestaurantCard${closedText ? ' allRestaurantCard--closed' : ''}`} onClick={onClick}>
             <div className={`allRestaurantPreview ${showSkeleton ? 'allRestaurantPreview--skeleton' : ''}`}>
                 {hasImage && imageOk && (
-                    <img
+                    <img loading="lazy" decoding="async"
                         src={item.img}
                         alt=""
                         className="allRestaurantPreviewImg"
