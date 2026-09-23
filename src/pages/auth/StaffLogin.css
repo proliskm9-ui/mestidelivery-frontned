@@ -83,3 +83,10 @@
 .staff-login-btn:not(:disabled):hover {
   filter: brightness(1.05);
 }
+
+/* Touch: 16px+ text in fields so iOS doesn't zoom the page on focus */
+@media (pointer: coarse) {
+    .staff-login-input {
+        font-size: 16px;
+    }
+}

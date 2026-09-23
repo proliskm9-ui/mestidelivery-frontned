@@ -357,3 +357,11 @@
     /* push to bottom if flex */
     box-shadow: 0 4px 20px rgba(33, 234, 124, 0.3);
 }
+
+/* Touch: 16px+ text in fields so iOS doesn't zoom the page on focus */
+@media (pointer: coarse) {
+    .as-input-group input,
+    .as-input-group textarea {
+        font-size: 16px;
+    }
+}

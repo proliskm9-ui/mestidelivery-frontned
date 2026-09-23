@@ -659,3 +659,10 @@ body:has(.checkout-page-container)::-webkit-scrollbar {
   justify-content: center;
 }
 
+/* Touch: 16px+ text in fields so iOS doesn't zoom the page on focus */
+@media (pointer: coarse) {
+    .premium-input,
+    .premium-textarea {
+        font-size: 16px;
+    }
+}

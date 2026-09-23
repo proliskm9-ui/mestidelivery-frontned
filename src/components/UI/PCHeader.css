@@ -711,3 +711,12 @@
     }
     .pc-hd .hd-address-text { max-width: 130px; }
 }
+
+/* Touch: 16px+ text in fields so iOS doesn't zoom the page on focus */
+@media (pointer: coarse) {
+    .pc-hd .hd-search input,
+    .pc-pam-search input,
+    .pc-address-modal .pam-ct-input {
+        font-size: 16px;
+    }
+}

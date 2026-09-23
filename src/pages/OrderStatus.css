@@ -1985,3 +1985,10 @@
         font-size: 12.2px;
     }
 }
+
+/* Touch: 16px+ text in fields so iOS doesn't zoom the page on focus */
+@media (pointer: coarse) {
+    .y-rate-custom-tip-input {
+        font-size: 16px;
+    }
+}

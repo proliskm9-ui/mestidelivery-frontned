@@ -916,3 +916,10 @@ body.dish-modal-open .glass-panel-container,
 .modal-footer-v3 {
     z-index: 10002 !important;
 }
+
+/* Touch: 16px+ text in fields so iOS doesn't zoom the page on focus */
+@media (pointer: coarse) {
+    .rest-search-input {
+        font-size: 16px;
+    }
+}

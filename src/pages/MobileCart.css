@@ -490,3 +490,10 @@
     text-align: center;
     color: #fff;
 }
+
+/* Touch: 16px+ text in fields so iOS doesn't zoom the page on focus */
+@media (pointer: coarse) {
+    .mc-comment-box-floating textarea {
+        font-size: 16px;
+    }
+}
