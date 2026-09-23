@@ -10,8 +10,8 @@ import { formatPrice } from '../utils/formatPrice';
 
 const IconBack = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18" />
-        <line x1="6" y1="6" x2="18" y2="18" />
+        <line x1="19" y1="12" x2="5" y2="12" />
+        <polyline points="12 19 5 12 12 5" />
     </svg>
 );
 
@@ -196,11 +196,11 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
         <div className="mobile-cart-container cart-v2-layout">
             <div className="cart-block-top">
                 <header className="mobile-cart-header sticky-header">
-                    <button className="mc-back-btn" onClick={onBack}>
+                    <button type="button" className="mc-back-btn" onClick={onBack} aria-label={t('common.back')}>
                         <IconBack />
                     </button>
                     <div className="mc-header-center">
-                        <h1>{restaurant ? restaurant.name : t('cart.title').toUpperCase()}</h1>
+                        <h1>{restaurant ? restaurant.name : t('cart.title')}</h1>
                         <div className="mc-header-subtitle">
                             {formatPrice(total)} · {restaurant?.delivery || ''}
                         </div>
@@ -305,31 +305,26 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                 showPriceInButton={false}
             />
 
-            {/* Min Order Modal */}
-            {showMinOrderModal && (
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowMinOrderModal(false)}>
-                    <div style={{ background: 'radial-gradient(120% 120% at 50% 0%, rgb(40, 40, 40) 0%, rgb(15, 15, 15) 100%)', borderTop: '1px solid rgba(255, 255, 255, 0.08)', boxShadow: '0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1)', padding: '36px 24px 14px 24px', borderRadius: '28px', width: '90%', maxWidth: '400px', textAlign: 'center', position: 'relative' }} onClick={e => e.stopPropagation()}>
-
-                        <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px', color: '#fff', letterSpacing: '-0.5px', marginTop: 0 }}>{t('checkout.min_order_title').toUpperCase()}</h2>
-                        <p style={{ fontSize: '15px', color: '#8e8e93', marginBottom: '40px', lineHeight: 1.4 }}>
-                            {t('checkout.min_order_desc').split('{diff}').map((part, index, arr) => (
-                                <React.Fragment key={index}>
-                                    {part}
-                                    {index < arr.length - 1 && <strong style={{ color: '#21EA7C' }}>{formatPrice(50 - subtotal)}</strong>}
-                                </React.Fragment>
-                            ))}
-                        </p>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <button 
-                                onClick={() => { setShowMinOrderModal(false); onBack(); }}
-                                className="panel-btn-next"
-                            >
-                                {t('cart.go_to_restaurant')}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <Sheet
+                open={showMinOrderModal}
+                onOpenChange={setShowMinOrderModal}
+                title={t('checkout.min_order_title')}
+                description={t('checkout.min_order_desc').split('{diff}').map((part, index, arr) => (
+                    <React.Fragment key={index}>
+                        {part}
+                        {index < arr.length - 1 && <strong className="mc-accent">{formatPrice(50 - subtotal)}</strong>}
+                    </React.Fragment>
+                ))}
+                footer={
+                    <button
+                        type="button"
+                        className="md-sheet-cta"
+                        onClick={() => { setShowMinOrderModal(false); onBack(); }}
+                    >
+                        {t('cart.go_to_restaurant')}
+                    </button>
+                }
+            />
             <Sheet
                 open={confirmClearOpen}
                 onOpenChange={setConfirmClearOpen}

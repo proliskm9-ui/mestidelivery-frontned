@@ -500,3 +500,8 @@
 .mc-empty-cta:active {
     transform: scale(0.97);
 }
+
+.mc-accent {
+    color: var(--color-accent);
+    font-weight: 700;
+}

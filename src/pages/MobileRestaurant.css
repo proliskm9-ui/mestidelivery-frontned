@@ -183,13 +183,13 @@
 }
 
 .v2-nav-btn {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--icon-btn-bg);
     /* Match cart style .mc-back-btn */
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: var(--icon-btn-border);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
-    width: 40px;
-    height: 40px;
+    width: var(--icon-btn-size);
+    height: var(--icon-btn-size);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -690,14 +690,15 @@
 
 .mobile-restaurant-page .modal-main-add-btn {
     flex: 1;
-    background: #21EA7C;
-    color: black;
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
     border: none;
-    border-radius: 18px;
+    border-radius: var(--btn-radius);
     font-size: 17px;
     font-weight: 700;
-    height: 48px;
+    height: var(--btn-height-sm);
     cursor: pointer;
+    box-shadow: var(--btn-primary-shadow);
 }
 
 .mobile-restaurant-page .modal-main-add-btn:active {

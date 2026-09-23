@@ -53,7 +53,7 @@
 .address-delivery-prompt__btn {
     height: 48px;
     border: none;
-    border-radius: 14px;
+    border-radius: var(--btn-radius);
     font-family: 'Outfit', Inter, sans-serif;
     font-size: 0.98rem;
     font-weight: 700;
