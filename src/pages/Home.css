@@ -1510,3 +1510,10 @@
         font-size: 1.05rem;
     }
 }
+
+/* Landing (marketing) keeps its uppercase section titles explicitly — they used to
+   inherit it from the old global h1-h6 rule. */
+.hm-title,
+.hm-partners-title {
+    text-transform: uppercase;
+}
