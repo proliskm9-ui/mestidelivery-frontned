@@ -471,7 +471,7 @@
       '<div class="mesti-country-screen">',
       '  <h3 class="mesti-phone-title mesti-country-title">' + t('country_title') + '</h3>',
       '  <div class="mesti-country-search-wrap">',
-      '    <svg class="mesti-search-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"></circle><line x1="20.5" y1="20.5" x2="16.4" y2="16.4"></line></svg>',
+      '    <svg class="mesti-search-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
       '    <input type="search" class="mesti-country-search-input" id="mesti-country-search" placeholder="' + t('search_placeholder') + '" autocomplete="off" enterkeyhint="search">',
       '  </div>',
       '  <div class="mesti-country-scroll" id="mesti-country-scroll"></div>',

@@ -193,16 +193,16 @@
 }
 
 .mesti-phone-group {
-  border-radius: 18px;
-  background: var(--pa-glass);
-  border: 1px solid var(--pa-stroke);
-  border-top-color: var(--pa-stroke-top);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition: border-color 200ms ease;
+  border-radius: var(--control-radius, 16px);
+  background: var(--field-bg, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--field-border, rgba(255, 255, 255, 0.08));
+  transition: border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease;
 }
 
 .mesti-phone-group:focus-within {
-  border-color: rgba(33, 234, 124, 0.55);
+  border-color: var(--field-border-focus, rgba(33, 234, 124, 0.55));
+  background: var(--field-bg-focus, rgba(255, 255, 255, 0.07));
+  box-shadow: var(--field-ring-focus, 0 0 0 3px rgba(33, 234, 124, 0.12));
 }
 
 .mesti-country-row {
@@ -222,7 +222,7 @@
   -webkit-user-select: none;
   user-select: none;
   transition: background-color 120ms ease;
-  border-radius: 17px 17px 0 0;
+  border-radius: 15px 15px 0 0;
 }
 
 .mesti-country-row:active {
@@ -299,7 +299,7 @@
 }
 
 .mesti-phone-main-input::placeholder {
-  color: var(--pa-faint);
+  color: var(--field-placeholder, rgba(255, 255, 255, 0.28));
   font-weight: 500;
 }
 
@@ -356,39 +356,46 @@
   position: relative;
   display: flex;
   align-items: center;
+  gap: 12px;
   flex-shrink: 0;
+  height: var(--search-height, 52px);
   margin-bottom: 8px;
+  padding: 0 16px;
+  border-radius: var(--control-radius, 16px);
+  background: var(--search-bg, rgba(255, 255, 255, 0.1));
+  transition: background-color 200ms ease;
 }
 
 .mesti-search-icon {
-  position: absolute;
-  left: 14px;
-  color: var(--pa-faint);
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  color: var(--pa-green);
   pointer-events: none;
 }
 
 .mesti-country-search-input {
-  width: 100%;
-  height: 48px;
-  padding: 0 14px 0 42px;
-  border-radius: 14px;
-  border: 1px solid var(--pa-stroke);
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
   outline: 0;
-  background: var(--pa-glass);
+  background: transparent;
   color: var(--pa-text);
   font: inherit;
-  font-size: 16px;
+  font-size: 17px;
+  font-weight: 500;
   -webkit-appearance: none;
   appearance: none;
-  transition: border-color 200ms ease;
 }
 
 .mesti-country-search-input:focus {
-  border-color: rgba(33, 234, 124, 0.55);
+  outline: 0;
 }
 
 .mesti-country-search-input::placeholder {
-  color: var(--pa-faint);
+  color: var(--search-placeholder, #aaaaaa);
 }
 
 .mesti-country-scroll {
@@ -411,9 +418,9 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  border-radius: 18px;
-  background: var(--pa-glass);
-  border: 1px solid var(--pa-stroke);
+  border-radius: var(--control-radius, 16px);
+  background: var(--field-bg, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--field-border, rgba(255, 255, 255, 0.08));
   overflow: hidden;
 }
 
@@ -542,33 +549,56 @@
 }
 
 .mesti-phone-cta {
+  position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
   width: 100%;
-  height: 56px;
+  height: var(--control-height, 54px);
   padding: 0 20px;
   border: 0;
-  border-radius: 16px;
-  background: var(--pa-green);
-  color: #161616;
+  border-radius: var(--control-radius, 16px);
+  background: var(--btn-primary-bg, #21ea7c);
+  color: var(--btn-primary-text, #0a0a0a);
   font: inherit;
-  font-size: 17px;
+  font-size: 1.05rem;
   font-weight: 700;
+  letter-spacing: -0.01em;
   cursor: pointer;
-  box-shadow: 0 4px 5px rgba(59, 180, 74, 0.2);
+  box-shadow: var(--btn-primary-shadow, inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 6px 18px rgba(33, 234, 124, 0.18));
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
-  transition: transform 120ms var(--pa-ease-out), filter 160ms ease, opacity 160ms ease;
+  transition: transform 160ms var(--pa-ease-out), filter 200ms ease, box-shadow 200ms ease;
+}
+
+.mesti-phone-cta::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 18%;
+  right: 18%;
+  bottom: -6px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--btn-primary-glow, rgba(33, 234, 124, 0.22));
+  filter: blur(14px);
+  pointer-events: none;
+}
+
+.mesti-phone-cta:disabled::before {
+  display: none;
 }
 
 .mesti-phone-cta:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 
 .mesti-phone-cta:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
+  box-shadow: none;
   cursor: default;
 }
 
@@ -589,13 +619,13 @@
   padding: 10px 8px;
   border: 0;
   background: none;
-  color: var(--pa-green);
+  color: var(--link, rgba(33, 234, 124, 0.92));
   font: inherit;
-  font-size: 15px;
+  font-size: 0.92rem;
   font-weight: 600;
   cursor: pointer;
   touch-action: manipulation;
-  transition: opacity 160ms ease;
+  transition: color 160ms ease;
 }
 
 .mesti-phone-link:active {
@@ -603,17 +633,19 @@
 }
 
 .mesti-phone-link-muted {
-  color: var(--pa-muted);
+  color: var(--link-muted, rgba(255, 255, 255, 0.45));
+  font-size: 0.88rem;
   font-weight: 500;
 }
 
 .mesti-phone-error {
   margin-top: 12px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(255, 80, 80, 0.12);
-  color: #ff8f8f;
-  font-size: 13px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--error-bg, rgba(239, 68, 68, 0.12));
+  border: 1px solid var(--error-border, rgba(239, 68, 68, 0.28));
+  color: var(--error-text, #fca5a5);
+  font-size: 0.88rem;
   line-height: 1.4;
   text-align: center;
 }
@@ -674,11 +706,16 @@
   }
 
   .mesti-phone-cta:hover:not(:disabled) {
-    filter: brightness(1.05);
+    filter: brightness(1.04);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), 0 8px 22px rgba(33, 234, 124, 0.24);
+  }
+
+  .mesti-phone-link:not(.mesti-phone-link-muted):hover {
+    color: #21ea7c;
   }
 
   .mesti-phone-link-muted:hover {
-    color: var(--pa-text);
+    color: rgba(255, 255, 255, 0.65);
   }
 }
 

@@ -64,7 +64,7 @@
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 32px 32px 0 0;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  padding: 28px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  padding: 32px 24px calc(32px + env(safe-area-inset-bottom, 0px));
   color: var(--rf-text);
   transform: translateY(100%);
   transition: transform 280ms var(--rf-ease-out);
@@ -78,8 +78,8 @@
 /* Green close — same circle button as .ui-circle-btn on the restaurant page */
 .mesti-ref-btn-close {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 20px;
+  right: 20px;
   z-index: 2;
   display: flex;
   align-items: center;
@@ -109,7 +109,7 @@
 
 /* ---------- Heading ---------- */
 .mesti-ref-badge-wrap {
-  margin: 0 52px 8px 0;
+  margin: 0 56px 10px 0;
 }
 
 .mesti-ref-badge {
@@ -141,10 +141,10 @@
 }
 
 .mesti-ref-subtitle {
-  margin: 10px 0 22px;
+  margin: 12px 0 28px;
   font-size: 15px;
   font-weight: 500;
-  line-height: 1.45;
+  line-height: 1.5;
   color: var(--rf-muted);
   text-wrap: pretty;
 }
@@ -160,25 +160,24 @@
 .mesti-ref-link-box,
 .mesti-ref-messenger-btn,
 .mesti-ref-guest-card {
-  background: var(--rf-glass);
-  border: 1px solid var(--rf-stroke);
-  border-top-color: var(--rf-stroke-top);
+  background: var(--field-bg, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--field-border, rgba(255, 255, 255, 0.08));
 }
 
 /* ---------- Stats ---------- */
 .mesti-ref-stat-card {
   display: flex;
   align-items: flex-end;
-  gap: 18px;
-  margin-bottom: 12px;
-  padding: 18px;
+  gap: 20px;
+  margin-bottom: 16px;
+  padding: 22px 20px;
   border-radius: 20px;
 }
 
 .mesti-ref-stat-balance {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   flex: 1;
   min-width: 0;
 }
@@ -212,13 +211,13 @@
 
 .mesti-ref-stat-meta {
   display: flex;
-  gap: 20px;
+  gap: 24px;
 }
 
 .mesti-ref-meta-item {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .mesti-ref-meta-num {
@@ -233,21 +232,23 @@
 
 /* ---------- Link ---------- */
 .mesti-ref-link-group {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .mesti-ref-link-box {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 56px;
+  height: var(--control-height, 54px);
   padding: 0 6px 0 16px;
-  border-radius: 16px;
-  transition: border-color 200ms ease;
+  border-radius: var(--control-radius, 16px);
+  transition: border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease;
 }
 
 .mesti-ref-link-box:focus-within {
-  border-color: rgba(33, 234, 124, 0.55);
+  border-color: var(--field-border-focus, rgba(33, 234, 124, 0.55));
+  background: var(--field-bg-focus, rgba(255, 255, 255, 0.07));
+  box-shadow: var(--field-ring-focus, 0 0 0 3px rgba(33, 234, 124, 0.12));
 }
 
 .mesti-ref-link-url {
@@ -268,21 +269,21 @@
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
-  height: 44px;
+  height: 42px;
   padding: 0 14px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--btn-secondary-border, rgba(255, 255, 255, 0.12));
   /* concentric with the 16px field and its 6px inset */
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--rf-text);
+  background: var(--btn-secondary-bg, rgba(255, 255, 255, 0.06));
+  color: #ffffff;
   font: inherit;
-  font-size: 14px;
+  font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
-  transition: transform 120ms var(--rf-ease-out), background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+  transition: transform 160ms var(--rf-ease-out), background-color 200ms ease, color 200ms ease, border-color 200ms ease;
 }
 
 .mesti-ref-copy-btn:active {
@@ -298,56 +299,76 @@
 /* ---------- Actions ---------- */
 .mesti-ref-share-primary,
 .mesti-ref-guest-btn {
+  position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  height: 56px;
+  height: var(--control-height, 54px);
   padding: 0 20px;
   border: 0;
-  border-radius: 16px;
-  background: var(--rf-green);
-  color: #161616;
+  border-radius: var(--control-radius, 16px);
+  background: var(--btn-primary-bg, #21ea7c);
+  color: var(--btn-primary-text, #0a0a0a);
   font: inherit;
-  font-size: 17px;
+  font-size: 1.05rem;
   font-weight: 700;
+  letter-spacing: -0.01em;
   cursor: pointer;
-  box-shadow: 0 4px 5px rgba(59, 180, 74, 0.2);
+  box-shadow: var(--btn-primary-shadow, inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 6px 18px rgba(33, 234, 124, 0.18));
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
-  transition: transform 120ms var(--rf-ease-out), filter 160ms ease;
+  transition: transform 160ms var(--rf-ease-out), filter 200ms ease, box-shadow 200ms ease;
+}
+
+.mesti-ref-share-primary::before,
+.mesti-ref-guest-btn::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 18%;
+  right: 18%;
+  bottom: -6px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--btn-primary-glow, rgba(33, 234, 124, 0.22));
+  filter: blur(14px);
+  pointer-events: none;
 }
 
 .mesti-ref-share-primary:active,
 .mesti-ref-guest-btn:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 
 .mesti-ref-messengers {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 12px;
 }
 
 .mesti-ref-messenger-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 50px;
-  border-radius: 16px;
-  color: var(--rf-text);
-  font-size: 15px;
+  gap: 10px;
+  height: var(--btn-secondary-height, 52px);
+  border-radius: var(--control-radius, 16px);
+  background: var(--btn-secondary-bg, rgba(255, 255, 255, 0.06)) !important;
+  border: 1px solid var(--btn-secondary-border, rgba(255, 255, 255, 0.12)) !important;
+  color: #ffffff;
+  font-size: 0.95rem;
   font-weight: 600;
   text-decoration: none;
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
-  transition: transform 120ms var(--rf-ease-out), background-color 160ms ease;
+  transition: transform 160ms var(--rf-ease-out), background-color 200ms ease, border-color 200ms ease;
 }
 
 .mesti-ref-messenger-btn:active {
@@ -362,15 +383,15 @@
 
 /* ---------- Guest ---------- */
 .mesti-ref-guest-card {
-  padding: 18px;
+  padding: 22px 20px;
   border-radius: 20px;
 }
 
 .mesti-ref-guest-text {
-  margin: 0 0 14px;
+  margin: 0 0 18px;
   font-size: 15px;
   font-weight: 500;
-  line-height: 1.45;
+  line-height: 1.5;
   color: var(--rf-muted);
   text-wrap: pretty;
 }
@@ -379,18 +400,18 @@
 .mesti-ref-terms {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 22px;
-  padding-top: 18px;
+  gap: 14px;
+  margin-top: 32px;
+  padding-top: 24px;
   border-top: 1px solid var(--rf-hairline);
 }
 
 .mesti-ref-term-item {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 12px;
   font-size: 14px;
-  line-height: 1.45;
+  line-height: 1.5;
   color: var(--rf-muted);
   text-wrap: pretty;
 }
@@ -447,14 +468,19 @@
 /* ---------- Pointer devices ---------- */
 @media (hover: hover) and (pointer: fine) {
   .mesti-ref-btn-close:hover,
-  .mesti-ref-copy-btn:hover:not(.mesti-copied),
-  .mesti-ref-messenger-btn:hover {
+  .mesti-ref-copy-btn:hover:not(.mesti-copied) {
     background: rgba(255, 255, 255, 0.1);
+  }
+
+  .mesti-ref-messenger-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
   }
 
   .mesti-ref-share-primary:hover,
   .mesti-ref-guest-btn:hover {
-    filter: brightness(1.05);
+    filter: brightness(1.04);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), 0 8px 22px rgba(33, 234, 124, 0.24);
   }
 }
 
@@ -470,7 +496,7 @@
     border-radius: 32px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-top-color: rgba(255, 255, 255, 0.08);
-    padding: 30px 24px 24px;
+    padding: 36px 28px 32px;
     transform: translateY(16px) scale(0.98);
   }
 
