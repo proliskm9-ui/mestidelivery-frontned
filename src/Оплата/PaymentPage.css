@@ -151,10 +151,10 @@ body:has(.mobile-payment-wrapper),
 }
 
 .mp-amount-label {
-  font-size: 12px;
-  font-weight: 500;
   color: rgba(255, 255, 255, 0.5);
   margin-bottom: 6px;
+  font: var(--t-label);
+  letter-spacing: 0.06em;
 }
 
 .mp-amount-value {
@@ -185,20 +185,19 @@ body:has(.mobile-payment-wrapper),
 
 .mp-methods-title {
   margin: 0 0 24px 0;
-  font-size: 13px;
-  font-weight: 700;
   color: #8E8E93;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.06em;
+  font: var(--t-label);
 }
 
 .mp-method-btn {
   width: 100%;
   height: auto;
   min-height: 76px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 20px;
+  background: var(--row-bg);
+  border: var(--row-border);
+  border-radius: var(--row-radius);
   margin-bottom: 12px;
   display: flex;
   align-items: center;
@@ -451,20 +450,19 @@ body:has(.mobile-payment-wrapper),
 
 .mp-pay-button-primary {
   width: 100%;
-  height: 56px;
-  background: #21ea7c;
+  height: var(--btn-height);
+  background: var(--btn-primary-bg);
   border: none;
-  border-radius: 18px;
-  color: #000;
-  font-size: 17px;
-  font-weight: 800;
+  border-radius: var(--btn-radius);
+  color: var(--btn-primary-text);
   cursor: pointer;
-  box-shadow: 0 8px 25px rgba(33, 234, 124, 0.3);
+  box-shadow: var(--btn-primary-shadow);
   transition: all 0.3s;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  font: var(--btn-font);
 }
 
 .mp-pay-button-primary:active {
@@ -607,14 +605,13 @@ body:has(.mobile-payment-wrapper),
 }
 
 .mp-premium-title {
-  font-size: 22px;
-  font-weight: 800;
   color: #fff;
   text-align: center;
   margin: 0;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--tracking-tight);
   text-transform: none;
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  font: var(--t-section);
 }
 
 .mp-premium-subtitle {
@@ -673,22 +670,21 @@ body:has(.mobile-payment-wrapper),
 
 .mp-btn-view-order-clean {
   width: 100%;
-  height: 56px;
+  height: var(--btn-height);
   padding: 0 24px;
-  background: #21ea7c;
+  background: var(--btn-primary-bg);
   border: none;
-  border-radius: 20px;
-  color: #05140A;
-  font-size: 16px;
-  font-weight: 800;
+  border-radius: var(--btn-radius);
+  color: var(--btn-primary-text);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(33, 234, 124, 0.35);
+  box-shadow: var(--btn-primary-shadow);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
+  font: var(--btn-font);
 }
 
 .mp-btn-view-order-clean:hover {

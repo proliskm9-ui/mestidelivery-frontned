@@ -437,7 +437,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                                         )}
                                     </div>
                                 </div>
-                                <h3 className="mp-premium-title">{t('checkout.order_placed').toUpperCase()}</h3>
+                                <h3 className="mp-premium-title">{t('checkout.order_placed')}</h3>
                                 <p className="mp-premium-subtitle">
                                     {method === 'cash' ? (
                                         <>

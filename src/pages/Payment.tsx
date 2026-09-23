@@ -267,14 +267,14 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
                                             <Clock color="#21ea7c" size={40} strokeWidth={2} />
                                         )}
                                     </div>
-                                    <h2>{t('checkout.order_placed').toUpperCase()}</h2>
+                                    <h2>{t('checkout.order_placed')}</h2>
                                     <p>
                                         {method === 'cash'
                                             ? t('checkout.pay_cash_on_delivery')
                                             : t('checkout.waiting_payment_confirm')}
                                     </p>
                                     {orderId && (
-                                        <div className="pc-order-badge">{t('common.order').toUpperCase()} #{orderId}</div>
+                                        <div className="pc-order-badge">{t('common.order')} #{orderId}</div>
                                     )}
                                     {method !== 'cash' && orderId && (
                                         <div className="pc-pending-actions">
