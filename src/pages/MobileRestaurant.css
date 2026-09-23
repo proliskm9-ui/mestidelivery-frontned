@@ -873,7 +873,7 @@
 .v2-hero {
     position: absolute;
     inset: 0 0 auto 0;
-    height: calc(250px + env(safe-area-inset-top, 0px));
+    height: calc(180px + env(safe-area-inset-top, 0px));
     z-index: -1;
     overflow: hidden;
     pointer-events: none;
@@ -911,7 +911,7 @@
 
 /* Title lands on the lower part of the cover */
 .v2-header-block.has-hero .v2-nav-bar {
-    margin-bottom: 128px;
+    margin-bottom: 64px;
 }
 
 .v2-header-block.has-hero .v2-header-title {
