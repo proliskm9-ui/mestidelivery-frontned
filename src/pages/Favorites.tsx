@@ -61,7 +61,13 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
     if (totalFavoritesCount === 0) {
         return (
             <div style={{ color: 'white', padding: '40px 40px 80px 40px', textAlign: 'center', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', paddingTop: '80px' }}>
+                <style>{`
+                    .fav-empty-cta { transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1); touch-action: manipulation; }
+                    .fav-empty-cta:active { transform: scale(0.97); }
+                `}</style>
                 <button
+                    type="button"
+                    aria-label={t('common.back')}
                     onClick={() => onNavigate && onNavigate('menu')}
                     style={{
                         position: 'absolute',
@@ -83,7 +89,7 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
                     }}
                 >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                        <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
                     </svg>
                 </button>
 
@@ -98,6 +104,8 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
                 </div>
 
                 <button
+                    type="button"
+                    className="fav-empty-cta"
                     onClick={() => onNavigate && onNavigate('menu')}
                     style={{
                         position: 'fixed',
@@ -109,27 +117,20 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
                         maxWidth: 'calc(100vw - 32px)',
                         height: '56px',
                         background: '#21EA7C',
-                        color: '#000000',
+                        color: 'var(--btn-primary-text)',
                         border: 'none',
-                        borderRadius: '16px',
+                        borderRadius: 'var(--control-radius)',
+                        boxShadow: 'var(--btn-primary-shadow)',
                         fontFamily: 'Inter, sans-serif',
-                        fontWeight: 600,
+                        fontWeight: 700,
                         fontSize: '17px',
-                        lineHeight: '10px',
-                        letterSpacing: '-0.2px',
+                        letterSpacing: '-0.01em',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
-                        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                         zIndex: 100
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(0.98)'; e.currentTarget.style.filter = 'brightness(1.1)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.filter = 'brightness(1)'; }}
-                    onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.95)'; }}
-                    onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(0.98)'; }}
-                    onTouchStart={(e) => { e.currentTarget.style.transform = 'scale(0.95)'; }}
-                    onTouchEnd={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
                 >
                     {t('cart.go_to_restaurants')}
                 </button>
