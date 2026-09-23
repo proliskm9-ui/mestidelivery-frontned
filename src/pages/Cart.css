@@ -47,10 +47,9 @@ body:has(.cart-page-container)::-webkit-scrollbar {
     flex: 1;
     margin: 0;
     text-align: center;
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
 }
 
 .cart-main-header .clear-cart-btn {
@@ -375,10 +374,9 @@ body:has(.cart-page-container)::-webkit-scrollbar {
 
 .premium-summary-card h2 {
     margin: 0;
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
     color: #fff;
 }
 
@@ -616,10 +614,9 @@ body:has(.cart-page-container)::-webkit-scrollbar {
     flex: 1;
     margin: 0;
     text-align: center;
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
 }
 
 .empty-cart-header-spacer {
