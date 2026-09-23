@@ -282,23 +282,6 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
-.card-title {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 700;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    padding-bottom: 12px;
-}
-
-.card-title svg {
-    color: var(--primary);
-}
 
 /* Map */
 .map-view-placeholder {
@@ -855,13 +838,14 @@
     }
 
     .info-section {
-        max-width: none;
+        max-width: 560px;
         padding: 0 28px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px 24px;
-        align-items: start;
-    }
+        display: flex;
+        gap: 12px;
+        align-items: stretch;
+        flex-direction: column;
+        margin: 0 auto;
+}
 
     /* PC: cost left, items right (DOM stays mobile order) */
     .info-section > .od-section-label:nth-of-type(1) {
@@ -900,10 +884,7 @@
     }
 
     .od-section-label {
-        font-size: 13px;
-        letter-spacing: 0.08em;
-        color: rgba(255, 255, 255, 0.5);
-        margin: 0;
+        margin: 8px 0 0;
     }
 
     .od-cost-row.total {

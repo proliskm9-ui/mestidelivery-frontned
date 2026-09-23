@@ -226,11 +226,10 @@
 
 .card-label {
     margin: 0;
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: var(--tracking-tight);
     color: #fff;
     text-transform: none;
+    font: var(--t-section);
 }
 
 .orders-list {
@@ -332,12 +331,9 @@
 }
 
 .order-status-pill {
-    font-size: 0.7rem;
-    font-weight: 650;
-    padding: 4px 10px;
-    border-radius: 999px;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
+    padding: var(--badge-pad);
+    border-radius: var(--badge-radius);
+    font: var(--badge-font);
 }
 
 .order-status-pill.delivered {
