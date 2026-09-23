@@ -3,8 +3,8 @@
     "short_name": "MestiDelivery",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#191917",
-    "theme_color": "#21EA7C",
+    "background_color": "#151514",
+    "theme_color": "#151514",
     "description": "Food delivery in Mestia and Svaneti, Georgia. Доставка еды в Местиа.",
     "icons": [
         {
