@@ -1973,3 +1973,54 @@
 .y-rate-sheet .y-rate-badge {
     display: none;
 }
+
+/* ---------- Live status: the label rises in when the status changes ---------- */
+.os-status-swap {
+    animation: osStatusSwap 380ms var(--ease-out) both;
+}
+
+@keyframes osStatusSwap {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: none; opacity: 1; }
+}
+
+/* ---------- Delivered: one-time burst from the status label ---------- */
+.primary-status-label {
+    position: relative;
+}
+
+.os-confetti {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.os-confetti span {
+    --angle: calc(var(--i) * 20deg);
+    position: absolute;
+    width: 8px;
+    height: 14px;
+    margin: -7px 0 0 -4px;
+    border-radius: 3px;
+    background: var(--color-accent);
+    opacity: 0;
+    animation: osConfetti 1100ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: var(--delay, 0ms);
+}
+
+.os-confetti span:nth-child(3n) { background: #ffffff; width: 6px; height: 6px; border-radius: 50%; }
+.os-confetti span:nth-child(3n + 1) { background: #7cf5b3; }
+
+@keyframes osConfetti {
+    0% { transform: rotate(var(--angle)) translateY(0) rotate(0deg); opacity: 1; }
+    70% { opacity: 1; }
+    100% { transform: rotate(var(--angle)) translateY(calc(-1 * var(--dist))) rotate(220deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .os-status-swap { animation: none; }
+    .os-confetti { display: none; }
+}
