@@ -70,7 +70,14 @@ const LegalInfoPage: React.FC = () => {
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [isWideFormat, setIsWideFormat] = useState(false);
     const [showNavigation, setShowNavigation] = useState(true);
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    // Dark by default, like the rest of the app; the reader can switch to light and it is remembered
+    const [isDarkMode, setIsDarkModeState] = useState(() => {
+        try { return localStorage.getItem('legal_theme') !== 'light'; } catch { return true; }
+    });
+    const setIsDarkMode = (v: boolean) => {
+        setIsDarkModeState(v);
+        try { localStorage.setItem('legal_theme', v ? 'dark' : 'light'); } catch { /* storage unavailable */ }
+    };
     const [textSize, setTextSize] = useState<'small' | 'medium' | 'large'>('small');
     const [isReadingMode, setIsReadingMode] = useState(false);
     const [tocOpen, setTocOpen] = useState(false);
