@@ -24,7 +24,7 @@
     pointer-events: none;
 }
 
-.mp-header {
+.mobile-profile-container .mp-header {
     position: relative;
     z-index: 10;
     display: flex;
@@ -33,7 +33,7 @@
     justify-content: space-between;
 }
 
-.mp-back-btn {
+.mobile-profile-container .mp-back-btn {
     background: var(--icon-btn-bg);
     border: var(--icon-btn-border);
     backdrop-filter: blur(15px);
@@ -47,7 +47,7 @@
     cursor: pointer;
 }
 
-.mp-title {
+.mobile-profile-container .mp-title {
     margin: 0;
     font: var(--t-nav-title);
     letter-spacing: var(--tracking-tight);

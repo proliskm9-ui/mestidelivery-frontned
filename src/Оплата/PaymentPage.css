@@ -88,7 +88,7 @@ body:has(.mobile-payment-wrapper),
 }
 
 /* Шапка платежа */
-.mp-header {
+.mobile-payment-wrapper .mp-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -99,7 +99,7 @@ body:has(.mobile-payment-wrapper),
     z-index: 100;
 }
 
-.mp-back-btn {
+.mobile-payment-wrapper .mp-back-btn {
     background: var(--icon-btn-bg);
     border: var(--icon-btn-border);
     backdrop-filter: blur(15px);
@@ -114,12 +114,12 @@ body:has(.mobile-payment-wrapper),
     transition: transform 0.2s, background 0.2s;
 }
 
-.mp-back-btn:active {
+.mobile-payment-wrapper .mp-back-btn:active {
     transform: scale(0.92);
     background: rgba(255, 255, 255, 0.15);
 }
 
-.mp-title {
+.mobile-payment-wrapper .mp-title {
     margin: 0;
     color: #fff;
     font: var(--t-nav-title);
