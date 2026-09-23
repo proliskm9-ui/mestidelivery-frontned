@@ -6,6 +6,7 @@ import LiquidNavBar from './components/UI/LiquidNavBar';
 import LoadingScreen from './components/UI/LoadingScreen';
 import { PageSkeleton } from './components/UI/Skeleton';
 import Toaster from './components/UI/Toaster';
+import Sheet, { SheetClose } from './components/UI/Sheet';
 import { useAuth } from './auth/AuthContext';
 import { addressText, detectZoneFromText, deviceHasOrdered, accountHasOrders } from './utils/deliveryPromo';
 import CompleteProfileModal from './components/auth/CompleteProfileModal';
@@ -871,29 +872,31 @@ function AppContent() {
             </div>
 
             {/* Cross-restaurant warning modal */}
-            {pendingProductToAdd && (
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setPendingProductToAdd(null)}>
-                    <div style={{ background: 'radial-gradient(120% 120% at 50% 0%, rgb(40, 40, 40) 0%, rgb(15, 15, 15) 100%)', borderTop: '1px solid rgba(255, 255, 255, 0.08)', boxShadow: '0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1)', padding: '36px 24px 14px 24px', borderRadius: '28px', width: '90%', maxWidth: '400px', position: 'relative', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
-                        <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px', color: '#fff', letterSpacing: '-0.5px', marginTop: 0 }}>КОРЗИНА ИЗ ДРУГОГО РЕСТОРАНА</h2>
-                        <p style={{ fontSize: '15px', color: '#8e8e93', marginBottom: '40px', lineHeight: 1.4 }}>
-                            У вас уже есть блюда в корзине из другого ресторана. Чтобы заказать блюда из нового места, сначала очистите текущую корзину.
-                        </p>
-                        <button 
+            <Sheet
+                open={Boolean(pendingProductToAdd)}
+                onOpenChange={(open) => { if (!open) setPendingProductToAdd(null); }}
+                title={t('cart.other_restaurant_title')}
+                description={t('cart.other_restaurant_desc')}
+                footer={
+                    <>
+                        <button
+                            type="button"
+                            className="md-sheet-cta md-sheet-cta--danger"
                             onClick={() => {
+                                if (!pendingProductToAdd) return;
                                 setCart([{
                                     product: pendingProductToAdd,
                                     quantity: getMinimumOrderQuantity(pendingProductToAdd),
                                 }]);
                                 setPendingProductToAdd(null);
                             }}
-                            className="panel-btn-next"
-                            style={{ background: 'rgba(255, 59, 48, 0.1)', color: '#FF453A', border: '1px solid rgba(255, 59, 48, 0.2)', borderRadius: '16px', fontWeight: 700, height: '56px', fontSize: '16px', width: '100%' }}
                         >
-                            Очистить корзину
+                            {t('cart.other_restaurant_clear')}
                         </button>
-                    </div>
-                </div>
-            )}
+                        <SheetClose className="md-sheet-cta md-sheet-cta--ghost">{t('common.cancel')}</SheetClose>
+                    </>
+                }
+            />
 
             <CookieConsentBanner />
             <Toaster />

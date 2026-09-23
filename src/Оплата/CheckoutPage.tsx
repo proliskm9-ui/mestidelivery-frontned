@@ -24,6 +24,7 @@ import CustomTipModal from './modals/CustomTipModal/CustomTipModal';
 import CommentModal from './modals/CommentModal/CommentModal';
 import PhoneModal from './modals/PhoneModal/PhoneModal';
 import MapModal from './modals/MapModal/MapModal';
+import { toast } from 'sonner';
 
 // === ТИПЫ ===
 type DeliveryType = 'standard' | 'scheduled';
@@ -243,16 +244,16 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
           : !!addr.street?.trim();
 
     if (!hasLocation || !addr.phone?.trim()) {
-      alert(t('checkout.fill_alert'));
+      toast.error(t('checkout.fill_alert'));
       return;
     }
 
     if (!restaurantOpen && orderData.deliveryType !== 'scheduled') {
-      alert(closedHint || 'Ресторан закрыт. Выберите доставку ко времени.');
+      toast.error(closedHint || t('checkout.closed_pick_time'));
       return;
     }
     if (orderData.deliveryType === 'scheduled' && !orderData.scheduledTime) {
-      alert('Выберите время доставки');
+      toast.error(t('checkout.pick_time_alert'));
       return;
     }
 
@@ -278,7 +279,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
       });
     } else {
       console.log('Данные заказа:', orderData);
-      alert(`${t('checkout.mobile_pay')}: ${totalAmount.toFixed(2)} ₾`);
+      toast(`${t('checkout.mobile_pay')}: ${totalAmount.toFixed(2)} ₾`);
     }
   };
 

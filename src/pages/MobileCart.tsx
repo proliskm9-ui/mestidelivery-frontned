@@ -5,6 +5,7 @@ import { useLanguage } from '../translations/LanguageContext';
 import { pickI18nText } from '../utils/i18nContent';
 import { formatPortionCalories, formatPortionWeight } from '../utils/formatProductMeta';
 import GlassBottomPanel from '../components/UI/GlassBottomPanel';
+import Sheet, { SheetClose } from '../components/UI/Sheet';
 
 const IconBack = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -99,11 +100,12 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
         loadProducts();
     }, [initialCartItems]);
 
-    const handleClearCart = () => {
-        if (window.confirm(t('cart.clear_confirm'))) {
-            onClearCart && onClearCart();
-        }
-    }
+    const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+    const handleClearCart = () => setConfirmClearOpen(true);
+    const confirmClear = () => {
+        setConfirmClearOpen(false);
+        onClearCart && onClearCart();
+    };
 
     const handleCheckoutClick = () => {
         if (subtotal < 50) {
@@ -328,6 +330,19 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                     </div>
                 </div>
             )}
+            <Sheet
+                open={confirmClearOpen}
+                onOpenChange={setConfirmClearOpen}
+                title={t('cart.clear_confirm')}
+                footer={
+                    <>
+                        <button type="button" className="md-sheet-cta md-sheet-cta--danger" onClick={confirmClear}>
+                            {t('cart.clear')}
+                        </button>
+                        <SheetClose className="md-sheet-cta md-sheet-cta--ghost">{t('common.cancel')}</SheetClose>
+                    </>
+                }
+            />
         </div>
     );
 };

@@ -4,6 +4,7 @@ import './Cart.css';
 import { useLanguage } from '../translations/LanguageContext';
 import { pickI18nText } from '../utils/i18nContent';
 import { formatPortionWeight } from '../utils/formatProductMeta';
+import Sheet, { SheetClose } from '../components/UI/Sheet';
 
 // SVG Icons
 const IconTrash = () => (
@@ -97,11 +98,12 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
         loadProducts();
     }, [initialCartItems]);
 
-    const handleClearCart = () => {
-        if (window.confirm(t('cart.clear_confirm'))) {
-            onClearCart && onClearCart();
-        }
-    }
+    const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+    const handleClearCart = () => setConfirmClearOpen(true);
+    const confirmClear = () => {
+        setConfirmClearOpen(false);
+        onClearCart && onClearCart();
+    };
 
     const handleCheckoutClick = () => {
         if (subtotal < 50) {
@@ -331,6 +333,19 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                     </div>
                 </div>
             )}
+            <Sheet
+                open={confirmClearOpen}
+                onOpenChange={setConfirmClearOpen}
+                title={t('cart.clear_confirm')}
+                footer={
+                    <>
+                        <button type="button" className="md-sheet-cta md-sheet-cta--danger" onClick={confirmClear}>
+                            {t('cart.clear')}
+                        </button>
+                        <SheetClose className="md-sheet-cta md-sheet-cta--ghost">{t('common.cancel')}</SheetClose>
+                    </>
+                }
+            />
         </div>
     );
 };

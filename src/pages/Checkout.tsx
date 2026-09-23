@@ -15,6 +15,7 @@ import TimeModal from '../Оплата/modals/TimeModal/TimeModal';
 import PlaceTypeModal from '../Оплата/modals/PlaceTypeModal/PlaceTypeModal';
 import MapModal from '../Оплата/modals/MapModal/MapModal';
 import AddressBlock, { AddressData } from '../Оплата/blocks/AddressBlock/AddressBlock';
+import { toast } from 'sonner';
 
 // SVG Icons
 const IconArrowLeft = () => (
@@ -127,16 +128,16 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                     : !!address.street?.trim();
 
         if (!hasLocation || !address.phone?.trim()) {
-            alert(t('checkout.fill_alert'));
+            toast.error(t('checkout.fill_alert'));
             return;
         }
 
         if (!restaurantOpen && deliveryType !== 'scheduled') {
-            alert(closedHint || 'Ресторан закрыт. Выберите доставку ко времени.');
+            toast.error(closedHint || t('checkout.closed_pick_time'));
             return;
         }
         if (deliveryType === 'scheduled' && !scheduledTime) {
-            alert('Выберите время доставки');
+            toast.error(t('checkout.pick_time_alert'));
             return;
         }
 

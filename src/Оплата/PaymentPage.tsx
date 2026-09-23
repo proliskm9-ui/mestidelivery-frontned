@@ -7,6 +7,7 @@ import { Clock } from 'lucide-react';
 import { useLanguage } from '../translations/LanguageContext';
 import { formatCheckoutAddress, formatCourierComment } from '../utils/checkoutAddress';
 import { ENABLE_CRYPTO_PAY } from '../config/features';
+import { toast } from 'sonner';
 
 /** Keepz payment link — Tribute removed. */
 const PAYMENT_URL = 'https://app.keepz.me/pay?qrType=DEFAULT&receiverType=USER&receiverId=6ea6970c-20ee-4119-b25f-6ebcc8a888c6';
@@ -200,7 +201,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
             const result = await api.createOrder(payload);
 
             if (!result?.id) {
-                alert(t('checkout.order_creation_error'));
+                toast.error(t('checkout.order_creation_error'));
                 setScreen('select');
                 orderCreatedRef.current = false;
                 return;
@@ -236,7 +237,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
 
         } catch (e: any) {
             console.error('Order creation error:', e);
-            alert(t('common.error') + ': ' + (e.message || t('checkout.order_failed')));
+            toast.error(t('common.error') + ': ' + (e.message || t('checkout.order_failed')));
             setScreen('select');
             orderCreatedRef.current = false;
         }
@@ -304,7 +305,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
             const result = await api.createOrder(payload);
 
             if (!result?.id) {
-                alert(t('checkout.order_creation_error'));
+                toast.error(t('checkout.order_creation_error'));
                 setScreen('select');
                 orderCreatedRef.current = false;
                 return;
@@ -323,7 +324,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
 
         } catch (e: any) {
             console.error('Order creation error:', e);
-            alert(t('common.error') + ': ' + (e.message || t('checkout.order_failed')));
+            toast.error(t('common.error') + ': ' + (e.message || t('checkout.order_failed')));
             setScreen('select');
             orderCreatedRef.current = false;
         }
