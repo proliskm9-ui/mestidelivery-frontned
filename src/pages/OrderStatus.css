@@ -90,7 +90,7 @@
     font-size: 28px;
     font-weight: 800;
     margin: 0;
-    text-transform: uppercase;
+    text-transform: none;
     letter-spacing: 1px;
     background: linear-gradient(135deg, #fff 0%, #aaa 100%);
     -webkit-background-clip: text;
@@ -539,7 +539,7 @@
     font-size: 18px;
     font-weight: 800;
     margin: 8px 0 0 0;
-    text-transform: uppercase;
+    text-transform: none;
     letter-spacing: 0.5px;
 }
 
@@ -1594,7 +1594,7 @@
     letter-spacing: 0.5px;
     color: #ffffff;
     margin: 0 0 8px 0;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .os-rate-modal-subtitle {

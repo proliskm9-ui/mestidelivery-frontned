@@ -135,7 +135,7 @@ body:has(.desktop-restaurant)::-webkit-scrollbar {
     margin: 0 0 16px;
     letter-spacing: -0.4px;
     line-height: 1.15;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .rest-closed-banner {

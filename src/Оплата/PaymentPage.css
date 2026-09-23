@@ -613,7 +613,7 @@ body:has(.mobile-payment-wrapper),
   text-align: center;
   margin: 0;
   letter-spacing: 0.5px;
-  text-transform: uppercase;
+  text-transform: none;
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 

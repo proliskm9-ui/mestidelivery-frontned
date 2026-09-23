@@ -207,7 +207,7 @@
     color: white;
     margin: 0 0 20px 0;
     letter-spacing: -0.5px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .v2-sheet-legal-alt {
@@ -231,7 +231,7 @@
 .v2-sheet-title.compact {
     font-size: 22px;
     margin-bottom: 20px;
-    text-transform: uppercase;
+    text-transform: none;
     letter-spacing: -0.3px;
 }
 /* Auto-hide the bottom cart panel whenever a dish modal is open (ported from production) */

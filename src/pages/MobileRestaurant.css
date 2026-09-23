@@ -69,7 +69,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-transform: uppercase !important;
+    text-transform: none;
     letter-spacing: normal !important;
     font-family: 'Inter', sans-serif !important;
     max-width: 50%;
