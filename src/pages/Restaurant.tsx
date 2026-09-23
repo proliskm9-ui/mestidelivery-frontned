@@ -13,6 +13,7 @@ import './Restaurant.css';
 import './MobileRestaurant.css';
 import { useBackToClose } from '../hooks/useBackToClose';
 import { formatPrice } from '../utils/formatPrice';
+import { cuisineLine } from '../utils/restaurantCuisine';
 import Sheet from '../components/UI/Sheet';
 
 interface RestaurantPageProps {
@@ -98,15 +99,8 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     };
 
     /** Cuisine line per restaurant (prod copy, localized). */
-    const getCuisineLine = (r: Restaurant) => {
-        const name = String(r?.name || '').toLowerCase();
-        const pick = (en: string, ka: string, ru: string) => (language === 'en' ? en : language === 'ka' ? ka : ru);
-        if (name.includes('sunset')) return pick('European & Georgian cuisine • Breakfasts', 'ევროპული და ქართული სამზარეულო • საუზმე', 'Европейская и грузинская кухня • Завтраки');
-        if (name.includes('burger')) return pick('Craft Burgers • Fries & Snacks • Street Food', 'ბურგერები • ფრი & წასახემსებლები', 'Крафтовые бургеры • Закуски фри • Стритфуд');
-        if (name.includes('bbq')) return pick('BBQ & Grill • Kebabs • Caucasian cuisine', 'მწვადი და გრილი • კავკასიური სამზარეულო', 'Мангал & Гриль • Шашлык • Кавказская кухня');
-        if (name.includes('luizastan')) return pick('Authentic Svan & Georgian cuisine', 'ტრადიციული სვანური და ქართული სამზარეულო', 'Традиционная сванская и грузинская кухня');
-        return pick('Restaurant • Food delivery', 'რესტორანი • საკვების მიტანა', 'Ресторан • Доставка еды');
-    };
+    const getCuisineLine = (r: Restaurant) =>
+        cuisineLine(r?.name, language) || (language === 'en' ? 'Restaurant • Food delivery' : language === 'ka' ? 'რესტორანი • საკვების მიტანა' : 'Ресторан • Доставка еды');
 
     const getDeliveryTimeLine = (r: Restaurant) => {
         const d = String((r as any)?.delivery || '20-30 мин');
