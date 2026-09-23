@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Drawer } from '@base-ui/react/drawer';
 import { useBackToClose } from '../../hooks/useBackToClose';
 import './Sheet.css';
@@ -16,6 +16,8 @@ interface SheetProps {
     flush?: boolean;
     /** Green circular close button in the top-right corner. */
     showClose?: boolean;
+    /** Page-like sheet: fixed near-full height (for sections such as order history). */
+    tall?: boolean;
     className?: string;
     children?: React.ReactNode;
 }
@@ -34,19 +36,29 @@ const Sheet: React.FC<SheetProps> = ({
     closeOnBack = true,
     flush = false,
     showClose = true,
+    tall = false,
     className,
     children,
 }) => {
     useBackToClose(open, () => onOpenChange(false), closeOnBack);
+
+    // Tall sheets push the page behind back a little (iOS page-sheet feel)
+    useEffect(() => {
+        if (!tall || !open) return;
+        const root = document.documentElement;
+        root.style.setProperty('--recede-origin', `${window.scrollY + window.innerHeight / 2}px`);
+        root.classList.add('sheet-recede');
+        return () => root.classList.remove('sheet-recede');
+    }, [tall, open]);
 
     const handleOpenChange = (next: boolean) => onOpenChange(next);
 
     return (
         <Drawer.Root open={open} onOpenChange={handleOpenChange}>
             <Drawer.Portal>
-                <Drawer.Backdrop className="md-sheet-backdrop" />
+                <Drawer.Backdrop className={tall ? 'md-sheet-backdrop md-sheet-backdrop--tall' : 'md-sheet-backdrop'} />
                 <Drawer.Viewport className="md-sheet-viewport">
-                    <Drawer.Popup className={['md-sheet', className].filter(Boolean).join(' ')}>
+                    <Drawer.Popup className={['md-sheet', tall && 'md-sheet--tall', className].filter(Boolean).join(' ')}>
                         <div className="md-sheet-handle" aria-hidden="true" />
                         {showClose && (
                             <Drawer.Close className="md-sheet-close" aria-label="Close">

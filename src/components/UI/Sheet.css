@@ -281,3 +281,46 @@
         filter: none;
     }
 }
+
+/* Page-like sheet: near-full height, content scrolls inside; the page behind stays visible on top */
+.md-sheet--tall {
+    height: calc(92dvh + var(--bleed));
+    /* opaque base under the material: the page behind is only lightly dimmed */
+    background: var(--material-sheet-bg), #121211;
+}
+
+.md-sheet--tall .md-sheet-body {
+    padding-top: var(--space-2);
+}
+
+/* Tall sheets: lighter scrim so the receded page stays readable behind */
+.md-sheet-backdrop--tall {
+    background: rgba(0, 0, 0, 0.35);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+/* Page behind a tall sheet recedes (scale + rounded corners), like iOS page sheets */
+html:has(.app-container) .app-container {
+    transition: transform var(--dur-sheet) var(--ease-drawer), border-radius var(--dur-sheet) var(--ease-drawer), opacity var(--dur-sheet) var(--ease-drawer);
+}
+
+html.sheet-recede,
+html.sheet-recede body {
+    background: #000;
+}
+
+html.sheet-recede .app-container {
+    transform: scale(0.93);
+    transform-origin: 50% var(--recede-origin, 50vh);
+    border-radius: 20px;
+    overflow: hidden;
+    opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.sheet-recede .app-container {
+        transform: none;
+        border-radius: 0;
+    }
+}

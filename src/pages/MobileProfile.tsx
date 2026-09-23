@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './MobileProfile.css';
 import { useLanguage } from '../translations/LanguageContext';
 import AvatarPickerSheet from '../components/UI/AvatarPickerSheet';
+import Sheet from '../components/UI/Sheet';
 import { restaurantCache } from '../services/api';
 
 interface MobileProfileProps {
@@ -229,16 +230,13 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
     );
 
     const renderPersonalForm = () => (
-        <div className="mp-subview">
-            <div className="mp-bg-glow"></div>
-            <div className="mp-subview-header">
-                <div className="mp-back-btn" onClick={() => setView('dashboard')}>
-                    <IconArrowLeft />
-                </div>
-                <h2 className="mp-title">{t('profile.personal_data')}</h2>
-                <div style={{ width: 44 }}></div> {/* Spacer */}
-            </div>
-            <div className="mp-subview-content">
+        <Sheet
+            tall
+            open={view === 'personal'}
+            onOpenChange={(open) => { if (!open) setView('dashboard'); }}
+            title={t('profile.personal_data')}
+            footer={<button type="button" className="ds-btn ds-btn--primary" onClick={handleSavePersonal}>{t('common.save')}</button>}
+        >
                 <div className={`mp-ct-input-wrapper ${editProfile.name ? 'has-value' : ''}`}>
                     <span className="mp-ct-input-label">{t('profile.name')}</span>
                     <input
@@ -257,24 +255,18 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                         placeholder={editProfile.phone ? '' : t('profile.phone') as string}
                     />
                 </div>
-                <button className="mp-save-btn" onClick={handleSavePersonal}>
-                    {t('common.save')}
-                </button>
-            </div>
-        </div>
+
+        </Sheet>
     );
 
     const renderAddressesForm = () => (
-        <div className="mp-subview">
-            <div className="mp-bg-glow"></div>
-            <div className="mp-subview-header">
-                <div className="mp-back-btn" onClick={() => setView('dashboard')}>
-                    <IconArrowLeft />
-                </div>
-                <h2 className="mp-title">{t('profile.addresses')}</h2>
-                <div style={{ width: 44 }}></div>
-            </div>
-            <div className="mp-subview-content">
+        <Sheet
+            tall
+            open={view === 'addresses'}
+            onOpenChange={(open) => { if (!open) setView('dashboard'); }}
+            title={t('profile.addresses')}
+            footer={<button type="button" className="ds-btn ds-btn--primary" onClick={handleSaveAddress}>{t('profile.update')}</button>}
+        >
                 <div className={`mp-ct-input-wrapper ${editAddress.street ? 'has-value' : ''}`}>
                     <span className="mp-ct-input-label">{t('profile.street')}</span>
                     <input
@@ -313,27 +305,20 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                         />
                     </div>
                 </div>
-                <button className="mp-save-btn" onClick={handleSaveAddress}>
-                    {t('profile.update')}
-                </button>
-            </div>
-        </div>
+
+        </Sheet>
     );
 
     // Restaurant photo for an order row (restaurants are pre-fetched before the history)
     const orderImage = (order: any): string | undefined => restaurantCache[`rest_${order.restaurant_id}`]?.img || undefined;
 
     const renderOrdersForm = () => (
-        <div className="mp-subview">
-            <div className="mp-bg-glow"></div>
-            <div className="mp-subview-header">
-                <div className="mp-back-btn" onClick={() => setView('dashboard')}>
-                    <IconArrowLeft />
-                </div>
-                <h2 className="mp-title">{t('profile.history_title')}</h2>
-                <div style={{ width: 44 }}></div>
-            </div>
-            <div className="mp-subview-content">
+        <Sheet
+            tall
+            open={view === 'orders'}
+            onOpenChange={(open) => { if (!open) setView('dashboard'); }}
+            title={t('profile.history_title')}
+        >
                 {orderHistory.length === 0 ? (
                     <div style={{ padding: '20px 0', opacity: 0.5, textAlign: 'center' }}>
                         {t('profile.history_empty')}
@@ -380,15 +365,14 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                         })}
                     </div>
                 )}
-            </div>
-        </div>
+        </Sheet>
     );
 
     return (
         <div className="mobile-profile-container">
             <div className="mp-bg-glow"></div>
 
-            {view === 'dashboard' && (
+            {(
                 <>
                     <header className="mp-header">
                         <div className="mp-back-btn" onClick={onBack}>
@@ -401,9 +385,9 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                 </>
             )}
 
-            {view === 'personal' && renderPersonalForm()}
-            {view === 'addresses' && renderAddressesForm()}
-            {view === 'orders' && renderOrdersForm()}
+            {renderPersonalForm()}
+            {renderAddressesForm()}
+            {renderOrdersForm()}
 
             <AvatarPickerSheet
                 open={avatarModal}
