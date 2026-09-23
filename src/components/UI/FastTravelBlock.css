@@ -17,8 +17,8 @@
     position: absolute;
     /* Pure Gray Liquid Glass effect */
     background: linear-gradient(135deg, rgba(80, 80, 80, 0.15) 0%, rgba(40, 40, 40, 0.05) 100%);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    /* no backdrop blur: the cards sit on a flat background, so it was invisible
+       but cost a blur pass on every scroll frame on low-end phones */
 
     border-radius: 20px;
 
