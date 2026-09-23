@@ -705,7 +705,7 @@ const MenuPage: React.FC<{
                     background-color: var(--bg);
                     min-height: 100vh;
                     color: white;
-                    font-family: 'Segoe UI', sans-serif;
+                    font-family: 'Inter', -apple-system, sans-serif;
                 }
                 .stores-empty {
                     position: relative;

@@ -260,7 +260,7 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
                     padding-bottom: 120px;
                     min-height: 100vh;
                     background-color: var(--bg);
-                    font-family: 'Segoe UI', sans-serif;
+                    font-family: 'Inter', -apple-system, sans-serif;
                     color: white;
                 }
 
