@@ -132,6 +132,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     useBackToClose(Boolean(selectedProduct), () => setSelectedProduct(null));
     const cartWidgetRef = useRef<HTMLDivElement>(null);
     const infoCardRef = useRef<HTMLDivElement>(null);
+    const heroImgRef = useRef<HTMLImageElement>(null);
 
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
@@ -198,7 +199,13 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
             ticking = true;
             window.requestAnimationFrame(() => {
                 if (isMobile) {
-                    setIsScrolled(window.scrollY > 90);
+                    const hero = heroImgRef.current;
+                    const y = window.scrollY;
+                    if (hero && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                        // Pull-down stretches the cover, scrolling lets it lag behind (native feel)
+                        hero.style.transform = y < 0 ? `scale(${1 + -y / 260})` : `translate3d(0, ${Math.min(y, 400) * 0.35}px, 0)`;
+                    }
+                    setIsScrolled(y > (hero ? 230 : 90));
                 } else {
                     const info = infoCardRef.current;
                     if (info) {
@@ -345,6 +352,8 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
 
     const getCategoryDisplayName = (cat: string) => localizeMenuCategory(cat, t);
     const restaurantDisplayName = locName(restaurant.name).replace(/Restaraunt/gi, 'Restaurant');
+    // Cover: dedicated hero image, else the card photo the user just tapped in the catalog
+    const heroImage = restaurant.screen || restaurant.img || '';
 
     const restaurantClosedHint = closedBadgeText(restaurant.working_hours, language);
     const restaurantIsOpen = isRestaurantOpenNow(restaurant.working_hours);
@@ -866,7 +875,12 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
             </div>
 
             {/* === Main Header (hides on scroll) === */}
-            <div className="v2-header-block">
+            <div className={heroImage ? 'v2-header-block has-hero' : 'v2-header-block'}>
+                {heroImage && (
+                    <div className="v2-hero" aria-hidden="true">
+                        <img ref={heroImgRef} className="v2-hero-img" src={heroImage} alt="" decoding="async" />
+                    </div>
+                )}
                 {/* Nav row OR Search bar */}
                 {isSearchOpen ? (
                     <div className="v2-nav-bar v2-search-bar">
