@@ -22,15 +22,7 @@ const AddressDeliveryPrompt: React.FC<AddressDeliveryPromptProps> = ({
     return createPortal(
         <div className="address-delivery-prompt-wrap">
             <div className="address-delivery-prompt" role="status" aria-live="polite" aria-label={title}>
-                <div className="address-delivery-prompt__head">
-                    <span className="address-delivery-prompt__icon" aria-hidden="true">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                            <circle cx="12" cy="10" r="3" />
-                        </svg>
-                    </span>
-                    <p className="address-delivery-prompt__title">{title}</p>
-                </div>
+                <p className="address-delivery-prompt__title">{title}</p>
                 <div className="address-delivery-prompt__actions">
                     <button
                         type="button"
