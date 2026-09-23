@@ -63,8 +63,8 @@ const GlassBottomPanel: React.FC<GlassBottomPanelProps> = ({
 
     const showProgress = isEligible && totalItems > 0 && !discountAchieved && (baseFee <= 12 || isVillage);
     const progressText = baseFee <= 12
-        ? pick(`Add ${remaining.toFixed(2)} GEL for free delivery`, `კიდევ ${remaining.toFixed(2)} ₾ უფასო მიტანამდე`, `Ещё ${remaining.toFixed(2)} ₾ до бесплатной доставки`)
-        : pick(`Add ${remaining.toFixed(2)} GEL for 10 GEL off delivery`, `კიდევ ${remaining.toFixed(2)} ₾ მიტანის 10 ₾ ფასდაკლებამდე`, `Ещё ${remaining.toFixed(2)} ₾ до скидки 10 ₾ на доставку`);
+        ? pick(`Add ${remaining.toFixed(2)} ₾ for free delivery`, `კიდევ ${remaining.toFixed(2)} ₾ უფასო მიტანამდე`, `Ещё ${remaining.toFixed(2)} ₾ до бесплатной доставки`)
+        : pick(`Add ${remaining.toFixed(2)} ₾ for 10 ₾ off delivery`, `კიდევ ${remaining.toFixed(2)} ₾ მიტანის 10 ₾ ფასდაკლებამდე`, `Ещё ${remaining.toFixed(2)} ₾ до скидки 10 ₾ на доставку`);
 
     if (totalItems === 0) {
         return (
@@ -184,9 +184,9 @@ const GlassBottomPanel: React.FC<GlassBottomPanelProps> = ({
                                 {isFree && (
                                     <div className="v2-price-desc" style={{ color: '#21EA7C', fontWeight: 600 }}>
                                         {pick(
-                                            'Free delivery from 100 GEL for new clients in Center & Airport!',
+                                            'Free delivery from 100 ₾ for new clients in Center & Airport!',
                                             'უფასო მიტანა 100 ₾-დან ახალი კლიენტებისთვის ცენტრში და აეროპორტში!',
-                                            'Бесплатная доставка от 100 GEL для новых клиентов в Центре и Аэропорту!',
+                                            'Бесплатная доставка от 100 ₾ для новых клиентов в Центре и Аэропорту!',
                                         )}
                                     </div>
                                 )}
@@ -212,7 +212,7 @@ const GlassBottomPanel: React.FC<GlassBottomPanelProps> = ({
                                 </div>
                                 <div className="v2-info-row-item">
                                     <span className="info-label">{t('delivery.service_work')}</span>
-                                    <span className="info-value">от 0.99 GEL</span>
+                                    <span className="info-value">от 0.99 ₾</span>
                                 </div>
                                 <div className="v2-sheet-legal-alt" style={{ padding: '12px 0 0 0', marginTop: '4px' }}>
                                     <p>{t('delivery.service_fee_legal')}</p>

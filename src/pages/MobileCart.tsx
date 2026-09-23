@@ -6,6 +6,7 @@ import { pickI18nText } from '../utils/i18nContent';
 import { formatPortionCalories, formatPortionWeight } from '../utils/formatProductMeta';
 import GlassBottomPanel from '../components/UI/GlassBottomPanel';
 import Sheet from '../components/UI/Sheet';
+import { formatPrice } from '../utils/formatPrice';
 
 const IconBack = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -201,7 +202,7 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                     <div className="mc-header-center">
                         <h1>{restaurant ? restaurant.name : t('cart.title').toUpperCase()}</h1>
                         <div className="mc-header-subtitle">
-                            {total.toFixed(2)} GEL · {restaurant?.delivery || ''}
+                            {formatPrice(total)} · {restaurant?.delivery || ''}
                         </div>
                     </div>
                     <button className="mc-clear-btn" onClick={handleClearCart}>
@@ -218,7 +219,7 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                             <div className="mc-item-info">
                                 <div className="mc-item-name">{locName(product.name)}</div>
                                 <div className="mc-item-meta-row">
-                                    <span className="mc-item-price">{(product.price).toFixed(2)} GEL</span>
+                                    <span className="mc-item-price">{formatPrice(product.price)}</span>
                                     <span className="mc-item-sep">·</span>
                                     <span className="mc-item-weight">{formatWeight(product.weight) || ''}</span>
                                 </div>
@@ -284,7 +285,7 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                                             </svg>
                                         </button>
                                     </div>
-                                    <div className="mc-rec-price-green">{prod.price.toFixed(2)} GEL</div>
+                                    <div className="mc-rec-price-green">{formatPrice(prod.price)}</div>
                                     <div className="mc-rec-name-white">{locName(prod.name)}</div>
                                     <div className="mc-rec-meta">{formatWeight(prod.weight) || `200 ${portionLabels.grams}`} · {formatCalories(prod.calories) || `430 ${portionLabels.kcal}`}</div>
                                 </div>
@@ -314,7 +315,7 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                             {t('checkout.min_order_desc').split('{diff}').map((part, index, arr) => (
                                 <React.Fragment key={index}>
                                     {part}
-                                    {index < arr.length - 1 && <strong style={{ color: '#21EA7C' }}>{(50 - subtotal).toFixed(2)} GEL</strong>}
+                                    {index < arr.length - 1 && <strong style={{ color: '#21EA7C' }}>{formatPrice(50 - subtotal)}</strong>}
                                 </React.Fragment>
                             ))}
                         </p>

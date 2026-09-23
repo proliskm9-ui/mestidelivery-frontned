@@ -11,6 +11,7 @@ import { closedBadgeText, isRestaurantOpenNow, nextOpenAt } from '../utils/worki
 import './Restaurant.css';
 import './MobileRestaurant.css';
 import { useBackToClose } from '../hooks/useBackToClose';
+import { formatPrice } from '../utils/formatPrice';
 
 interface RestaurantPageProps {
     restaurantId: string | null;
@@ -404,7 +405,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             </div>
                         </div>
                     </div>
-                    <div className="dcn-price">{product.price.toFixed(0)} ₾</div>
+                    <div className="dcn-price">{formatPrice(product.price)}</div>
                     <div className="dcn-title">{locName(product.name)}</div>
                     <div className="dcn-meta">
                         {formatWeight(product.weight) && <span>{formatWeight(product.weight)}</span>}
@@ -626,7 +627,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                             <img loading="lazy" decoding="async" src={resolveImageUrl(item.product.img || '') || '/Assets/default-food.png'} className="cw-item-img" alt={locName(item.product.name)} />
                                             <div className="cw-item-info">
                                                 <div className="cw-item-name">{locName(item.product.name)}</div>
-                                                <div className="cw-item-price-val">{item.product.price} ₾</div>
+                                                <div className="cw-item-price-val">{formatPrice(item.product.price)}</div>
                                             </div>
                                             <div className="cw-item-counter">
                                                 <button type="button" className="cw-count-btn" onClick={() => onUpdateQuantity && onUpdateQuantity(item.product.id, -1)}>−</button>
@@ -657,7 +658,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
 
                             {cart.length > 0 && (
                                 <button type="button" className="cw-checkout-btn" onClick={onNavigateToCart}>
-                                    {t('restaurant.proceed_to_payment')} · {(orderTotal ?? (cartTotal + (deliveryFee || 0))).toFixed(0)} ₾
+                                    {t('restaurant.proceed_to_payment')} · {formatPrice(orderTotal ?? (cartTotal + (deliveryFee || 0)))}
                                 </button>
                             )}
                         </div>
@@ -674,7 +675,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             <div className="pc-dish-modal-body">
                                 <div className="pc-dish-modal-header">
                                     <h2>{locName(selectedProduct.name)}</h2>
-                                    <span>{selectedProduct.price.toFixed(0)} ₾</span>
+                                    <span>{formatPrice(selectedProduct.price)}</span>
                                 </div>
                                 <p className="pc-dish-modal-desc">{locDesc(selectedProduct.description) || ''}</p>
                                 {(formatWeight(selectedProduct.weight) || formatCalories(selectedProduct.calories)) && (
@@ -696,7 +697,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                         ? ` ${getMinimumOrderQuantity(selectedProduct)} шт.`
                                         : ''}
                                     {' • '}
-                                    {(selectedProduct.price * getMinimumOrderQuantity(selectedProduct)).toFixed(0)} ₾
+                                    {formatPrice(selectedProduct.price * getMinimumOrderQuantity(selectedProduct))}
                                 </button>
                             </div>
                         </div>
@@ -998,7 +999,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                                 </div>
 
                                                 <div className="dish-text">
-                                                    <div className="dish-price">{product.price.toFixed(2)} GEL</div>
+                                                    <div className="dish-price">{formatPrice(product.price)}</div>
                                                     <div className="dish-title">{locName(product.name)}</div>
                                                     <div className="dish-meta">
                                                         {formatWeight(product.weight) && <span>{formatWeight(product.weight)}</span>}
@@ -1063,7 +1064,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                         <span className="footer-dish-weight">мин. {getMinimumOrderQuantity(selectedProduct)} шт.</span>
                                     )}
                                 </h2>
-                                <span className="footer-dish-price">{selectedProduct.price.toFixed(0)} GEL</span>
+                                <span className="footer-dish-price">{formatPrice(selectedProduct.price)}</span>
                             </div>
 
                             <div className="footer-actions-row">

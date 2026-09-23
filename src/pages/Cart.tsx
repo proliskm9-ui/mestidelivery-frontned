@@ -5,6 +5,7 @@ import { useLanguage } from '../translations/LanguageContext';
 import { pickI18nText } from '../utils/i18nContent';
 import { formatPortionWeight } from '../utils/formatProductMeta';
 import Sheet from '../components/UI/Sheet';
+import { formatPrice } from '../utils/formatPrice';
 
 // SVG Icons
 const IconTrash = () => (
@@ -246,7 +247,7 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                                             </div>
                                             <div className="rec-info">
                                                 <div className="rec-name">{locName(prod.name)}</div>
-                                                <div className="rec-price">{Number(prod.price).toFixed(0)} ₾</div>
+                                                <div className="rec-price">{formatPrice(prod.price)}</div>
                                             </div>
                                             <button type="button" className="rec-add-btn" onClick={() => onAddToCart && onAddToCart(prod)}>
                                                 {t('cart.add_btn')}
@@ -310,7 +311,7 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                             {t('checkout.min_order_desc').split('{diff}').map((part, index, arr) => (
                                 <React.Fragment key={index}>
                                     {part}
-                                    {index < arr.length - 1 && <strong>{(50 - subtotal).toFixed(2)} GEL</strong>}
+                                    {index < arr.length - 1 && <strong>{formatPrice(50 - subtotal)}</strong>}
                                 </React.Fragment>
                             ))}
                         </p>

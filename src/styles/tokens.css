@@ -125,6 +125,47 @@
   --error-border: rgba(239, 68, 68, 0.28);
   --error-text: #fca5a5;
 
+  /* ---------- Components: the ONE way to draw each role ----------
+   * Measured on every client screen (Sep 2026 audit) and consolidated to the
+   * most-used / best-reading variant. New UI must use these, not raw values. */
+  --page-bg: var(--color-bg);                       /* every page, incl. checkout & order status */
+
+  --card-bg: rgba(255, 255, 255, 0.04);             /* content card on a page */
+  --card-border: 1px solid rgba(255, 255, 255, 0.08);
+  --card-radius: 20px;
+  --card-pad: 16px;
+  --panel-radius: 28px;                             /* big rounded page block (restaurant/cart/order bottom block) */
+
+  --row-bg: rgba(255, 255, 255, 0.04);              /* tappable list row (profile actions, orders, options) */
+  --row-border: 1px solid rgba(255, 255, 255, 0.06);
+  --row-radius: 16px;
+  --row-divider: 1px solid rgba(255, 255, 255, 0.06); /* rows inside a card */
+
+  --icon-btn-size: 44px;                            /* round back / close / action buttons */
+  --icon-btn-bg: rgba(255, 255, 255, 0.06);
+  --icon-btn-border: 1px solid rgba(255, 255, 255, 0.1);
+
+  --btn-height: 56px;                               /* primary / secondary / danger, full width */
+  --btn-height-sm: 48px;                            /* compact: inline prompts, next to a stepper */
+  --btn-radius: 16px;
+  --btn-font: 700 17px/1 var(--font-text);
+  --btn-danger-bg: rgba(255, 59, 48, 0.1);
+  --btn-danger-border: 1px solid rgba(255, 59, 48, 0.2);
+  --btn-danger-text: #ff453a;
+
+  /* Text roles (Inter). size/weight — use these, not ad-hoc sizes. */
+  --t-large-title: 800 28px/1.1 var(--font-text);   /* restaurant, dish, order status */
+  --t-section: 800 22px/1.2 var(--font-text);       /* section headings on any page */
+  --t-nav-title: 800 18px/1.2 var(--font-text);     /* centered top-bar title */
+  --t-item: 600 16px/1.3 var(--font-text);          /* list item / dish / option title */
+  --t-body: 500 15px/1.45 var(--font-text);
+  --t-secondary: 500 14px/1.4 var(--font-text);     /* + color: var(--color-text-secondary) */
+  --t-caption: 500 13px/1.35 var(--font-text);      /* + color: var(--color-text-tertiary) */
+  --t-label: 600 12px/1.2 var(--font-text);         /* + uppercase, letter-spacing 0.06em */
+  --t-price: 700 15px/1.2 var(--font-text);         /* + color: var(--color-accent) */
+  --t-total: 800 18px/1.2 var(--font-text);
+  --tracking-tight: -0.02em;                        /* titles >= 18px */
+
   /* ---------- Motion ---------- */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);

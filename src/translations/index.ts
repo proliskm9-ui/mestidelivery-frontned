@@ -278,7 +278,7 @@ export const translations = {
             landmark: 'Ориентир',
             comment_courier: 'Комментарий курьеру',
             phone_number: 'Номер телефона',
-            min_order_title: 'Минимальная сумма 50 GEL',
+            min_order_title: 'Минимальная сумма 50 ₾',
             min_order_desc: 'Вам не хватает {diff} до минимальной суммы заказа. Пожалуйста, добавьте еще блюда.',
             got_it: 'Понятно',
             choose_time_title: 'Выбор времени',
@@ -462,7 +462,7 @@ export const translations = {
             details_title: 'Детали',
             max_weight: 'Максимальный вес заказа',
             service_work: 'Работа сервиса',
-            service_fee_legal: 'Сервисный сбор составляет 6% от суммы заказа, но не более 2.00 GEL и не менее 0.99 GEL.'
+            service_fee_legal: 'Сервисный сбор составляет 6% от суммы заказа, но не более 2.00 ₾ и не менее 0.99 ₾.'
         },
         categories: {
             fast_food: 'Фастфуд',
@@ -929,7 +929,7 @@ export const translations = {
             landmark: 'Landmark',
             comment_courier: 'Comment for courier',
             phone_number: 'Phone number',
-            min_order_title: 'Min order amount is 50 GEL',
+            min_order_title: 'Min order amount is 50 ₾',
             min_order_desc: 'You need {diff} more to reach the minimum order. Please add more items.',
             got_it: 'Got it',
             choose_time_title: 'Choose time',
@@ -1113,7 +1113,7 @@ export const translations = {
             details_title: 'Details',
             max_weight: 'Maximum order weight',
             service_work: 'Service fee',
-            service_fee_legal: 'The service fee is 6% of the order amount, but no more than 2.00 GEL and no less than 0.99 GEL.'
+            service_fee_legal: 'The service fee is 6% of the order amount, but no more than 2.00 ₾ and no less than 0.99 ₾.'
         },
         categories: {
             fast_food: 'Fast Food',
@@ -1580,7 +1580,7 @@ export const translations = {
             landmark: 'ორიენტირი',
             comment_courier: 'კომენტარი კურიერს',
             phone_number: 'ტელეფონის ნომერი',
-            min_order_title: 'მინიმალური შეკვეთა 50 GEL',
+            min_order_title: 'მინიმალური შეკვეთა 50 ₾',
             min_order_desc: 'გაკლდებათ {diff} მინიმალურ შეკვეთამდე. გთხოვთ დაამატოთ კერძები.',
             got_it: 'გასაგებია',
             choose_time_title: 'დროის არჩევა',
@@ -1764,7 +1764,7 @@ export const translations = {
             details_title: 'დეტალები',
             max_weight: 'შეკვეთის მაქსიმალური წონა',
             service_work: 'სერვისის მუშაობა',
-            service_fee_legal: 'სერვისის საკომისიო შეადგენს შეკვეთის თანხის 6%-ს, მაგრამ არაუმეტეს 2.00 GEL და არანაკლებ 0.99 GEL.'
+            service_fee_legal: 'სერვისის საკომისიო შეადგენს შეკვეთის თანხის 6%-ს, მაგრამ არაუმეტეს 2.00 ₾ და არანაკლებ 0.99 ₾.'
         },
         categories: {
             fast_food: 'სწრაფი კვება',
