@@ -125,11 +125,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onForgotPassword }) => {
         e.preventDefault();
         setError('');
         clearError();
+
+        // Registration requires a verified phone (Firebase SMS via /static/mesti-phone-auth.js)
+        const phoneAuth = (window as any).MestiPhoneAuth;
+        if (!isLogin && phoneAuth && !phoneAuth.isVerified(phone)) {
+            try {
+                await phoneAuth.open({ phone });
+            } catch {
+                return;
+            }
+        }
         setLoading(true);
 
         const endpoint = isLogin ? '/api/auth/customer/login' : '/api/auth/customer/register';
         const body = !isLogin
-            ? { email, password, full_name: fullName, phone }
+            ? { email, password, full_name: fullName, phone, firebase_token: (phoneAuth && phoneAuth.getVerifiedToken()) || '' }
             : { email, password };
 
         try {
