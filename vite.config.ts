@@ -1,10 +1,17 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import hoverGate from './postcss-hover-gate.js'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  css: {
+    postcss: {
+      // Gate :hover styles to real pointers so taps on phones don't leave hover stuck
+      plugins: [hoverGate()],
+    },
+  },
   resolve: {
     alias: {
       '@': '/src',
