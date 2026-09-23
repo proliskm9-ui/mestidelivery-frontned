@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './SummaryBlock.css';
 import { useLanguage } from '../../../translations/LanguageContext';
+import AnimatedPrice from '../../../components/UI/AnimatedPrice';
 import { formatPrice } from '../../../utils/formatPrice';
 import { pickI18nText } from '../../../utils/i18nContent';
 
@@ -121,7 +122,7 @@ const SummaryBlock: React.FC<SummaryBlockProps> = ({
 
       <div className="summary-total">
         <span>{t('common.total')}</span>
-        <span className="summary-total-value">{formatPrice(total)}</span>
+        <AnimatedPrice className="summary-total-value" value={total} />
       </div>
     </section>
   );

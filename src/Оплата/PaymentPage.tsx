@@ -213,6 +213,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
             if (selectedMethod === 'cash') {
                 setMethod('cash');
                 setScreen('pending_confirmation');
+                try { navigator.vibrate?.([12, 60, 12]); } catch { /* not supported */ }
                 await new Promise(r => setTimeout(r, 3000));
                 // Order is already committed server-side here: a failure in the parent's
                 // completion callback shouldn't surface as "order failed" or reset the flow.
@@ -425,7 +426,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
 
                         {/* PENDING CONFIRMATION — waiting for admin to verify payment */}
                         {screen === 'pending_confirmation' && (
-                            <div className="mp-premium-waiting-container">
+                            <div className={method === 'cash' ? 'mp-premium-waiting-container is-success' : 'mp-premium-waiting-container'}>
                                 <div className="mp-premium-spinner">
                                     <div className="mp-premium-icon">
                                         {method === 'cash' ? (

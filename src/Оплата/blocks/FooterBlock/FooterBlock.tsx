@@ -1,7 +1,7 @@
 import React from 'react';
 import './FooterBlock.css';
 import { useLanguage } from '../../../translations/LanguageContext';
-import { formatPrice } from '../../../utils/formatPrice';
+import AnimatedPrice from '../../../components/UI/AnimatedPrice';
 
 interface FooterBlockProps {
   totalAmount: number;
@@ -14,7 +14,7 @@ const FooterBlock: React.FC<FooterBlockProps> = ({ totalAmount, onPay }) => {
     <footer className="fixed-footer">
       <div className="footer-left">
         <div className={`footer-amount ${totalAmount >= 100 ? 'small-text' : ''}`}>
-          {formatPrice(totalAmount)}
+          <AnimatedPrice value={totalAmount} />
         </div>
         <div className="footer-label">{t('common.total')}</div>
       </div>

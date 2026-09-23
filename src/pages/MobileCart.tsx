@@ -6,6 +6,7 @@ import { pickI18nText } from '../utils/i18nContent';
 import { formatPortionCalories, formatPortionWeight } from '../utils/formatProductMeta';
 import GlassBottomPanel from '../components/UI/GlassBottomPanel';
 import Sheet from '../components/UI/Sheet';
+import AnimatedPrice from '../components/UI/AnimatedPrice';
 import { formatPrice } from '../utils/formatPrice';
 
 const IconBack = () => (
@@ -202,7 +203,7 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                     <div className="mc-header-center">
                         <h1>{restaurant ? restaurant.name : t('cart.title')}</h1>
                         <div className="mc-header-subtitle">
-                            {formatPrice(total)} · {restaurant?.delivery || ''}
+                            <AnimatedPrice value={total} /> · {restaurant?.delivery || ''}
                         </div>
                     </div>
                     <button className="mc-clear-btn" onClick={handleClearCart}>
