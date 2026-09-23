@@ -616,30 +616,46 @@ body:has(.checkout-page-container)::-webkit-scrollbar {
 
 /* Rush hour delivery warning badge */
 .rush-hour-badge {
-    margin-top: 12px;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.14) 0%, rgba(217, 119, 6, 0.07) 100%);
-    border: 1px solid rgba(245, 158, 11, 0.35);
-    border-radius: 14px;
-    padding: 10px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.08);
+  margin-top: 12px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.14) 0%, rgba(217, 119, 6, 0.07) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.08);
+  animation: fadeInRush 0.25s ease-out;
+}
+@keyframes fadeInRush {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 .rush-hour-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 700;
-    font-size: 0.88rem;
-    color: #f59e0b;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #fbbf24;
+  letter-spacing: -0.2px;
 }
 .rush-flame {
-    font-size: 1rem;
+  font-size: 15px;
+  line-height: 1;
 }
 .rush-hour-desc {
-    margin: 0;
-    font-size: 0.78rem;
-    line-height: 1.4;
-    color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.72);
+  margin: 0;
 }
+.checkout-top .rush-hour-badge {
+  max-width: 360px;
+  margin: 12px auto 4px auto;
+  text-align: center;
+}
+.checkout-top .rush-hour-header {
+  justify-content: center;
+}
+

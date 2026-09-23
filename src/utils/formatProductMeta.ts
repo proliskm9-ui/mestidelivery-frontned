@@ -8,9 +8,14 @@ export type PortionUnitLabels = {
     kcal: string;
 };
 
-type UnitKind = 'grams' | 'ml' | 'liter' | 'pcs';
+type UnitKind = 'grams' | 'ml' | 'liter' | 'pcs' | 'portion';
 
 const UNIT_KIND: Record<string, UnitKind> = {
+    порция: 'portion',
+    порц: 'portion',
+    portion: 'portion',
+    portions: 'portion',
+    ულუფა: 'portion',
     г: 'grams',
     'г.': 'grams',
     g: 'grams',
@@ -43,8 +48,8 @@ const UNIT_KIND: Record<string, UnitKind> = {
     ცალი: 'pcs',
 };
 
-function cleanLabel(label: string): string {
-    return label.replace(/\.+$/, '').trim();
+function cleanLabel(label: string | null | undefined): string {
+    return label ? String(label).replace(/\.+$/, '').trim() : '';
 }
 
 /** "250 г" / "350 мл" / "1 шт" / "0.5 л" → localized, no double units. */
@@ -62,12 +67,13 @@ export function formatPortionWeight(
     const amount = match[1];
     const unitRaw = (match[2] || '').trim().toLowerCase();
     if (!unitRaw) {
-        return `${amount} ${cleanLabel(labels.grams)}`;
+        return labels && labels.grams ? `${amount} ${cleanLabel(labels.grams)}` : `${amount} г`;
     }
 
     const kind = UNIT_KIND[unitRaw];
-    if (kind) {
-        return `${amount} ${cleanLabel(labels[kind])}`;
+    const label = kind && labels ? (labels as Record<string, string | undefined>)[kind] : undefined;
+    if (label) {
+        return `${amount} ${cleanLabel(label)}`;
     }
 
     // Unknown unit already present — keep as stored
@@ -84,12 +90,13 @@ export function formatPortionCalories(
     if (!str) return null;
 
     const amount = str.replace(/\s*(ккал|kcal|კკალ)\.?$/iu, '').trim();
+    const kcal = cleanLabel(kcalLabel);
     if (!amount || !/^[\d.,]+$/.test(amount)) {
         // Already a free-form string with unknown suffix
         if (/(ккал|kcal|კკალ)/iu.test(str)) return str;
-        return `${str} ${cleanLabel(kcalLabel)}`;
+        return kcal ? `${str} ${kcal}` : str;
     }
-    return `${amount} ${cleanLabel(kcalLabel)}`;
+    return kcal ? `${amount} ${kcal}` : amount;
 }
 
 /** Map DB category labels (usually RU) to translation keys under `categories.*`. */

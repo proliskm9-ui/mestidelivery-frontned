@@ -260,17 +260,3 @@
     color: rgba(255, 255, 255, 0.3);
     font-size: 0.95rem;
 }
-
-/* Per-language Hero Title Scaling */
-.mobile-hero-title.sh-title--ru,
-.sh-title--ru {
-    font-size: clamp(2.85rem, 12.8vw, 3.6rem);
-}
-.mobile-hero-title.sh-title--en,
-.sh-title--en {
-    font-size: clamp(2.35rem, 10.6vw, 3.2rem);
-}
-.mobile-hero-title.sh-title--ka,
-.sh-title--ka {
-    font-size: clamp(2.5rem, 11.2vw, 3.4rem);
-}

@@ -1,4 +1,5 @@
 import { deliveryZonesSeed } from '../lib/delivery/zonesSeed';
+import { addressText, detectZoneFromText } from './deliveryPromo';
 import { calculateZonePrice, resolveDeliveryPrice } from '../lib/delivery/calculateZonePrice';
 import { FALLBACK_DELIVERY_PRICE, MESTIA_CENTER } from '../types/delivery';
 
@@ -69,11 +70,16 @@ export function parseCoordinates(geoString: string | undefined): [number, number
 
 export function getDeliveryFeeForAddress(addr: any): number {
   if (!addr) return 8;
+  // Zone named in the address text wins over coordinates (prod)
+  const textZone = detectZoneFromText(addressText(addr), true);
+  if (textZone === 'airport') return 12;
+  if (textZone === 'center') return 8;
+  if (textZone === 'nearby_villages') return 20;
   const coords = parseCoordinates(addr.geo);
   if (coords) {
     return resolveDeliveryPrice(coords[0], coords[1]).price;
   }
-  if (addr.deliveryZone) {
+  if (addr.deliveryZone && addr.deliveryZone !== 'outside') {
     const match = deliveryZonesSeed.find((z) => z.id === addr.deliveryZone);
     if (match) return match.price;
   }

@@ -138,14 +138,21 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
     };
 
     const getStatusInfo = (status?: string): { label: string; cls: string } => {
-        const s = status?.toLowerCase() || 'delivered';
+        const s = status?.toLowerCase() || 'pending';
         switch (s) {
-            case 'pending': return { label: t('status.pending'), cls: 'pending' };
+            case 'scheduled': return { label: t('status.scheduled'), cls: 'pending' };
+            case 'new':
+            case 'pending':
+            case 'pending_payment': return { label: t('status.pending'), cls: 'pending' };
             case 'confirmed': return { label: t('status.confirmed'), cls: 'pending' };
             case 'preparing': return { label: t('status.preparing'), cls: 'pending' };
-            case 'delivering': return { label: t('status.delivering'), cls: 'pending' };
+            case 'ready': return { label: t('status.ready'), cls: 'pending' };
+            case 'delivering':
+            case 'picked_up':
+            case 'arrived': return { label: t('status.delivering'), cls: 'pending' };
             case 'cancelled': return { label: t('status.cancelled'), cls: 'cancelled' };
-            default: return { label: t('status.delivered'), cls: 'delivered' };
+            case 'delivered': return { label: t('status.delivered'), cls: 'delivered' };
+            default: return { label: t('status.pending'), cls: 'pending' };
         }
     };
 
@@ -216,9 +223,16 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
     const serviceFee = itemsTotal > 0 ? +(Math.max(0.99, Math.min(2.00, itemsTotal * 0.06)).toFixed(2)) : 0;
     const hasServiceFee = order.total >= (itemsTotal + serviceFee);
     const calculatedServiceFee = hasServiceFee ? serviceFee : 0;
-    const deliveryFee = order.total > (itemsTotal + calculatedServiceFee) 
-        ? +(order.total - itemsTotal - calculatedServiceFee).toFixed(2) 
+    const rawDeliveryFee = order.total > (itemsTotal + calculatedServiceFee)
+        ? +(order.total - itemsTotal - calculatedServiceFee).toFixed(2)
         : 0;
+    // Orders from 100 ₾: delivery shown with the free-delivery promo applied (prod)
+    const promoFree = itemsTotal >= 100 && rawDeliveryFee <= 12;
+    const promoMinus10 = itemsTotal >= 100 && rawDeliveryFee >= 20;
+    const deliveryFee = promoFree ? 0 : promoMinus10 ? 10 : rawDeliveryFee;
+    const displayTotal = promoFree
+        ? itemsTotal + calculatedServiceFee
+        : promoMinus10 ? itemsTotal + calculatedServiceFee + 10 : order.total;
 
     return (
         <div className="od-page">
@@ -229,7 +243,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                     <button className="od-back-btn" onClick={onBack}><IconBack /></button>
                     <div className="od-header-center">
                         <span className="od-header-title">{restName}</span>
-                        <span className="od-header-subtitle od-header-subtitle-mobile">{order.total?.toFixed(2)} ₾ · {dateStr}</span>
+                        <span className="od-header-subtitle od-header-subtitle-mobile">{displayTotal?.toFixed(2)} ₾ · {dateStr}</span>
                         <span className="od-header-subtitle od-header-subtitle-pc">{dateStr !== '—' ? dateStr : ''}</span>
                     </div>
                     <div className="od-header-spacer" />
@@ -241,7 +255,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                     <div className="od-pc-hero">
                         <div className="od-pc-hero-total">
                             <span className="od-pc-hero-label">{t('order.total')}</span>
-                            <span className="od-pc-hero-value">{order.total?.toFixed(2)} ₾</span>
+                            <span className="od-pc-hero-value">{displayTotal?.toFixed(2)} ₾</span>
                         </div>
                         <span className={`od-status-badge ${statusInfo.cls}`}>{statusInfo.label}</span>
                     </div>
@@ -316,7 +330,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                                 )}
                                 <div className="od-cost-row total">
                                     <span>{t('order.total')}</span>
-                                    <span className="od-cost-value">{order.total?.toFixed(2)} ₾</span>
+                                    <span className="od-cost-value">{displayTotal?.toFixed(2)} ₾</span>
                                 </div>
                             </div>
                         </div>

@@ -20,13 +20,15 @@ const STATUS_COLORS: Record<string, string> = {
     ready: '#10b981',
     delivering: '#21ea7c',
     delivered: '#f59e0b',
+    scheduled: '#21ea7c',
 };
 
 /** Normalize backend status aliases to i18n keys under status.* */
 const normalizeStatusKey = (status: string): string => {
-    if (status === 'accepted') return 'confirmed';
-    if (status === 'pending_payment') return 'pending';
-    return status;
+    const base = String(status || '').split(':')[0]; // e.g. "scheduled:18:30"
+    if (base === 'accepted') return 'confirmed';
+    if (base === 'pending_payment') return 'pending';
+    return base;
 };
 
 const ESTIMATED_TIMES: Record<string, string> = {
@@ -36,6 +38,7 @@ const ESTIMATED_TIMES: Record<string, string> = {
     ready: 'Ожидает курьера',
     delivering: 'Будет у вас через ~7 мин',
     delivered: 'Приятного аппетита!',
+    scheduled: 'Заказ ко времени',
 };
 
 interface Props {
@@ -44,7 +47,7 @@ interface Props {
 }
 
 const HeaderOrderStatus: React.FC<Props> = ({ onNavigate, compact }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [order, setOrder] = useState<ActiveOrder | null>(null);
     const token = localStorage.getItem('token');
 
@@ -126,16 +129,29 @@ const HeaderOrderStatus: React.FC<Props> = ({ onNavigate, compact }) => {
         }
     };
 
-    const color = STATUS_COLORS[order.status] || '#888';
     const statusKey = normalizeStatusKey(order.status);
+    const color = STATUS_COLORS[statusKey] || STATUS_COLORS[order.status] || '#21ea7c';
+    const isScheduled = statusKey === 'scheduled' || String(order.status).startsWith('scheduled');
+    const scheduledAt = (raw: string | null | undefined): string => {
+        if (!raw) return language === 'en' ? 'To opening time' : language === 'ka' ? 'გახსნის დროისთვის' : 'Ко времени открытия';
+        const m = String(raw).match(/(\d{1,2}:\d{2})/);
+        const time = m ? m[1] : String(raw);
+        return language === 'en' ? `At ${time}` : language === 'ka' ? `${time}-ზე` : `К ${time}`;
+    };
     const translatedStatus = t(`status.${statusKey}`);
     const statusText = order.status === 'delivered'
         ? t('status.courier_on_site')
-        : (translatedStatus !== `status.${statusKey}` ? translatedStatus : (ESTIMATED_TIMES[statusKey] || order.status));
+        : (translatedStatus !== `status.${statusKey}`
+            ? translatedStatus
+            : (isScheduled
+                ? (language === 'en' ? 'Scheduled order' : language === 'ka' ? 'შეკვეთა დროზე' : 'Заказ ко времени')
+                : (ESTIMATED_TIMES[statusKey] || order.status)));
     const translatedDesc = t(`status.desc_${statusKey}`);
     const estimatedTime = translatedDesc !== `status.desc_${statusKey}`
         ? translatedDesc
-        : (ESTIMATED_TIMES[statusKey] || ESTIMATED_TIMES[order.status] || '...');
+        : (isScheduled
+            ? scheduledAt((order as any).scheduled_time)
+            : (ESTIMATED_TIMES[statusKey] || ESTIMATED_TIMES[order.status] || '...'));
 
     const getStatusIcon = (status: string) => {
         const size = compact ? 22 : 24;
@@ -153,6 +169,8 @@ const HeaderOrderStatus: React.FC<Props> = ({ onNavigate, compact }) => {
                 return <ChefHat size={size} strokeWidth={strokeWidth} className="simple-anim-pulse" />;
             case 'confirmed':
                 return <ClipboardCheck size={size} strokeWidth={strokeWidth} className="simple-anim-tada" />;
+            case 'scheduled':
+                return <Clock size={size} strokeWidth={strokeWidth} className="simple-anim-pulse" />;
             case 'pending':
             default:
                 return <Clock size={size} strokeWidth={strokeWidth} className="simple-anim-spin" />;

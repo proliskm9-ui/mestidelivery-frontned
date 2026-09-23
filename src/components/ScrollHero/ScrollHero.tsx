@@ -32,7 +32,7 @@ function chapterVis(p: number, from: number, to: number): number {
 interface Props { onNavigate: (page: string) => void; }
 
 const ScrollHero: React.FC<Props> = ({ onNavigate }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
 
     const wrapRef    = useRef<HTMLDivElement>(null);
     const stickyRef  = useRef<HTMLDivElement>(null);
@@ -326,7 +326,7 @@ const ScrollHero: React.FC<Props> = ({ onNavigate }) => {
                 <div ref={centerRef} className="sh-center">
                     <div className="sh-center-body">
                         <span className="sh-eyebrow">MestiDelivery · Mestia</span>
-                        <h1 className="sh-title">
+                        <h1 className={`sh-title sh-title--${language || 'ru'}`}>
                             <span className="sh-title-solid">{t('home.hero_title_1') || 'ВКУС МЕСТИИ'}</span>
                             <span className="sh-title-outline">
                                 {outlineLines.map((line, i) => (

@@ -125,7 +125,12 @@ export const DeliveryLocationProvider: React.FC<{
     geo: string;
   }) => void;
 }> = ({ children, onLocationSynced }) => {
-  const stored = readStored();
+  const rawStored = readStored();
+  // Ignore a stale 'outside' fix that isn't even near Mestia (prod)
+  const stored = rawStored && (rawStored.zoneId !== 'outside'
+    || (rawStored.lat != null && rawStored.lng != null && rawStored.lat >= 42.85 && rawStored.lat <= 43.25 && rawStored.lng >= 42.45 && rawStored.lng <= 43.15))
+    ? rawStored
+    : null;
   const [state, setState] = useState<DeliveryLocationState>(() => {
     if (stored?.lat != null && stored?.lng != null && stored.fee != null) {
       return {
@@ -138,14 +143,15 @@ export const DeliveryLocationProvider: React.FC<{
         status: 'ready',
       };
     }
+    // Default: Mestia center at the center price until the user sets an address (prod)
     return {
-      lat: null,
-      lng: null,
-      zoneId: null,
-      fee: null,
-      preliminary: false,
-      zoneName: null,
-      status: 'idle',
+      lat: 43.0445,
+      lng: 42.7278,
+      zoneId: 'center',
+      fee: 8,
+      preliminary: true,
+      zoneName: { ru: 'Центр', en: 'Center', ka: 'ცენტრი' },
+      status: 'ready',
     };
   });
 

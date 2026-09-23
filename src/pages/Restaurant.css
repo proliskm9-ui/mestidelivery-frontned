@@ -890,8 +890,29 @@ body:has(.desktop-restaurant)::-webkit-scrollbar {
         padding: 20px;
     }
 }
-/* Hide bottom glass navigation when dish modal is open */
+/* Auto-hide the bottom cart panel whenever a dish modal is open (ported from production) */
+body:has(.dish-modal-overlay) .glass-panel-container,
+body:has(.dish-modal-content) .glass-panel-container,
+body:has(.pc-dish-modal-overlay) .glass-panel-container,
+body:has(.pc-dish-modal) .glass-panel-container,
+body:has([class*=dish-modal]) .glass-panel-container,
 body.dish-modal-open .glass-panel-container,
 .dish-modal-open .glass-panel-container {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.dish-modal-overlay,
+.pc-dish-modal-overlay {
+    z-index: 10000 !important;
+}
+
+.dish-modal-content {
+    z-index: 10001 !important;
+}
+
+.modal-footer-v3 {
+    z-index: 10002 !important;
 }

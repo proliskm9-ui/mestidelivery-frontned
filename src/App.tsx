@@ -6,6 +6,7 @@ import LiquidNavBar from './components/UI/LiquidNavBar';
 import LoadingScreen from './components/UI/LoadingScreen';
 import { PageSkeleton } from './components/UI/Skeleton';
 import { useAuth } from './auth/AuthContext';
+import { addressText, detectZoneFromText, deviceHasOrdered, accountHasOrders } from './utils/deliveryPromo';
 import CompleteProfileModal from './components/auth/CompleteProfileModal';
 
 // --- Lazy-loaded pages (loaded only when navigated to) ---
@@ -261,8 +262,11 @@ function AppContent() {
         if (deliveryLoc.status !== 'ready' || deliveryLoc.lat == null || deliveryLoc.lng == null) return;
         const geo = `${deliveryLoc.lat.toFixed(6)}, ${deliveryLoc.lng.toFixed(6)}`;
         setUserAddress((prev: any) => {
-            if (prev?.geo === geo && prev?.deliveryZone === deliveryLoc.zoneId) return prev;
-            const next = { ...(prev || {}), geo, deliveryZone: deliveryLoc.zoneId };
+            // Zone named in the address text wins; a GPS 'outside' falls back to center (prod)
+            const forcedZone = detectZoneFromText(addressText(prev, false));
+            const effectiveZone = forcedZone || (deliveryLoc.zoneId === 'outside' ? 'center' : deliveryLoc.zoneId);
+            if (prev?.geo === geo && prev?.deliveryZone === effectiveZone) return prev;
+            const next = { ...(prev || {}), geo, deliveryZone: effectiveZone };
             localStorage.setItem('user_address', JSON.stringify(next));
             return next;
         });
@@ -271,7 +275,13 @@ function AppContent() {
     const cartSubtotal = cart.reduce((a: number, b: { quantity: number; product: any }) => a + (Number(b.product.price) * b.quantity), 0);
     const cartServiceFee = cartSubtotal > 0 ? Math.max(0.99, Math.min(2.00, cartSubtotal * 0.06)) : 0;
     
-    const deliveryFee = deliveryLoc.fee ?? getDeliveryFeeForAddress(userAddress) ?? 8;
+    // First-order promo (prod): new device & account, cart >= 100 ₾
+    const baseCartDeliveryFee = deliveryLoc.fee ?? getDeliveryFeeForAddress(userAddress) ?? 8;
+    const cartPromoEligible = !deviceHasOrdered() && !accountHasOrders();
+    const cartDeliveryDiscount = cartPromoEligible && cartSubtotal >= 100
+        ? (baseCartDeliveryFee <= 12 ? baseCartDeliveryFee : 10)
+        : 0;
+    const deliveryFee = Math.max(0, baseCartDeliveryFee - cartDeliveryDiscount);
     const cartTotalAmount = cartSubtotal + deliveryFee + cartServiceFee;
 
     // Global Profile State

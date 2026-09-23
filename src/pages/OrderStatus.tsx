@@ -236,10 +236,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
             await api.rateOrder(orderId, { rating: restRating, rating_comment: fullComment });
 
             try {
-                const BOT_BASE = (import.meta as any).env?.VITE_API_URL
-                    ? `${(import.meta as any).env.VITE_API_URL}/bot/v1/orders/review`
-                    : '/api/bot/v1/orders/review';
-                fetch(BOT_BASE, {
+                fetch('/api/bot/v1/orders/review', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ order_id: orderId, rating: restRating, courier_rating: courierRating, comment: fullComment }),
@@ -250,10 +247,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
             if (effectiveTip > 0) {
                 window.open(KEEPZ_PAY_URL, '_blank', 'noopener,noreferrer');
                 try {
-                    const BOT_BASE2 = (import.meta as any).env?.VITE_API_URL
-                        ? `${(import.meta as any).env.VITE_API_URL}/bot/v1/orders/tips`
-                        : '/api/bot/v1/orders/tips';
-                    fetch(BOT_BASE2, {
+                    fetch('/api/bot/v1/orders/tips', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ order_id: orderId, tips: effectiveTip }),
@@ -288,10 +282,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
         setIsSubmittingTips(true);
         try {
             window.open(KEEPZ_PAY_URL, '_blank', 'noopener,noreferrer');
-            const BOT_BASE = (import.meta as any).env?.VITE_API_URL
-                ? `${(import.meta as any).env.VITE_API_URL}/bot/v1/orders/tips`
-                : '/api/bot/v1/orders/tips';
-            fetch(BOT_BASE, {
+            fetch('/api/bot/v1/orders/tips', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ order_id: orderId, tips: effectiveTipStandalone }),
@@ -331,9 +322,16 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
     const serviceFee = itemsTotal > 0 ? +(Math.max(0.99, Math.min(2.00, itemsTotal * 0.06)).toFixed(2)) : 0;
     const hasServiceFee = order.total >= (itemsTotal + serviceFee);
     const calculatedServiceFee = hasServiceFee ? serviceFee : 0;
-    const deliveryFee = order.total > (itemsTotal + calculatedServiceFee)
+    const rawDeliveryFee = order.total > (itemsTotal + calculatedServiceFee)
         ? +(order.total - itemsTotal - calculatedServiceFee).toFixed(2)
         : 0;
+    // Orders from 100 ₾: delivery shown with the free-delivery promo applied (prod)
+    const promoFree = itemsTotal >= 100 && rawDeliveryFee <= 12;
+    const promoMinus10 = itemsTotal >= 100 && rawDeliveryFee >= 20;
+    const deliveryFee = promoFree ? 0 : promoMinus10 ? 10 : rawDeliveryFee;
+    const displayTotal = promoFree
+        ? itemsTotal + calculatedServiceFee
+        : promoMinus10 ? itemsTotal + calculatedServiceFee + 10 : order.total;
 
     return (
         <div className="order-status-page page-layout">
@@ -401,7 +399,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                         )}
                         <div className="od-cost-row total">
                             <span>{t('order.total')}</span>
-                            <span className="od-cost-value">{order.total?.toFixed(2)} &#8382;</span>
+                            <span className="od-cost-value">{displayTotal?.toFixed(2)} &#8382;</span>
                         </div>
                     </div>
 
@@ -688,11 +686,21 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                     <div className="y-rate-success-glow" />
                                     <Check size={36} color="#21EA7C" strokeWidth={3} />
                                 </div>
-                                <h2 className="y-rate-success-title">Спасибо за отзыв!</h2>
-                                <p className="y-rate-success-desc">
-                                    Ваша оценка помогает нам и ресторану становиться лучше.
-                                    {effectiveTipModal > 0 && ' Чаевые переданы курьеру.'}
-                                </p>
+                                <h2 className="rate-success-title">СПАСИБО ЗА ВАШ ОТЗЫВ!</h2>
+                                <div className="rate-success-desc">
+                                    <span className="rate-success-line">Мы получили ваш отзыв — для нас это очень важно.</span>
+                                    {effectiveTipModal > 0 ? (
+                                        <>
+                                            <span className="rate-success-line">Чаевые мотивируют курьера держать</span>
+                                            <span className="rate-success-line">высокий уровень доставки.</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="rate-success-line">Обратная связь помогает улучшать сервис</span>
+                                            <span className="rate-success-line">и развивать доставку в регионе.</span>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>
@@ -768,8 +776,8 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                     <div className="y-rate-success-glow" />
                                     <Check size={36} color="#21EA7C" strokeWidth={3} />
                                 </div>
-                                <h2 className="y-rate-success-title">Спасибо за щедрость!</h2>
-                                <p className="y-rate-success-desc">Мы передали ваши чаевые и благодарность курьеру.</p>
+                                <h2 className="rate-success-title">Чаевые отправлены</h2>
+                                <p className="rate-success-desc">Ваша поддержка мотивирует курьера и помогает поддерживать высокие стандарты доставки.</p>
                             </div>
                         )}
                     </div>

@@ -54,14 +54,18 @@ export function resolveDeliveryPrice(
   lng: number,
   zones: DeliveryZone[] = deliveryZonesSeed
 ): ZonePriceResult {
+  // Far outside Mestia (bad GPS / tourists planning ahead): treat as center, preliminary
+  if (lat < 42.85 || lat > 43.25 || lng < 42.45 || lng > 43.15) {
+    return { zoneId: 'center', zoneName: { ru: 'Центр', en: 'Center', ka: 'ცენტრი' }, price: 8, preliminary: true };
+  }
   const hit = calculateZonePrice(lat, lng, zones);
   if (hit) return hit;
   return {
-    zoneId: 'outside',
+    zoneId: 'nearby_villages',
     zoneName: {
-      ru: 'Вне зоны',
-      en: 'Outside zone',
-      ka: 'ზონის გარეთ',
+      ru: 'Ближайшие деревни',
+      en: 'Nearby villages',
+      ka: 'ახლომდებარე სოფლები',
     },
     price: FALLBACK_DELIVERY_PRICE,
     preliminary: true,

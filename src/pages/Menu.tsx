@@ -585,7 +585,9 @@ const MenuPage: React.FC<{
                                 type: 'restaurants_browse',
                                 isMobileSource: true
                             });
-                        }} />
+                        }}
+                            onSecondBannerClick={() => { (window as any).MestiReferral?.open(); }}
+                        />
                         <FastTravelBlock
                             onNavigate={(tab) => {
                             if (tab === 'shops') {

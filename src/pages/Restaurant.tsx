@@ -60,25 +60,53 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
         return byName[r.name] || '100+';
     };
     const getHoursLabel = (r: Restaurant) => {
+        let hours: string | null = null;
         if (r.working_hours) {
             try {
                 const parsed = JSON.parse(r.working_hours);
                 const todayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][new Date().getDay()];
-                const today = parsed?.[todayKey];
-                if (today) return t('restaurant.hours_label').replace('{hours}', today);
+                hours = parsed?.[todayKey] || null;
             } catch { /* fall through */ }
         }
-        const fromTags = String(r.filter_tags || '').match(/hours:([^,]+)/i)?.[1]?.trim();
-        const byName: Record<string, string> = {
-            Luizastan: '10:00-23:00',
-            'Sunset Restaraunt': '10:30-23:00',
-            'Sunset Restaurant': '10:30-23:00',
-            'BBQ Garden': '10:00-23:00',
-        };
-        const hours = fromTags || byName[r.name];
-        if (!hours) return t('restaurant.seller_info_hours');
-        return t('restaurant.hours_label').replace('{hours}', hours);
+        if (!hours) {
+            const fromTags = String(r.filter_tags || '').match(/hours:([^,]+)/i)?.[1]?.trim();
+            const byName: Record<string, string> = {
+                Luizastan: '10:00-23:00',
+                'Sunset Restaraunt': '10:30-23:00',
+                'Sunset Restaurant': '10:30-23:00',
+                'BBQ Garden': '10:00-23:00',
+            };
+            hours = fromTags || byName[r.name] || null;
+        }
+        if (hours && String(hours).toLowerCase() === 'closed') {
+            return language === 'en'
+                ? 'Working hours: Temporarily closed'
+                : language === 'ka'
+                    ? 'სამუშაო საათები: დროებით დაკეტილია'
+                    : 'Режим работы: Временно не принимает заказы';
+        }
+        return hours ? t('restaurant.hours_label').replace('{hours}', hours) : t('restaurant.seller_info_hours');
     };
+
+    /** Cuisine line per restaurant (prod copy, localized). */
+    const getCuisineLine = (r: Restaurant) => {
+        const name = String(r?.name || '').toLowerCase();
+        const pick = (en: string, ka: string, ru: string) => (language === 'en' ? en : language === 'ka' ? ka : ru);
+        if (name.includes('sunset')) return pick('European & Georgian cuisine • Breakfasts', 'ევროპული და ქართული სამზარეულო • საუზმე', 'Европейская и грузинская кухня • Завтраки');
+        if (name.includes('burger')) return pick('Craft Burgers • Fries & Snacks • Street Food', 'ბურგერები • ფრი & წასახემსებლები', 'Крафтовые бургеры • Закуски фри • Стритфуд');
+        if (name.includes('bbq')) return pick('BBQ & Grill • Kebabs • Caucasian cuisine', 'მწვადი და გრილი • კავკასიური სამზარეულო', 'Мангал & Гриль • Шашлык • Кавказская кухня');
+        if (name.includes('luizastan')) return pick('Authentic Svan & Georgian cuisine', 'ტრადიციული სვანური და ქართული სამზარეულო', 'Традиционная сванская и грузинская кухня');
+        return pick('Restaurant • Food delivery', 'რესტორანი • საკვების მიტანა', 'Ресторан • Доставка еды');
+    };
+
+    const getDeliveryTimeLine = (r: Restaurant) => {
+        const d = String((r as any)?.delivery || '20-30 мин');
+        if (language === 'en') return `Delivery time: ~${d.replace(/мин/g, 'min')}`;
+        if (language === 'ka') return `მიტანის დრო: ~${d.replace(/мин/g, 'წთ')}`;
+        return `Время доставки: ~${d}`;
+    };
+
+    const mestiaAddress = language === 'en' ? 'Mestia, Georgia' : language === 'ka' ? 'მესტია, საქართველო' : 'Местиа, Грузия';
 
     const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
@@ -87,16 +115,6 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     const [loading, setLoading] = useState(true);
     const [isNetworkError, setIsNetworkError] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-    useEffect(() => {
-        if (selectedProduct) {
-            document.body.classList.add('dish-modal-open');
-        } else {
-            document.body.classList.remove('dish-modal-open');
-        }
-        return () => {
-            document.body.classList.remove('dish-modal-open');
-        };
-    }, [selectedProduct]);
 
     const [isScrolled, setIsScrolled] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -681,15 +699,15 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             <div className="v2-sheet-content">
                                 <h2 className="v2-sheet-title">{restaurantDisplayName}</h2>
                                 <div className="v2-sheet-section">
-                                    <p className="v2-sheet-address">{restaurant.address || ''}</p>
+                                    <p className="v2-sheet-address">{restaurant.address || mestiaAddress}</p>
                                 </div>
                                 <div className="v2-sheet-section">
-                                    <p className="v2-sheet-tags">{restaurant.category || ''}</p>
+                                    <p className="v2-sheet-tags">{getCuisineLine(restaurant)}</p>
                                 </div>
                                 <div className="v2-sheet-divider" />
                                 <div className="v2-sheet-legal">
-                                    <p>{t('restaurant.seller_info_legal').replace('{name}', restaurantDisplayName)}</p>
                                     <p>{getHoursLabel(restaurant)}</p>
+                                    <p>{getDeliveryTimeLine(restaurant)}</p>
                                 </div>
                             </div>
                         </div>
@@ -891,21 +909,21 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
 
                             <div className="v2-sheet-section">
                                 <p className="v2-sheet-address">
-                                    {restaurant.address || t('restaurant.address_fallback')}
+                                    {restaurant.address || mestiaAddress}
                                 </p>
                             </div>
 
                             <div className="v2-sheet-section">
                                 <p className="v2-sheet-tags">
-                                    {restaurant.category || t('restaurant.category_fallback')} • $$$
+                                    {getCuisineLine(restaurant)}
                                 </p>
                             </div>
 
                             <div className="v2-sheet-divider" />
 
                             <div className="v2-sheet-legal">
-                                <p>{t('restaurant.seller_info_legal').replace('{name}', restaurantDisplayName)}</p>
                                 <p>{getHoursLabel(restaurant)}</p>
+                                <p>{getDeliveryTimeLine(restaurant)}</p>
                             </div>
                         </div>
                     </div>

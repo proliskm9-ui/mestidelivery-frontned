@@ -1,6 +1,7 @@
 import React from 'react';
 import './HeaderBlock.css';
 import { useLanguage } from '../../../translations/LanguageContext';
+import { useRushStatus, rushTitle, rushDescription } from '../../../utils/rushStatus';
 
 interface HeaderBlockProps {
   deliveryType: 'standard' | 'scheduled';
@@ -25,7 +26,8 @@ const HeaderBlock: React.FC<HeaderBlockProps> = ({
   asapDisabled,
   closedHint,
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const rush = useRushStatus();
   const timeLabel = scheduledDisplay || scheduledTime;
   return (
     <section className="checkout-top">
@@ -58,7 +60,7 @@ const HeaderBlock: React.FC<HeaderBlockProps> = ({
           style={asapDisabled ? { opacity: 0.45, cursor: 'not-allowed' } : undefined}
         >
           <span className="btn-title">{t('checkout.standard')}</span>
-          <span className="btn-sub">25-30 {t('checkout.min_short')}</span>
+          <span className="btn-sub">{rush.isRush ? '45-65 ' : '25-40 '}{t('checkout.min_short')}</span>
         </button>
 
         <button
@@ -72,6 +74,16 @@ const HeaderBlock: React.FC<HeaderBlockProps> = ({
           </span>
         </button>
       </div>
+
+      {rush.isRush && (
+        <div className="rush-hour-badge">
+          <div className="rush-hour-header">
+            <span className="rush-flame">🔥</span>
+            <span>{rushTitle(rush, language)}</span>
+          </div>
+          <p className="rush-hour-desc">{rushDescription(language)}</p>
+        </div>
+      )}
     </section>
   );
 };

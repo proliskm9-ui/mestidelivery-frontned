@@ -14,16 +14,16 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onFirstBannerClick, onSecondB
     const touchEndX = useRef<number | null>(null);
 
     const mainBannerSrc = {
-        ru: '/Assets/banner_ru.jpeg',
-        en: '/Assets/banner_en.jpeg',
-        ka: '/Assets/banner_ge.jpeg'
-    }[language] || '/Assets/banner_ru.jpeg';
+        ru: '/Assets/banners/RU_1_besplatnaya-dostavka.png',
+        en: '/Assets/banners/EN_1_free-delivery.png',
+        ka: '/Assets/banners/KA_1_free-delivery.png'
+    }[language] || '/Assets/banners/RU_1_besplatnaya-dostavka.png';
 
     const refBannerSrc = {
-        ru: '/Assets/ref_banner_ru.jpeg',
-        en: '/Assets/ref_banner_en.jpeg',
-        ka: '/Assets/ref_banner_ge.jpeg'
-    }[language] || '/Assets/ref_banner_ru.jpeg';
+        ru: '/Assets/banners/RU_2_skidka-za-druga.png',
+        en: '/Assets/banners/EN_2_refer-a-friend.png',
+        ka: '/Assets/banners/KA_2_refer-a-friend.png'
+    }[language] || '/Assets/banners/RU_2_skidka-za-druga.png';
 
     const banners = [
         { src: mainBannerSrc, onClick: onFirstBannerClick },
@@ -67,7 +67,7 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onFirstBannerClick, onSecondB
             <div className="promoBannerWrap">
                 <div
                     className="promoBannerTrack"
-                    style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+                    style={{ transform: activeIndex === 0 ? 'translateX(0)' : 'translateX(calc(-100% - 10px))' }}
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
@@ -77,7 +77,7 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onFirstBannerClick, onSecondB
                             className="promoBannerSlide"
                             key={index}
                             onClick={() => banner.onClick?.()}
-                            style={{ cursor: banner.onClick ? 'pointer' : 'default' }}
+                            style={{ cursor: banner.onClick ? 'pointer' : 'default', marginRight: index < banners.length - 1 ? '10px' : '0' }}
                             role={banner.onClick ? 'button' : undefined}
                         >
                             <img src={banner.src} alt="" className="promoBannerImg" />

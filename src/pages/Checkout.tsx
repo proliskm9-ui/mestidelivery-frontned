@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './Checkout.css';
+import { useRushStatus, rushTitle, rushDescription } from '../utils/rushStatus';
+import { deviceHasOrdered, accountHasOrders } from '../utils/deliveryPromo';
 import './MobileCheckout.css';
 import { useLanguage } from '../translations/LanguageContext';
 import { api } from '../services/api';
@@ -89,28 +91,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
         const slots = generateRestaurantSlots(workingHours);
         return slots.find((s) => s.value === scheduledTime)?.label || scheduledTime;
     }, [scheduledTime, workingHours]);
-    const [rushState, setRushState] = useState(() => {
-        try {
-            const H = parseInt(new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Tbilisi", hour: "numeric", hour12: false }).format(new Date()), 10);
-            return { isRush: H >= 18 && H < 22, reason: H >= 18 && H < 22 ? "evening_rush" : "normal" };
-        } catch {
-            const H = (new Date().getUTCHours() + 4) % 24;
-            return { isRush: H >= 18 && H < 22, reason: H >= 18 && H < 22 ? "evening_rush" : "normal" };
-        }
-    });
-
-    useEffect(() => {
-        let active = true;
-        fetch('/api/bot/v1/rush-status')
-            .then(r => r.ok ? r.json() : null)
-            .then(d => {
-                if (active && d && typeof d.is_rush === 'boolean') {
-                    setRushState({ isRush: d.is_rush, reason: d.reason || 'evening_rush' });
-                }
-            })
-            .catch(() => {});
-        return () => { active = false; };
-    }, []);
+    const rushState = useRushStatus(rid);
 
 
     const savedAddressRaw = localStorage.getItem('user_address');
@@ -122,7 +103,14 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
     );
 
     const subtotal = cartItems?.reduce((sum: number, item: any) => sum + (Number(item.product.price) * item.quantity), 0) || 0;
-    const deliveryFee = getDeliveryFeeForAddress(address);
+    // First-order promo (prod): new device & account, order >= 100 ₾ — free delivery in center/airport, else -10 ₾ when fee >= 20
+    const baseDeliveryFee = getDeliveryFeeForAddress(address);
+    const firstOrderEligible = !deviceHasOrdered() && !accountHasOrders();
+    const promoZone = address.deliveryZone || 'center';
+    const deliveryDiscount = firstOrderEligible && subtotal >= 100
+        ? (promoZone === 'center' || promoZone === 'airport' ? baseDeliveryFee : (baseDeliveryFee >= 20 ? 10 : 0))
+        : 0;
+    const deliveryFee = Math.max(0, baseDeliveryFee - deliveryDiscount);
     const serviceFee = subtotal > 0 ? Math.max(0.99, Math.min(2.00, subtotal * 0.06)) : 0;
     const finalTotal = subtotal + deliveryFee + serviceFee;
 
@@ -256,7 +244,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                                     >
                                         <span className="title">{t('checkout.standard')}</span>
                                         <span className="subtitle">
-                                            {rushState.isRush ? '45-65 ' : '30-45 '} {t('common.min')}
+                                            {rushState.isRush ? '45-65 ' : '25-40 '}{t('common.min')}
                                         </span>
                                     </button>
                                     <button
@@ -276,19 +264,11 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                                         <div className="rush-hour-header">
                                             <span className="rush-flame">🔥</span>
                                             <span>
-                                                {language === 'en'
-                                                    ? (rushState.reason === 'manual_on' ? 'High demand · Delivery ~45–65 min' : 'Evening rush hour · ~45–65 min')
-                                                    : language === 'ka'
-                                                    ? (rushState.reason === 'manual_on' ? 'მაღალი მოთხოვნა · მიტანა ~45–65 წთ' : 'საღამოს პიკის საათი · ~45–65 წთ')
-                                                    : (rushState.reason === 'manual_on' ? 'Высокий спрос · Доставка ~45–65 мин' : 'Вечерний час пик · ~45–65 мин')}
+                                                {rushTitle(rushState, language)}
                                             </span>
                                         </div>
                                         <p className="rush-hour-desc">
-                                            {language === 'en'
-                                                ? 'Kitchens and couriers in Mestia are busy right now. You can also schedule your order for later.'
-                                                : language === 'ka'
-                                                ? 'სამზარეულოები და კურიერები მესტიაში დაკავებულები არიან. შეგიძლიათ შეუკვეთოთ წინასწარ.'
-                                                : 'Кухни ресторанов и курьеры сейчас загружены. Вы также можете оформить предзаказ ко времени.'}
+                                            {rushDescription(language)}
                                         </p>
                                     </div>
                                 )}

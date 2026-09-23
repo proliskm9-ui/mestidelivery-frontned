@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import './CheckoutPage.css';
 import { useLanguage } from '../translations/LanguageContext';
 import { api } from '../services/api';
-import { getDeliveryFeeForAddress } from '../utils/deliveryCalculator';
 import { useDeliveryLocationOptional } from '../delivery/DeliveryLocationContext';
 import {
   closedBadgeText,
@@ -12,6 +11,7 @@ import {
 
 // === БЛОКИ ===
 import HeaderBlock from './blocks/HeaderBlock/HeaderBlock';
+import { addressText, detectZoneFromText, deviceHasOrdered, accountHasOrders, markDeviceOrdered } from '../utils/deliveryPromo';
 import AddressBlock, { AddressData } from './blocks/AddressBlock/AddressBlock';
 import TipsBlock from './blocks/TipsBlock/TipsBlock';
 import FooterBlock from './blocks/FooterBlock/FooterBlock';
@@ -60,6 +60,9 @@ export interface CheckoutOrderData {
   cutleryCount?: number;
   /** Зональная цена доставки — должна уйти в createOrder. */
   deliveryFee?: number;
+  /** Скидка на доставку за первый заказ и итоговая цена доставки для клиента. */
+  discount?: number;
+  clientDeliveryFee?: number;
   serviceFee?: number;
   deliveryLat?: number | null;
   deliveryLng?: number | null;
@@ -108,7 +111,9 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
       landmark: '',
       comment: savedAddress?.comment || '',
       phone: savedAddress?.phone || savedPhone || '',
-      deliveryZone: savedAddress?.deliveryZone || 'center'
+      // Zone from address text first (prod), then saved zone unless it was 'outside'
+      deliveryZone: detectZoneFromText(addressText(savedAddress, false))
+        || (savedAddress?.deliveryZone && savedAddress.deliveryZone !== 'outside' ? savedAddress.deliveryZone : 'center')
     },
 
     payment: 'cash',
@@ -166,10 +171,12 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
   };
 
   const updateAddress = (field: string, value: string): void => {
-    setOrderData(prev => ({
-      ...prev,
-      address: { ...prev.address, [field]: value }
-    }));
+    setOrderData(prev => {
+      const address = { ...prev.address, [field]: value };
+      const zone = detectZoneFromText(addressText(address));
+      if (zone) address.deliveryZone = zone;
+      return { ...prev, address };
+    });
   };
 
   // Логика выбора времени (сброс на Стандарт)
@@ -201,7 +208,16 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
   };
 
   const subtotal = cartItems?.reduce((sum: number, item: any) => sum + (Number(item.product.price) * item.quantity), 0) || 0;
-  const deliveryFee = deliveryLoc?.fee ?? getDeliveryFeeForAddress(orderData.address);
+  // Prod pricing: fixed fee by zone (center 8 / airport 12 / other 20); first-order promo for orders >= 100 ₾
+  const isFirstOrder = !deviceHasOrdered() && (!localStorage.getItem('token') || !accountHasOrders());
+  const detectedZone = detectZoneFromText(addressText(orderData.address), true);
+  const pricedZone = detectedZone
+    || (orderData.address.deliveryZone && orderData.address.deliveryZone !== 'outside'
+      ? orderData.address.deliveryZone
+      : (deliveryLoc?.zoneId && deliveryLoc.zoneId !== 'outside' ? deliveryLoc.zoneId : 'center'));
+  const baseDeliveryFee = pricedZone === 'center' ? 8 : pricedZone === 'airport' ? 12 : 20;
+  const deliveryDiscount = isFirstOrder && subtotal >= 100 ? (baseDeliveryFee <= 12 ? baseDeliveryFee : 10) : 0;
+  const deliveryFee = Math.max(0, baseDeliveryFee - deliveryDiscount);
   const serviceFee = subtotal > 0 ? Math.max(0.99, Math.min(2.00, subtotal * 0.06)) : 0;
   
   const finalTotal = subtotal + deliveryFee + serviceFee;
@@ -247,12 +263,15 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
         .filter((n: number) => Number.isFinite(n));
       const fromGeoLat = geoParts.length >= 2 ? geoParts[0] : null;
       const fromGeoLng = geoParts.length >= 2 ? geoParts[1] : null;
+      markDeviceOrdered();
       onProceedToPayment({
         ...orderData,
         total: totalAmount,
         restaurantComment,
         cutleryCount,
-        deliveryFee,
+        deliveryFee: baseDeliveryFee,
+        discount: deliveryDiscount,
+        clientDeliveryFee: deliveryFee,
         serviceFee,
         deliveryLat: deliveryLoc?.lat ?? fromGeoLat,
         deliveryLng: deliveryLoc?.lng ?? fromGeoLng,
@@ -299,7 +318,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
             onEditPhone={() => toggleModal('phone', true)}
           />
 
-          {orderData.address.deliveryZone === 'outside' && (
+          {(pricedZone === 'outside' || (orderData.address.deliveryZone === 'outside' && !detectedZone)) && (
             <div style={{
               margin: '0 16px 12px',
               padding: '12px 14px',
