@@ -141,9 +141,13 @@ function AppContent() {
     // Redirect auth users from home
     useEffect(() => {
         if (token && (currentPage === 'home' || currentPage === 'login')) {
-            setCurrentPage('menu');
+            // Replace, not push: otherwise Back lands on the landing/login URL,
+            // which redirects forward again and traps the user.
+            setCurrentPageState('menu');
+            if (isServicePath(location.pathname) || isLegalPath(location.pathname)) return;
+            navigate(pagePath(language, 'menu'), { replace: true });
         }
-    }, [token, currentPage, setCurrentPage]);
+    }, [token, currentPage, language, location.pathname, navigate]);
 
     const handleNavigate = (page: string, extras?: { restaurant?: string; orderId?: number }) => {
         const protectedRoutes = ['profile', 'favorites', 'cart', 'checkout', 'payment', 'order_status', 'order_details'];
@@ -564,7 +568,11 @@ function AppContent() {
                 {isLoading && (
                     <LoadingScreen onComplete={() => {
                         setIsLoading(false);
-                        setCurrentPage('menu');
+                        // Keep deep links (order status from the bot, a shared restaurant,
+                        // refresh on profile); only the landing/login URL goes to the menu.
+                        // Read the URL, not currentPage: this callback is captured at mount.
+                        const urlPage = parseCustomerPath(window.location.pathname).page;
+                        if (!urlPage || urlPage === 'home' || urlPage === 'login') setCurrentPage('menu');
                     }} />
                 )}
                 {/* Navbar - Hidden on Home, Login, Menu, Restaurant AND Cart AND Checkout AND Profile AND Admin pages */}
