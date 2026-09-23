@@ -8,7 +8,7 @@
   max-width: 100%;
   min-height: 100vh;
   margin: 0 auto;
-  background: #0A0A0A;
+  background: var(--page-bg);
   color: rgba(255, 255, 255, 0.85);
   font-family: 'Inter', sans-serif;
   position: relative;

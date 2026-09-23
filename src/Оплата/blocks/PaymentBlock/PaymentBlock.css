@@ -16,10 +16,10 @@
 
 .payment-title {
   margin: 0;
-  font-weight: 800;
-  font-size: 20px;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--color-text);
   white-space: nowrap;
+  font: var(--t-section);
+  letter-spacing: var(--tracking-tight);
 }
 
 .payment-content {

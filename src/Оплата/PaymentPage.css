@@ -6,7 +6,7 @@
   max-width: 100%;
   min-height: 100vh;
   margin: 0 auto;
-  background-color: #0A0A0A;
+  background-color: var(--page-bg);
   color: #ffffff;
   font-family: 'Inter', -apple-system, sans-serif;
   position: relative;
@@ -18,7 +18,7 @@
 
 .mobile-payment-wrapper.payment-v2-layout {
     min-height: 100vh;
-    background-color: #0A0A0A;
+    background-color: var(--page-bg);
     color: white;
     font-family: 'Inter', sans-serif;
 }
@@ -100,8 +100,8 @@ body:has(.mobile-payment-wrapper),
 }
 
 .mp-back-btn {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--icon-btn-bg);
+    border: var(--icon-btn-border);
     backdrop-filter: blur(15px);
     width: 44px;
     height: 44px;
@@ -120,10 +120,10 @@ body:has(.mobile-payment-wrapper),
 }
 
 .mp-title {
-    font-size: 20px;
-    font-weight: 700;
     margin: 0;
     color: #fff;
+    font: var(--t-nav-title);
+    letter-spacing: var(--tracking-tight);
 }
 
 /* Контент */

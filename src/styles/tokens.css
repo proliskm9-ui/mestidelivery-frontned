@@ -135,6 +135,8 @@
   --card-radius: 20px;
   --card-pad: 16px;
   --panel-radius: 28px;                             /* big rounded page block (restaurant/cart/order bottom block) */
+  --panel-bg: rgba(255, 255, 255, 0.04);
+  --panel-border: 1px solid rgba(255, 255, 255, 0.08);
 
   --row-bg: rgba(255, 255, 255, 0.04);              /* tappable list row (profile actions, orders, options) */
   --row-border: 1px solid rgba(255, 255, 255, 0.06);
@@ -152,6 +154,10 @@
   --btn-danger-bg: rgba(255, 59, 48, 0.1);
   --btn-danger-border: 1px solid rgba(255, 59, 48, 0.2);
   --btn-danger-text: #ff453a;
+
+  --badge-font: 700 12px/1.2 var(--font-text);     /* status badges: sentence case, no caps */
+  --badge-radius: 8px;
+  --badge-pad: 5px 10px;
 
   /* Text roles (Inter). size/weight — use these, not ad-hoc sizes. */
   --t-large-title: 800 28px/1.1 var(--font-text);   /* restaurant, dish, order status */

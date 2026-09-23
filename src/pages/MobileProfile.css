@@ -3,9 +3,9 @@
 .mobile-profile-container {
     padding: 0;
     min-height: 100vh;
-    background: var(--bg);
+    background: var(--page-bg);
     color: #ffffff;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-text);
     position: relative;
     overflow-y: auto;
     padding-bottom: 120px;
@@ -34,8 +34,8 @@
 }
 
 .mp-back-btn {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--icon-btn-bg);
+    border: var(--icon-btn-border);
     backdrop-filter: blur(15px);
     width: 44px;
     height: 44px;
@@ -48,9 +48,9 @@
 }
 
 .mp-title {
-    font-size: 20px;
-    font-weight: 700;
     margin: 0;
+    font: var(--t-nav-title);
+    letter-spacing: var(--tracking-tight);
 }
 
 .mp-content {
@@ -64,11 +64,11 @@
 
 /* Base Liquid Card */
 .liquid-card {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--panel-bg);
+    border: var(--panel-border);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border-radius: 28px;
+    border-radius: var(--panel-radius);
     padding: 24px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     position: relative;
@@ -125,8 +125,9 @@
 
 .mp-user-name {
     font-size: 22px;
-    font-weight: 700;
+    font-weight: 800;
     margin: 0 0 4px 0;
+    letter-spacing: var(--tracking-tight);
 }
 
 .mp-user-phone {
@@ -160,9 +161,9 @@
     display: flex;
     align-items: center;
     padding: 14px 16px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--row-bg);
+    border-radius: var(--row-radius);
+    border: var(--row-border);
     cursor: pointer;
     text-decoration: none;
     transition: all 0.2s ease;
@@ -216,9 +217,9 @@
 }
 
 .mp-orders-title {
-    font-size: 18px;
-    font-weight: 700;
     margin: 0;
+    font: var(--t-section);
+    letter-spacing: var(--tracking-tight);
 }
 
 .see-all {
@@ -268,9 +269,9 @@
     align-items: center;
     gap: 16px;
     padding: 16px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--row-bg);
+    border-radius: var(--row-radius);
+    border: var(--row-border);
     margin-bottom: 12px;
     transition: all 0.2s ease;
     cursor: pointer;
@@ -313,13 +314,11 @@
 
 .mp-order-name {
     margin: 0;
-    font-size: 14px;
-    font-weight: 700;
     color: #fff;
-    text-transform: uppercase;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font: var(--t-item);
 }
 
 .mp-order-meta {
@@ -348,11 +347,9 @@
 }
 
 .mp-order-status-badge {
-    font-size: 11px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 6px;
-    text-transform: capitalize;
+    padding: var(--badge-pad);
+    border-radius: var(--badge-radius);
+    font: var(--badge-font);
 }
 
 .mp-order-status-badge.delivered {
@@ -374,14 +371,14 @@
 .mp-logout-btn {
     margin-top: 10px;
     width: 100%;
-    padding: 16px;
-    border-radius: 24px;
-    background: rgba(255, 59, 48, 0.1);
-    color: #FF453A;
-    border: 1px solid rgba(255, 59, 48, 0.2);
-    font-size: 16px;
-    font-weight: 600;
+    padding: 0;
+    border-radius: var(--btn-radius);
+    background: var(--btn-danger-bg);
+    color: var(--btn-danger-text);
+    border: var(--btn-danger-border);
     text-align: center;
+    height: var(--btn-height);
+    font: var(--btn-font);
 }
 
 /* View Overlays (Modal style for forms) */
@@ -420,9 +417,9 @@
 
 /* --- mp-ct-input classes for MobileProfile --- */
 .mp-ct-input-wrapper {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
+    background: var(--field-bg);
+    border: 1px solid var(--field-border);
+    border-radius: var(--control-radius);
     padding: 16px;
     height: 60px;
     display: flex;
@@ -434,8 +431,9 @@
 }
 
 .mp-ct-input-wrapper:focus-within {
-    border-color: #21EA7C;
-    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--field-border-focus);
+    background: var(--field-bg-focus);
+    box-shadow: var(--field-ring-focus);
 }
 
 .mp-ct-input-wrapper.has-value {
@@ -477,14 +475,15 @@
 
 .mp-save-btn {
     width: 100%;
-    padding: 18px;
-    border-radius: 20px;
-    background: #21EA7C;
-    color: #000;
-    font-size: 16px;
-    font-weight: 700;
+    padding: 0;
+    border-radius: var(--btn-radius);
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
     border: none;
     margin-top: 20px;
+    height: var(--btn-height);
+    box-shadow: var(--btn-primary-shadow);
+    font: var(--btn-font);
 }
 
 /* Avatar Modal adjustments for mobile */

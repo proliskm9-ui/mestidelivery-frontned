@@ -1,8 +1,8 @@
 .mobile-cart-container.cart-v2-layout {
     min-height: 100vh;
-    background-color: var(--bg);
+    background-color: var(--page-bg);
     color: white;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-text);
     padding-bottom: 110px;
     display: flex;
     flex-direction: column;
@@ -16,20 +16,20 @@
 
 /* V2 Blocks */
 .cart-block-top {
-    background: rgba(255, 255, 255, 0.04);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--panel-bg);
+    border-bottom: var(--panel-border);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border-radius: 0 0 28px 28px;
+    border-radius: 0 0 var(--panel-radius) var(--panel-radius);
     padding-bottom: 24px;
 }
 
 .cart-block-bottom {
-    background: rgba(255, 255, 255, 0.04);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--panel-bg);
+    border-top: var(--panel-border);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border-radius: 28px 28px 0 0;
+    border-radius: var(--panel-radius) var(--panel-radius) 0 0;
     padding-top: 24px;
 }
 
@@ -53,13 +53,11 @@
 }
 
 .mc-header-center h1 {
-    font-size: 16px;
-    font-weight: 700;
     margin: 0;
     color: white;
     text-transform: none;
-    letter-spacing: 0.5px;
-    font-family: 'Inter', sans-serif;
+    letter-spacing: var(--tracking-tight);
+    font: var(--t-nav-title);
 }
 
 .mc-header-subtitle {
@@ -75,8 +73,8 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--icon-btn-bg);
+    border: var(--icon-btn-border);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     display: flex;
@@ -190,13 +188,11 @@
 }
 
 .mc-item-name {
-    font-size: 17px;
-    font-weight: 500;
     color: white;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-family: 'Inter', sans-serif;
+    font: var(--t-item);
 }
 
 .mc-item-meta-row {
@@ -349,15 +345,13 @@
 }
 
 .mc-section-title {
-    font-size: 30px;
-    font-weight: 800;
     color: white;
     margin-top: 0;
-    margin-bottom: 20px;
-    font-family: 'Inter', sans-serif;
-    letter-spacing: -0.3px;
+    margin-bottom: 16px;
+    letter-spacing: var(--tracking-tight);
     text-transform: none;
     /* Убираем капс, если он прилетает извне */
+    font: var(--t-section);
 }
 
 .mc-recs-grid {

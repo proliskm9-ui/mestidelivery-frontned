@@ -2,8 +2,8 @@
 
 .checkout-top {
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--panel-bg);
+  border-bottom: var(--panel-border);
   border-top: none;
   border-left: none;
   border-right: none;
@@ -26,15 +26,15 @@
 }
 
 .ho-title {
-  font-size: 20px;
-  font-weight: 700;
   margin: 0;
   color: #fff;
+  font: var(--t-nav-title);
+  letter-spacing: var(--tracking-tight);
 }
 
 .ho-back-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--icon-btn-bg);
+  border: var(--icon-btn-border);
   backdrop-filter: blur(15px);
   width: 44px;
   height: 44px;

@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { createPortal } from 'react-dom';
 import './GlassBottomPanel.css';
 import { useLanguage } from '../../translations/LanguageContext';
 import { useDeliveryLocationOptional } from '../../delivery/DeliveryLocationContext';
 import { deviceHasOrdered, accountHasOrders } from '../../utils/deliveryPromo';
-import { useBackToClose } from '../../hooks/useBackToClose';
+import DeliveryConditionsSheet from './DeliveryConditionsSheet';
 
 const FREE_DELIVERY_THRESHOLD = 100;
 
@@ -35,7 +34,6 @@ const GlassBottomPanel: React.FC<GlassBottomPanelProps> = ({
     const { t, language } = useLanguage();
     const delivery = useDeliveryLocationOptional();
     const [isConditionsOpen, setIsConditionsOpen] = useState(false);
-    useBackToClose(isConditionsOpen, () => setIsConditionsOpen(false));
 
     // First-order promo (prod): new device & account, cart >= 100 ₾ —
     // free delivery when the zone fee is <= 12 ₾, otherwise 10 ₾ off.
@@ -65,6 +63,18 @@ const GlassBottomPanel: React.FC<GlassBottomPanelProps> = ({
     const progressText = baseFee <= 12
         ? pick(`Add ${remaining.toFixed(2)} ₾ for free delivery`, `კიდევ ${remaining.toFixed(2)} ₾ უფასო მიტანამდე`, `Ещё ${remaining.toFixed(2)} ₾ до бесплатной доставки`)
         : pick(`Add ${remaining.toFixed(2)} ₾ for 10 ₾ off delivery`, `კიდევ ${remaining.toFixed(2)} ₾ მიტანის 10 ₾ ფასდაკლებამდე`, `Ещё ${remaining.toFixed(2)} ₾ до скидки 10 ₾ на доставку`);
+
+    const conditionsSheet = (
+        <DeliveryConditionsSheet
+            open={isConditionsOpen}
+            onOpenChange={setIsConditionsOpen}
+            zoneId={delivery?.zoneId}
+            fee={fee}
+            baseFee={baseFee}
+            eta={eta}
+            promoEligible={isEligible}
+        />
+    );
 
     if (totalItems === 0) {
         return (
@@ -103,6 +113,7 @@ const GlassBottomPanel: React.FC<GlassBottomPanelProps> = ({
                         </div>
                     </div>
                 </div>
+                {conditionsSheet}
             </div>
         );
     }
@@ -156,73 +167,7 @@ const GlassBottomPanel: React.FC<GlassBottomPanelProps> = ({
                 </button>
             </div>
 
-            {isConditionsOpen && createPortal(
-                <div className="v2-info-overlay active" onClick={() => setIsConditionsOpen(false)}>
-                    <div className="v2-info-sheet active" onClick={(e) => e.stopPropagation()}>
-                        <div className="v2-sheet-handle" onClick={() => setIsConditionsOpen(false)} />
-
-                        <div className="v2-sheet-content">
-                            <div className="v2-modal-card">
-                                <h2 className="v2-sheet-title compact">{t('delivery.fee_label')}</h2>
-
-                                <div className="v2-partner-info">
-                                    <img
-                                        src="/Assets/иконка_человек_2 пнг 32.png"
-                                        alt="Courier"
-                                        className="partner-icon"
-                                        style={{ width: '28px', height: '28px', objectFit: 'contain' }}
-                                    />
-                                    <span>mestigo</span>
-                                </div>
-
-                                <div className="v2-info-row-item">
-                                    <span className="info-label">{t('delivery.fee_label')}</span>
-                                    <span className="info-value">
-                                        {isFree ? '0 ₾' : `${Math.round(fee)} ₾`}
-                                    </span>
-                                </div>
-                                {isFree && (
-                                    <div className="v2-price-desc" style={{ color: '#21EA7C', fontWeight: 600 }}>
-                                        {pick(
-                                            'Free delivery from 100 ₾ for new clients in Center & Airport!',
-                                            'უფასო მიტანა 100 ₾-დან ახალი კლიენტებისთვის ცენტრში და აეროპორტში!',
-                                            'Бесплатная доставка от 100 ₾ для новых клиентов в Центре и Аэропорту!',
-                                        )}
-                                    </div>
-                                )}
-                                <div className="v2-info-row-item">
-                                    <span className="info-label">{t('delivery.zone_center')}</span>
-                                    <span className="info-value">8 ₾</span>
-                                </div>
-                                <div className="v2-info-row-item">
-                                    <span className="info-label">{t('delivery.zone_airport')}</span>
-                                    <span className="info-value">12 ₾</span>
-                                </div>
-                                <div className="v2-info-row-item">
-                                    <span className="info-label">{t('delivery.zone_villages')}</span>
-                                    <span className="info-value">20 ₾</span>
-                                </div>
-                            </div>
-
-                            <div className="v2-modal-card">
-                                <h2 className="v2-sheet-title compact" style={{ marginBottom: '8px' }}>{t('delivery.details_title')}</h2>
-                                <div className="v2-info-row-item">
-                                    <span className="info-label">{t('delivery.max_weight')}</span>
-                                    <span className="info-value">45 кг</span>
-                                </div>
-                                <div className="v2-info-row-item">
-                                    <span className="info-label">{t('delivery.service_work')}</span>
-                                    <span className="info-value">от 0.99 ₾</span>
-                                </div>
-                                <div className="v2-sheet-legal-alt" style={{ padding: '12px 0 0 0', marginTop: '4px' }}>
-                                    <p>{t('delivery.service_fee_legal')}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>,
-                document.body
-            )}
+            {conditionsSheet}
         </div>
     );
 };

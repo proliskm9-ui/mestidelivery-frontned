@@ -1,7 +1,7 @@
 .cart-page-container {
     --primary: #21EA7C;
     --bg-dark: var(--bg);
-    --card-bg: rgba(255, 255, 255, 0.04);
+    --cart-card-bg: rgba(255, 255, 255, 0.04);
     --border-light: rgba(255, 255, 255, 0.08);
     --text-muted: rgba(255, 255, 255, 0.45);
     --flow-max: 1360px;
@@ -93,7 +93,7 @@ body:has(.cart-page-container)::-webkit-scrollbar {
 }
 
 .cart-glass-block {
-    background: var(--card-bg);
+    background: var(--cart-card-bg);
     border: 1px solid var(--border-light);
     border-radius: 28px;
     padding: 8px 20px;
@@ -248,7 +248,7 @@ body:has(.cart-page-container)::-webkit-scrollbar {
 
 .extra-card,
 .comment-card {
-    background: var(--card-bg);
+    background: var(--cart-card-bg);
     border: 1px solid var(--border-light);
     border-radius: 20px;
     backdrop-filter: blur(24px);
@@ -362,7 +362,7 @@ body:has(.cart-page-container)::-webkit-scrollbar {
 }
 
 .premium-summary-card {
-    background: var(--card-bg);
+    background: var(--cart-card-bg);
     border: 1px solid var(--border-light);
     border-radius: 28px;
     padding: 22px 24px;
@@ -478,7 +478,7 @@ body:has(.cart-page-container)::-webkit-scrollbar {
 }
 
 .empty-cart-card {
-    background: var(--card-bg);
+    background: var(--cart-card-bg);
     border: 1px solid var(--border-light);
     border-radius: 28px;
     padding: 48px 32px;
@@ -526,7 +526,7 @@ body:has(.cart-page-container)::-webkit-scrollbar {
 
 .rec-card {
     min-width: 0;
-    background: var(--card-bg);
+    background: var(--cart-card-bg);
     border: 1px solid var(--border-light);
     border-radius: 20px;
     padding: 12px;

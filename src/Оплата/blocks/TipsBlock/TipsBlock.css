@@ -3,15 +3,15 @@
 .tips-card {
   box-sizing: border-box;
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--panel-bg);
+  border-top: var(--panel-border);
+  border-bottom: var(--panel-border);
   border-left: none;
   border-right: none;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-radius: 20px;
+  border-radius: var(--card-radius);
   margin-bottom: 0;
   padding: 24px;
   font-family: 'Inter', sans-serif;
@@ -26,9 +26,9 @@
 
 .tips-title {
   margin: 0;
-  font-weight: 800;
-  font-size: 20px;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--color-text);
+  font: var(--t-section);
+  letter-spacing: var(--tracking-tight);
 }
 
 .tips-chev-ph {

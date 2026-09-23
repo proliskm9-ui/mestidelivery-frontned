@@ -4,17 +4,17 @@
     --primary: #21EA7C;
     --primary-glow: rgba(33, 234, 124, 0.4);
     --bg-dark: #000000;
-    --card-bg: rgba(255, 255, 255, 0.05);
+    --os-card-bg: rgba(255, 255, 255, 0.05);
     --border-light: rgba(255, 255, 255, 0.1);
     --text-muted: #888;
 }
 
 .order-status-page,
 .order-status-page.page-layout {
-    background-color: #000000;
+    background-color: var(--page-bg);
     min-height: 100vh;
     color: #fff;
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-text);
     padding-bottom: 40px;
     overflow-x: hidden;
 }
@@ -274,7 +274,7 @@
 }
 
 .info-card {
-    background: var(--card-bg);
+    background: var(--os-card-bg);
     border: 1px solid var(--border-light);
     border-radius: 24px;
     padding: 24px;
@@ -513,8 +513,8 @@
 
 .os-block-top {
     flex: none;
-    background: rgba(255, 255, 255, 0.07);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    background: var(--panel-bg);
+    border-bottom: var(--panel-border);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border-radius: 0 0 28px 28px;
@@ -524,8 +524,8 @@
 }
 
 .os-block-bottom {
-    background: rgba(255, 255, 255, 0.07);
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    background: var(--panel-bg);
+    border-top: var(--panel-border);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border-radius: 28px 28px 0 0;
@@ -536,17 +536,16 @@
 
 /* --- Receipt Card & Status Styles copied from OrderDetails.css --- */
 .od-section-label {
-    font-size: 18px;
-    font-weight: 800;
     margin: 8px 0 0 0;
     text-transform: none;
-    letter-spacing: 0.5px;
+    letter-spacing: var(--tracking-tight);
+    font: var(--t-section);
 }
 
 .od-items-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 20px;
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: var(--card-radius);
     padding: 4px 0;
     overflow: hidden;
     margin-bottom: 16px;
@@ -558,7 +557,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 14px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: var(--row-divider);
 }
 
 .od-item-row:last-child {
@@ -586,9 +585,9 @@
 }
 
 .od-cost-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 20px;
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: var(--card-radius);
     padding: 0;
     overflow: hidden;
     margin-top: 12px;
@@ -601,7 +600,7 @@
     padding: 14px 20px;
     font-size: 15px;
     color: rgba(255, 255, 255, 0.5);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: var(--row-divider);
 }
 
 .od-cost-row:last-child {
@@ -628,9 +627,9 @@
 .od-details-btn {
     width: 100%;
     padding: 16px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: var(--card-radius);
     color: #fff;
     font-weight: 600;
     font-size: 15px;
@@ -654,9 +653,9 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 20px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 16px;
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: var(--card-radius);
     margin-top: 12px;
 }
 
@@ -666,12 +665,9 @@
 }
 
 .od-status-badge {
-    font-size: 13px;
-    font-weight: 700;
-    padding: 6px 14px;
-    border-radius: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    padding: var(--badge-pad);
+    border-radius: var(--badge-radius);
+    font: var(--badge-font);
 }
 
 .od-status-badge.delivered {
