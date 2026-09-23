@@ -682,6 +682,8 @@ function AppContent() {
                                         onUpdateQuantity={handleUpdateCartQuantity}
                                         onClearCart={() => setCart([])}
                                         onNavigateToCart={() => setCurrentPage('cart')}
+                                        cartDeliveryFee={deliveryFee}
+                                        orderTotal={cartTotalAmount}
                                     />
                                 )}
 

@@ -22,6 +22,9 @@ interface RestaurantPageProps {
     onUpdateQuantity?: (pid: string, delta: number) => void;
     onClearCart?: () => void;
     onNavigateToCart?: () => void;
+    /** Delivery fee and order total as the cart computes them (first-order promo, service fee). */
+    cartDeliveryFee?: number;
+    orderTotal?: number;
 }
 
 const RestaurantPage: React.FC<RestaurantPageProps> = ({ 
@@ -33,7 +36,9 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     cart, 
     onUpdateQuantity, 
     onClearCart, 
-    onNavigateToCart 
+    onNavigateToCart,
+    cartDeliveryFee,
+    orderTotal,
 }) => {
     const { t, language } = useLanguage();
     const deliveryLoc = useDeliveryLocationOptional();
@@ -636,9 +641,11 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             <div className="cw-bottom-info">
                                 <div className="cw-info-text">
                                     <div>
-                                        {deliveryFee != null
+                                        {deliveryFee != null && cart.length > 0 && cartDeliveryFee === 0
+                                            ? `${t('menu.free_delivery')} · ${deliveryLoc?.etaLabel || restaurant.delivery || t('cart.time')}`
+                                            : deliveryFee != null
                                             ? t('delivery.fee_with_eta')
-                                                .replace('{fee}', String(Math.round(deliveryFee)))
+                                                .replace('{fee}', String(Math.round(cart.length > 0 ? (cartDeliveryFee ?? deliveryFee) : deliveryFee)))
                                                 .replace('{eta}', deliveryLoc?.etaLabel || restaurant.delivery || t('cart.time'))
                                             : t('delivery.need_location')}
                                     </div>
@@ -650,7 +657,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
 
                             {cart.length > 0 && (
                                 <button type="button" className="cw-checkout-btn" onClick={onNavigateToCart}>
-                                    {t('restaurant.proceed_to_payment')} · {(cartTotal + (deliveryFee || 0)).toFixed(0)} ₾
+                                    {t('restaurant.proceed_to_payment')} · {(orderTotal ?? (cartTotal + (deliveryFee || 0))).toFixed(0)} ₾
                                 </button>
                             )}
                         </div>
