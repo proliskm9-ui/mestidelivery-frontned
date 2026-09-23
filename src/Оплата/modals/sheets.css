@@ -1,0 +1,132 @@
+/* ---------- Checkout sheets: one design-system pass ----------
+   Every checkout bottom sheet (time, place, tip, promo, comment, map) shares
+   the premium material from index.css. This file aligns what sits inside:
+   title scale (as in TimeModal), fields (Login .auth-field) and the primary
+   button (Login .auth-cta). Loaded after the modal stylesheets. */
+
+.tm-bottom-sheet,
+.pt-bottom-sheet,
+.ct-bottom-sheet,
+.pc-bottom-sheet,
+.cm-bottom-sheet,
+.mm-bottom-sheet {
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Title + subtitle */
+.pt-header,
+.ct-header,
+.pc-header,
+.cm-header,
+.mm-header {
+  margin-bottom: 20px;
+}
+
+.pt-title,
+.ct-title,
+.pc-title,
+.cm-title,
+.mm-title {
+  font-size: 22px;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.pt-subtitle,
+.ct-subtitle,
+.pc-subtitle,
+.cm-subtitle,
+.mm-subtitle {
+  margin-top: 6px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Fields */
+.ct-input-wrapper,
+.pc-input-wrapper,
+.cm-input-wrapper {
+  background: var(--field-bg);
+  border: 1px solid var(--field-border);
+  border-radius: var(--control-radius);
+  transition: border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease;
+}
+
+.ct-input-wrapper:focus-within,
+.pc-input-wrapper:focus-within,
+.cm-input-wrapper:focus-within {
+  background: var(--field-bg-focus);
+  border-color: var(--field-border-focus);
+  box-shadow: var(--field-ring-focus);
+}
+
+.ct-input::placeholder,
+.pc-input::placeholder {
+  color: var(--field-placeholder);
+}
+
+/* Primary button */
+.tm-confirm-btn,
+.pt-confirm-btn,
+.ct-confirm-btn,
+.pc-confirm-btn,
+.cm-confirm-btn,
+.mm-confirm-btn {
+  height: var(--control-height);
+  border: none;
+  border-radius: var(--control-radius);
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  box-shadow: var(--btn-primary-shadow);
+  touch-action: manipulation;
+  transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1), opacity 200ms ease, box-shadow 200ms ease;
+}
+
+.ct-confirm-btn,
+.pc-confirm-btn,
+.cm-confirm-btn {
+  margin-top: 24px;
+}
+
+.tm-confirm-btn:active:not(:disabled),
+.pt-confirm-btn:active:not(:disabled),
+.ct-confirm-btn:active:not(:disabled),
+.pc-confirm-btn:active:not(:disabled),
+.cm-confirm-btn:active:not(:disabled),
+.mm-confirm-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Disabled = same button, dimmed (as .auth-cta), not a different grey control */
+.ct-confirm-btn:disabled,
+.pc-confirm-btn:disabled,
+.cm-confirm-btn:disabled,
+.mm-confirm-btn:disabled {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  opacity: 0.4;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* TimeModal's button is sticky over the scrolling slots: keep its fade-out edge */
+.tm-confirm-btn {
+  box-shadow: 0 -12px 24px 8px #0f0f0f, var(--btn-primary-shadow);
+}
+
+@media (min-width: 1025px) {
+  /* these three become centered cards on desktop */
+  .tm-bottom-sheet,
+  .pt-bottom-sheet,
+  .mm-bottom-sheet {
+    border-radius: 28px;
+    padding-bottom: 24px;
+  }
+}

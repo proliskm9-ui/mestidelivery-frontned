@@ -24,6 +24,7 @@ import CustomTipModal from './modals/CustomTipModal/CustomTipModal';
 import CommentModal from './modals/CommentModal/CommentModal';
 import PhoneModal from './modals/PhoneModal/PhoneModal';
 import MapModal from './modals/MapModal/MapModal';
+import './modals/sheets.css';
 import { toast } from 'sonner';
 import { useBackToClose } from '../hooks/useBackToClose';
 
