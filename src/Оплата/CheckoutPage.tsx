@@ -13,6 +13,7 @@ import {
 import HeaderBlock from './blocks/HeaderBlock/HeaderBlock';
 import { addressText, detectZoneFromText, deviceHasOrdered, accountHasOrders, markDeviceOrdered } from '../utils/deliveryPromo';
 import AddressBlock, { AddressData } from './blocks/AddressBlock/AddressBlock';
+import SummaryBlock from './blocks/SummaryBlock/SummaryBlock';
 import TipsBlock from './blocks/TipsBlock/TipsBlock';
 import FooterBlock from './blocks/FooterBlock/FooterBlock';
 
@@ -354,7 +355,19 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
             onOpenCustomTip={() => toggleModal('customTip', true)}
           />
 
-          {/* --- 5. ФУТЕР --- */}
+          {/* --- 5. СТОИМОСТЬ --- */}
+          <SummaryBlock
+            items={cartItems || []}
+            subtotal={subtotal}
+            baseDeliveryFee={baseDeliveryFee}
+            deliveryDiscount={deliveryDiscount}
+            serviceFee={serviceFee}
+            tip={orderData.tip}
+            total={totalAmount}
+            freeDeliveryLeft={isFirstOrder && baseDeliveryFee <= 12 && subtotal < 100 ? 100 - subtotal : 0}
+          />
+
+          {/* --- 6. ФУТЕР --- */}
           <FooterBlock
             totalAmount={totalAmount}
             onPay={handlePay}

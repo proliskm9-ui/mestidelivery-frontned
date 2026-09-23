@@ -1,0 +1,149 @@
+/* SummaryBlock — order contents and price breakdown. Design-system tokens only. */
+
+.summary-card {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 24px;
+  background: var(--panel-bg);
+  border-top: var(--panel-border);
+  border-bottom: var(--panel-border);
+  border-radius: var(--card-radius);
+  font-family: var(--font-text);
+}
+
+.summary-title {
+  margin: 0 0 8px;
+  font: var(--t-section);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text);
+}
+
+.summary-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 0;
+  border: 0;
+  border-bottom: var(--row-divider);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.summary-row--toggle {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.summary-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.summary-row-title {
+  font: var(--t-body);
+  color: var(--color-text);
+}
+
+.summary-row-sub {
+  font: var(--t-caption);
+  color: var(--color-text-tertiary);
+}
+
+.summary-row-sub--accent {
+  color: var(--color-accent);
+}
+
+.summary-row-value {
+  font: var(--t-price);
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.summary-row-value--accent {
+  color: var(--color-accent);
+}
+
+.summary-old {
+  font: var(--t-caption);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+.summary-chevron {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+  transition: transform 200ms var(--ease-out);
+}
+
+.summary-chevron.is-open {
+  transform: rotate(180deg);
+}
+
+/* Expanded order contents */
+.summary-items {
+  margin: 0;
+  padding: 6px 0 10px;
+  list-style: none;
+  border-bottom: var(--row-divider);
+}
+
+.summary-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 0;
+  font: var(--t-secondary);
+  color: var(--color-text-secondary);
+}
+
+.summary-item-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summary-item-qty {
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+.summary-item-price {
+  min-width: 72px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.summary-hint {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--row-radius);
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+  font: var(--t-secondary);
+  font-weight: 600;
+}
+
+.summary-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-top: 16px;
+  font: var(--t-total);
+  color: var(--color-text);
+}
+
+.summary-total-value {
+  color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+}
