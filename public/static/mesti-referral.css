@@ -1,23 +1,22 @@
 /* ==========================================================================
    MestiDelivery — Referral programme
-   Styled with the app design tokens (src/styles/tokens.css); every var() has a
-   fallback so this file also works before the app bundle CSS has loaded.
-   Mobile: bottom sheet. ≥600px: centered card.
+   Uses the app's premium modal material (index.css .premium-modal-content-global):
+   near-black radial gradient, top light edge, green close, Archivo 800 heading,
+   glass inner blocks. Mobile: bottom sheet. ≥600px: centered card.
    ========================================================================== */
 
 .mesti-ref-overlay {
-  --rf-bg: var(--color-surface-2, #242423);
-  --rf-field: var(--color-surface-3, #2d2d2b);
-  --rf-hairline: var(--color-hairline, rgba(255, 255, 255, 0.06));
-  --rf-border: var(--color-border, rgba(255, 255, 255, 0.1));
-  --rf-text: var(--color-text, #ffffff);
-  --rf-text-2: var(--color-text-secondary, rgba(255, 255, 255, 0.62));
-  --rf-text-3: var(--color-text-tertiary, rgba(255, 255, 255, 0.38));
-  --rf-accent: var(--color-accent, #21ea7c);
-  --rf-accent-subtle: var(--color-accent-subtle, rgba(33, 234, 124, 0.12));
-  --rf-on-accent: var(--color-on-accent, #0b0b0a);
+  --rf-glass: rgba(255, 255, 255, 0.045);
+  --rf-stroke: rgba(255, 255, 255, 0.1);
+  --rf-stroke-top: rgba(255, 255, 255, 0.14);
+  --rf-hairline: rgba(255, 255, 255, 0.08);
+  --rf-text: #ffffff;
+  --rf-muted: rgba(255, 255, 255, 0.55);
+  --rf-faint: rgba(255, 255, 255, 0.32);
+  --rf-green: var(--color-accent, #21ea7c);
   --rf-ease-out: var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
   --rf-ease-drawer: var(--ease-drawer, cubic-bezier(0.32, 0.72, 0, 1));
+  --rf-display: 'Archivo', 'Inter', -apple-system, 'Noto Sans Georgian', sans-serif;
 
   position: fixed;
   inset: 0;
@@ -25,12 +24,14 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: var(--color-scrim, rgba(0, 0, 0, 0.6));
+  background: rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   opacity: 0;
   visibility: hidden;
   /* exit */
-  transition: opacity 240ms ease, visibility 0s linear 260ms;
-  font-family: var(--font-text, 'Inter', -apple-system, BlinkMacSystemFont, 'Noto Sans Georgian', sans-serif);
+  transition: opacity 260ms ease, visibility 0s linear 280ms;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Noto Sans Georgian', sans-serif;
   color: var(--rf-text);
   -webkit-tap-highlight-color: transparent;
   -webkit-font-smoothing: antialiased;
@@ -49,7 +50,7 @@
   transition: opacity 400ms var(--rf-ease-drawer), visibility 0s;
 }
 
-/* ---------- Sheet ---------- */
+/* ---------- Sheet (premium modal material) ---------- */
 .mesti-ref-modal {
   position: relative;
   display: flex;
@@ -59,126 +60,146 @@
   max-height: 92dvh;
   overflow-y: auto;
   overscroll-behavior: contain;
-  background: var(--rf-bg);
-  border-radius: var(--radius-sheet, 28px) var(--radius-sheet, 28px) 0 0;
-  padding: 24px var(--gutter, 16px) calc(20px + env(safe-area-inset-bottom, 0px));
-  box-shadow: var(--shadow-3, inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 24px 60px rgba(0, 0, 0, 0.55));
+  background: radial-gradient(120% 120% at 50% 0%, rgba(30, 30, 30, 0.97) 0%, rgba(10, 10, 10, 0.98) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 32px 32px 0 0;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  padding: 28px 20px calc(24px + env(safe-area-inset-bottom, 0px));
   color: var(--rf-text);
   transform: translateY(100%);
-  transition: transform 260ms var(--rf-ease-out);
+  transition: transform 280ms var(--rf-ease-out);
 }
 
 .mesti-ref-overlay.mesti-ref-active .mesti-ref-modal {
   transform: translateY(0);
-  transition: transform 400ms var(--rf-ease-drawer);
+  transition: transform 420ms var(--rf-ease-drawer);
 }
 
+/* Green close — same circle button as .ui-circle-btn on the restaurant page */
 .mesti-ref-btn-close {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 16px;
+  right: 16px;
   z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   padding: 0;
-  border: 0;
   border-radius: 50%;
-  background: var(--rf-field);
-  color: var(--rf-text-2);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--rf-green);
   cursor: pointer;
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
-  transition: transform 120ms var(--rf-ease-out), background-color 160ms ease, color 160ms ease;
+  transition: transform 120ms var(--rf-ease-out), background-color 160ms ease;
 }
 
 .mesti-ref-btn-close svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 .mesti-ref-btn-close:active {
-  transform: scale(0.94);
+  transform: scale(0.92);
 }
 
 /* ---------- Heading ---------- */
 .mesti-ref-badge-wrap {
-  margin: 0 48px 6px 0;
+  margin: 0 52px 8px 0;
 }
 
 .mesti-ref-badge {
-  font-size: var(--text-footnote, 13px);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--rf-accent);
+  color: var(--rf-green);
 }
 
 .mesti-ref-badge-dot {
-  display: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rf-green);
 }
 
 .mesti-ref-title {
-  margin: 0 48px 0 0;
-  font-family: inherit;
-  font-size: var(--text-title-1, 28px);
-  line-height: var(--leading-title-1, 1.1);
-  letter-spacing: var(--tracking-title-1, -0.02em);
-  font-weight: 700;
+  margin: 0 52px 0 0;
+  font-family: var(--rf-display);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
   text-transform: none;
   color: var(--rf-text);
   text-wrap: balance;
 }
 
 .mesti-ref-subtitle {
-  margin: 10px 0 20px;
-  font-size: var(--text-callout, 15px);
-  line-height: var(--leading-callout, 1.4);
-  color: var(--rf-text-2);
+  margin: 10px 0 22px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--rf-muted);
   text-wrap: pretty;
 }
 
 .mesti-ref-subtitle b,
 .mesti-ref-subtitle .mesti-bonus-val {
-  color: var(--rf-text);
-  font-weight: 600;
+  color: var(--rf-green);
+  font-weight: 700;
+}
+
+/* ---------- Glass blocks ---------- */
+.mesti-ref-stat-card,
+.mesti-ref-link-box,
+.mesti-ref-messenger-btn,
+.mesti-ref-guest-card {
+  background: var(--rf-glass);
+  border: 1px solid var(--rf-stroke);
+  border-top-color: var(--rf-stroke-top);
 }
 
 /* ---------- Stats ---------- */
 .mesti-ref-stat-card {
   display: flex;
   align-items: flex-end;
-  gap: 16px;
+  gap: 18px;
   margin-bottom: 12px;
-  padding: 16px;
-  border-radius: var(--radius-lg, 20px);
-  background: var(--rf-field);
+  padding: 18px;
+  border-radius: 20px;
 }
 
 .mesti-ref-stat-balance {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   flex: 1;
   min-width: 0;
 }
 
 .mesti-ref-stat-label,
 .mesti-ref-meta-text {
-  font-size: var(--text-footnote, 13px);
+  font-size: 13px;
+  font-weight: 500;
   line-height: 1.3;
-  color: var(--rf-text-2);
+  color: var(--rf-muted);
   text-transform: none;
   letter-spacing: 0;
 }
 
 .mesti-ref-stat-amount {
-  font-size: 32px;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  font-weight: 700;
-  color: var(--rf-accent);
+  font-family: var(--rf-display);
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--rf-green);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -186,7 +207,7 @@
 .mesti-ref-stat-divider {
   align-self: stretch;
   width: 1px;
-  background: var(--rf-border);
+  background: var(--rf-hairline);
 }
 
 .mesti-ref-stat-meta {
@@ -197,13 +218,15 @@
 .mesti-ref-meta-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .mesti-ref-meta-num {
+  font-family: var(--rf-display);
   font-size: 22px;
-  line-height: 1.05;
-  font-weight: 700;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
   color: var(--rf-text);
   font-variant-numeric: tabular-nums;
 }
@@ -219,14 +242,12 @@
   gap: 8px;
   height: 56px;
   padding: 0 6px 0 16px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md, 16px);
-  background: var(--rf-field);
-  transition: border-color 160ms ease;
+  border-radius: 16px;
+  transition: border-color 200ms ease;
 }
 
 .mesti-ref-link-box:focus-within {
-  border-color: var(--rf-accent);
+  border-color: rgba(33, 234, 124, 0.55);
 }
 
 .mesti-ref-link-url {
@@ -235,9 +256,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: inherit;
-  font-size: var(--text-callout, 15px);
-  color: var(--rf-text-2);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--rf-muted);
   -webkit-user-select: all;
   user-select: all;
 }
@@ -249,10 +270,10 @@
   flex-shrink: 0;
   height: 44px;
   padding: 0 14px;
-  border: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   /* concentric with the 16px field and its 6px inset */
-  border-radius: calc(var(--radius-md, 16px) - 6px);
-  background: var(--rf-bg);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
   color: var(--rf-text);
   font: inherit;
   font-size: 14px;
@@ -261,7 +282,7 @@
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
-  transition: transform 120ms var(--rf-ease-out), background-color 160ms ease, color 160ms ease;
+  transition: transform 120ms var(--rf-ease-out), background-color 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 
 .mesti-ref-copy-btn:active {
@@ -269,8 +290,9 @@
 }
 
 .mesti-ref-copy-btn.mesti-copied {
-  background: var(--rf-accent-subtle);
-  color: var(--rf-accent);
+  border-color: rgba(33, 234, 124, 0.35);
+  background: rgba(33, 234, 124, 0.1);
+  color: var(--rf-green);
 }
 
 /* ---------- Actions ---------- */
@@ -281,33 +303,33 @@
   justify-content: center;
   gap: 8px;
   width: 100%;
-  height: 54px;
+  height: 56px;
   padding: 0 20px;
   border: 0;
-  border-radius: var(--radius-md, 16px);
-  background: var(--rf-accent);
-  color: var(--rf-on-accent);
+  border-radius: 16px;
+  background: var(--rf-green);
+  color: #161616;
   font: inherit;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 4px 5px rgba(59, 180, 74, 0.2);
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
-  transition: transform 120ms var(--rf-ease-out), background-color 160ms ease;
+  transition: transform 120ms var(--rf-ease-out), filter 160ms ease;
 }
 
 .mesti-ref-share-primary:active,
 .mesti-ref-guest-btn:active {
   transform: scale(0.97);
-  background: var(--color-accent-pressed, #1dd470);
 }
 
 .mesti-ref-messengers {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .mesti-ref-messenger-btn {
@@ -315,9 +337,8 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 48px;
-  border-radius: var(--radius-md, 16px);
-  background: var(--rf-field);
+  height: 50px;
+  border-radius: 16px;
   color: var(--rf-text);
   font-size: 15px;
   font-weight: 600;
@@ -336,19 +357,22 @@
 .mesti-ref-messenger-btn svg {
   width: 18px;
   height: 18px;
-  color: var(--rf-text-2);
+  color: var(--rf-muted);
 }
 
 /* ---------- Guest ---------- */
 .mesti-ref-guest-card {
-  margin-bottom: 4px;
+  padding: 18px;
+  border-radius: 20px;
 }
 
 .mesti-ref-guest-text {
-  margin: 0 0 12px;
-  font-size: var(--text-callout, 15px);
-  line-height: 1.4;
-  color: var(--rf-text-2);
+  margin: 0 0 14px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--rf-muted);
+  text-wrap: pretty;
 }
 
 /* ---------- Rules ---------- */
@@ -356,8 +380,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 20px;
-  padding-top: 16px;
+  margin-top: 22px;
+  padding-top: 18px;
   border-top: 1px solid var(--rf-hairline);
 }
 
@@ -367,17 +391,17 @@
   gap: 10px;
   font-size: 14px;
   line-height: 1.45;
-  color: var(--rf-text-2);
+  color: var(--rf-muted);
   text-wrap: pretty;
 }
 
 .mesti-ref-term-bullet {
   flex-shrink: 0;
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: var(--rf-text-3);
-  transform: translateY(-3px);
+  background: var(--rf-green);
+  transform: translateY(-2px);
 }
 
 .mesti-ref-term-item b {
@@ -395,12 +419,13 @@
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
-  border-radius: var(--radius-lg, 20px);
-  background: var(--color-surface-2, #242423);
-  box-shadow: var(--shadow-2, inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 24px rgba(0, 0, 0, 0.35));
-  color: var(--color-text, #ffffff);
-  font-family: var(--font-text, 'Inter', -apple-system, sans-serif);
+  border-radius: 16px;
+  background: radial-gradient(120% 120% at 50% 0%, #262626 0%, #121212 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  font-family: 'Inter', -apple-system, sans-serif;
   font-size: 14px;
   font-weight: 600;
   pointer-events: none;
@@ -421,22 +446,15 @@
 
 /* ---------- Pointer devices ---------- */
 @media (hover: hover) and (pointer: fine) {
-  .mesti-ref-btn-close:hover {
-    color: var(--rf-text);
-    background: #363634;
-  }
-
-  .mesti-ref-copy-btn:hover:not(.mesti-copied) {
-    background: #1c1c1b;
+  .mesti-ref-btn-close:hover,
+  .mesti-ref-copy-btn:hover:not(.mesti-copied),
+  .mesti-ref-messenger-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
   }
 
   .mesti-ref-share-primary:hover,
   .mesti-ref-guest-btn:hover {
-    background: var(--color-accent-pressed, #1dd470);
-  }
-
-  .mesti-ref-messenger-btn:hover {
-    background: #363634;
+    filter: brightness(1.05);
   }
 }
 
@@ -449,8 +467,10 @@
 
   .mesti-ref-modal {
     max-width: 440px;
-    border-radius: var(--radius-sheet, 28px);
-    padding: 28px 24px 24px;
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-top-color: rgba(255, 255, 255, 0.08);
+    padding: 30px 24px 24px;
     transform: translateY(16px) scale(0.98);
   }
 
@@ -461,15 +481,14 @@
 
 @media (prefers-reduced-motion: reduce) {
   .mesti-ref-modal,
-  .mesti-ref-overlay.mesti-ref-active .mesti-ref-modal,
-  .mesti-ref-toast,
-  .mesti-ref-toast.mesti-toast-show {
-    transform: translateX(-50%);
-    transition: opacity 200ms ease;
-  }
-
-  .mesti-ref-modal,
   .mesti-ref-overlay.mesti-ref-active .mesti-ref-modal {
     transform: none;
+    transition: none;
+  }
+
+  .mesti-ref-toast,
+  .mesti-ref-toast.mesti-toast-show {
+    transform: translate(-50%, 0);
+    transition: opacity 200ms ease;
   }
 }

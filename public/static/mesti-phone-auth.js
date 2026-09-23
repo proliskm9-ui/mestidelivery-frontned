@@ -38,18 +38,21 @@
 
   var I18N = {
     ru: {
-      title_phone: "Подтверждение номера",
-      sub_phone: "Введите номер для получения проверочного SMS",
+      title_phone: "Ваш номер телефона",
+      sub_phone: "Проверьте код страны и введите номер телефона",
       title_otp: "Код из SMS",
-      sub_otp: "Мы отправили 6-значный проверочный код на номер",
-      btn_send: "Получить код",
+      sub_otp: "Мы отправили SMS с кодом на этот номер",
+      btn_send: "Далее",
       btn_verify: "Подтвердить",
       resend_timer: "Повторная отправка через",
       resend_action: "Отправить код повторно",
-      change_number: "Изменить номер",
+      change_number: "Неверный номер?",
+      country_label: "Страна",
+      country_title: "Выберите страну",
+      nothing_found: "Ничего не найдено",
       success_title: "Номер подтверждён",
       success_sub: "Телефон успешно сохранён и верифицирован",
-      search_placeholder: "Поиск страны или кода (+995, Грузия)...",
+      search_placeholder: "Поиск",
       popular_title: "Популярные",
       all_countries_title: "Все страны",
       err_invalid_phone: "Введите корректный номер телефона",
@@ -61,18 +64,21 @@
       err_generic: "Не удалось отправить SMS. Попробуйте ещё раз через минуту."
     },
     ka: {
-      title_phone: "ნომრის დადასტურება",
-      sub_phone: "შეიყვანეთ ტელეფონის ნომერი SMS კოდის მისაღებად",
+      title_phone: "თქვენი ტელეფონის ნომერი",
+      sub_phone: "შეამოწმეთ ქვეყნის კოდი და შეიყვანეთ ტელეფონის ნომერი",
       title_otp: "SMS კოდი",
-      sub_otp: "ჩვენ გამოგიგზავნეთ 6-ნიშნა კოდი ნომერზე",
-      btn_send: "კოდის მიღება",
+      sub_otp: "კოდი SMS-ით გამოგიგზავნეთ ამ ნომერზე",
+      btn_send: "შემდეგი",
       btn_verify: "დადასტურება",
       resend_timer: "ხელახლა გაგზავნა",
       resend_action: "კოდის ხელახლა გაგზავნა",
-      change_number: "ნომრის შეცვლა",
+      change_number: "არასწორი ნომერი?",
+      country_label: "ქვეყანა",
+      country_title: "აირჩიეთ ქვეყანა",
+      nothing_found: "ვერაფერი მოიძებნა",
       success_title: "ნომერი დადასტურებულია",
       success_sub: "ტელეფონი წარმატებით დადასტურდა",
-      search_placeholder: "ქვეყნის ან კოდის ძებნა...",
+      search_placeholder: "ძებნა",
       popular_title: "პოპულარული",
       all_countries_title: "ყველა ქვეყანა",
       err_invalid_phone: "შეიყვანეთ სწორი ტელეფონის ნომერი",
@@ -84,18 +90,21 @@
       err_generic: "SMS-ის გაგზავნა ვერ მოხერხდა. სცადეთ მოგვიანებით."
     },
     en: {
-      title_phone: "Phone Verification",
-      sub_phone: "Enter your phone number to receive a verification SMS",
+      title_phone: "Your phone number",
+      sub_phone: "Confirm your country code and enter your phone number",
       title_otp: "SMS Code",
-      sub_otp: "We sent a 6-digit verification code to",
-      btn_send: "Get Code",
+      sub_otp: "We sent an SMS with a code to this number",
+      btn_send: "Next",
       btn_verify: "Verify",
       resend_timer: "Resend code in",
       resend_action: "Resend code",
-      change_number: "Change number",
+      change_number: "Wrong number?",
+      country_label: "Country",
+      country_title: "Choose a country",
+      nothing_found: "Nothing found",
       success_title: "Phone Verified",
       success_sub: "Your phone number has been successfully verified",
-      search_placeholder: "Search country or dial code (+995, Georgia)...",
+      search_placeholder: "Search",
       popular_title: "Popular",
       all_countries_title: "All Countries",
       err_invalid_phone: "Please enter a valid phone number",
@@ -252,11 +261,11 @@
   function formatPhoneDigits(digits, dialCode) {
     var d = digits.replace(/\D/g, '');
     if (dialCode === '+995') {
-      // Georgia: 5XX XX-XX-XX
+      // Georgia: 5XX XX XX XX
       if (d.length <= 3) return d;
       if (d.length <= 5) return d.slice(0, 3) + ' ' + d.slice(3);
-      if (d.length <= 7) return d.slice(0, 3) + ' ' + d.slice(3, 5) + '-' + d.slice(5);
-      return d.slice(0, 3) + ' ' + d.slice(3, 5) + '-' + d.slice(5, 7) + '-' + d.slice(7, 9);
+      if (d.length <= 7) return d.slice(0, 3) + ' ' + d.slice(3, 5) + ' ' + d.slice(5);
+      return d.slice(0, 3) + ' ' + d.slice(3, 5) + ' ' + d.slice(5, 7) + ' ' + d.slice(7, 9);
     }
     if (dialCode === '+7') {
       // Russia / Kazakhstan: (XXX) XXX-XX-XX
@@ -310,7 +319,7 @@
 
     document.getElementById('mesti-phone-btn-close').addEventListener('click', closeModal);
     document.getElementById('mesti-phone-btn-back').addEventListener('click', function () {
-      renderPhoneInputView(currentFullNumber);
+      if (backHandler) backHandler();
     });
 
     root.addEventListener('click', function (e) {
@@ -338,183 +347,100 @@
     return window.mestiRecaptchaVerifier;
   }
 
-  // --- Views ---
+  // --- Views (Telegram-style: full screen, one task per screen) ---
 
-  function renderPhoneInputView(initialRaw, errorMsg) {
+  var backHandler = null;
+
+  function setBack(handler) {
+    backHandler = handler;
+    var btn = document.getElementById('mesti-phone-btn-back');
+    var close = document.getElementById('mesti-phone-btn-close');
+    if (btn) btn.style.display = handler ? 'flex' : 'none';
+    if (close) close.style.display = handler ? 'none' : 'flex';
+  }
+
+  // Swap screen content with a short directional slide (forward: from right, back: from left)
+  function setView(html, dir) {
     var container = document.getElementById('mesti-phone-view-container');
-    document.getElementById('mesti-phone-btn-back').style.display = 'none';
+    container.innerHTML = html;
+    container.classList.remove('mesti-view-fwd', 'mesti-view-back');
+    void container.offsetWidth;
+    if (dir) container.classList.add(dir === 'back' ? 'mesti-view-back' : 'mesti-view-fwd');
+    return container;
+  }
+
+  var ICON_CHEVRON = '<svg width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 1 7 7 1 13"></polyline></svg>';
+  var ICON_CHECK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+  function renderPhoneInputView(initialRaw, errorMsg, dir) {
+    setBack(null);
 
     var parsed = parseAndDetectCountry(initialRaw, selectedCountry);
     selectedCountry = parsed.country;
     var formattedDigits = formatPhoneDigits(parsed.digits, selectedCountry.dial);
 
-    container.innerHTML = [
-      '<div class="mesti-phone-header">',
-      '  <img src="/Assets/general-green.png" class="mesti-phone-brand-logo" alt="MestiDelivery" />',
-      '  <h3 class="mesti-phone-title">' + t('title_phone') + '</h3>',
-      '  <p class="mesti-phone-subtitle">' + t('sub_phone') + '</p>',
-      '</div>',
-      errorMsg ? '<div class="mesti-phone-error">' + errorMsg + '</div>' : '',
-      '<form id="mesti-phone-form" onsubmit="return false;">',
-      '  <div class="mesti-phone-input-group">',
-      '    <button type="button" class="mesti-country-picker-btn" id="mesti-btn-country-picker" title="' + getCountryName(selectedCountry) + '">',
-      '      <span class="mesti-picker-flag-slot" id="mesti-picker-flag-slot">' + renderFlagHTML(selectedCountry) + '</span>',
-      '      <span class="mesti-country-dial" id="mesti-dial-label">' + selectedCountry.dial + '</span>',
-      '      <span class="mesti-country-arrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg></span>',
-      '    </button>',
-      '    <input type="tel" id="mesti-phone-number-input" class="mesti-phone-main-input" placeholder="' + (selectedCountry.dial === '+995' ? '5XX XX-XX-XX' : 'XXX XXX-XXXX') + '" value="' + formattedDigits + '" autofocus autocomplete="tel">',
-      '    <div class="mesti-country-dropdown" id="mesti-country-dropdown" style="display:none;">',
-      '      <div class="mesti-country-search-wrap">',
-      '        <div class="mesti-search-input-box">',
-      '          <svg class="mesti-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
-      '          <input type="text" class="mesti-country-search-input" id="mesti-country-search" placeholder="' + t('search_placeholder') + '" autocomplete="off">',
-      '        </div>',
-      '      </div>',
-      '      <div class="mesti-popular-chips-wrap" id="mesti-popular-chips"></div>',
-      '      <ul class="mesti-country-list" id="mesti-country-list"></ul>',
-      '    </div>',
+    setView([
+      '<div class="mesti-phone-screen">',
+      '  <div class="mesti-phone-header">',
+      '    <img src="/Assets/general-green.png" class="mesti-phone-brand-logo" alt="MestiDelivery" />',
+      '    <h3 class="mesti-phone-title">' + t('title_phone') + '</h3>',
+      '    <p class="mesti-phone-subtitle">' + t('sub_phone') + '</p>',
       '  </div>',
-      '  <button type="submit" id="mesti-phone-submit-btn" class="mesti-phone-cta">',
-      '    <span>' + t('btn_send') + '</span>',
-      '  </button>',
-      '</form>'
-    ].join('\n');
+      '  <form id="mesti-phone-form" class="mesti-phone-form" onsubmit="return false;">',
+      '    <div class="mesti-phone-group">',
+      '      <button type="button" class="mesti-country-row" id="mesti-btn-country-picker">',
+      '        <span class="mesti-country-row-label">' + t('country_label') + '</span>',
+      '        <span class="mesti-country-row-value">',
+      '          <span class="mesti-picker-flag-slot" id="mesti-picker-flag-slot">' + renderFlagHTML(selectedCountry) + '</span>',
+      '          <span class="mesti-country-row-name" id="mesti-country-name">' + getCountryName(selectedCountry) + '</span>',
+      '        </span>',
+      '        <span class="mesti-country-arrow">' + ICON_CHEVRON + '</span>',
+      '      </button>',
+      '      <div class="mesti-phone-input-group">',
+      '        <span class="mesti-country-dial" id="mesti-dial-label">' + selectedCountry.dial + '</span>',
+      '        <input type="tel" id="mesti-phone-number-input" class="mesti-phone-main-input" placeholder="' + (selectedCountry.dial === '+995' ? '5XX XX XX XX' : (selectedCountry.mask || 'XXX XXX XXXX')) + '" value="' + formattedDigits + '" autocomplete="tel-national" inputmode="tel" enterkeyhint="next">',
+      '      </div>',
+      '    </div>',
+      errorMsg ? '    <div class="mesti-phone-error">' + errorMsg + '</div>' : '',
+      '    <div class="mesti-phone-footer">',
+      '      <button type="submit" id="mesti-phone-submit-btn" class="mesti-phone-cta"><span>' + t('btn_send') + '</span></button>',
+      '    </div>',
+      '  </form>',
+      '</div>'
+    ].join('\n'), dir);
 
-    var pickerBtn = document.getElementById('mesti-btn-country-picker');
+    var phoneInput = document.getElementById('mesti-phone-number-input');
     var flagSlot = document.getElementById('mesti-picker-flag-slot');
     var dialLabel = document.getElementById('mesti-dial-label');
-    var dropdown = document.getElementById('mesti-country-dropdown');
-    var searchInput = document.getElementById('mesti-country-search');
-    var countryList = document.getElementById('mesti-country-list');
-    var popularChipsWrap = document.getElementById('mesti-popular-chips');
-    var phoneInput = document.getElementById('mesti-phone-number-input');
+    var nameLabel = document.getElementById('mesti-country-name');
 
-    function applyCountrySelection(c, keepFocus) {
+    function showDetectedCountry(c) {
       selectedCountry = c;
       dialLabel.textContent = c.dial;
+      nameLabel.textContent = getCountryName(c);
       flagSlot.innerHTML = renderFlagHTML(c);
       flagSlot.classList.remove('mesti-flag-pop');
-      void flagSlot.offsetWidth; // trigger reflow
+      void flagSlot.offsetWidth;
       flagSlot.classList.add('mesti-flag-pop');
-
-      phoneInput.placeholder = (c.dial === '+995' ? '5XX XX-XX-XX' : (c.mask || 'XXX XXX-XXXX'));
-      var curDigits = phoneInput.value.replace(/\D/g, '');
-      phoneInput.value = formatPhoneDigits(curDigits, c.dial);
-
-      dropdown.style.display = 'none';
-      if (keepFocus !== false) {
-        phoneInput.focus();
-      }
+      phoneInput.placeholder = (c.dial === '+995' ? '5XX XX XX XX' : (c.mask || 'XXX XXX XXXX'));
     }
 
-    // Populate Popular Quick Chips
-    popularChipsWrap.innerHTML = '';
-    POPULAR_CODES.forEach(function (code) {
-      var c = COUNTRIES.find(function (item) { return item.code === code; });
-      if (!c) return;
-      var chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'mesti-country-chip' + (selectedCountry.code === c.code ? ' active' : '');
-      chip.innerHTML = renderFlagHTML(c, 'mesti-chip-flag') + '<span>' + c.code + ' ' + c.dial + '</span>';
-      chip.addEventListener('click', function (e) {
-        e.stopPropagation();
-        applyCountrySelection(c, true);
-      });
-      popularChipsWrap.appendChild(chip);
+    document.getElementById('mesti-btn-country-picker').addEventListener('click', function () {
+      renderCountryView(phoneInput.value);
     });
 
-    // Populate Dropdown Countries List
-    function populateCountries(filter) {
-      countryList.innerHTML = '';
-      var q = (filter || '').trim().toLowerCase();
-
-      var filtered = COUNTRIES.filter(function (c) {
-        if (!q) return true;
-        var nameRu = (c.name || '').toLowerCase();
-        var nameEn = (c.nameEn || '').toLowerCase();
-        var nameKa = (c.nameKa || '').toLowerCase();
-        var dial = (c.dial || '').toLowerCase();
-        var code = (c.code || '').toLowerCase();
-        return nameRu.indexOf(q) !== -1 || nameEn.indexOf(q) !== -1 || nameKa.indexOf(q) !== -1 || dial.indexOf(q) !== -1 || code.indexOf(q) !== -1;
-      });
-
-      if (!filtered.length) {
-        var emptyLi = document.createElement('li');
-        emptyLi.className = 'mesti-country-empty';
-        emptyLi.textContent = 'Ничего не найдено';
-        countryList.appendChild(emptyLi);
-        return;
-      }
-
-      filtered.forEach(function (c) {
-        var li = document.createElement('li');
-        var isSelected = (selectedCountry.code === c.code);
-        li.className = 'mesti-country-item' + (isSelected ? ' selected' : '');
-        li.innerHTML = [
-          '<div class="mesti-country-item-left">',
-          '  ' + renderFlagHTML(c),
-          '  <span class="mesti-country-item-name">' + getCountryName(c) + '</span>',
-          '</div>',
-          '<div class="mesti-country-item-right">',
-          '  <span class="mesti-country-item-dial">' + c.dial + '</span>',
-          isSelected ? '  <span class="mesti-country-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></span>' : '',
-          '</div>'
-        ].join('');
-
-        li.addEventListener('click', function (e) {
-          e.stopPropagation();
-          applyCountrySelection(c, true);
-        });
-        countryList.appendChild(li);
-      });
-    }
-
-    populateCountries('');
-
-    pickerBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      var isVisible = (dropdown.style.display === 'flex');
-      dropdown.style.display = isVisible ? 'none' : 'flex';
-      if (!isVisible) {
-        searchInput.value = '';
-        populateCountries('');
-        setTimeout(function () { searchInput.focus(); }, 50);
-      }
-    });
-
-    searchInput.addEventListener('input', function (e) {
-      populateCountries(e.target.value);
-    });
-
-    // Close dropdown on click outside
-    document.addEventListener('click', function (e) {
-      if (!dropdown.contains(e.target) && e.target !== pickerBtn && !pickerBtn.contains(e.target)) {
-        dropdown.style.display = 'none';
-      }
-    });
-
-    // Smart Real-time typing & paste auto-detection
+    // Smart real-time typing & paste auto-detection
     function handlePhoneInput() {
       var raw = phoneInput.value;
-      
-      // If user typed '+' or started entering international format
       if (raw.indexOf('+') !== -1 || raw.replace(/\D/g, '').length >= 10) {
         var detected = parseAndDetectCountry(raw, selectedCountry);
         if (detected.detected && detected.country.code !== selectedCountry.code) {
-          selectedCountry = detected.country;
-          dialLabel.textContent = selectedCountry.dial;
-          flagSlot.innerHTML = renderFlagHTML(selectedCountry);
-          flagSlot.classList.remove('mesti-flag-pop');
-          void flagSlot.offsetWidth;
-          flagSlot.classList.add('mesti-flag-pop');
-          phoneInput.placeholder = (selectedCountry.dial === '+995' ? '5XX XX-XX-XX' : (selectedCountry.mask || 'XXX XXX-XXXX'));
+          showDetectedCountry(detected.country);
           phoneInput.value = formatPhoneDigits(detected.digits, selectedCountry.dial);
           return;
         }
       }
-
-      var digitsOnly = raw.replace(/\D/g, '');
-      phoneInput.value = formatPhoneDigits(digitsOnly, selectedCountry.dial);
+      phoneInput.value = formatPhoneDigits(raw.replace(/\D/g, ''), selectedCountry.dial);
     }
 
     phoneInput.addEventListener('input', handlePhoneInput);
@@ -529,54 +455,112 @@
         renderPhoneInputView(phoneInput.value, t('err_invalid_phone'));
         return;
       }
-      var fullE164 = selectedCountry.dial + rawDigits;
-      sendVerificationSms(fullE164);
+      sendVerificationSms(selectedCountry.dial + rawDigits);
     });
 
-    setTimeout(function () { phoneInput.focus(); }, 100);
+    setTimeout(function () { phoneInput.focus(); }, 120);
+  }
+
+  function renderCountryView(typedNumber) {
+    var digitsTyped = String(typedNumber || '').replace(/\D/g, '');
+    setBack(function () {
+      renderPhoneInputView(selectedCountry.dial + digitsTyped, null, 'back');
+    });
+
+    var container = setView([
+      '<div class="mesti-country-screen">',
+      '  <h3 class="mesti-phone-title mesti-country-title">' + t('country_title') + '</h3>',
+      '  <div class="mesti-country-search-wrap">',
+      '    <svg class="mesti-search-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"></circle><line x1="20.5" y1="20.5" x2="16.4" y2="16.4"></line></svg>',
+      '    <input type="search" class="mesti-country-search-input" id="mesti-country-search" placeholder="' + t('search_placeholder') + '" autocomplete="off" enterkeyhint="search">',
+      '  </div>',
+      '  <div class="mesti-country-scroll" id="mesti-country-scroll"></div>',
+      '</div>'
+    ].join('\n'), 'fwd');
+
+    var scroll = container.querySelector('#mesti-country-scroll');
+    var searchInput = container.querySelector('#mesti-country-search');
+
+    function rowHTML(c) {
+      var sel = selectedCountry.code === c.code;
+      return '<li class="mesti-country-item' + (sel ? ' selected' : '') + '" data-code="' + c.code + '">' +
+        '<span class="mesti-country-item-left">' + renderFlagHTML(c) + '<span class="mesti-country-item-name">' + getCountryName(c) + '</span></span>' +
+        '<span class="mesti-country-item-right"><span class="mesti-country-item-dial">' + c.dial + '</span>' +
+        (sel ? '<span class="mesti-country-check">' + ICON_CHECK + '</span>' : '') + '</span></li>';
+    }
+
+    function render(filter) {
+      var q = (filter || '').trim().toLowerCase();
+      var html = '';
+      if (!q) {
+        var popular = POPULAR_CODES.map(function (code) {
+          return COUNTRIES.find(function (c) { return c.code === code; });
+        }).filter(Boolean);
+        html += '<p class="mesti-country-section">' + t('popular_title') + '</p><ul class="mesti-country-list">' + popular.map(rowHTML).join('') + '</ul>';
+        html += '<p class="mesti-country-section">' + t('all_countries_title') + '</p>';
+      }
+      var filtered = COUNTRIES.filter(function (c) {
+        if (!q) return true;
+        return [c.name, c.nameEn, c.nameKa, c.dial, c.code].some(function (v) {
+          return String(v || '').toLowerCase().indexOf(q) !== -1;
+        });
+      });
+      html += filtered.length
+        ? '<ul class="mesti-country-list">' + filtered.map(rowHTML).join('') + '</ul>'
+        : '<p class="mesti-country-empty">' + t('nothing_found') + '</p>';
+      scroll.innerHTML = html;
+    }
+
+    render('');
+
+    searchInput.addEventListener('input', function (e) { render(e.target.value); });
+
+    scroll.addEventListener('click', function (e) {
+      var li = e.target.closest && e.target.closest('.mesti-country-item');
+      if (!li) return;
+      var c = COUNTRIES.find(function (item) { return item.code === li.getAttribute('data-code'); });
+      if (!c) return;
+      selectedCountry = c;
+      renderPhoneInputView(c.dial + digitsTyped, null, 'back');
+    });
   }
 
   function renderOtpView(phoneNumber, errorMsg) {
-    var container = document.getElementById('mesti-phone-view-container');
-    document.getElementById('mesti-phone-btn-back').style.display = 'flex';
+    setBack(function () { renderPhoneInputView(currentFullNumber, null, 'back'); });
 
-    container.innerHTML = [
-      '<div class="mesti-phone-header">',
-      '  <img src="/Assets/general-green.png" class="mesti-phone-brand-logo" alt="MestiDelivery" />',
-      '  <h3 class="mesti-phone-title">' + t('title_otp') + '</h3>',
-      '  <p class="mesti-phone-subtitle">' + t('sub_otp') + '<br/>',
-      '    <span class="mesti-phone-highlight-badge">',
-      '      ' + renderFlagHTML(selectedCountry, 'mesti-badge-flag') + ' ' + phoneNumber,
-      '    </span>',
-      '  </p>',
-      '</div>',
-      errorMsg ? '<div class="mesti-phone-error">' + errorMsg + '</div>' : '',
-      '<div class="mesti-otp-container" id="mesti-otp-boxes">',
-      '  <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="mesti-otp-cell" data-idx="0" autofocus>',
-      '  <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="mesti-otp-cell" data-idx="1">',
-      '  <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="mesti-otp-cell" data-idx="2">',
-      '  <div class="mesti-otp-divider"></div>',
-      '  <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="mesti-otp-cell" data-idx="3">',
-      '  <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="mesti-otp-cell" data-idx="4">',
-      '  <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="mesti-otp-cell" data-idx="5">',
-      '</div>',
-      '<button type="button" id="mesti-otp-submit-btn" class="mesti-phone-cta">',
-      '  <span>' + t('btn_verify') + '</span>',
-      '</button>',
-      '<div class="mesti-phone-meta">',
-      '  <span id="mesti-timer-text">' + t('resend_timer') + ' <b id="mesti-countdown">0:59</b></span>',
-      '  <button type="button" id="mesti-resend-btn" class="mesti-phone-link" style="display:none;">' + t('resend_action') + '</button>',
-      '</div>',
-      '<div style="text-align:center;margin-top:14px;">',
-      '  <button type="button" class="mesti-phone-link mesti-phone-link-muted" id="mesti-btn-change-number">' + t('change_number') + '</button>',
+    var national = String(phoneNumber || '').replace(selectedCountry.dial, '').replace(/\D/g, '');
+    var pretty = selectedCountry.dial + ' ' + formatPhoneDigits(national, selectedCountry.dial);
+
+    var cells = '';
+    for (var i = 0; i < 6; i++) {
+      cells += '<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="' + (i === 0 ? 6 : 1) + '" class="mesti-otp-cell" data-idx="' + i + '"' +
+        (i === 0 ? ' autocomplete="one-time-code"' : ' autocomplete="off"') + ' aria-label="' + (i + 1) + '">';
+    }
+
+    setView([
+      '<div class="mesti-phone-screen">',
+      '  <div class="mesti-phone-header">',
+      '    <h3 class="mesti-phone-title mesti-otp-number">' + pretty + '</h3>',
+      '    <p class="mesti-phone-subtitle">' + t('sub_otp') + '</p>',
+      '  </div>',
+      '  <div class="mesti-otp-container" id="mesti-otp-boxes">' + cells + '</div>',
+      errorMsg ? '  <div class="mesti-phone-error">' + errorMsg + '</div>' : '',
+      '  <div class="mesti-phone-meta">',
+      '    <span id="mesti-timer-text">' + t('resend_timer') + ' <b id="mesti-countdown">0:59</b></span>',
+      '    <button type="button" id="mesti-resend-btn" class="mesti-phone-link" style="display:none;">' + t('resend_action') + '</button>',
+      '  </div>',
+      '  <div class="mesti-phone-footer">',
+      '    <button type="button" id="mesti-otp-submit-btn" class="mesti-phone-cta"><span>' + t('btn_verify') + '</span></button>',
+      '    <button type="button" class="mesti-phone-link mesti-phone-link-muted" id="mesti-btn-change-number">' + t('change_number') + '</button>',
+      '  </div>',
       '</div>'
-    ].join('\n');
+    ].join('\n'), errorMsg ? null : 'fwd');
 
     setupOtpInputs();
     startCountdown(60);
 
     document.getElementById('mesti-btn-change-number').addEventListener('click', function () {
-      renderPhoneInputView(currentFullNumber);
+      renderPhoneInputView(currentFullNumber, null, 'back');
     });
 
     document.getElementById('mesti-resend-btn').addEventListener('click', function () {
@@ -589,21 +573,19 @@
   }
 
   function renderSuccessView(phone) {
-    var container = document.getElementById('mesti-phone-view-container');
-    document.getElementById('mesti-phone-btn-back').style.display = 'none';
+    setBack(null);
     document.getElementById('mesti-phone-btn-close').style.display = 'none';
 
-    container.innerHTML = [
-      '<div style="text-align:center;padding:24px 0 16px;">',
-      '  <div class="mesti-success-icon-wrap">',
-      '    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
-      '  </div>',
-      '  <h3 class="mesti-phone-title" style="margin-top:16px;">' + t('success_title') + '</h3>',
-      '  <p class="mesti-phone-subtitle">' + t('success_sub') + '<br/>',
-      '    <span class="mesti-phone-highlight-badge" style="margin-top:8px;">' + renderFlagHTML(selectedCountry, 'mesti-badge-flag') + ' ' + phone + '</span>',
-      '  </p>',
+    var national = String(phone || '').replace(selectedCountry.dial, '').replace(/\D/g, '');
+    var pretty = selectedCountry.dial + ' ' + formatPhoneDigits(national, selectedCountry.dial);
+
+    setView([
+      '<div class="mesti-phone-screen mesti-success-screen">',
+      '  <div class="mesti-success-icon-wrap">' + ICON_CHECK + '</div>',
+      '  <h3 class="mesti-phone-title">' + t('success_title') + '</h3>',
+      '  <p class="mesti-phone-subtitle">' + pretty + '</p>',
       '</div>'
-    ].join('\n');
+    ].join('\n'), 'fwd');
 
     setTimeout(function () {
       closeModal();
@@ -646,7 +628,18 @@
     cells.forEach(function (cell, idx) {
       cell.addEventListener('input', function (e) {
         var val = e.target.value.replace(/\D/g, '');
-        e.target.value = val ? val.charAt(val.length - 1) : '';
+        // SMS autofill (one-time-code) drops the whole code into one cell: spread it
+        if (val.length > 1) {
+          var digits = val.slice(0, 6);
+          for (var k = 0; k < cells.length; k++) {
+            cells[k].value = digits[k] || '';
+            cells[k].classList.toggle('filled', Boolean(digits[k]));
+          }
+          if (digits.length >= 6) submitOtpCode();
+          else cells[digits.length].focus();
+          return;
+        }
+        e.target.value = val;
 
         if (e.target.value) {
           cell.classList.add('filled');

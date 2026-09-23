@@ -13,7 +13,12 @@
   --color-hairline: rgba(255, 255, 255, 0.06);
   --color-border: rgba(255, 255, 255, 0.1);
   --color-highlight: rgba(255, 255, 255, 0.08); /* top-edge light on materials */
-  --color-scrim: rgba(0, 0, 0, 0.6);
+  --color-scrim: rgba(0, 0, 0, 0.7);
+  --scrim-filter: blur(8px);
+  /* Glass blocks inside modals and auth (Login.css --auth-glass / --auth-stroke) */
+  --color-glass: rgba(255, 255, 255, 0.045);
+  --color-stroke: rgba(255, 255, 255, 0.1);
+  --color-stroke-top: rgba(255, 255, 255, 0.14);
 
   /* ---------- Color: text ---------- */
   --color-text: #ffffff;
@@ -25,7 +30,7 @@
   --color-accent-rgb: 33, 234, 124;
   --color-accent-pressed: #1dd470;
   --color-accent-subtle: rgba(33, 234, 124, 0.12);
-  --color-on-accent: #0b0b0a;
+  --color-on-accent: #161616;
 
   /* ---------- Color: status ---------- */
   --color-danger: #ff453a;
@@ -35,8 +40,10 @@
   --color-success: var(--color-accent);
 
   /* ---------- Typography ---------- */
+  /* Inter — UI text; Archivo 800 — headings in modals & auth; Outfit — brand/marketing blocks (home) */
   --font-text: 'Inter', -apple-system, BlinkMacSystemFont, 'Noto Sans Georgian', sans-serif;
-  --font-display: 'Montserrat', 'Inter', -apple-system, 'Noto Sans Georgian', sans-serif;
+  --font-display: 'Archivo', 'Inter', -apple-system, 'Noto Sans Georgian', sans-serif;
+  --font-brand: 'Outfit', 'Inter', -apple-system, 'Noto Sans Georgian', sans-serif;
 
   --text-display: 34px;  --leading-display: 1.05; --tracking-display: -0.02em;
   --text-title-1: 28px;  --leading-title-1: 1.1;  --tracking-title-1: -0.02em;
@@ -71,17 +78,21 @@
   --radius-md: 16px;
   --radius-lg: 20px;
   --radius-xl: 24px;
-  --radius-sheet: 28px;
+  --radius-sheet: 32px;
+  --radius-card: 28px; /* centered modal cards (CompleteProfileModal, AddressConfirmModal) */
   --radius-full: 9999px;
 
   /* ---------- Materials & elevation ---------- */
   --material-chrome-bg: rgba(21, 21, 20, 0.72);
   --material-chrome-filter: blur(20px) saturate(180%);
-  --material-sheet-bg: var(--color-surface-2);
+  /* Premium modal material (index.css .premium-modal-content-global) */
+  --material-sheet-bg: radial-gradient(120% 120% at 50% 0%, rgba(30, 30, 30, 0.97) 0%, rgba(10, 10, 10, 0.98) 100%);
+  --material-sheet-edge: rgba(255, 255, 255, 0.08);
 
   --shadow-1: inset 0 1px 0 var(--color-highlight);
   --shadow-2: inset 0 1px 0 var(--color-highlight), 0 8px 24px rgba(0, 0, 0, 0.35);
-  --shadow-3: inset 0 1px 0 var(--color-highlight), 0 24px 60px rgba(0, 0, 0, 0.55);
+  --shadow-3: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --shadow-accent: 0 4px 5px rgba(59, 180, 74, 0.2); /* primary green button */
 
   /* ---------- Motion ---------- */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);

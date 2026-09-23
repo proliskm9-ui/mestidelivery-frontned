@@ -14,16 +14,16 @@ const Toaster: React.FC = () => (
         mobileOffset={{ top: 'calc(var(--safe-top) + 8px)', left: 'var(--gutter)', right: 'var(--gutter)' }}
         style={
             {
-                '--normal-bg': 'var(--color-surface-2)',
-                '--normal-border': 'var(--color-border)',
+                '--normal-bg': 'radial-gradient(120% 120% at 50% 0%, #262626 0%, #121212 100%)',
+                '--normal-border': 'var(--color-stroke)',
                 '--normal-text': 'var(--color-text)',
-                '--success-bg': 'var(--color-surface-2)',
+                '--success-bg': 'radial-gradient(120% 120% at 50% 0%, #262626 0%, #121212 100%)',
                 '--success-border': 'rgba(var(--color-accent-rgb), 0.28)',
                 '--success-text': 'var(--color-text)',
-                '--error-bg': 'var(--color-surface-2)',
+                '--error-bg': 'radial-gradient(120% 120% at 50% 0%, #262626 0%, #121212 100%)',
                 '--error-border': 'rgba(255, 69, 58, 0.32)',
                 '--error-text': 'var(--color-text)',
-                '--border-radius': 'var(--radius-lg)',
+                '--border-radius': 'var(--radius-md)',
                 fontFamily: 'var(--font-text)',
                 zIndex: 'var(--z-toast)',
             } as React.CSSProperties

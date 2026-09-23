@@ -14,6 +14,8 @@ interface SheetProps {
     closeOnBack?: boolean;
     /** Removes default body padding (e.g. for full-bleed dish photos). */
     flush?: boolean;
+    /** Green circular close button in the top-right corner. */
+    showClose?: boolean;
     className?: string;
     children?: React.ReactNode;
 }
@@ -31,6 +33,7 @@ const Sheet: React.FC<SheetProps> = ({
     footer,
     closeOnBack = true,
     flush = false,
+    showClose = true,
     className,
     children,
 }) => {
@@ -78,9 +81,17 @@ const Sheet: React.FC<SheetProps> = ({
                 <Drawer.Viewport className="md-sheet-viewport">
                     <Drawer.Popup className={['md-sheet', className].filter(Boolean).join(' ')}>
                         <div className="md-sheet-handle" aria-hidden="true" />
+                        {showClose && (
+                            <Drawer.Close className="md-sheet-close" aria-label="Close">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                            </Drawer.Close>
+                        )}
                         <Drawer.Content className={flush ? 'md-sheet-body md-sheet-body--flush' : 'md-sheet-body'}>
                             {(title || description) && (
-                                <header className="md-sheet-header">
+                                <header className={showClose ? 'md-sheet-header md-sheet-header--with-close' : 'md-sheet-header'}>
                                     {title && <Drawer.Title className="md-sheet-title">{title}</Drawer.Title>}
                                     {description && (
                                         <Drawer.Description className="md-sheet-description">{description}</Drawer.Description>
