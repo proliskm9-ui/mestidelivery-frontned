@@ -160,6 +160,8 @@
     letter-spacing: -0.035em;
     line-height: 1;
     color: #fff;
+    /* wordmark: uppercase like the site header logo */
+    text-transform: uppercase;
 }
 
 .auth-brand-tag {
