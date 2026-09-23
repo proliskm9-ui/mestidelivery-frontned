@@ -5,7 +5,6 @@ import { pickI18nText } from '../../utils/i18nContent';
 import { closedBadgeText } from '../../utils/workingHours';
 import './favBtn.css';
 import './cardImageSkeleton.css';
-import { cuisineLine } from '../../utils/restaurantCuisine';
 
 interface RestaurantCardProps {
     item: Restaurant;
@@ -87,9 +86,6 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ item, onClick, isVertic
                         <span>{formatDuration(item.delivery || '25-35 мин', language)}</span>
                     </div>
                 </div>
-                {cuisineLine(item.name, language) && (
-                    <div className="rest-cuisine">{cuisineLine(item.name, language)}</div>
-                )}
             </div>
         </div>
     );

@@ -1056,7 +1056,6 @@ const MenuPage: React.FC<{
                 }
                 .rest-card { cursor: pointer; touch-action: manipulation; transition: transform 160ms var(--ease-out); }
                 .rest-card:active:not(:has(.fav-btn:active)) { transform: scale(0.98); }
-                .rest-cuisine { margin-top: 4px; padding-left: 4px; font: var(--t-caption); color: var(--color-text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
                 .rest-img {
                     height: auto; width: 100%; aspect-ratio: 2 / 1; border-radius: 25px !important;
                     background-size: cover; background-position: center; margin-bottom: 4px;

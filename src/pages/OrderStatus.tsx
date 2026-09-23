@@ -92,12 +92,6 @@ const TIP_PRESETS = [2, 4, 7, 10];
 
 type RatingStep = 'restaurant' | 'courier' | 'success';
 
-/** Run once the startup splash (deep links, refresh) is gone, so moments aren't played unseen. */
-function afterSplash(run: () => void, tries = 40): void {
-    if (!document.querySelector('.loading-screen') || tries <= 0) { run(); return; }
-    window.setTimeout(() => afterSplash(run, tries - 1), 150);
-}
-
 interface Props {
     orderId: number;
     onBack: () => void;
@@ -136,30 +130,10 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
 
     const stepsRef = useRef<(HTMLDivElement | null)[]>([]);
 
-    // One-time celebration the first time this order is seen delivered
-    const [celebrate, setCelebrate] = useState(false);
-    useEffect(() => {
-        if (!order || order.status !== 'delivered') return;
-        const key = `mesti_celebrated_${order.id}`;
-        try {
-            if (localStorage.getItem(key)) return;
-            localStorage.setItem(key, '1');
-        } catch { /* storage unavailable: celebrate anyway */ }
-        let timer = 0;
-        afterSplash(() => {
-            setCelebrate(true);
-            try { navigator.vibrate?.([10, 50, 10, 50, 18]); } catch { /* not supported */ }
-            timer = window.setTimeout(() => setCelebrate(false), 1600);
-        });
-        return () => window.clearTimeout(timer);
-    }, [order?.id, order?.status]); // eslint-disable-line react-hooks/exhaustive-deps
-
     useEffect(() => {
         if (order) {
             if (order.status === 'delivered' && !order.rating && prevStatus !== 'delivered') {
-                // Let "Delivered" and its burst land first, then ask for the rating.
-                // No cleanup on purpose: the effect re-runs right away when prevStatus updates.
-                afterSplash(() => window.setTimeout(() => setShowRatingModal(true), 1500));
+                setShowRatingModal(true);
             }
             setPrevStatus(order.status);
         }
@@ -367,13 +341,6 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
 
                 <div className="primary-status-label">
                     <h1 key={currentStatusLabel} className="os-status-swap">{currentStatusLabel}</h1>
-                    {celebrate && (
-                        <div className="os-confetti" aria-hidden="true">
-                            {Array.from({ length: 18 }).map((_, i) => (
-                                <span key={i} style={{ '--i': i, '--dist': `${70 + ((i * 23) % 60)}px`, '--delay': `${(i * 17) % 120}ms` } as React.CSSProperties} />
-                            ))}
-                        </div>
-                    )}
                 </div>
 
                 <div className="status-scroll-container">
