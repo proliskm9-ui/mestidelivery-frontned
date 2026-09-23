@@ -576,6 +576,37 @@ const MenuPage: React.FC<{
                     </div>
                 ) : isNetworkError && restaurants.length === 0 ? (
                     <NetworkErrorState />
+                ) : searchQuery.trim() ? (
+                    <div className="content-pad menu-search-results">
+                        {filteredRestaurants.length + filteredStores.length > 0 ? (
+                            <>
+                                <p className="ds-label">
+                                    {t('menu.search_results')} · {filteredRestaurants.length + filteredStores.length}
+                                </p>
+                                {renderRestaurantGrid(filteredRestaurants)}
+                                {filteredStores.map((store) => (
+                                    <MobileRestaurantCard
+                                        key={store.id}
+                                        item={store}
+                                        onClick={() => setActiveCollection({ title: t('menu.stores'), items: [], type: 'stores_soon' })}
+                                        isFavorite={favorites.includes(store.id)}
+                                        onToggleFavorite={() => onToggleFavorite && onToggleFavorite(store.id)}
+                                    />
+                                ))}
+                            </>
+                        ) : (
+                            <div className="menu-search-empty">
+                                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                    <circle cx="11" cy="11" r="7" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="8" y1="11" x2="14" y2="11" />
+                                </svg>
+                                <h2>{t('menu.search_empty_title')}</h2>
+                                <p>{t('menu.search_empty_desc')}</p>
+                                <button type="button" className="ds-btn ds-btn--secondary ds-btn--sm" onClick={() => setSearchQuery('')}>
+                                    {t('menu.search_clear')}
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 ) : (
                     <div className="content-pad">
                         <PromoBanner onFirstBannerClick={() => {
@@ -707,6 +738,39 @@ const MenuPage: React.FC<{
                     color: white;
                     font-family: 'Inter', -apple-system, sans-serif;
                 }
+.menu-search-results {
+                    padding-top: 8px;
+                    min-height: 60vh;
+                }
+                .menu-search-results > .ds-label {
+                    margin: 8px 4px 12px;
+                }
+                .menu-search-empty {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    text-align: center;
+                    gap: 8px;
+                    padding: 56px 24px;
+                    color: var(--color-text-tertiary);
+                }
+                .menu-search-empty h2 {
+                    margin: 8px 0 0;
+                    font: var(--t-section);
+                    letter-spacing: var(--tracking-tight);
+                    color: var(--color-text);
+                    text-transform: none;
+                }
+                .menu-search-empty p {
+                    margin: 0 0 12px;
+                    font: var(--t-secondary);
+                    color: var(--color-text-secondary);
+                    max-width: 280px;
+                }
+                .menu-search-empty .ds-btn {
+                    width: auto;
+                    padding: 0 24px;
+                }
                 .stores-empty {
                     position: relative;
                     z-index: 1;
@@ -794,12 +858,12 @@ const MenuPage: React.FC<{
                 .menu-collection-back {
                     appearance: none;
                     -webkit-appearance: none;
-                    background: rgba(255, 255, 255, 0.08);
-                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    background: var(--icon-btn-bg);
+                    border: var(--icon-btn-border);
                     backdrop-filter: blur(15px);
                     -webkit-backdrop-filter: blur(15px);
-                    width: 44px;
-                    height: 44px;
+                    width: var(--icon-btn-size);
+                    height: var(--icon-btn-size);
                     border-radius: 50%;
                     display: flex;
                     align-items: center;
@@ -810,12 +874,11 @@ const MenuPage: React.FC<{
                     flex-shrink: 0;
                 }
                 .menu-collection-title {
-                    font-size: 20px;
-                    font-weight: 700;
+                    font: var(--t-nav-title);
+                    letter-spacing: var(--tracking-tight);
                     margin: 0;
                     color: white;
-                    font-family: Inter, sans-serif;
-                    text-transform: uppercase;
+                    text-transform: none;
                     text-align: center;
                 }
                 .menu-collection-spacer {

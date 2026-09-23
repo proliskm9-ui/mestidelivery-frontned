@@ -122,6 +122,8 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
         return (
             <div style={{ color: 'white', padding: '40px 40px 80px 40px', textAlign: 'center', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', background: 'var(--bg)', paddingTop: '80px' }}>
                 <button
+                    type="button"
+                    aria-label={t('common.back')}
                     onClick={onBack}
                     style={{
                         position: 'absolute',
@@ -142,9 +144,7 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                         zIndex: 10
                     }}
                 >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
+                    <IconBack />
                 </button>
 
                 <img src="/Assets/корзина.png" alt="Empty" style={{ width: '280px', height: '195px', marginBottom: '24px', objectFit: 'contain' }} />

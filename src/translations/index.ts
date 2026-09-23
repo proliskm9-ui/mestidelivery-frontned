@@ -136,6 +136,10 @@ export const translations = {
             language: 'Язык'
         },
         menu: {
+            search_results: 'Результаты поиска',
+            search_empty_title: 'Ничего не нашлось',
+            search_empty_desc: 'Попробуйте другое название ресторана или магазина',
+            search_clear: 'Сбросить поиск',
             stores: 'Магазины',
             stores_empty_title: 'Магазины скоро откроются',
             stores_empty_desc: 'Раздел ещё в подготовке — совсем скоро здесь можно будет заказать из магазинов Местии.',
@@ -867,6 +871,10 @@ export const translations = {
             language: 'Language'
         },
         menu: {
+            search_results: 'Search results',
+            search_empty_title: 'Nothing found',
+            search_empty_desc: 'Try another restaurant or shop name',
+            search_clear: 'Clear search',
             stores: 'Stores',
             stores_empty_title: 'Stores coming soon',
             stores_empty_desc: 'This section is still in the works — soon you’ll be able to order from Mestia shops here.',
@@ -1598,6 +1606,10 @@ export const translations = {
             language: 'ენა'
         },
         menu: {
+            search_results: 'ძიების შედეგები',
+            search_empty_title: 'ვერაფერი მოიძებნა',
+            search_empty_desc: 'სცადეთ რესტორნის ან მაღაზიის სხვა სახელი',
+            search_clear: 'ძიების გასუფთავება',
             stores: 'მაღაზიები',
             stores_empty_title: 'მაღაზიები მალე გაიხსნება',
             stores_empty_desc: 'განყოფილება ჯერ მზადდება — მალე აქ შეძლებთ მესტიის მაღაზიებიდან შეკვეთას.',
