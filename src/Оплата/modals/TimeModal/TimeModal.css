@@ -234,81 +234,14 @@
   }
 }
 
-/* ---------- Design system pass ----------
-   Sticky title + sticky 'Done', slots scroll between them; slots use the
-   app's field style (Login .auth-field) with a clear selected state. */
-.tm-header {
-  position: sticky;
-  top: -24px;
-  z-index: 2;
-  margin: -24px -16px 16px;
-  padding: 24px 16px 12px;
-  background: linear-gradient(180deg, #121212 70%, rgba(18, 18, 18, 0));
-}
-
-.tm-title {
-  font-size: 22px;
-  line-height: 1.15;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: #fff;
-}
-
-.tm-subtitle {
-  margin-top: 6px;
-  line-height: 1.35;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.tm-slot-btn {
-  height: 46px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.05);
-  font-variant-numeric: tabular-nums;
-  color: rgba(255, 255, 255, 0.9);
-  touch-action: manipulation;
-  transition: border-color 200ms ease, background-color 200ms ease, transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.tm-slot-btn:active {
-  transform: scale(0.97);
-}
-
-.tm-slot-btn.active {
-  border-color: rgba(33, 234, 124, 0.55);
-  background: rgba(33, 234, 124, 0.12);
-  color: #fff;
-  font-weight: 600;
-}
-
-.tm-confirm-btn {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
-  box-shadow: 0 -12px 24px 8px #0f0f0f, 0 4px 5px rgba(59, 180, 74, 0.2);
-}
-
-@media (min-width: 1025px) {
-  .tm-slot-btn {
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .tm-slot-btn.active {
-    border-color: rgba(33, 234, 124, 0.55);
-    background: rgba(33, 234, 124, 0.12);
-    color: #fff;
-    font-weight: 600;
-  }
-}
-
+/* Day separators: slots span today and the next days */
 .tm-day-label {
   grid-column: 1 / -1;
-  margin: 10px 2px 2px;
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.55);
+  margin: 14px 0 2px;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .tm-day-label:first-child {

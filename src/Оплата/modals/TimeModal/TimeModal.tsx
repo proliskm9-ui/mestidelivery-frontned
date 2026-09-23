@@ -61,11 +61,9 @@ const TimeModal: React.FC<TimeModalProps> = ({ isOpen, onClose, currentTime, onS
         <div className="tm-header">
           <div>
             <h2 className="tm-title">{t('checkout.choose_time_title')}</h2>
-            {localSelection && selectedLabel && selectedLabel !== '—' && (
-              <p className="tm-subtitle">
-                {t('checkout.current_selection')} {selectedLabel}
-              </p>
-            )}
+            <p className="tm-subtitle">
+              {t('checkout.current_selection')} {selectedLabel}
+            </p>
           </div>
         </div>
 

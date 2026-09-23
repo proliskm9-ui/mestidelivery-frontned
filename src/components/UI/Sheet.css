@@ -98,6 +98,15 @@
     margin-bottom: var(--space-6);
 }
 
+/* Header-only sheets (confirmations): no dead space above the actions */
+.md-sheet-header:last-child {
+    margin-bottom: 0;
+}
+
+.md-sheet:has(.md-sheet-footer) .md-sheet-body:has(> .md-sheet-header:last-child) {
+    padding-bottom: var(--space-4);
+}
+
 .md-sheet-title {
     margin: 0;
     font-family: var(--font-display);
