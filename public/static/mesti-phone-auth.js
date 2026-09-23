@@ -795,7 +795,7 @@
       var root = ensureModalDOM();
       root.classList.add('active');
 
-      var phone = options.phone || localStorage.getItem('user_phone') || "+995598902876";
+      var phone = options.phone || localStorage.getItem('user_phone') || '';
 
       return new Promise(function (resolve, reject) {
         currentPromise = { resolve: resolve, reject: reject };
