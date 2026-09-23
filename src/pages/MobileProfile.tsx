@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './MobileProfile.css';
 import { useLanguage } from '../translations/LanguageContext';
 import AvatarPickerSheet from '../components/UI/AvatarPickerSheet';
+import { restaurantCache } from '../services/api';
 
 interface MobileProfileProps {
     userAddress?: any;
@@ -319,6 +320,9 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
         </div>
     );
 
+    // Restaurant photo for an order row (restaurants are pre-fetched before the history)
+    const orderImage = (order: any): string | undefined => restaurantCache[`rest_${order.restaurant_id}`]?.img || undefined;
+
     const renderOrdersForm = () => (
         <div className="mp-subview">
             <div className="mp-bg-glow"></div>
@@ -356,7 +360,11 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                                     )}
                                     <div className="mp-order-item" onClick={() => onOrderClick?.(order.id)}>
                                         <div className="mp-order-icon-box">
-                                            <img src="/Assets/general-green.png" alt="MestiGo" style={{ objectFit: 'contain', padding: '6px' }} />
+                                            {orderImage(order) ? (
+                                                <img className="mp-order-thumb" src={orderImage(order)} alt="" loading="lazy" />
+                                            ) : (
+                                                <img src="/Assets/general-green.png" alt="" style={{ objectFit: 'contain', padding: '6px' }} />
+                                            )}
                                         </div>
                                         <div className="mp-order-main">
                                             <h4 className="mp-order-name">{orderName}, {formatTime(order)}</h4>

@@ -499,13 +499,19 @@
 }
 
 .mp-history-date-header {
-    font-size: 13px;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.4);
-    margin: 16px 0 8px 4px;
-    text-transform: lowercase;
+    font: var(--t-label);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    margin: 20px 0 10px 4px;
 }
 
 .mp-history-date-header:first-child {
     margin-top: 4px;
+}
+
+.mp-order-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
