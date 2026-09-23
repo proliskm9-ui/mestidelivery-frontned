@@ -157,6 +157,8 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                 </div>
 
                 <button
+                    type="button"
+                    className="mc-empty-cta"
                     onClick={onBack}
                     style={{
                         position: 'fixed',
@@ -168,23 +170,20 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                         maxWidth: 'calc(100vw - 32px)',
                         height: '56px',
                         background: '#21EA7C',
-                        color: '#000000',
+                        color: 'var(--btn-primary-text)',
                         border: 'none',
-                        borderRadius: '16px',
+                        borderRadius: 'var(--control-radius)',
+                        boxShadow: 'var(--btn-primary-shadow)',
                         fontFamily: 'Inter, sans-serif',
-                        fontWeight: 600,
+                        fontWeight: 700,
                         fontSize: '17px',
-                        lineHeight: '10px',
-                        letterSpacing: '-0.2px',
+                        letterSpacing: '-0.01em',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
-                        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                         zIndex: 100
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0px 4px 12px rgba(33, 234, 124, 0.4)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
                 >
                     {t('cart.go_to_restaurants')}
                 </button>

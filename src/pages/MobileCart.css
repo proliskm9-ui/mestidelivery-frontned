@@ -497,3 +497,12 @@
         font-size: 16px;
     }
 }
+
+.mc-empty-cta {
+    touch-action: manipulation;
+    transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.mc-empty-cta:active {
+    transform: scale(0.97);
+}
