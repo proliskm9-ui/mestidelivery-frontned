@@ -168,7 +168,7 @@
 .mesti-ref-stat-card {
   display: flex;
   align-items: flex-end;
-  gap: 20px;
+  gap: 18px;
   margin-bottom: 16px;
   padding: 22px 20px;
   border-radius: 20px;
@@ -190,6 +190,7 @@
   color: var(--rf-muted);
   text-transform: none;
   letter-spacing: 0;
+  white-space: nowrap;
 }
 
 .mesti-ref-stat-amount {
@@ -211,7 +212,7 @@
 
 .mesti-ref-stat-meta {
   display: flex;
-  gap: 24px;
+  gap: 20px;
 }
 
 .mesti-ref-meta-item {
