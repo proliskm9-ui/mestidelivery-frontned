@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { flushSync } from 'react-dom';
 import { api, Product, Restaurant, resolveImageUrl } from '../services/api';
 import FullPageLoader from '../components/UI/FullPageLoader';
 import NetworkErrorState from '../components/UI/NetworkErrorState';
@@ -133,6 +134,36 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     const cartWidgetRef = useRef<HTMLDivElement>(null);
     const infoCardRef = useRef<HTMLDivElement>(null);
     const heroImgRef = useRef<HTMLImageElement>(null);
+    // Dish photo flies from the grid card into the sheet (View Transitions; plain open elsewhere)
+    const dishCardImgRef = useRef<HTMLImageElement | null>(null);
+    const canMorph = () =>
+        typeof document !== 'undefined' &&
+        'startViewTransition' in document &&
+        !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const openDish = (product: Product, cardImg?: HTMLImageElement | null) => {
+        dishCardImgRef.current = cardImg || null;
+        if (!cardImg || !canMorph()) { setSelectedProduct(product); return; }
+        cardImg.style.viewTransitionName = 'dish-photo';
+        document.documentElement.classList.add('vt-dish');
+        const vt = (document as any).startViewTransition(() => {
+            cardImg.style.viewTransitionName = '';
+            flushSync(() => setSelectedProduct(product));
+        });
+        vt.finished.finally(() => document.documentElement.classList.remove('vt-dish'));
+    };
+    const closeDish = () => {
+        const cardImg = dishCardImgRef.current;
+        if (!cardImg || !cardImg.isConnected || !canMorph()) { setSelectedProduct(null); return; }
+        document.documentElement.classList.add('vt-dish');
+        const vt = (document as any).startViewTransition(() => {
+            flushSync(() => setSelectedProduct(null));
+            cardImg.style.viewTransitionName = 'dish-photo';
+        });
+        vt.finished.finally(() => {
+            cardImg.style.viewTransitionName = '';
+            document.documentElement.classList.remove('vt-dish');
+        });
+    };
 
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
@@ -1003,7 +1034,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                     {filteredByCategory[cat].map(product => {
                                         const count = getQuantity(product.id);
                                         return (
-                                            <div key={product.id} className="dish-card" onClick={() => setSelectedProduct(product)}>
+                                            <div key={product.id} className="dish-card" onClick={(e) => openDish(product, (e.currentTarget as HTMLElement).querySelector<HTMLImageElement>('.dish-photo img'))}>
                                                 <div className="dish-photo">
                                                     <img loading="lazy" decoding="async" src={resolveImageUrl(product.img || '') || '/Assets/default-food.png'} alt={locName(product.name)} />
                                                     <div className="dish-controls">
@@ -1012,11 +1043,13 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                                                 className="qty-btn qty-minus"
                                                                 onClick={(e) => { e.stopPropagation(); onUpdateQuantity && onUpdateQuantity(product.id, -1); }}
                                                             />
-                                                            <span className="qty-value">{count > 0 ? count : ''}</span>
+                                                            <span className="qty-value" key={count}>{count > 0 ? count : ''}</span>
                                                             <button
                                                                 className="qty-btn qty-plus"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
+                                                                    // Tiny haptic tick where supported (Android); iOS ignores it
+                                                                    try { navigator.vibrate?.(8); } catch { /* not supported */ }
                                                                     if (count === 0) {
                                                                         onAddToCart(product);
                                                                     } else {
@@ -1048,11 +1081,11 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
             </div>
 
             {selectedProduct && (
-                <div className="dish-modal-overlay" onClick={() => setSelectedProduct(null)}>
+                <div className="dish-modal-overlay" onClick={closeDish}>
                     <div className="dish-modal-content" onClick={e => e.stopPropagation()}>
                         <div className="modal-top">
-                            <img src={resolveImageUrl(selectedProduct.img || '') || '/Assets/default-food.png'} alt={locName(selectedProduct.name)} className="modal-hero-img" />
-                            <button className="modal-close-btn" onClick={() => setSelectedProduct(null)}>
+                            <img src={resolveImageUrl(selectedProduct.img || '') || '/Assets/default-food.png'} alt={locName(selectedProduct.name)} className="modal-hero-img" style={{ viewTransitionName: 'dish-photo' }} />
+                            <button className="modal-close-btn" onClick={closeDish}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
                                 </svg>

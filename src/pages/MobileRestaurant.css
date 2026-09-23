@@ -398,7 +398,7 @@
     width: 100%;
     background: rgba(33, 234, 124, 1);
     border-radius: 20px;
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+    transition: width 260ms var(--ease-out), background 200ms ease;
     overflow: hidden;
 }
 
@@ -922,4 +922,62 @@
     .v2-hero {
         animation-duration: 1ms;
     }
+}
+
+/* ---------- Add-to-cart feedback ----------
+   Frequent action: short and subtle (press 0.9 on the control, 0.98 on the card, number tick). */
+.mobile-restaurant-page .qty-btn {
+    touch-action: manipulation;
+    transition: transform 120ms var(--ease-out);
+}
+
+.mobile-restaurant-page .qty-btn:active {
+    transform: scale(0.86);
+}
+
+.mobile-restaurant-page .dish-card {
+    transition: transform 160ms var(--ease-out);
+}
+
+.mobile-restaurant-page .dish-card:active:not(:has(.qty-btn:active)) {
+    transform: scale(0.98);
+}
+
+.mobile-restaurant-page .quantity-counter:not(.collapsed) .qty-value {
+    animation: qtyTick 180ms var(--ease-out);
+}
+
+@keyframes qtyTick {
+    from { transform: translateY(35%); opacity: 0.3; }
+    to { transform: none; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mobile-restaurant-page .quantity-counter:not(.collapsed) .qty-value {
+        animation: none;
+    }
+}
+
+/* ---------- Dish photo morph (View Transitions) ----------
+   While the photo flies, the sheet appears in place (no slide) so the target rect is final. */
+html.vt-dish .mobile-restaurant-page .dish-modal-content,
+html.vt-dish .mobile-restaurant-page .dish-modal-overlay {
+    animation: none !important;
+}
+
+::view-transition-group(dish-photo) {
+    animation-duration: 340ms;
+    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+::view-transition-old(dish-photo),
+::view-transition-new(dish-photo) {
+    height: 100%;
+    object-fit: cover;
+    overflow: clip;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 220ms;
 }
