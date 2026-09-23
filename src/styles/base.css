@@ -48,3 +48,42 @@ html:has(.app-container) :is(a, button, [role='button'], [role='tab'], [tabindex
   overflow-y: auto;
   overscroll-behavior: contain;
 }
+
+/* Lazy images fade in when loaded (class set by a capture listener in main.tsx).
+   Fallback reveal after 1.2s in case the load event was missed (e.g. already cached). */
+html:has(.app-container) img[loading='lazy'] {
+  transition: opacity 300ms ease;
+}
+
+html:has(.app-container) img[loading='lazy']:not(.is-loaded) {
+  opacity: 0;
+  animation: imgRevealFallback 0s linear 1.2s forwards;
+}
+
+@keyframes imgRevealFallback {
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.app-container) img[loading='lazy'] {
+    transition: none;
+  }
+}
+
+/* Catalog -> restaurant cover morph: hold the page/cover entrance so the target rect is final */
+html.vt-nav .page-transition-wrapper,
+html.vt-nav .mobile-restaurant-page .v2-hero {
+    animation: none !important;
+}
+
+::view-transition-group(rest-photo) {
+    animation-duration: 380ms;
+    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+::view-transition-old(rest-photo),
+::view-transition-new(rest-photo) {
+    height: 100%;
+    object-fit: cover;
+    overflow: clip;
+}
