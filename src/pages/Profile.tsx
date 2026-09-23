@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Profile.css';
 import { useLanguage } from '../translations/LanguageContext';
+import AvatarPickerSheet from '../components/UI/AvatarPickerSheet';
 import MobileProfile from './MobileProfile';
 
 const IconEdit = () => (
@@ -39,13 +40,6 @@ interface ProfilePageProps {
     onBack?: () => void;
     onOrderClick?: (orderId: number) => void;
 }
-
-const PRESET_AVATARS = [
-    { id: 'av1', img: '/Assets/photo_2026-02-11_23-14-10.jpg', label: 'Art 1' },
-    { id: 'av2', img: '/Assets/photo_2026-02-11_23-14-27.jpg', label: 'Art 2' },
-    { id: 'av3', img: '/Assets/photo_2026-02-11_23-14-50.jpg', label: 'Art 3' },
-    { id: 'av4', img: '/Assets/photo_2026-02-11_23-19-47.jpg', label: 'Art 4' }
-];
 
 const ProfilePage: React.FC<ProfilePageProps> = ({
     userAddress,
@@ -385,64 +379,12 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                 {view === 'history' && renderHistory()}
             </div>
 
-            {avatarModal && (
-                <div className="bento-modal-overlay" onClick={() => setAvatarModal(false)}>
-                    <div className="bento-modal avatar-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="avatar-modal-header">
-                            <div>
-                                <h3 className="avatar-modal-title">{t('profile.choose_avatar')}</h3>
-                                <p className="avatar-modal-subtitle">{t('profile.choose_avatar_hint')}</p>
-                            </div>
-                            <button
-                                type="button"
-                                className="avatar-modal-close ui-circle-btn"
-                                onClick={() => setAvatarModal(false)}
-                                aria-label={t('common.cancel')}
-                            >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M18 6L6 18M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div className="emoji-grid">
-                            {PRESET_AVATARS.map((av) => (
-                                <button
-                                    key={av.id}
-                                    type="button"
-                                    className={`emoji-btn ${userProfile?.avatar === av.img ? 'active' : ''}`}
-                                    onClick={() => {
-                                        onUpdateProfile?.({ avatar: av.img });
-                                        setAvatarModal(false);
-                                    }}
-                                >
-                                    <img src={av.img} alt={av.label} />
-                                </button>
-                            ))}
-                        </div>
-                        <label className="bento-primary-btn avatar-upload-btn">
-                            {t('profile.upload_photo')}
-                            <input
-                                type="file"
-                                hidden
-                                accept="image/*"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (!file) return;
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => {
-                                        onUpdateProfile?.({ avatar: reader.result });
-                                        setAvatarModal(false);
-                                    };
-                                    reader.readAsDataURL(file);
-                                }}
-                            />
-                        </label>
-                        <button type="button" className="bento-secondary-btn" onClick={() => setAvatarModal(false)}>
-                            {t('common.cancel')}
-                        </button>
-                    </div>
-                </div>
-            )}
+            <AvatarPickerSheet
+                open={avatarModal}
+                onOpenChange={setAvatarModal}
+                current={userProfile?.avatar}
+                onPick={(avatar) => onUpdateProfile?.({ avatar })}
+            />
         </div>
     );
 };

@@ -4,6 +4,7 @@ import { api } from '../services/api';
 import FullPageLoader from '../components/UI/FullPageLoader';
 import NetworkErrorState from '../components/UI/NetworkErrorState';
 import './OrderStatus.css';
+import { formatPrice } from '../utils/formatPrice';
 import { useLanguage } from '../translations/LanguageContext';
 import { pickI18nText } from '../utils/i18nContent';
 import {
@@ -88,14 +89,6 @@ const COURIER_TAGS_NEGATIVE = [
 ];
 
 const TIP_PRESETS = [2, 4, 7, 10];
-
-const RATING_CAPTIONS: Record<number, string> = {
-    1: 'Ужасно \u{1F61E}',
-    2: 'Плохо \u{1F615}',
-    3: 'Нормально \u{1F610}',
-    4: 'Хорошо \u{1F60A}',
-    5: 'Превосходно! \u{1F929}',
-};
 
 type RatingStep = 'restaurant' | 'courier' | 'success';
 
@@ -412,22 +405,22 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                             {ratingSubmitted || order.rating ? (
                                 <div className="os-rating-submitted-box">
                                     <div className="os-rating-submitted-header">
-                                        <span className="os-rating-done-title">{t('order.rating_title') || 'Ваша оценка'}</span>
+                                        <span className="os-rating-done-title">{t('rating.your_rating')}</span>
                                         <div className="os-rating-submitted-stars">
                                             {[1,2,3,4,5].map((star) => (
                                                 <StarIcon key={star} filled={(order.rating || restRating) >= star} size={20} />
                                             ))}
                                         </div>
                                     </div>
-                                    <span className="os-rating-done-desc">{t('order.thanks_rating') || 'Спасибо за оценку!'}</span>
+                                    <span className="os-rating-done-desc">{t('rating.thanks_rating')}</span>
                                     {!tipsSent ? (
                                         <button type="button" className="os-post-tip-btn" onClick={() => setShowTipsModal(true)}>
                                             <Coins size={16} strokeWidth={2.2} />
-                                            <span>Оставить чаевые курьеру</span>
+                                            <span>{t('rating.leave_tip')}</span>
                                         </button>
                                     ) : (
                                         <span className="os-tips-sent-label">
-                                            <Check size={14} /> Чаевые отправлены
+                                            <Check size={14} /> {t('rating.tips_sent')}
                                         </span>
                                     )}
                                 </div>
@@ -438,7 +431,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                     onClick={() => { setRatingStep('restaurant'); setShowRatingModal(true); }}
                                 >
                                     <StarIcon filled={true} size={20} />
-                                    <span>{t('order.rate_order') || 'Оценить заказ'}</span>
+                                    <span>{t('rating.rate_order')}</span>
                                 </button>
                             )}
                         </div>
@@ -464,9 +457,9 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                     {ratingStep === 'success' && '\u2705'}
                                 </span>
                                 <span className="y-rate-badge-rest">
-                                    {ratingStep === 'restaurant' && 'Оцените ресторан'}
-                                    {ratingStep === 'courier' && 'Как прошла доставка?'}
-                                    {ratingStep === 'success' && 'Спасибо!'}
+                                    {ratingStep === 'restaurant' && t('rating.rate_restaurant')}
+                                    {ratingStep === 'courier' && t('rating.how_was_delivery')}
+                                    {ratingStep === 'success' && t('rating.thanks_short')}
                                 </span>
                             </div>
                             {ratingStep !== 'success' && (
@@ -481,12 +474,12 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                             <div className="y-rate-stepper">
                                 <div className={`y-rate-step-indicator ${ratingStep === 'restaurant' ? 'active' : 'completed'}`}>
                                     {ratingStep === 'courier' ? <Check size={13} /> : <span>1</span>}
-                                    <span>Ресторан</span>
+                                    <span>{t('rating.step_restaurant')}</span>
                                 </div>
                                 <div className="y-rate-step-dot" />
                                 <div className={`y-rate-step-indicator ${ratingStep === 'courier' ? 'active' : ''}`}>
                                     <span>2</span>
-                                    <span>Курьер</span>
+                                    <span>{t('rating.step_courier')}</span>
                                 </div>
                             </div>
                         )}
@@ -497,9 +490,9 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                 <div className="y-rate-entity-icon y-rate-entity-icon--rest">
                                     <span style={{ fontSize: 28 }}>&#127869;&#65039;</span>
                                 </div>
-                                <h2 className="y-rate-title">Оцените ресторан</h2>
+                                <h2 className="y-rate-title">{t('rating.rate_restaurant')}</h2>
                                 <p className="y-rate-subtitle">
-                                    Как вам блюда{order.restaurant_name ? ` от ${order.restaurant_name}` : ''}?
+                                    {order.restaurant_name ? t('rating.dishes_question_from').replace('{name}', order.restaurant_name) : t('rating.dishes_question')}
                                 </p>
 
                                 <div className="y-rate-stars-wrapper">
@@ -516,7 +509,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                     </div>
                                     {(restHover || restRating) > 0 && (
                                         <span className="y-rate-rating-caption">
-                                            {RATING_CAPTIONS[restHover || restRating]}
+                                            {t(`rating.caption_${restHover || restRating}`)}
                                         </span>
                                     )}
                                 </div>
@@ -526,22 +519,22 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                         <div className="y-rate-tags-grid">
                                             {(restRating >= 4 ? REST_TAGS_POSITIVE : REST_TAGS_NEGATIVE).map(tag => {
                                                 const IconComp = tag.icon;
-                                                const used = isTagUsed(tag.label, restComment);
+                                                const used = isTagUsed(t(`rating.tag_${tag.id}`), restComment);
                                                 return (
                                                     <button key={tag.id} type="button"
                                                         className={`y-rate-chip ${used ? 'used' : ''}`}
-                                                        onClick={() => !used && appendTag(tag.label, setRestComment)}
+                                                        onClick={() => !used && appendTag(t(`rating.tag_${tag.id}`), setRestComment)}
                                                         disabled={used}
                                                     >
                                                         <IconComp size={13} strokeWidth={2.2} />
-                                                        <span>{tag.label}</span>
+                                                        <span>{t(`rating.tag_${tag.id}`)}</span>
                                                     </button>
                                                 );
                                             })}
                                         </div>
                                         <div className="y-rate-input-wrap">
                                             <textarea className="y-rate-textarea" rows={2}
-                                                placeholder="Напишите пару слов о блюдах (необязательно)"
+                                                placeholder={t('rating.dishes_placeholder')}
                                                 value={restComment}
                                                 onChange={e => setRestComment(e.target.value)}
                                                 maxLength={400}
@@ -552,14 +545,14 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
 
                                 <div className="y-rate-actions" style={{ marginTop: restRating > 0 ? 0 : 24 }}>
                                     <button type="button" className="y-rate-skip-btn" onClick={closeAndResetModal}>
-                                        Не сейчас
+                                        {t('rating.not_now')}
                                     </button>
                                     <button type="button"
                                         className={`y-rate-primary-btn ${restRating > 0 ? 'active' : ''}`}
                                         disabled={restRating === 0}
                                         onClick={() => setRatingStep('courier')}
                                     >
-                                        Далее &#8594;
+                                        {t('rating.next')} &#8594;
                                     </button>
                                 </div>
                             </div>
@@ -571,8 +564,8 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                 <div className="y-rate-entity-icon y-rate-entity-icon--courier">
                                     <span style={{ fontSize: 28 }}>&#128693;</span>
                                 </div>
-                                <h2 className="y-rate-title">Как прошла доставка?</h2>
-                                <p className="y-rate-subtitle">Оцените работу и скорость вашего курьера</p>
+                                <h2 className="y-rate-title">{t('rating.how_was_delivery')}</h2>
+                                <p className="y-rate-subtitle">{t('rating.courier_subtitle')}</p>
 
                                 <div className="y-rate-stars-wrapper">
                                     <div className="y-rate-stars">
@@ -588,7 +581,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                     </div>
                                     {(courierHover || courierRating) > 0 && (
                                         <span className="y-rate-rating-caption">
-                                            {RATING_CAPTIONS[courierHover || courierRating]}
+                                            {t(`rating.caption_${courierHover || courierRating}`)}
                                         </span>
                                     )}
                                 </div>
@@ -598,22 +591,22 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                         <div className="y-rate-tags-grid">
                                             {(courierRating >= 4 ? COURIER_TAGS_POSITIVE : COURIER_TAGS_NEGATIVE).map(tag => {
                                                 const IconComp = tag.icon;
-                                                const used = isTagUsed(tag.label, courierComment);
+                                                const used = isTagUsed(t(`rating.tag_${tag.id}`), courierComment);
                                                 return (
                                                     <button key={tag.id} type="button"
                                                         className={`y-rate-chip ${used ? 'used' : ''}`}
-                                                        onClick={() => !used && appendTag(tag.label, setCourierComment)}
+                                                        onClick={() => !used && appendTag(t(`rating.tag_${tag.id}`), setCourierComment)}
                                                         disabled={used}
                                                     >
                                                         <IconComp size={13} strokeWidth={2.2} />
-                                                        <span>{tag.label}</span>
+                                                        <span>{t(`rating.tag_${tag.id}`)}</span>
                                                     </button>
                                                 );
                                             })}
                                         </div>
                                         <div className="y-rate-input-wrap">
                                             <textarea className="y-rate-textarea" rows={2}
-                                                placeholder="Напишите пару слов о курьере (необязательно)"
+                                                placeholder={t('rating.courier_placeholder')}
                                                 value={courierComment}
                                                 onChange={e => setCourierComment(e.target.value)}
                                                 maxLength={400}
@@ -626,8 +619,8 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                 <div className="y-rate-tips-section">
                                     <div className="y-rate-tips-header">
                                         <HeartHandshake size={15} color="#21EA7C" />
-                                        <span>Чаевые курьеру</span>
-                                        <span className="y-rate-tips-caption">100% курьеру</span>
+                                        <span>{t('rating.tips_title')}</span>
+                                        <span className="y-rate-tips-caption">{t('rating.tips_caption')}</span>
                                     </div>
                                     <div className="y-rate-tips-grid">
                                         {TIP_PRESETS.map(preset => (
@@ -642,13 +635,13 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                             className={`y-rate-tip-chip ${isCustomTipActive ? 'active' : ''}`}
                                             onClick={() => { setIsCustomTipActive(true); setSelectedTip(0); }}
                                         >
-                                            Своя
+                                            {t('rating.tip_custom')}
                                         </button>
                                     </div>
                                     {isCustomTipActive && (
                                         <div className="y-rate-custom-tip-wrap">
                                             <input type="number" step="0.5" min="1" max="50"
-                                                placeholder="Сумма (&#8382;)"
+                                                placeholder={t('rating.tip_amount')}
                                                 className="y-rate-custom-tip-input"
                                                 value={customTip}
                                                 onChange={e => setCustomTip(e.target.value)}
@@ -662,7 +655,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                     <button type="button" className="y-rate-skip-btn y-rate-back-btn"
                                         onClick={() => setRatingStep('restaurant')}
                                     >
-                                        &#8592; Назад
+                                        &#8592; {t('rating.back')}
                                     </button>
                                     <button type="button"
                                         className={`y-rate-primary-btn ${courierRating > 0 ? 'active' : ''}`}
@@ -670,10 +663,10 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                         onClick={handleSubmitRating}
                                     >
                                         {isSubmitting
-                                            ? 'Отправка...'
+                                            ? t('rating.sending')
                                             : effectiveTipModal > 0
-                                                ? `Отправить + ${effectiveTipModal.toFixed(2)} &#8382;`
-                                                : 'Отправить отзыв'}
+                                                ? t('rating.send_with_tip').replace('{sum}', formatPrice(effectiveTipModal))
+                                                : t('rating.send_review')}
                                     </button>
                                 </div>
                             </div>
@@ -686,19 +679,13 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                     <div className="y-rate-success-glow" />
                                     <Check size={36} color="#21EA7C" strokeWidth={3} />
                                 </div>
-                                <h2 className="rate-success-title">СПАСИБО ЗА ВАШ ОТЗЫВ!</h2>
+                                <h2 className="rate-success-title">{t('rating.thanks_title')}</h2>
                                 <div className="rate-success-desc">
-                                    <span className="rate-success-line">Мы получили ваш отзыв — для нас это очень важно.</span>
+                                    <span className="rate-success-line">{t('rating.thanks_line')}</span>
                                     {effectiveTipModal > 0 ? (
-                                        <>
-                                            <span className="rate-success-line">Чаевые мотивируют курьера держать</span>
-                                            <span className="rate-success-line">высокий уровень доставки.</span>
-                                        </>
+                                        <span className="rate-success-line">{t('rating.thanks_tip')}</span>
                                     ) : (
-                                        <>
-                                            <span className="rate-success-line">Обратная связь помогает улучшать сервис</span>
-                                            <span className="rate-success-line">и развивать доставку в регионе.</span>
-                                        </>
+                                        <span className="rate-success-line">{t('rating.thanks_feedback')}</span>
                                     )}
                                 </div>
                             </div>
@@ -715,7 +702,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                         <div className="y-rate-drag-handle" />
                         <div className="y-rate-header">
                             <div className="y-rate-badge">
-                                <span>Чаевые курьеру &#183; Заказ #{order.id}</span>
+                                <span>{t('rating.tips_order').replace('{id}', String(order.id))}</span>
                             </div>
                             <button type="button" className="y-rate-close-btn" onClick={() => setShowTipsModal(false)}>
                                 <X size={16} />
@@ -726,8 +713,8 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                 <div className="y-rate-tip-icon-big">
                                     <HeartHandshake size={32} color="#21EA7C" />
                                 </div>
-                                <h2 className="y-rate-title" style={{ marginBottom: '8px' }}>Поблагодарить курьера</h2>
-                                <p className="y-rate-tip-subtitle">100% чаевых поступают напрямую курьеру</p>
+                                <h2 className="y-rate-title" style={{ marginBottom: '8px' }}>{t('rating.thank_courier')}</h2>
+                                <p className="y-rate-tip-subtitle">{t('rating.tips_direct')}</p>
                                 <div className="y-rate-tips-grid" style={{ marginTop: '16px', marginBottom: '16px' }}>
                                     {TIP_PRESETS.map(preset => (
                                         <button key={preset} type="button"
@@ -741,13 +728,13 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                         className={`y-rate-tip-chip ${isCustomTipActive ? 'active' : ''}`}
                                         onClick={() => { setIsCustomTipActive(true); setSelectedTip(0); }}
                                     >
-                                        Своя сумма
+                                        {t('rating.tip_custom_long')}
                                     </button>
                                 </div>
                                 {isCustomTipActive && (
                                     <div className="y-rate-custom-tip-wrap" style={{ marginBottom: '16px' }}>
                                         <input type="number" step="0.5" min="1" max="50"
-                                            placeholder="Введите сумму (&#8382;)"
+                                            placeholder={t('rating.enter_amount')}
                                             className="y-rate-custom-tip-input"
                                             value={customTip}
                                             onChange={e => setCustomTip(e.target.value)}
@@ -756,17 +743,16 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                     </div>
                                 )}
                                 <div className="y-rate-actions">
-                                    <button type="button" className="y-rate-skip-btn" onClick={() => setShowTipsModal(false)}>
-                                        Отмена
-                                    </button>
                                     <button type="button"
                                         className={`y-rate-primary-btn ${effectiveTipStandalone > 0 ? 'active' : ''}`}
                                         onClick={handleDirectTipsPay}
                                         disabled={effectiveTipStandalone <= 0 || isSubmittingTips}
                                     >
                                         {isSubmittingTips
-                                            ? 'Отправка...'
-                                            : `Оплатить ${effectiveTipStandalone > 0 ? `${effectiveTipStandalone.toFixed(2)} \u20BE` : ''}`}
+                                            ? t('rating.sending')
+                                            : effectiveTipStandalone > 0
+                                                ? `${t('rating.pay')} ${formatPrice(effectiveTipStandalone)}`
+                                                : t('rating.pay')}
                                     </button>
                                 </div>
                             </div>
@@ -776,8 +762,8 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                     <div className="y-rate-success-glow" />
                                     <Check size={36} color="#21EA7C" strokeWidth={3} />
                                 </div>
-                                <h2 className="rate-success-title">Чаевые отправлены</h2>
-                                <p className="rate-success-desc">Ваша поддержка мотивирует курьера и помогает поддерживать высокие стандарты доставки.</p>
+                                <h2 className="rate-success-title">{t('rating.tips_sent')}</h2>
+                                <p className="rate-success-desc">{t('rating.tips_sent_desc')}</p>
                             </div>
                         )}
                     </div>

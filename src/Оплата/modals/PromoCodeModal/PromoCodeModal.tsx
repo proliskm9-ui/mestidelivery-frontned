@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './PromoCodeModal.css';
 import { useLanguage } from '../../../translations/LanguageContext';
+import Sheet from '../../../components/UI/Sheet';
 
 interface PromoCodeModalProps {
   isOpen: boolean;
@@ -20,8 +21,6 @@ const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ isOpen, onClose, curren
     }
   }, [isOpen, currentCode]);
 
-  if (!isOpen) return null;
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setInputValue(e.target.value);
   };
@@ -37,18 +36,14 @@ const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ isOpen, onClose, curren
   const isButtonDisabled = isInputEmpty && !hasCurrentCode;
 
   return (
-    <>
-      <div className="pc-overlay active promo-modal-overlay" onClick={onClose}>
-        <div className="pc-bottom-sheet active promo-modal-content" onClick={(e) => e.stopPropagation()}>
-
-        <div className="pc-header">
-          <div>
-            <h2 className="pc-title">{t('checkout.promo_codes')}</h2>
-            <p className="pc-subtitle">
-              {t('checkout.current_selection')} {currentCode ? `#${currentCode}` : '—'}
-            </p>
-          </div>
-        </div>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => { if (!open) onClose(); }}
+      title={t('checkout.promo_codes')}
+      description={`${t('checkout.current_selection')} ${currentCode ? `#${currentCode}` : '—'}`}
+      className="checkout-sheet"
+      footer={<button type="button" className="md-sheet-cta" onClick={handleApply} disabled={isButtonDisabled}>{t('checkout.promo_apply')}</button>}
+    >
 
         <div className={`pc-input-wrapper ${inputValue ? 'has-value' : ''}`}>
           <label className="pc-input-label">{t('checkout.promo_code')}</label>
@@ -64,18 +59,7 @@ const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ isOpen, onClose, curren
             }}
           />
         </div>
-
-        <button
-          className="pc-confirm-btn"
-          onClick={handleApply}
-          disabled={isButtonDisabled}
-        >
-          {t('checkout.promo_apply')}
-        </button>
-
-      </div>
-      </div>
-    </>
+    </Sheet>
   );
 };
 

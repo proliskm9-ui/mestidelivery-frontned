@@ -49,7 +49,7 @@ const DeliveryConditionsSheet: React.FC<DeliveryConditionsSheetProps> = ({
             title={t('delivery.conditions_title')}
             description={t('delivery.courier_service')}
         >
-            <div className="dc">
+            <div className="ds-stack">
                 <section className="dc-hero">
                     <span className="dc-hero-icon"><CourierIcon /></span>
                     <div className="dc-hero-text">
@@ -65,43 +65,43 @@ const DeliveryConditionsSheet: React.FC<DeliveryConditionsSheetProps> = ({
                 </section>
 
                 {promoEligible && (
-                    <section className="dc-promo">
-                        <p className="dc-promo-title">{t('delivery.promo_title')}</p>
-                        <p className="dc-promo-desc">{t('delivery.promo_desc')}</p>
-                    </section>
+                    <p className="ds-note">
+                        <b>{t('delivery.promo_title')}</b>
+                        {t('delivery.promo_desc')}
+                    </p>
                 )}
 
-                <p className="dc-label">{t('delivery.zones_title')}</p>
-                <ul className="dc-card">
+                <p className="ds-label">{t('delivery.zones_title')}</p>
+                <ul className="ds-card">
                     {ZONES.map((z) => {
                         const current = z.id === zone?.id;
                         return (
-                            <li key={z.id} className={current ? 'dc-row is-current' : 'dc-row'}>
-                                <span className="dc-row-main">
-                                    <span className="dc-row-title">{t(z.key)}</span>
-                                    <span className="dc-row-sub">{z.eta} {min}</span>
+                            <li key={z.id} className="ds-row">
+                                <span className="ds-row-main">
+                                    <span className="ds-row-title">{t(z.key)}</span>
+                                    <span className="ds-row-sub">{z.eta} {min}</span>
                                 </span>
-                                {current && <span className="dc-row-badge">{t('delivery.you_are_here')}</span>}
-                                <span className="dc-row-value">{z.price} ₾</span>
+                                {current && <span className="ds-badge">{t('delivery.you_are_here')}</span>}
+                                <span className="ds-row-value ds-row-value--accent">{z.price} ₾</span>
                             </li>
                         );
                     })}
                 </ul>
 
-                <p className="dc-label">{t('delivery.details_title')}</p>
-                <ul className="dc-card">
-                    <li className="dc-row">
-                        <span className="dc-row-main">
-                            <span className="dc-row-title">{t('delivery.service_fee')}</span>
-                            <span className="dc-row-sub">{t('delivery.service_fee_hint')}</span>
+                <p className="ds-label">{t('delivery.details_title')}</p>
+                <ul className="ds-card">
+                    <li className="ds-row">
+                        <span className="ds-row-main">
+                            <span className="ds-row-title">{t('delivery.service_fee')}</span>
+                            <span className="ds-row-sub">{t('delivery.service_fee_hint')}</span>
                         </span>
-                        <span className="dc-row-value dc-row-value--plain">0.99–2.00 ₾</span>
+                        <span className="ds-row-value">0.99–2.00 ₾</span>
                     </li>
-                    <li className="dc-row">
-                        <span className="dc-row-main">
-                            <span className="dc-row-title">{t('delivery.max_weight')}</span>
+                    <li className="ds-row">
+                        <span className="ds-row-main">
+                            <span className="ds-row-title">{t('delivery.max_weight')}</span>
                         </span>
-                        <span className="dc-row-value dc-row-value--plain">45 {t('delivery.kg')}</span>
+                        <span className="ds-row-value">45 {t('delivery.kg')}</span>
                     </li>
                 </ul>
             </div>

@@ -33,7 +33,7 @@ html:has(.app-container) :is(button, [role='button'], [role='tab'], [role='switc
 }
 
 /* Keyboard focus ring (desktop); pointer/touch focus stays clean */
-html:has(.app-container) :is(a, button, [role='button'], [role='tab'], [tabindex]):focus-visible {
+html:has(.app-container) :is(a, button, [role='button'], [role='tab'], [tabindex]:not([tabindex='-1'])):focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }

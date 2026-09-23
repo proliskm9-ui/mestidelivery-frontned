@@ -12,6 +12,7 @@ import './Restaurant.css';
 import './MobileRestaurant.css';
 import { useBackToClose } from '../hooks/useBackToClose';
 import { formatPrice } from '../utils/formatPrice';
+import Sheet from '../components/UI/Sheet';
 
 interface RestaurantPageProps {
     restaurantId: string | null;
@@ -129,7 +130,6 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
     // System Back closes the dish / info sheets instead of leaving the restaurant
     useBackToClose(Boolean(selectedProduct), () => setSelectedProduct(null));
-    useBackToClose(isInfoModalOpen, () => setIsInfoModalOpen(false));
     const cartWidgetRef = useRef<HTMLDivElement>(null);
     const infoCardRef = useRef<HTMLDivElement>(null);
 
@@ -349,6 +349,71 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     const restaurantClosedHint = closedBadgeText(restaurant.working_hours, language);
     const restaurantIsOpen = isRestaurantOpenNow(restaurant.working_hours);
     const hasNextOpen = Boolean(nextOpenAt(restaurant.working_hours));
+    // "Label: value" copy -> [label, value] for the info rows
+    const splitLine = (line: string): [string, string] => {
+        const i = line.indexOf(': ');
+        return i > 0 ? [line.slice(0, i), line.slice(i + 2)] : ['', line];
+    };
+    const [hoursLabel, hoursValue] = splitLine(getHoursLabel(restaurant));
+    const [etaLabel, etaValue] = splitLine(getDeliveryTimeLine(restaurant));
+    const infoSheet = (
+        <Sheet
+            open={isInfoModalOpen}
+            onOpenChange={setIsInfoModalOpen}
+            title={restaurantDisplayName}
+            description={getCuisineLine(restaurant)}
+        >
+            <div className="ds-stack">
+                {!restaurantIsOpen && restaurantClosedHint && (
+                    <p className="ds-note ds-note--warn"><b>{restaurantClosedHint}</b></p>
+                )}
+                <ul className="ds-card">
+                    <li className="ds-row">
+                        <span className="ds-row-icon" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                        </span>
+                        <span className="ds-row-main">
+                            <span className="ds-row-title">{restaurant.address || mestiaAddress}</span>
+                            <span className="ds-row-sub">{t('restaurant.address_label')}</span>
+                        </span>
+                    </li>
+                    <li className="ds-row">
+                        <span className="ds-row-icon" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><polyline points="12 7 12 12 15 14" /></svg>
+                        </span>
+                        <span className="ds-row-main">
+                            <span className="ds-row-title">{hoursValue}</span>
+                            {hoursLabel && <span className="ds-row-sub">{hoursLabel}</span>}
+                        </span>
+                        <span className={restaurantIsOpen ? 'ds-badge' : 'ds-badge ds-badge--danger'}>
+                            {restaurantIsOpen ? t('restaurant.open_now') : t('restaurant.closed_now')}
+                        </span>
+                    </li>
+                    <li className="ds-row">
+                        <span className="ds-row-icon" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="7" width="13" height="10" rx="2" /><path d="M14 10h4l3 3v4h-7" /><circle cx="6" cy="18" r="2" /><circle cx="18" cy="18" r="2" /></svg>
+                        </span>
+                        <span className="ds-row-main">
+                            <span className="ds-row-title">{etaValue}</span>
+                            {etaLabel && <span className="ds-row-sub">{etaLabel}</span>}
+                        </span>
+                    </li>
+                    {restaurant.rating ? (
+                        <li className="ds-row">
+                            <span className="ds-row-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z" /></svg>
+                            </span>
+                            <span className="ds-row-main">
+                                <span className="ds-row-title">{restaurant.rating}</span>
+                                <span className="ds-row-sub">{getReviewsLabel(restaurant)} {t('restaurant.reviews_count')}</span>
+                            </span>
+                        </li>
+                    ) : null}
+                </ul>
+            </div>
+        </Sheet>
+    );
+
     const closedBanner = !restaurantIsOpen && restaurantClosedHint ? (
         <div className="rest-closed-banner" role="status">
             <strong>{restaurantClosedHint}</strong>
@@ -704,27 +769,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                     </div>
                 )}
 
-                {isInfoModalOpen && (
-                    <div className="v2-info-overlay" onClick={() => setIsInfoModalOpen(false)}>
-                        <div className="v2-info-sheet pc-info-sheet" onClick={(e) => e.stopPropagation()}>
-                            <div className="v2-sheet-handle" onClick={() => setIsInfoModalOpen(false)} />
-                            <div className="v2-sheet-content">
-                                <h2 className="v2-sheet-title">{restaurantDisplayName}</h2>
-                                <div className="v2-sheet-section">
-                                    <p className="v2-sheet-address">{restaurant.address || mestiaAddress}</p>
-                                </div>
-                                <div className="v2-sheet-section">
-                                    <p className="v2-sheet-tags">{getCuisineLine(restaurant)}</p>
-                                </div>
-                                <div className="v2-sheet-divider" />
-                                <div className="v2-sheet-legal">
-                                    <p>{getHoursLabel(restaurant)}</p>
-                                    <p>{getDeliveryTimeLine(restaurant)}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                {infoSheet}
             </div>
         );
     }
@@ -911,36 +956,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
             </div>
 
             {/* === Restaurant Info Bottom Sheet === */}
-            {isInfoModalOpen && (
-                <div className="v2-info-overlay" onClick={() => setIsInfoModalOpen(false)}>
-                    <div className="v2-info-sheet" onClick={(e) => e.stopPropagation()}>
-                        <div className="v2-sheet-handle" onClick={() => setIsInfoModalOpen(false)} />
-
-                        <div className="v2-sheet-content">
-                            <h2 className="v2-sheet-title">{restaurantDisplayName}</h2>
-
-                            <div className="v2-sheet-section">
-                                <p className="v2-sheet-address">
-                                    {restaurant.address || mestiaAddress}
-                                </p>
-                            </div>
-
-                            <div className="v2-sheet-section">
-                                <p className="v2-sheet-tags">
-                                    {getCuisineLine(restaurant)}
-                                </p>
-                            </div>
-
-                            <div className="v2-sheet-divider" />
-
-                            <div className="v2-sheet-legal">
-                                <p>{getHoursLabel(restaurant)}</p>
-                                <p>{getDeliveryTimeLine(restaurant)}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {infoSheet}
 
             <div className="v2-menu-block">
                 {/* Categories always stay visible */}

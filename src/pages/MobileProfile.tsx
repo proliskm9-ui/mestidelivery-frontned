@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
 import './MobileProfile.css';
 import { useLanguage } from '../translations/LanguageContext';
-
-const PRESET_AVATARS = [
-    { id: 'av1', img: '/Assets/photo_2026-02-11_23-14-10.jpg', label: 'Art 1' },
-    { id: 'av2', img: '/Assets/photo_2026-02-11_23-14-27.jpg', label: 'Art 2' },
-    { id: 'av3', img: '/Assets/photo_2026-02-11_23-14-50.jpg', label: 'Art 3' },
-    { id: 'av4', img: '/Assets/photo_2026-02-11_23-19-47.jpg', label: 'Art 4' }
-];
+import AvatarPickerSheet from '../components/UI/AvatarPickerSheet';
 
 interface MobileProfileProps {
     userAddress?: any;
@@ -403,58 +397,12 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
             {view === 'addresses' && renderAddressesForm()}
             {view === 'orders' && renderOrdersForm()}
 
-            {/* Avatar Modal Container */}
-            {avatarModal && (
-                <div className="bento-modal-overlay" style={{ zIndex: 9999 }} onClick={() => setAvatarModal(false)}>
-                    <div className="bento-modal mp-avatar-modal" onClick={e => e.stopPropagation()}>
-                        <h3 style={{ textAlign: 'center', marginBottom: '20px', color: '#fff' }}>{t('profile.choose_avatar')}</h3>
-                        <div className="emoji-grid" style={{ gap: '15px' }}>
-                            {PRESET_AVATARS.map(av => (
-                                <div
-                                    key={av.id}
-                                    className={`emoji-btn ${userProfile?.avatar === av.img ? 'active' : ''}`}
-                                    onClick={() => {
-                                        onUpdateProfile?.({ avatar: av.img });
-                                        setAvatarModal(false);
-                                    }}
-                                    style={{
-                                        borderRadius: '50%',
-                                        overflow: 'hidden',
-                                        aspectRatio: '1',
-                                        padding: 0,
-                                        border: userProfile?.avatar === av.img ? '3px solid #21EA7C' : 'none'
-                                    }}
-                                >
-                                    <img src={av.img} alt={av.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                </div>
-                            ))}
-                        </div>
-                        <label className="bento-primary-btn" style={{
-                            background: 'rgba(255,255,255,0.1)',
-                            color: 'white',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            marginTop: '25px',
-                            border: '1px solid rgba(255,255,255,0.2)'
-                        }}>
-                            {t('profile.upload_photo')}
-                            <input type="file" hidden accept="image/*" onChange={e => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => { onUpdateProfile?.({ avatar: reader.result }); setAvatarModal(false); };
-                                    reader.readAsDataURL(file);
-                                }
-                            }} />
-                        </label>
-                        <button className="mp-save-btn" style={{ background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', marginTop: '10px' }} onClick={() => setAvatarModal(false)}>
-                            {t('common.cancel')}
-                        </button>
-                    </div>
-                </div>
-            )}
+            <AvatarPickerSheet
+                open={avatarModal}
+                onOpenChange={setAvatarModal}
+                current={userProfile?.avatar}
+                onPick={(avatar) => onUpdateProfile?.({ avatar })}
+            />
         </div>
     );
 };

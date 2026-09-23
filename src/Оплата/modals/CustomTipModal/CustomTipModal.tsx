@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './CustomTipModal.css';
 import { useLanguage } from '../../../translations/LanguageContext';
+import Sheet from '../../../components/UI/Sheet';
 
 interface CustomTipModalProps {
   isOpen: boolean;
@@ -23,8 +24,6 @@ const CustomTipModal: React.FC<CustomTipModalProps> = ({ isOpen, onClose, curren
     }
   }, [isOpen, currentTip]);
 
-  if (!isOpen) return null;
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const val = e.target.value;
     if (/^\d*$/.test(val)) {
@@ -41,17 +40,14 @@ const CustomTipModal: React.FC<CustomTipModalProps> = ({ isOpen, onClose, curren
   };
 
   return (
-    <>
-      <div className="ct-overlay active tip-modal-overlay" onClick={onClose}>
-        <div className="ct-bottom-sheet active tip-modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="ct-header">
-          <div>
-            <h2 className="ct-title">{t('checkout.select_amount')}</h2>
-            <p className="ct-subtitle">
-              {t('checkout.current_selection')} {inputValue ? `${parseFloat(inputValue).toFixed(2)} ₾` : (currentTip > 0 ? `${currentTip.toFixed(2)} ₾` : t('checkout.no_tips'))}
-            </p>
-          </div>
-        </div>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => { if (!open) onClose(); }}
+      title={t('checkout.select_amount')}
+      description={`${t('checkout.current_selection')} ${inputValue ? `${parseFloat(inputValue).toFixed(2)} ₾` : (currentTip > 0 ? `${currentTip.toFixed(2)} ₾` : t('checkout.no_tips'))}`}
+      className="checkout-sheet"
+      footer={<button type="button" className="md-sheet-cta" onClick={handleApply} disabled={!inputValue || parseFloat(inputValue) <= 0}>{t('menu.apply')}</button>}
+    >
 
         <div className={`ct-input-wrapper ${inputValue ? 'has-value' : ''}`}>
           <label className="ct-input-label">{t('checkout.tips_title')}</label>
@@ -76,16 +72,7 @@ const CustomTipModal: React.FC<CustomTipModalProps> = ({ isOpen, onClose, curren
           </div>
         </div>
 
-        <button
-          className="ct-confirm-btn"
-          onClick={handleApply}
-          disabled={!inputValue || parseFloat(inputValue) <= 0}
-        >
-          {t('menu.apply')}
-        </button>
-      </div>
-      </div>
-    </>
+    </Sheet>
   );
 };
 

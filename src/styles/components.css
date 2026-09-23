@@ -1,0 +1,205 @@
+/*
+ * Shared UI primitives built only from tokens.css.
+ * Use these inside sheets and pages instead of re-styling cards and rows per screen.
+ *
+ *   <p class="ds-label">Section</p>
+ *   <ul class="ds-card">
+ *     <li class="ds-row">
+ *       <span class="ds-row-icon">…</span>
+ *       <span class="ds-row-main"><span class="ds-row-title">Title</span><span class="ds-row-sub">Sub</span></span>
+ *       <span class="ds-row-value">8 ₾</span>
+ *     </li>
+ *   </ul>
+ */
+
+.ds-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.ds-label {
+    margin: var(--space-3) 4px 0;
+    font: var(--t-label);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+}
+
+.ds-card {
+    margin: 0;
+    padding: 0 var(--card-pad);
+    list-style: none;
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: var(--card-radius);
+}
+
+.ds-card--pad {
+    padding: var(--card-pad);
+}
+
+.ds-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 56px;
+    padding: 10px 0;
+    border-bottom: var(--row-divider);
+    color: inherit;
+    text-decoration: none;
+}
+
+.ds-row:last-child {
+    border-bottom: none;
+}
+
+a.ds-row,
+button.ds-row {
+    width: 100%;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    background: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.ds-row-icon {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: var(--color-accent-subtle);
+    color: var(--color-accent);
+}
+
+.ds-row-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.ds-row-title {
+    font: var(--t-body);
+    color: var(--color-text);
+}
+
+.ds-row-sub {
+    font: var(--t-caption);
+    color: var(--color-text-tertiary);
+}
+
+.ds-row-value {
+    font: var(--t-price);
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.ds-row-value--accent {
+    color: var(--color-accent);
+}
+
+.ds-row-chevron {
+    flex-shrink: 0;
+    color: var(--color-text-tertiary);
+}
+
+.ds-badge {
+    padding: var(--badge-pad);
+    border-radius: var(--badge-radius);
+    background: var(--color-accent-subtle);
+    color: var(--color-accent);
+    font: var(--badge-font);
+    white-space: nowrap;
+}
+
+.ds-badge--warn {
+    background: rgba(255, 214, 10, 0.12);
+    color: #ffd60a;
+}
+
+.ds-badge--danger {
+    background: var(--color-danger-subtle);
+    color: var(--color-danger);
+}
+
+.ds-note {
+    margin: 0;
+    padding: 14px var(--card-pad);
+    border-radius: var(--card-radius);
+    background: var(--color-accent-subtle);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.22);
+    font: var(--t-secondary);
+    color: var(--color-text-secondary);
+}
+
+.ds-note b {
+    display: block;
+    margin-bottom: 4px;
+    font: var(--t-item);
+    color: var(--color-accent);
+}
+
+.ds-note--warn {
+    background: rgba(255, 214, 10, 0.08);
+    border-color: rgba(255, 214, 10, 0.22);
+}
+
+.ds-note--warn b {
+    color: #ffd60a;
+}
+
+/* Buttons (same look as the sheet CTAs / checkout primary) */
+.ds-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    width: 100%;
+    height: var(--btn-height);
+    border: 0;
+    border-radius: var(--btn-radius);
+    font: var(--btn-font);
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform var(--dur-press) var(--ease-out), opacity var(--dur-fast) ease;
+}
+
+.ds-btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.ds-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.ds-btn--primary {
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    box-shadow: var(--btn-primary-shadow);
+}
+
+.ds-btn--secondary {
+    background: var(--btn-secondary-bg);
+    border: 1px solid var(--btn-secondary-border);
+    color: var(--color-text);
+}
+
+.ds-btn--danger {
+    background: var(--btn-danger-bg);
+    border: var(--btn-danger-border);
+    color: var(--btn-danger-text);
+}
+
+.ds-btn--sm {
+    height: var(--btn-height-sm);
+}

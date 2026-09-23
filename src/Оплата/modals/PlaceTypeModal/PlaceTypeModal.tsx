@@ -1,6 +1,7 @@
 import React from 'react';
 import './PlaceTypeModal.css';
 import { useLanguage } from '../../../translations/LanguageContext';
+import Sheet from '../../../components/UI/Sheet';
 
 type PlaceType = 'home' | 'hotel' | 'map';
 
@@ -23,19 +24,15 @@ const PlaceTypeModal: React.FC<PlaceTypeModalProps> = ({ isOpen, onClose, select
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <>
-      <div className="pt-overlay active place-modal-overlay" onClick={onClose}>
-        <div className="pt-bottom-sheet active place-modal-content" onClick={(e) => e.stopPropagation()}>
-
-        <div className="pt-header">
-          <div>
-            <h2 className="pt-title">{t('checkout.select_premise')}</h2>
-            <p className="pt-subtitle">{t('checkout.current_selection')} {getTitle(selectedType)}</p>
-          </div>
-        </div>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => { if (!open) onClose(); }}
+      title={t('checkout.select_premise')}
+      description={`${t('checkout.current_selection')} ${getTitle(selectedType)}`}
+      className="checkout-sheet"
+      footer={<button type="button" className="md-sheet-cta" onClick={onClose}>{t('common.done')}</button>}
+    >
 
         {/* --- Опция: Дом / Квартира --- */}
         <div
@@ -103,14 +100,7 @@ const PlaceTypeModal: React.FC<PlaceTypeModalProps> = ({ isOpen, onClose, select
             </svg>
           </div>
         </div>
-
-        <button className="pt-confirm-btn" onClick={onClose}>
-          {t('common.done')}
-        </button>
-
-      </div>
-      </div>
-    </>
+    </Sheet>
   );
 };
 

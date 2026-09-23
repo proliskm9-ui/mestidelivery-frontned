@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './TimeModal.css';
 import { useLanguage } from '../../../translations/LanguageContext';
+import Sheet from '../../../components/UI/Sheet';
 import { generateRestaurantSlots, type TimeSlot } from '../../../utils/workingHours';
 
 interface TimeModalProps {
@@ -22,8 +23,6 @@ const TimeModal: React.FC<TimeModalProps> = ({ isOpen, onClose, currentTime, onS
   }, [isOpen, currentTime]);
 
   const slots = useMemo<TimeSlot[]>(() => generateRestaurantSlots(workingHours), [workingHours, isOpen]);
-
-  if (!isOpen) return null;
 
   const selectedLabel =
     slots.find((s) => s.value === localSelection)?.label ||
@@ -55,17 +54,14 @@ const TimeModal: React.FC<TimeModalProps> = ({ isOpen, onClose, currentTime, onS
   };
 
   return (
-    <>
-      <div className="tm-overlay active time-modal-overlay" onClick={onClose}>
-        <div className="tm-bottom-sheet active time-modal-content" onClick={e => e.stopPropagation()}>
-        <div className="tm-header">
-          <div>
-            <h2 className="tm-title">{t('checkout.choose_time_title')}</h2>
-            <p className="tm-subtitle">
-              {t('checkout.current_selection')} {selectedLabel}
-            </p>
-          </div>
-        </div>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => { if (!open) onClose(); }}
+      title={t('checkout.choose_time_title')}
+      description={`${t('checkout.current_selection')} ${selectedLabel}`}
+      className="checkout-sheet"
+      footer={<button type="button" className="md-sheet-cta" onClick={handleFinalize}>{t('common.done')}</button>}
+    >
 
         <div className="tm-slots-grid">
           {slots.length === 0 ? (
@@ -92,12 +88,7 @@ const TimeModal: React.FC<TimeModalProps> = ({ isOpen, onClose, currentTime, onS
           )}
         </div>
 
-        <button type="button" className="tm-confirm-btn" onClick={handleFinalize}>
-          {t('common.done')}
-        </button>
-      </div>
-      </div>
-    </>
+    </Sheet>
   );
 };
 

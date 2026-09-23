@@ -164,8 +164,9 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
     map: false,
   });
   // System Back closes whichever checkout sheet is open instead of leaving checkout
-  useBackToClose(Object.values(modals).some(Boolean), () =>
-    setModals((prev) => Object.fromEntries(Object.keys(prev).map((k) => [k, false])) as unknown as ModalState)
+  // Sheets handle Back themselves; the map (custom full-height modal) and phone editor need it here
+  useBackToClose(modals.map || modals.phone, () =>
+    setModals((prev) => ({ ...prev, map: false, phone: false }))
   );
 
   // Хелпер для открытия/закрытия
@@ -378,55 +379,45 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
         {/* ================= ВСЕ МОДАЛКИ ================= */}
 
         {/* 1. Время */}
-        {modals.time && (
-          <TimeModal
+                  <TimeModal
             isOpen={modals.time}
             onClose={() => toggleModal('time', false)}
             currentTime={orderData.scheduledTime}
             onSelect={handleTimeSelect}
             workingHours={workingHours}
           />
-        )}
 
         {/* 2. Тип жилья */}
-        {modals.place && (
-          <PlaceTypeModal
+                  <PlaceTypeModal
             isOpen={modals.place}
             onClose={() => toggleModal('place', false)}
             selectedType={orderData.address.type}
             onSelectType={handlePlaceTypeSelect}
           />
-        )}
 
         {/* 3. Промокод */}
-        {modals.promo && (
-          <PromoCodeModal
+                  <PromoCodeModal
             isOpen={modals.promo}
             onClose={() => toggleModal('promo', false)}
             currentCode={orderData.promoCode}
             onApply={(code: string) => updateOrder('promoCode', code)}
           />
-        )}
 
         {/* 4. Чаевые (Другая сумма) */}
-        {modals.customTip && (
-          <CustomTipModal
+                  <CustomTipModal
             isOpen={modals.customTip}
             onClose={() => toggleModal('customTip', false)}
             currentTip={orderData.tip}
             onApply={(amount: number) => updateOrder('tip', amount)}
           />
-        )}
 
         {/* 5. Комментарий */}
-        {modals.comment && (
-          <CommentModal
+                  <CommentModal
             isOpen={modals.comment}
             onClose={() => toggleModal('comment', false)}
             currentValue={orderData.address.comment}
             onSave={(val: string) => updateAddress('comment', val)}
           />
-        )}
 
         {/* 6. Телефон */}
         {modals.phone && (

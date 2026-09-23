@@ -986,9 +986,9 @@
     position: fixed;
     inset: 0;
     z-index: 99999;
-    background: rgba(0, 0, 0, 0.72);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: var(--color-scrim);
+    backdrop-filter: var(--scrim-filter);
+    -webkit-backdrop-filter: var(--scrim-filter);
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -1002,17 +1002,17 @@
 
 .y-rate-sheet {
     width: 100%;
-    max-width: 480px;
-    background: #141416;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-bottom: none;
-    border-radius: 32px 32px 0 0;
+    max-width: 560px;
+    background: var(--material-sheet-bg);
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
     padding: 12px 24px calc(24px + env(safe-area-inset-bottom));
-    box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.65);
+    box-shadow: var(--shadow-3);
     position: relative;
     animation: yRateSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1);
     max-height: 90vh;
     overflow-y: auto;
+    border-top: 1px solid var(--material-sheet-edge);
+    font-family: var(--font-text);
 }
 
 @media (min-width: 768px) {
@@ -1087,17 +1087,18 @@
 }
 
 .y-rate-close-btn {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--color-accent);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: transform var(--dur-press) var(--ease-out);
+    margin-left: auto;
 }
 
 .y-rate-close-btn:hover {
@@ -1163,12 +1164,10 @@
 }
 
 .y-rate-title {
-    font-size: 21px;
-    font-weight: 700;
     color: #FFFFFF;
     margin: 0 0 20px;
-    line-height: 1.3;
-    letter-spacing: -0.3px;
+    letter-spacing: var(--tracking-tight);
+    font: var(--t-section);
 }
 
 .y-rate-stars-wrapper {
@@ -1283,12 +1282,12 @@
 
 .y-rate-textarea {
     width: 100%;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
+    background: var(--field-bg);
+    border: 1px solid var(--field-border);
+    border-radius: var(--control-radius);
     padding: 14px 16px;
     color: #fff;
-    font-size: 14px;
+    font-size: 16px;
     font-family: inherit;
     resize: none;
     outline: none;
@@ -1389,16 +1388,17 @@
 }
 
 .y-rate-skip-btn {
-    flex: 1;
-    padding: 15px;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 18px;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 15px;
-    font-weight: 600;
+    flex: 0 0 auto;
+    padding: 0 20px;
+    background: var(--btn-secondary-bg);
+    border: 1px solid var(--btn-secondary-border);
+    border-radius: var(--btn-radius);
+    color: var(--color-text);
     cursor: pointer;
     transition: all 0.2s;
+    height: var(--btn-height);
+    font: var(--btn-font);
+    white-space: nowrap;
 }
 
 .y-rate-skip-btn:hover {
@@ -1407,26 +1407,28 @@
 }
 
 .y-rate-primary-btn {
-    flex: 2;
-    padding: 15px 20px;
-    background: rgba(255, 255, 255, 0.08);
+    flex: 1;
+    padding: 0 20px;
+    background: var(--btn-primary-bg);
     border: none;
-    border-radius: 18px;
-    color: rgba(255, 255, 255, 0.3);
-    font-size: 15px;
-    font-weight: 700;
+    border-radius: var(--btn-radius);
+    color: var(--btn-primary-text);
     cursor: not-allowed;
     transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     align-items: center;
     justify-content: center;
+    height: var(--btn-height);
+    opacity: 0.4;
+    font: var(--btn-font);
 }
 
 .y-rate-primary-btn.active {
-    background: linear-gradient(135deg, #21EA7C 0%, #15D26C 100%);
-    color: #061B0E;
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
     cursor: pointer;
-    box-shadow: 0 8px 24px rgba(33, 234, 124, 0.25);
+    box-shadow: var(--btn-primary-shadow);
+    opacity: 1;
 }
 
 .y-rate-primary-btn.active:hover {
@@ -1949,13 +1951,10 @@
 
 /* Review / tips success copy (ported from production) */
 .rate-success-title {
-    font-family: 'Inter', -apple-system, sans-serif;
-    font-weight: 700;
-    font-size: 21px;
     color: #FFFFFF;
     margin: 0 0 12px 0;
-    letter-spacing: -0.4px;
-    text-transform: uppercase !important;
+    letter-spacing: var(--tracking-tight);
+    font: var(--t-section);
 }
 
 .rate-success-desc {
@@ -1987,4 +1986,9 @@
     .y-rate-custom-tip-input {
         font-size: 16px;
     }
+}
+
+/* Design system: the step title already says what to rate; the header only keeps the close button */
+.y-rate-sheet .y-rate-badge {
+    display: none;
 }

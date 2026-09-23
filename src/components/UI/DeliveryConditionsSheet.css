@@ -1,11 +1,5 @@
 /* Delivery conditions sheet — built only from design-system tokens (styles/tokens.css). */
 
-.dc {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-}
-
 /* What you pay: zone, fee, ETA */
 .dc-hero {
     display: flex;
@@ -63,95 +57,4 @@
     color: var(--color-accent);
     font: var(--badge-font);
     white-space: nowrap;
-}
-
-/* First-order promo */
-.dc-promo {
-    padding: 14px var(--card-pad);
-    border-radius: var(--card-radius);
-    background: var(--color-accent-subtle);
-    border: 1px solid rgba(var(--color-accent-rgb), 0.22);
-}
-
-.dc-promo-title {
-    margin: 0 0 4px;
-    font: var(--t-item);
-    color: var(--color-accent);
-}
-
-.dc-promo-desc {
-    margin: 0;
-    font: var(--t-secondary);
-    color: var(--color-text-secondary);
-    text-wrap: pretty;
-}
-
-/* Section label inside a sheet */
-.dc-label {
-    margin: var(--space-3) 4px 0;
-    font: var(--t-label);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--color-text-tertiary);
-}
-
-/* Card with divided rows */
-.dc-card {
-    margin: 0;
-    padding: 0 var(--card-pad);
-    list-style: none;
-    background: var(--card-bg);
-    border: var(--card-border);
-    border-radius: var(--card-radius);
-}
-
-.dc-row {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    min-height: 56px;
-    padding: 10px 0;
-    border-bottom: var(--row-divider);
-}
-
-.dc-row:last-child {
-    border-bottom: none;
-}
-
-.dc-row-main {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex: 1;
-    min-width: 0;
-}
-
-.dc-row-title {
-    font: var(--t-body);
-    color: var(--color-text);
-}
-
-.dc-row-sub {
-    font: var(--t-caption);
-    color: var(--color-text-tertiary);
-}
-
-.dc-row-badge {
-    padding: var(--badge-pad);
-    border-radius: var(--badge-radius);
-    background: var(--color-accent-subtle);
-    color: var(--color-accent);
-    font: var(--badge-font);
-    white-space: nowrap;
-}
-
-.dc-row-value {
-    font: var(--t-price);
-    color: var(--color-accent);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-}
-
-.dc-row-value--plain {
-    color: var(--color-text);
 }
