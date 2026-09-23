@@ -1,0 +1,158 @@
+/* Bottom sheet — built on Base UI Drawer. All values come from src/styles/tokens.css. */
+
+.md-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    min-height: 100dvh;
+    z-index: var(--z-sheet);
+    background: var(--color-scrim);
+    /* Dims in step with the swipe, so the page "comes back" as the sheet is pulled down */
+    opacity: calc(1 - var(--drawer-swipe-progress, 0));
+    transition: opacity var(--dur-sheet) var(--ease-drawer);
+}
+
+.md-sheet-backdrop[data-starting-style],
+.md-sheet-backdrop[data-ending-style] {
+    opacity: 0;
+}
+
+.md-sheet-backdrop[data-swiping] {
+    transition-duration: 0ms;
+}
+
+.md-sheet-backdrop[data-ending-style] {
+    transition-duration: calc(var(--drawer-swipe-strength, 1) * 300ms);
+}
+
+.md-sheet-viewport {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-sheet);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.md-sheet {
+    /* Extra height below the screen edge so an upward over-drag never reveals a gap */
+    --bleed: 3rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 560px;
+    max-height: calc(92dvh + var(--bleed));
+    margin-bottom: calc(-1 * var(--bleed));
+    padding-bottom: var(--bleed);
+    background: var(--material-sheet-bg);
+    color: var(--color-text);
+    font-family: var(--font-text);
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    box-shadow: var(--shadow-3);
+    outline: 0;
+    transform: translateY(var(--drawer-swipe-movement-y, 0px));
+    transition: transform var(--dur-sheet) var(--ease-drawer);
+    will-change: transform;
+}
+
+.md-sheet[data-starting-style],
+.md-sheet[data-ending-style] {
+    transform: translateY(calc(100% - var(--bleed) + 2px));
+}
+
+.md-sheet[data-swiping] {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Exit is faster than entry; a hard flick shortens it further */
+.md-sheet[data-ending-style] {
+    transition-duration: calc(var(--drawer-swipe-strength, 1) * 300ms);
+}
+
+.md-sheet-handle {
+    flex-shrink: 0;
+    width: 36px;
+    height: 5px;
+    margin: var(--space-2) auto var(--space-1);
+    border-radius: var(--radius-full);
+    background: var(--color-surface-3);
+}
+
+.md-sheet-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--space-2) var(--gutter) var(--space-6);
+}
+
+.md-sheet-body--flush {
+    padding: 0;
+}
+
+.md-sheet-header {
+    margin-bottom: var(--space-4);
+}
+
+.md-sheet-title {
+    margin: 0;
+    font-family: var(--font-text);
+    font-size: var(--text-title-2);
+    line-height: var(--leading-title-2);
+    letter-spacing: var(--tracking-title-2);
+    font-weight: var(--weight-bold);
+    text-transform: none;
+    color: var(--color-text);
+    text-wrap: balance;
+}
+
+.md-sheet-description {
+    margin: var(--space-2) 0 0;
+    font-size: var(--text-callout);
+    line-height: var(--leading-callout);
+    color: var(--color-text-secondary);
+    text-wrap: pretty;
+}
+
+.md-sheet-footer {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--gutter) calc(var(--space-3) + var(--safe-bottom));
+    border-top: 1px solid var(--color-hairline);
+    background: var(--material-sheet-bg);
+}
+
+/* No footer: body carries the home-indicator inset */
+.md-sheet:not(:has(.md-sheet-footer)) .md-sheet-body {
+    padding-bottom: calc(var(--space-6) + var(--safe-bottom));
+}
+
+@media (min-width: 600px) {
+    /* Floating card on larger screens: no bleed, all corners rounded */
+    .md-sheet {
+        --bleed: 0px;
+        margin-bottom: var(--space-6);
+        border-radius: var(--radius-sheet);
+        overflow: hidden;
+    }
+
+    .md-sheet[data-starting-style],
+    .md-sheet[data-ending-style] {
+        transform: translateY(calc(100% + var(--space-6)));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .md-sheet {
+        transition: opacity var(--dur-base) ease;
+    }
+
+    .md-sheet[data-starting-style],
+    .md-sheet[data-ending-style] {
+        transform: translateY(var(--drawer-swipe-movement-y, 0px));
+        opacity: 0;
+    }
+}

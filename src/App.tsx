@@ -5,6 +5,7 @@ import { api, restaurantCache } from './services/api';
 import LiquidNavBar from './components/UI/LiquidNavBar';
 import LoadingScreen from './components/UI/LoadingScreen';
 import { PageSkeleton } from './components/UI/Skeleton';
+import Toaster from './components/UI/Toaster';
 import { useAuth } from './auth/AuthContext';
 import { addressText, detectZoneFromText, deviceHasOrdered, accountHasOrders } from './utils/deliveryPromo';
 import CompleteProfileModal from './components/auth/CompleteProfileModal';
@@ -895,6 +896,7 @@ function AppContent() {
             )}
 
             <CookieConsentBanner />
+            <Toaster />
         </Suspense>
     );
 };

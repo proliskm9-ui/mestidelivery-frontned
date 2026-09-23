@@ -1,0 +1,50 @@
+/*
+ * Mobile-native baseline for the client app.
+ * Scoped with html:has(.app-container) so the partner mini-app and admin
+ * (which render without .app-container) are unaffected.
+ */
+
+html:has(.app-container) {
+  /* No gray flash on tap — every pressable provides its own :active state */
+  -webkit-tap-highlight-color: transparent;
+  /* No font inflation in landscape */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* App shell: no pull-to-refresh / page rubber-band fighting inner scrollers and sheets */
+  overscroll-behavior-y: none;
+}
+
+/*
+ * PartnerMain is imported eagerly (deliberate: iOS Telegram WebView), so its global
+ * `body { user-select: none }` reaches the client. Content must stay selectable —
+ * addresses, order numbers, promo codes.
+ */
+html:has(.app-container) body {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Controls are not content: long-press must not select their label */
+html:has(.app-container) :is(button, [role='button'], [role='tab'], [role='switch']) {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+/* Keyboard focus ring (desktop); pointer/touch focus stays clean */
+html:has(.app-container) :focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Prices and counters: digits don't shift width as values change */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Inner scroll areas keep their own bounce but never chain to the page */
+.scroll-contain {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
