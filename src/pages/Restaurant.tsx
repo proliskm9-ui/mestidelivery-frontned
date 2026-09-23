@@ -10,6 +10,7 @@ import { getMinimumOrderQuantity } from '../utils/minimumOrderQuantity';
 import { closedBadgeText, isRestaurantOpenNow, nextOpenAt } from '../utils/workingHours';
 import './Restaurant.css';
 import './MobileRestaurant.css';
+import { useBackToClose } from '../hooks/useBackToClose';
 
 interface RestaurantPageProps {
     restaurantId: string | null;
@@ -120,6 +121,9 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [mobileSearchQuery, setMobileSearchQuery] = useState('');
     const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+    // System Back closes the dish / info sheets instead of leaving the restaurant
+    useBackToClose(Boolean(selectedProduct), () => setSelectedProduct(null));
+    useBackToClose(isInfoModalOpen, () => setIsInfoModalOpen(false));
     const cartWidgetRef = useRef<HTMLDivElement>(null);
     const infoCardRef = useRef<HTMLDivElement>(null);
 

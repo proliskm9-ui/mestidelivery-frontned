@@ -25,6 +25,7 @@ import CommentModal from './modals/CommentModal/CommentModal';
 import PhoneModal from './modals/PhoneModal/PhoneModal';
 import MapModal from './modals/MapModal/MapModal';
 import { toast } from 'sonner';
+import { useBackToClose } from '../hooks/useBackToClose';
 
 // === ТИПЫ ===
 type DeliveryType = 'standard' | 'scheduled';
@@ -160,6 +161,10 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
     phone: false,
     map: false,
   });
+  // System Back closes whichever checkout sheet is open instead of leaving checkout
+  useBackToClose(Object.values(modals).some(Boolean), () =>
+    setModals((prev) => Object.fromEntries(Object.keys(prev).map((k) => [k, false])) as unknown as ModalState)
+  );
 
   // Хелпер для открытия/закрытия
   const toggleModal = (name: keyof ModalState, isOpen: boolean): void => {

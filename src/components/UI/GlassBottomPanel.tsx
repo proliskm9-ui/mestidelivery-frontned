@@ -4,6 +4,7 @@ import './GlassBottomPanel.css';
 import { useLanguage } from '../../translations/LanguageContext';
 import { useDeliveryLocationOptional } from '../../delivery/DeliveryLocationContext';
 import { deviceHasOrdered, accountHasOrders } from '../../utils/deliveryPromo';
+import { useBackToClose } from '../../hooks/useBackToClose';
 
 const FREE_DELIVERY_THRESHOLD = 100;
 
@@ -34,6 +35,7 @@ const GlassBottomPanel: React.FC<GlassBottomPanelProps> = ({
     const { t, language } = useLanguage();
     const delivery = useDeliveryLocationOptional();
     const [isConditionsOpen, setIsConditionsOpen] = useState(false);
+    useBackToClose(isConditionsOpen, () => setIsConditionsOpen(false));
 
     // First-order promo (prod): new device & account, cart >= 100 ₾ —
     // free delivery when the zone fee is <= 12 ₾, otherwise 10 ₾ off.

@@ -1,6 +1,6 @@
-import React, { useEffect, useId, useRef } from 'react';
+import React from 'react';
 import { Drawer } from '@base-ui/react/drawer';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useBackToClose } from '../../hooks/useBackToClose';
 import './Sheet.css';
 
 interface SheetProps {
@@ -37,42 +37,9 @@ const Sheet: React.FC<SheetProps> = ({
     className,
     children,
 }) => {
-    const sheetKey = useId();
-    const location = useLocation();
-    const navigate = useNavigate();
-    const pushedRef = useRef(false);
+    useBackToClose(open, () => onOpenChange(false), closeOnBack);
 
-    // Give the open sheet its own history entry, so Back closes it instead of the page.
-    useEffect(() => {
-        if (!closeOnBack) return;
-        if (open && !pushedRef.current) {
-            pushedRef.current = true;
-            navigate(location, { state: { ...(location.state as object), sheet: sheetKey } });
-        } else if (!open && pushedRef.current) {
-            // Closed programmatically by the parent: drop our entry so Back isn't "eaten".
-            pushedRef.current = false;
-            navigate(-1);
-        }
-    }, [open, closeOnBack]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    // Back pressed: our entry was popped → close.
-    useEffect(() => {
-        if (!pushedRef.current) return;
-        const state = location.state as { sheet?: string } | null;
-        if (state?.sheet !== sheetKey) {
-            pushedRef.current = false;
-            if (open) onOpenChange(false);
-        }
-    }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    const handleOpenChange = (next: boolean) => {
-        if (!next && pushedRef.current) {
-            // Closed from the UI: drop our history entry; the location effect then settles state.
-            pushedRef.current = false;
-            navigate(-1);
-        }
-        onOpenChange(next);
-    };
+    const handleOpenChange = (next: boolean) => onOpenChange(next);
 
     return (
         <Drawer.Root open={open} onOpenChange={handleOpenChange}>

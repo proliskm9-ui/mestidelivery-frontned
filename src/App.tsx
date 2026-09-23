@@ -210,14 +210,21 @@ function AppContent() {
     // screens. Known restaurant IDs map to stable, readable slugs.
     useEffect(() => {
         if (currentPage !== 'restaurant' || !selectedRestaurantId || isLegalPath(location.pathname)) return;
+        // Only rewrite a restaurant URL (id -> slug). If the URL points elsewhere, the user
+        // navigated away (e.g. system Back) and the URL -> state effect above takes over;
+        // re-pushing here used to trap Back on the restaurant page.
+        if (parseCustomerPath(location.pathname).page !== 'restaurant') return;
         const expected = pagePath(language, 'restaurant', { restaurant: selectedRestaurantId });
-        if (location.pathname !== expected) navigate(expected);
+        if (location.pathname !== expected) navigate(expected, { replace: true });
     }, [currentPage, language, location.pathname, navigate, selectedRestaurantId]);
 
     useEffect(() => {
         if (!selectedOrderId || (currentPage !== 'order_status' && currentPage !== 'order_details')) return;
+        // Same guard as above: never fight a Back navigation away from the order screens.
+        const urlPage = parseCustomerPath(location.pathname).page;
+        if (urlPage !== 'order_status' && urlPage !== 'order_details') return;
         const expected = pagePath(language, currentPage, { orderId: selectedOrderId });
-        if (location.pathname !== expected) navigate(expected);
+        if (location.pathname !== expected) navigate(expected, { replace: true });
     }, [currentPage, language, location.pathname, navigate, selectedOrderId]);
     const [cart, setCart] = useState<{ product: any, quantity: number }[]>([]);
     const [pendingProductToAdd, setPendingProductToAdd] = useState<any>(null);
