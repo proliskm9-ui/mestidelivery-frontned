@@ -46,12 +46,12 @@ const StarIcon = ({ filled = false, size = 38 }: { filled?: boolean; size?: numb
         width={size}
         height={size}
         viewBox="0 0 24 24"
-        fill={filled ? "#FFB800" : "none"}
-        stroke={filled ? "#FFB800" : "rgba(255, 255, 255, 0.22)"}
+        fill={filled ? "#FFC53D" : "none"}
+        stroke={filled ? "#FFC53D" : "rgba(255, 255, 255, 0.24)"}
         strokeWidth="1.75"
         strokeLinecap="round"
         strokeLinejoin="round"
-        style={{ filter: filled ? "drop-shadow(0 0 10px rgba(255, 184, 0, 0.55))" : "none", transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)" }}
+        style={{ transition: "fill 0.15s ease, stroke 0.15s ease" }}
     >
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
     </svg>
@@ -448,48 +448,21 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                     <div className="y-rate-sheet" onClick={e => e.stopPropagation()}>
                         <div className="y-rate-drag-handle" />
 
-                        {/* Header */}
-                        <div className="y-rate-header">
-                            <div className="y-rate-badge">
-                                <span>
-                                    {ratingStep === 'restaurant' && <Utensils size={14} strokeWidth={2.2} />}
-                                    {ratingStep === 'courier' && <Bike size={14} strokeWidth={2.2} />}
-                                    {ratingStep === 'success' && <Check size={14} strokeWidth={2.6} />}
-                                </span>
-                                <span className="y-rate-badge-rest">
-                                    {ratingStep === 'restaurant' && t('rating.rate_restaurant')}
-                                    {ratingStep === 'courier' && t('rating.how_was_delivery')}
-                                    {ratingStep === 'success' && t('rating.thanks_short')}
-                                </span>
-                            </div>
-                            {ratingStep !== 'success' && (
-                                <button type="button" className="y-rate-close-btn" onClick={closeAndResetModal}>
-                                    <X size={16} />
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Step progress dots */}
                         {ratingStep !== 'success' && (
-                            <div className="y-rate-stepper">
-                                <div className={`y-rate-step-indicator ${ratingStep === 'restaurant' ? 'active' : 'completed'}`}>
-                                    {ratingStep === 'courier' ? <Check size={13} /> : <span>1</span>}
-                                    <span>{t('rating.step_restaurant')}</span>
+                            <div className="y-rate-top">
+                                <div className="y-rate-progress" aria-hidden="true">
+                                    <span className="is-on" />
+                                    <span className={ratingStep === 'courier' ? 'is-on' : ''} />
                                 </div>
-                                <div className="y-rate-step-dot" />
-                                <div className={`y-rate-step-indicator ${ratingStep === 'courier' ? 'active' : ''}`}>
-                                    <span>2</span>
-                                    <span>{t('rating.step_courier')}</span>
-                                </div>
+                                <button type="button" className="y-rate-close-btn" onClick={closeAndResetModal} aria-label={t('common.cancel')}>
+                                    <X size={18} strokeWidth={2.4} />
+                                </button>
                             </div>
                         )}
 
                         {/* ── Step 1: Restaurant ── */}
                         {ratingStep === 'restaurant' && (
                             <div className="y-rate-step-body">
-                                <div className="y-rate-entity-icon y-rate-entity-icon--rest">
-                                    <Utensils size={28} strokeWidth={1.8} />
-                                </div>
                                 <h2 className="y-rate-title">{t('rating.rate_restaurant')}</h2>
                                 <p className="y-rate-subtitle">
                                     {order.restaurant_name ? t('rating.dishes_question_from').replace('{name}', order.restaurant_name) : t('rating.dishes_question')}
@@ -503,7 +476,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                                 onMouseEnter={() => setRestHover(star)}
                                                 onMouseLeave={() => setRestHover(0)}
                                             >
-                                                <StarIcon filled={(restHover || restRating) >= star} size={44} />
+                                                <StarIcon filled={(restHover || restRating) >= star} size={40} />
                                             </button>
                                         ))}
                                     </div>
@@ -561,9 +534,6 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                         {/* ── Step 2: Courier ── */}
                         {ratingStep === 'courier' && (
                             <div className="y-rate-step-body">
-                                <div className="y-rate-entity-icon y-rate-entity-icon--courier">
-                                    <Bike size={28} strokeWidth={1.8} />
-                                </div>
                                 <h2 className="y-rate-title">{t('rating.how_was_delivery')}</h2>
                                 <p className="y-rate-subtitle">{t('rating.courier_subtitle')}</p>
 
@@ -575,7 +545,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                                 onMouseEnter={() => setCourierHover(star)}
                                                 onMouseLeave={() => setCourierHover(0)}
                                             >
-                                                <StarIcon filled={(courierHover || courierRating) >= star} size={44} />
+                                                <StarIcon filled={(courierHover || courierRating) >= star} size={40} />
                                             </button>
                                         ))}
                                     </div>
@@ -700,22 +670,16 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                 <div className="y-rate-overlay" onClick={() => setShowTipsModal(false)}>
                     <div className="y-rate-sheet" onClick={e => e.stopPropagation()}>
                         <div className="y-rate-drag-handle" />
-                        <div className="y-rate-header">
-                            <div className="y-rate-badge">
-                                <span>{t('rating.tips_order').replace('{id}', String(order.id))}</span>
-                            </div>
-                            <button type="button" className="y-rate-close-btn" onClick={() => setShowTipsModal(false)}>
-                                <X size={16} />
+                        <div className="y-rate-top">
+                            <button type="button" className="y-rate-close-btn" onClick={() => setShowTipsModal(false)} aria-label={t('common.cancel')}>
+                                <X size={18} strokeWidth={2.4} />
                             </button>
                         </div>
                         {!tipsSent ? (
                             <div className="y-rate-step-body">
-                                <div className="y-rate-tip-icon-big">
-                                    <HeartHandshake size={32} color="#21EA7C" />
-                                </div>
                                 <h2 className="y-rate-title" style={{ marginBottom: '8px' }}>{t('rating.thank_courier')}</h2>
                                 <p className="y-rate-tip-subtitle">{t('rating.tips_direct')}</p>
-                                <div className="y-rate-tips-grid" style={{ marginTop: '16px', marginBottom: '16px' }}>
+                                <div className="y-rate-tips-grid" style={{ marginTop: '20px', marginBottom: '16px', justifyContent: 'center' }}>
                                     {TIP_PRESETS.map(preset => (
                                         <button key={preset} type="button"
                                             className={`y-rate-tip-chip ${!isCustomTipActive && selectedTip === preset ? 'active' : ''}`}

@@ -2003,3 +2003,222 @@
     box-shadow: none;
     color: var(--color-accent);
 }
+
+/* ================= Rating & tips: minimal pass =================
+   One surface, one title, stars, optional details, one primary action. */
+.y-rate-sheet {
+    max-width: 560px;
+    background: var(--material-sheet-bg);
+    border: 0;
+    border-top: 1px solid var(--material-sheet-edge);
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    padding: 10px 24px calc(20px + env(safe-area-inset-bottom));
+    box-shadow: var(--shadow-3);
+}
+
+.y-rate-top {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    margin: 4px 0 12px;
+}
+
+.y-rate-progress {
+    display: flex;
+    gap: 6px;
+}
+
+.y-rate-progress span {
+    width: 28px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.12);
+    transition: background-color 200ms ease;
+}
+
+.y-rate-progress span.is-on {
+    background: var(--color-accent);
+}
+
+.y-rate-top .y-rate-close-btn {
+    position: absolute;
+    right: -4px;
+    top: 0;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--color-accent);
+}
+
+.y-rate-title {
+    font: var(--t-section);
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-text);
+    margin: 0 0 6px;
+}
+
+.y-rate-subtitle {
+    margin: 0 0 20px;
+    font: var(--t-secondary);
+    color: var(--color-text-secondary);
+}
+
+.y-rate-stars-wrapper {
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.y-rate-stars {
+    gap: 6px;
+}
+
+.y-star-btn:hover {
+    transform: none;
+}
+
+.y-rate-rating-caption {
+    min-height: 20px;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: var(--color-text-secondary);
+    font: var(--t-secondary);
+}
+
+/* Chips: text only, quiet outline, accent when picked */
+.y-rate-chip svg {
+    display: none;
+}
+
+.y-rate-chip {
+    padding: 8px 14px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--color-text-secondary);
+    font: var(--t-secondary);
+}
+
+.y-rate-chip.used,
+.y-rate-chip:disabled {
+    opacity: 1;
+    background: var(--color-accent-subtle);
+    border-color: rgba(33, 234, 124, 0.35);
+    color: var(--color-accent);
+}
+
+.y-rate-textarea {
+    background: var(--field-bg);
+    border: 1px solid var(--field-border);
+    border-radius: var(--control-radius);
+    font-size: 15px;
+}
+
+.y-rate-textarea:focus {
+    border-color: var(--field-border-focus);
+    box-shadow: var(--field-ring-focus);
+}
+
+/* Tips inside the courier step: no box, same chip language */
+.y-rate-tips-section {
+    padding: 0;
+    background: none;
+    border: 0;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.y-rate-tips-header {
+    justify-content: space-between;
+    font: var(--t-item);
+    font-size: 15px;
+}
+
+.y-rate-tips-header svg {
+    display: none;
+}
+
+.y-rate-tips-caption {
+    font: var(--t-caption);
+    color: var(--color-text-tertiary);
+    background: none;
+    border: 0;
+    padding: 0;
+}
+
+.y-rate-tips-grid {
+    justify-content: flex-start;
+}
+
+.y-rate-tip-chip {
+    padding: 9px 16px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    color: var(--color-text);
+    font: var(--t-secondary);
+    font-weight: 600;
+}
+
+.y-rate-tip-chip.active {
+    background: var(--color-accent-subtle);
+    border-color: rgba(33, 234, 124, 0.45);
+    color: var(--color-accent);
+    box-shadow: none;
+}
+
+/* Actions: one primary button, the secondary as quiet text under it */
+.y-rate-actions {
+    flex-direction: column-reverse;
+    gap: 4px;
+    margin-top: 20px !important;
+}
+
+.y-rate-actions .y-rate-primary-btn {
+    width: 100%;
+    flex: none;
+}
+
+.y-rate-actions .y-rate-skip-btn {
+    width: 100%;
+    flex: none;
+    height: 44px;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: var(--color-text-secondary);
+    font: var(--btn-font);
+    font-size: 16px;
+}
+
+/* Success: calm check, sentence-case title */
+.y-rate-success-glow {
+    display: none;
+}
+
+.y-rate-success-icon-wrap {
+    width: 64px;
+    height: 64px;
+    box-shadow: none;
+    border: 0;
+    background: var(--color-accent-subtle);
+}
+
+.y-rate-sheet .rate-success-title {
+    text-transform: none !important;
+    font: var(--t-section);
+    letter-spacing: var(--tracking-tight);
+}
+
+.y-rate-sheet .rate-success-line {
+    color: var(--color-text-secondary);
+    font: var(--t-secondary);
+}
+
+.y-rate-tip-subtitle {
+    margin: 0;
+    font: var(--t-secondary);
+    color: var(--color-text-secondary);
+}

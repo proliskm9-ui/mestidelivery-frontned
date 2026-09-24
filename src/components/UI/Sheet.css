@@ -286,7 +286,7 @@
 .md-sheet--tall {
     height: calc(92dvh + var(--bleed));
     /* opaque base under the material: the page behind is only lightly dimmed */
-    background: var(--material-sheet-bg), #121211;
+    background: var(--material-sheet-bg);
 }
 
 .md-sheet--tall .md-sheet-body {

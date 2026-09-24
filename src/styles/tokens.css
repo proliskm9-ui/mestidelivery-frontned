@@ -86,7 +86,7 @@
   --material-chrome-bg: rgba(21, 21, 20, 0.72);
   --material-chrome-filter: blur(20px) saturate(180%);
   /* Premium modal material (index.css .premium-modal-content-global) */
-  --material-sheet-bg: radial-gradient(120% 120% at 50% 0%, rgba(30, 30, 30, 0.97) 0%, rgba(10, 10, 10, 0.98) 100%);
+  --material-sheet-bg: #141416; /* sheets, dialogs, modals (the rating sheet's tone: reads better than near-black) */
   --material-sheet-edge: rgba(255, 255, 255, 0.08);
 
   --shadow-1: inset 0 1px 0 var(--color-highlight);

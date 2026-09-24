@@ -229,7 +229,7 @@ button.fav-hero-btn:active {
 }
 
 .premium-modal-content-global {
-    background: radial-gradient(120% 120% at 50% 0%, rgba(30, 30, 30, 0.9) 0%, rgba(10, 10, 10, 0.95) 100%);
+    background: var(--material-sheet-bg);
     border-radius: 40px;
     width: 100%;
     /* max-width should be set per modal */
@@ -284,7 +284,7 @@ button.fav-hero-btn:active {
 .map-modal-content,
 .premium-address-modal,
 .modal-content {
-    background: radial-gradient(120% 120% at 50% 0%, rgba(30, 30, 30, 0.9) 0%, rgba(10, 10, 10, 0.95) 100%) !important;
+    background: var(--material-sheet-bg) !important;
     border: none !important;
     border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
     box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1) !important;
@@ -301,5 +301,5 @@ button.fav-hero-btn:active {
 .phone-modal-content {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    background: radial-gradient(120% 120% at 50% 0%, rgba(30, 30, 30, 1) 0%, rgba(10, 10, 10, 1) 100%) !important;
+    background: var(--material-sheet-bg) !important;
 }
