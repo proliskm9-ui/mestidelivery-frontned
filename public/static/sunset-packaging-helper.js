@@ -217,10 +217,11 @@
       "  align-items: center !important;",
       "  gap: 12px !important;",
       "  min-height: 60px !important;",
-      "  margin: 4px 0 20px 0 !important;",
+      "  margin: 0 0 28px 0 !important;",
       "  padding: 10px 16px !important;",
-      "  background: rgba(255, 255, 255, 0.04) !important;",
-      "  border-radius: 20px !important;",
+      "  background: rgba(255, 255, 255, 0.03) !important;",
+      "  border: 1px solid rgba(255, 255, 255, 0.05) !important;",
+      "  border-radius: 16px !important;",
       "  box-sizing: border-box !important;",
       "  width: 100% !important;",
       "  text-align: left !important;",
@@ -337,7 +338,7 @@
     if (mobileBody) {
       targetBefore = mobileBody.querySelector(".kbju-section-v2, .section-label-v3, .kbju-grid-modal");
     } else if (pcModalBody) {
-      targetBefore = pcModalBody.querySelector(".pc-dish-modal-meta, .pc-dish-modal-add");
+      targetBefore = pcModalBody.querySelector(".kbju-section-v2") || pcModalBody.querySelector(".pc-dish-modal-add");
     }
 
     var existingFn = container.querySelector(".sunset-modal-footnote");

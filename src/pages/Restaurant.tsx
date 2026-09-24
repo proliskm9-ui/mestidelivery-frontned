@@ -767,16 +767,37 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                     <span>{formatPrice(selectedProduct.price)}</span>
                                 </div>
                                 <p className="pc-dish-modal-desc">{locDesc(selectedProduct.description) || ''}</p>
-                                {(formatWeight(selectedProduct.weight) || formatCalories(selectedProduct.calories)) && (
+                                {(formatWeight(selectedProduct.weight) || getMinimumOrderQuantity(selectedProduct) > 1) && (
                                     <div className="pc-dish-modal-meta">
                                         {formatWeight(selectedProduct.weight)}
-                                        {formatWeight(selectedProduct.weight) && formatCalories(selectedProduct.calories) ? ' · ' : ''}
-                                        {formatCalories(selectedProduct.calories)}
+                                        {formatWeight(selectedProduct.weight) && getMinimumOrderQuantity(selectedProduct) > 1 ? ' · ' : ''}
                                         {getMinimumOrderQuantity(selectedProduct) > 1
-                                            ? ` · минимум ${getMinimumOrderQuantity(selectedProduct)} шт.`
+                                            ? `минимум ${getMinimumOrderQuantity(selectedProduct)} шт.`
                                             : ''}
                                     </div>
                                 )}
+                                {/* Same nutrition block as the phone modal */}
+                                <div className="kbju-section-v2">
+                                    <h3 className="section-label-v3">{t('restaurant.kbju')}</h3>
+                                    <div className="kbju-grid-modal">
+                                        <div className="kbju-item-circle">
+                                            <span className="kbju-val-circle">{selectedProduct.calories != null && selectedProduct.calories !== '' ? selectedProduct.calories : '—'}</span>
+                                            <span className="kbju-lab-circle">{t('restaurant.kcal')}</span>
+                                        </div>
+                                        <div className="kbju-item-circle">
+                                            <span className="kbju-val-circle">{selectedProduct.proteins != null && selectedProduct.proteins !== '' ? selectedProduct.proteins : '—'}</span>
+                                            <span className="kbju-lab-circle">{t('restaurant.proteins')}</span>
+                                        </div>
+                                        <div className="kbju-item-circle">
+                                            <span className="kbju-val-circle">{selectedProduct.fats != null && selectedProduct.fats !== '' ? selectedProduct.fats : '—'}</span>
+                                            <span className="kbju-lab-circle">{t('restaurant.fats')}</span>
+                                        </div>
+                                        <div className="kbju-item-circle">
+                                            <span className="kbju-val-circle">{selectedProduct.carbs != null && selectedProduct.carbs !== '' ? selectedProduct.carbs : '—'}</span>
+                                            <span className="kbju-lab-circle">{t('restaurant.carbs')}</span>
+                                        </div>
+                                    </div>
+                                </div>
                                 <button type="button" className="pc-dish-modal-add" onClick={(e) => {
                                     addToCartAnimated(selectedProduct, e.currentTarget);
                                     setSelectedProduct(null);

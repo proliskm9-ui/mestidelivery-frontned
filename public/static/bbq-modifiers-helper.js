@@ -15,7 +15,7 @@
 
   var I18N = {
     ru: {
-      sauceTitle: "К блюду",
+      sauceTitle: "Добавить к блюду",
       sauceSub: "По желанию",
       breadTitle: "Хлеб к блюду",
       breadSub: "Необязательно, выберите 1",
@@ -26,7 +26,7 @@
       cartUpsellTitle: "Не забудьте к заказу:"
     },
     en: {
-      sauceTitle: "With your dish",
+      sauceTitle: "Add to your dish",
       sauceSub: "Optional",
       breadTitle: "Bread with dish",
       breadSub: "Optional, choose 1",
@@ -37,7 +37,7 @@
       cartUpsellTitle: "Don't forget with your order:"
     },
     ka: {
-      sauceTitle: "კერძთან ერთად",
+      sauceTitle: "დაამატეთ კერძს",
       sauceSub: "სურვილისამებრ",
       breadTitle: "პური კერძთან",
       breadSub: "არასავალდებულო, აირჩიეთ 1",
@@ -275,19 +275,23 @@
       ".ym-row.selected .ym-price {",
       "  color: #21ea7c !important;",
       "}",
-      "/* Design system pass: one card, hairline rows, round checks */",
-      ".ym-container { margin: 4px 0 20px 0 !important; gap: 12px !important; }",
-      ".ym-section { background: rgba(255, 255, 255, 0.04) !important; border: 0 !important; border-radius: 20px !important; padding: 0 16px !important; }",
-      ".ym-header { display: flex !important; align-items: baseline !important; justify-content: space-between !important; margin: 0 !important; padding: 14px 0 6px !important; }",
-      ".ym-title { font-size: 16px !important; font-weight: 700 !important; letter-spacing: -0.01em !important; }",
-      ".ym-subtitle { margin: 0 !important; font-size: 13px !important; color: rgba(255, 255, 255, 0.4) !important; }",
-      ".ym-row, .ym-row:first-child, .ym-row:last-child { min-height: 52px !important; padding: 0 !important; box-sizing: border-box !important; }",
-      ".ym-row { border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important; -webkit-tap-highlight-color: transparent !important; }",
-      ".ym-row:last-child { border-bottom: 0 !important; }",
-      ".ym-checkbox { width: 22px !important; height: 22px !important; border-radius: 50% !important; border: 2px solid rgba(255, 255, 255, 0.22) !important; background: transparent !important; }",
-      ".ym-row.selected .ym-checkbox { background: #21ea7c !important; border-color: #21ea7c !important; }",
-      ".ym-name { font-size: 15px !important; font-weight: 500 !important; }",
-      ".ym-price { font-size: 15px !important; font-weight: 600 !important; color: rgba(255, 255, 255, 0.5) !important; }",
+      "/* Modifiers as tiles: same material as the tip / delivery-mode buttons */",
+      ".ym-container { margin: 8px 0 28px 0 !important; gap: 0 !important; }",
+      ".ym-section { background: none !important; border: 0 !important; border-radius: 0 !important; padding: 0 !important; }",
+      ".ym-header { margin: 0 0 12px 0 !important; padding: 0 !important; }",
+      ".ym-title { font-size: 14px !important; font-weight: 700 !important; color: rgba(255, 255, 255, 0.3) !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; line-height: 1.2 !important; }",
+      ".ym-subtitle { display: none !important; }",
+      ".ym-list { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; }",
+      ".ym-row, .ym-row:first-child, .ym-row:last-child { position: relative !important; display: flex !important; flex-direction: column !important; align-items: flex-start !important; justify-content: center !important; gap: 3px !important; min-height: 64px !important; padding: 10px 12px !important; border: 2px solid rgba(255, 255, 255, 0.1) !important; border-radius: 16px !important; background: transparent !important; box-sizing: border-box !important; -webkit-tap-highlight-color: transparent !important; transition: border-color 0.2s ease, background-color 0.2s ease !important; }",
+      ".ym-row.selected { border-color: rgba(33, 234, 124, 0.85) !important; background: #1F1F1E !important; }",
+      ".ym-row:active { transform: scale(0.97) !important; }",
+      ".ym-left { display: block !important; min-width: 0 !important; max-width: 100% !important; }",
+      ".ym-checkbox { position: absolute !important; top: auto !important; bottom: 10px !important; right: 10px !important; width: 18px !important; height: 18px !important; border: 0 !important; border-radius: 50% !important; background: #21ea7c !important; opacity: 0 !important; transform: scale(0.6) !important; transition: opacity 0.15s ease, transform 0.15s ease !important; }",
+      ".ym-row.selected .ym-checkbox { opacity: 1 !important; transform: scale(1) !important; }",
+      ".ym-checkbox svg { width: 10px !important; height: 10px !important; }",
+      ".ym-name { display: block !important; font-size: 14px !important; font-weight: 600 !important; color: #ffffff !important; line-height: 1.25 !important; white-space: normal !important; overflow-wrap: anywhere !important; }",
+      ".ym-price { font-size: 13px !important; font-weight: 600 !important; color: rgba(255, 255, 255, 0.45) !important; }",
+      ".ym-row.selected .ym-price { color: #21ea7c !important; }",
       "/* Cart Upsell Strip */",
       ".bbq-cart-upsell {",
       "  margin: 12px 0 16px 0 !important;",
@@ -486,7 +490,9 @@
       if (kbju && kbju.parentElement === body) body.insertBefore(container, kbju);
       else body.appendChild(container);
     } else {
-      body.insertBefore(container, addBtn);
+      // Same order as on the phone: add-ons first, nutrition after
+      var kbjuPc = body.querySelector(".kbju-section-v2");
+      body.insertBefore(container, kbjuPc && kbjuPc.parentElement === body ? kbjuPc : addBtn);
     }
 
     // Dynamic Price Calculator
