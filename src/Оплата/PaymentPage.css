@@ -789,13 +789,6 @@ body:has(.mobile-payment-wrapper),
   }
 }
 
-/* What the amount is for — one quiet line under the total */
-.mp-amount-context {
-  margin: 10px 0 0;
-  font: var(--t-secondary);
-  color: var(--color-text-secondary);
-  text-align: center;
-}
 
 /* Accepted methods: small monochrome marks under the pay button */
 .mp-pay-marks {
@@ -822,6 +815,3 @@ body:has(.mobile-payment-wrapper),
   font-variant-numeric: tabular-nums;
 }
 
-.mp-amount-context {
-  margin-top: 8px;
-}

@@ -9,7 +9,6 @@ import { formatCheckoutAddress, formatCourierComment } from '../utils/checkoutAd
 import { ENABLE_CRYPTO_PAY } from '../config/features';
 import { toast } from 'sonner';
 import { formatPrice } from '../utils/formatPrice';
-import { getTbilisiNow } from '../utils/workingHours';
 
 /** Keepz payment link — Tribute removed. */
 const PAYMENT_URL = 'https://app.keepz.me/pay?qrType=DEFAULT&receiverType=USER&receiverId=6ea6970c-20ee-4119-b25f-6ebcc8a888c6';
@@ -350,31 +349,6 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
         return t('checkout.time_format_sec').replace('{s}', String(s));
     };
 
-    // "BBQ Garden · 4 блюда · к 10:00" — what exactly is being paid for
-    const restaurantId = cartItems?.[0]?.product?.restaurant_id || '';
-    const restaurantName = restaurantCache[`rest_${restaurantId}`]?.name || '';
-    const dishCount = (cartItems || []).reduce((n, ci) => n + (Number(ci.quantity) || 0), 0);
-    const dishesLabel = (() => {
-        if (!dishCount) return '';
-        const n10 = dishCount % 10, n100 = dishCount % 100;
-        const form = n10 === 1 && n100 !== 11 ? 'one' : n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14) ? 'few' : 'many';
-        return t(`checkout.dishes_${form}`).replace('{n}', String(dishCount));
-    })();
-    const scheduledLabel = (() => {
-        const v: string | null | undefined = orderData?.deliveryType === 'scheduled' ? orderData?.scheduledTime : null;
-        const m = v && /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})$/.exec(v);
-        if (!m) return '';
-        // Slot dates are Tbilisi dates
-        const now = getTbilisiNow();
-        now.setHours(0, 0, 0, 0);
-        const [y, mo, d] = m[1].split('-').map(Number);
-        const days = Math.round((new Date(y, mo - 1, d).getTime() - now.getTime()) / 86_400_000);
-        if (days <= 0) return t('checkout.deliver_at').replace('{time}', m[2]);
-        if (days === 1) return t('checkout.deliver_at_later').replace('{time}', m[2]);
-        return t('checkout.deliver_at_date').replace('{date}', `${String(d).padStart(2, '0')}.${String(mo).padStart(2, '0')}`).replace('{time}', m[2]);
-    })();
-    const contextLine = [restaurantName, dishesLabel, scheduledLabel].filter(Boolean).join(' · ');
-
     return (
         <div className="mobile-payment-wrapper payment-v2-layout">
             <div className="page">
@@ -404,7 +378,6 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                             <h2 className="mp-amount-value">
                                 {totalAmount.toFixed(2)} ₾
                             </h2>
-                            {contextLine && <p className="mp-amount-context">{contextLine}</p>}
                         </div>
                     </div>
                 </div>
