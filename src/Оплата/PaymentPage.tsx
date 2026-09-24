@@ -8,9 +8,11 @@ import { useLanguage } from '../translations/LanguageContext';
 import { formatCheckoutAddress, formatCourierComment } from '../utils/checkoutAddress';
 import { ENABLE_CRYPTO_PAY } from '../config/features';
 import { toast } from 'sonner';
+import { CreditCard, MessageCircle } from 'lucide-react';
 import { formatPrice } from '../utils/formatPrice';
 
 /** Keepz payment link — Tribute removed. */
+const SUPPORT_URL = 'https://t.me/MestigoSupport_Bot';
 const PAYMENT_URL = 'https://app.keepz.me/pay?qrType=DEFAULT&receiverType=USER&receiverId=6ea6970c-20ee-4119-b25f-6ebcc8a888c6';
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
@@ -92,6 +94,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
     onCompleteRef.current  = onPaymentComplete;
     const [replayKey, setReplayKey]       = useState(0);  // re-runs the "order placed" animation
     const [returned, setReturned]         = useState(false);
+    const leftAppRef       = useRef(false);
     const pollTimerRef     = useRef<ReturnType<typeof setInterval> | null>(null);
     const deadlineRef      = useRef<number>(0);
 
@@ -133,8 +136,9 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
     useEffect(() => {
         if (screen !== 'pending_confirmation' || method === 'cash') return;
         let left = document.visibilityState === 'hidden';
+        if (left) leftAppRef.current = true;
         const onVisibility = () => {
-            if (document.visibilityState === 'hidden') { left = true; return; }
+            if (document.visibilityState === 'hidden') { left = true; leftAppRef.current = true; return; }
             if (!left) return;
             left = false;
             setReplayKey((k) => k + 1);
@@ -149,6 +153,12 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
         const timer = setTimeout(() => complete('card', orderId), 2600);
         return () => clearTimeout(timer);
     }, [returned, orderId, screen, complete]);
+
+    useEffect(() => {
+        if (!orderId || screen !== 'pending_confirmation' || method === 'cash') return;
+        const timer = setTimeout(() => { if (!leftAppRef.current) complete('card', orderId); }, 6000);
+        return () => clearTimeout(timer);
+    }, [orderId, screen, method, complete]);
 
     // ── Start polling order status ──────────────────────────────────────────
     const startPolling = useCallback((id: number, selectedMethod: string) => {
@@ -393,42 +403,6 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
         return t('checkout.time_format_sec').replace('{s}', String(s));
     };
 
-    if (screen === 'pending_confirmation') {
-        const isCash = method === 'cash';
-        return (
-            <div className="mobile-payment-wrapper payment-v2-layout">
-                <div className="mp-done" role="status" aria-live="polite">
-                    <div className="mp-done-mark" key={replayKey}>
-                        <svg viewBox="0 0 96 96" aria-hidden="true">
-                            <circle className="mp-done-ring" cx="48" cy="48" r="45" />
-                            <path className="mp-done-check" d="M30 49.5 42.5 62 66 36" />
-                        </svg>
-                    </div>
-                    <h1 className="mp-done-title" key={`t${replayKey}`}>{t('checkout.order_placed')}</h1>
-                    <p className="mp-done-text">
-                        {isCash ? t('checkout.pay_cash_on_delivery') : t('checkout.waiting_payment_confirm')}
-                    </p>
-                    {orderId && <span className="mp-done-id">{t('common.order')} #{orderId}</span>}
-                    {!isCash && (
-                        <div className="mp-done-actions">
-                            <button
-                                type="button"
-                                className="ds-btn ds-btn--secondary"
-                                disabled={!orderId}
-                                onClick={() => orderId && complete('card', orderId)}
-                            >
-                                {t('checkout.go_to_order')}
-                            </button>
-                            <button type="button" className="mp-done-link" onClick={() => openPaymentUrl(PAYMENT_URL)}>
-                                {t('checkout.open_payment_page')}
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="mobile-payment-wrapper payment-v2-layout">
             <div className="page">
@@ -510,6 +484,37 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                                 <IsometricBoxLoader isSuccess={true} />
                                 <h3>{method === 'cash' ? t('checkout.order_placed') : t('checkout.payment_confirmed')}</h3>
                                 <p>{method === 'cash' ? t('checkout.pay_cash_desc') : t('checkout.order_sent_to_restaurant')}</p>
+                            </div>
+                        )}
+
+                        {/* ORDER PLACED — card: admin confirms the Keepz payment; cash: straight to status */}
+                        {screen === 'pending_confirmation' && (
+                            <div className="mp-premium-waiting-container mp-placed" role="status" aria-live="polite">
+                                <div className="mp-done-mark" key={replayKey}>
+                                    <svg viewBox="0 0 96 96" aria-hidden="true">
+                                        <circle className="mp-done-ring" cx="48" cy="48" r="45" />
+                                        <path className="mp-done-check" d="M30 49.5 42.5 62 66 36" />
+                                    </svg>
+                                </div>
+                                <h3 className="mp-premium-title" key={`t${replayKey}`}>{t('checkout.order_placed')}</h3>
+                                <p className="mp-premium-subtitle">
+                                    {method === 'cash' ? t('checkout.pay_cash_on_delivery') : t('checkout.waiting_payment_confirm')}
+                                </p>
+                                {orderId && (
+                                    <div className="mp-premium-badge">{t('common.order')} #{orderId}</div>
+                                )}
+                                {method !== 'cash' && (
+                                    <div className="mp-round-actions">
+                                        <button type="button" className="mp-round-btn" onClick={() => openPaymentUrl(PAYMENT_URL)}>
+                                            <span className="mp-round-icon"><CreditCard size={22} strokeWidth={2} /></span>
+                                            <span className="mp-round-label">{t('checkout.action_pay')}</span>
+                                        </button>
+                                        <a className="mp-round-btn" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
+                                            <span className="mp-round-icon"><MessageCircle size={22} strokeWidth={2} /></span>
+                                            <span className="mp-round-label">{t('checkout.action_support')}</span>
+                                        </a>
+                                    </div>
+                                )}
                             </div>
                         )}
 

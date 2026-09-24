@@ -139,19 +139,14 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
         }
     }, [order, prevStatus]);
 
-    // Online order waiting for the admin to see the Keepz payment
-    const status = String(order?.status || '');
-    const isPaymentCheck = status === 'pending_payment' || status === 'pending:card'
-        || (status.split(':')[0] === 'pending' && (order?.payment_method === 'card' || String(order?.comment || '').includes('[Оплата: Онлайн]')));
-
     const STATUS_STEPS = useMemo(() => [
-        { key: 'pending',    label: isPaymentCheck ? t('status.payment_check') : t('status.pending'),    icon: <Clock strokeWidth={1.5} /> },
+        { key: 'pending',    label: t('status.pending'),    icon: <Clock strokeWidth={1.5} /> },
         { key: 'confirmed',  label: t('status.confirmed'),  icon: <ClipboardCheck strokeWidth={1.5} /> },
         { key: 'preparing',  label: t('status.preparing'),  icon: <ChefHat strokeWidth={1.5} /> },
         { key: 'ready',      label: t('status.ready'),      icon: <ShoppingBag strokeWidth={1.5} /> },
         { key: 'delivering', label: t('status.delivering'), icon: <Bike strokeWidth={1.5} /> },
         { key: 'delivered',  label: t('status.delivered'),  icon: <MapPin strokeWidth={1.5} /> },
-    ], [t, isPaymentCheck]);
+    ], [t]);
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -198,7 +193,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
     }, [orderId]);
 
     const currentStepIndex = order
-        ? STATUS_STEPS.findIndex(s => s.key === order.status || (isPaymentCheck && s.key === 'pending'))
+        ? STATUS_STEPS.findIndex(s => s.key === order.status || (order.status === 'pending_payment' && s.key === 'pending'))
         : 0;
     const activeStepIndex = currentStepIndex === -1 ? 0 : currentStepIndex;
 
