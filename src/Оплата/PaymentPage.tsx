@@ -3,7 +3,7 @@ import './PaymentPage.css';
 import { QRCodeSVG } from 'qrcode.react';
 import { api, restaurantCache } from '../services/api';
 import IsometricBoxLoader from '../components/UI/IsometricBoxLoader';
-import { Clock } from 'lucide-react';
+
 import { useLanguage } from '../translations/LanguageContext';
 import { formatCheckoutAddress, formatCourierComment } from '../utils/checkoutAddress';
 import { ENABLE_CRYPTO_PAY } from '../config/features';
@@ -86,6 +86,12 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
     const [elapsed, setElapsed]           = useState(0);      // секунды ожидания
 
     const orderCreatedRef  = useRef(false);
+    const completedRef     = useRef(false);
+    const createdOrderRef  = useRef<{ id: number; method: string } | null>(null);
+    const onCompleteRef    = useRef(onPaymentComplete);
+    onCompleteRef.current  = onPaymentComplete;
+    const [replayKey, setReplayKey]       = useState(0);  // re-runs the "order placed" animation
+    const [returned, setReturned]         = useState(false);
     const pollTimerRef     = useRef<ReturnType<typeof setInterval> | null>(null);
     const deadlineRef      = useRef<number>(0);
 
@@ -103,6 +109,46 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
     }, []);
 
     useEffect(() => () => stopPolling(), [stopPolling]);
+
+    // Order exists server-side -> hand over to the status page exactly once
+    const complete = useCallback((m: string, id: number) => {
+        if (completedRef.current) return;
+        completedRef.current = true;
+        try {
+            onCompleteRef.current(m, id);
+        } catch (navError) {
+            console.error('Order created but post-success navigation failed', navError);
+        }
+    }, []);
+
+    // Leaving this page after the order was created (system back etc.) must not
+    // drop the user back into checkout with a full cart: finish the hand-over instead.
+    useEffect(() => () => {
+        const created = createdOrderRef.current;
+        if (created && !completedRef.current) complete(created.method, created.id);
+    }, [complete]);
+
+    // Online payment: Keepz opens in another window. When the user comes back,
+    // replay the "order placed" animation, then open the order status.
+    useEffect(() => {
+        if (screen !== 'pending_confirmation' || method === 'cash') return;
+        let left = document.visibilityState === 'hidden';
+        const onVisibility = () => {
+            if (document.visibilityState === 'hidden') { left = true; return; }
+            if (!left) return;
+            left = false;
+            setReplayKey((k) => k + 1);
+            setReturned(true);
+        };
+        document.addEventListener('visibilitychange', onVisibility);
+        return () => document.removeEventListener('visibilitychange', onVisibility);
+    }, [screen, method]);
+
+    useEffect(() => {
+        if (!returned || !orderId || screen !== 'pending_confirmation') return;
+        const timer = setTimeout(() => complete('card', orderId), 2600);
+        return () => clearTimeout(timer);
+    }, [returned, orderId, screen, complete]);
 
     // ── Start polling order status ──────────────────────────────────────────
     const startPolling = useCallback((id: number, selectedMethod: string) => {
@@ -217,6 +263,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
             }
 
             setOrderId(result.id);
+            createdOrderRef.current = { id: result.id, method: selectedMethod };
 
             // ── CASH: no payment confirmation needed ──────────────────────
             if (selectedMethod === 'cash') {
@@ -226,11 +273,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                 await new Promise(r => setTimeout(r, 3000));
                 // Order is already committed server-side here: a failure in the parent's
                 // completion callback shouldn't surface as "order failed" or reset the flow.
-                try {
-                    onPaymentComplete(selectedMethod, result.id);
-                } catch (navError) {
-                    console.error('Order created but post-success navigation failed', navError);
-                }
+                complete(selectedMethod, result.id);
                 return;
             }
 
@@ -322,6 +365,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
             }
 
             setOrderId(result.id);
+            createdOrderRef.current = { id: result.id, method: 'card' };
 
             // Backend ignores status on creation — update it separately
             try {
@@ -348,6 +392,42 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
         if (m > 0) return t('checkout.time_format_min_sec').replace('{m}', String(m)).replace('{s}', String(s));
         return t('checkout.time_format_sec').replace('{s}', String(s));
     };
+
+    if (screen === 'pending_confirmation') {
+        const isCash = method === 'cash';
+        return (
+            <div className="mobile-payment-wrapper payment-v2-layout">
+                <div className="mp-done" role="status" aria-live="polite">
+                    <div className="mp-done-mark" key={replayKey}>
+                        <svg viewBox="0 0 96 96" aria-hidden="true">
+                            <circle className="mp-done-ring" cx="48" cy="48" r="45" />
+                            <path className="mp-done-check" d="M30 49.5 42.5 62 66 36" />
+                        </svg>
+                    </div>
+                    <h1 className="mp-done-title" key={`t${replayKey}`}>{t('checkout.order_placed')}</h1>
+                    <p className="mp-done-text">
+                        {isCash ? t('checkout.pay_cash_on_delivery') : t('checkout.waiting_payment_confirm')}
+                    </p>
+                    {orderId && <span className="mp-done-id">{t('common.order')} #{orderId}</span>}
+                    {!isCash && (
+                        <div className="mp-done-actions">
+                            <button
+                                type="button"
+                                className="ds-btn ds-btn--secondary"
+                                disabled={!orderId}
+                                onClick={() => orderId && complete('card', orderId)}
+                            >
+                                {t('checkout.go_to_order')}
+                            </button>
+                            <button type="button" className="mp-done-link" onClick={() => openPaymentUrl(PAYMENT_URL)}>
+                                {t('checkout.open_payment_page')}
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="mobile-payment-wrapper payment-v2-layout">
@@ -430,64 +510,6 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                                 <IsometricBoxLoader isSuccess={true} />
                                 <h3>{method === 'cash' ? t('checkout.order_placed') : t('checkout.payment_confirmed')}</h3>
                                 <p>{method === 'cash' ? t('checkout.pay_cash_desc') : t('checkout.order_sent_to_restaurant')}</p>
-                            </div>
-                        )}
-
-                        {/* PENDING CONFIRMATION — waiting for admin to verify payment */}
-                        {screen === 'pending_confirmation' && (
-                            <div className={method === 'cash' ? 'mp-premium-waiting-container is-success' : 'mp-premium-waiting-container'}>
-                                <div className="mp-premium-spinner">
-                                    <div className="mp-premium-icon">
-                                        {method === 'cash' ? (
-                                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#21ea7c" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                                <polyline points="20 6 9 17 4 12" />
-                                            </svg>
-                                        ) : (
-                                            <Clock color="#21ea7c" size={40} strokeWidth={2} />
-                                        )}
-                                    </div>
-                                </div>
-                                <h3 className="mp-premium-title">{t('checkout.order_placed')}</h3>
-                                <p className="mp-premium-subtitle">
-                                    {method === 'cash' ? (
-                                        <>
-                                            {t('checkout.pay_cash_on_delivery')}
-                                        </>
-                                    ) : (
-                                        <>
-                                            {t('checkout.waiting_payment_confirm')}
-                                        </>
-                                    )}
-                                </p>
-                                {orderId && (
-                                    <div className="mp-premium-badge">{t('common.order')} #{orderId}</div>
-                                )}
-                                {method !== 'cash' && orderId && (
-                                    <div className="mp-pending-actions">
-                                        <button
-                                            type="button"
-                                            className="mp-btn-view-order-clean"
-                                            onClick={() => onPaymentComplete('card', orderId)}
-                                        >
-                                            <span>Открыть заказ</span>
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                                <line x1="5" y1="12" x2="19" y2="12" />
-                                                <polyline points="12 5 19 12 12 19" />
-                                            </svg>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="mp-btn-reopen-link"
-                                            onClick={() => openPaymentUrl(PAYMENT_URL)}
-                                        >
-                                            <span>{t('checkout.open_payment_page')}</span>
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M7 17L17 7" />
-                                                <path d="M8 7h9v9" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                )}
                             </div>
                         )}
 

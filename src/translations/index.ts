@@ -272,6 +272,7 @@ export const translations = {
             will_confirm_auto: 'Мы автоматически подтвердим заказ.',
             elapsed_waiting: 'Ожидание:',
             open_payment_page: 'Открыть страницу оплаты',
+            go_to_order: 'Перейти к заказу',
             order_placed: 'Заказ оформлен!',
             pay_cash_on_delivery: 'Оплатите наличными при получении, мы уведомим вас, когда всё будет готово.',
             order_sent_to_restaurant: 'Заказ передан в ресторан',
@@ -385,6 +386,7 @@ export const translations = {
         status: {
             title: 'Статус заказа',
             pending: 'Ожидание',
+            payment_check: 'Проверяем оплату',
             confirmed: 'Принят',
             preparing: 'Готовится',
             ready: 'Собран',
@@ -1018,6 +1020,7 @@ export const translations = {
             will_confirm_auto: 'We will confirm your order automatically.',
             elapsed_waiting: 'Waiting:',
             open_payment_page: 'Open payment page',
+            go_to_order: 'Go to order',
             order_placed: 'Order Placed!',
             pay_cash_on_delivery: 'Pay with cash on delivery, we will notify you when everything is ready.',
             order_sent_to_restaurant: 'Order sent to restaurant',
@@ -1131,6 +1134,7 @@ export const translations = {
         status: {
             title: 'Order Status',
             pending: 'Pending',
+            payment_check: 'Checking payment',
             confirmed: 'Confirmed',
             preparing: 'Preparing',
             ready: 'Ready',
@@ -1764,6 +1768,7 @@ export const translations = {
             will_confirm_auto: 'ჩვენ ავტომატურად დავადასტურებთ შეკვეთას.',
             elapsed_waiting: 'ლოდინი:',
             open_payment_page: 'გადახდის გვერდის გახსნა',
+            go_to_order: 'შეკვეთაზე გადასვლა',
             order_placed: 'შეკვეთა გაფორმდა!',
             pay_cash_on_delivery: 'გადაიხადეთ ნაღდი ფულით მიღებისას, შეგატყობინებთ როდესაც ყველაფერი მზად იქნება.',
             order_sent_to_restaurant: 'შეკვეთა გადაეცა რესტორანს',
@@ -1877,6 +1882,7 @@ export const translations = {
         status: {
             title: 'შეკვეთის სტატუსი',
             pending: 'მუშავდება',
+            payment_check: 'ვამოწმებთ გადახდას',
             confirmed: 'დადასტურებულია',
             preparing: 'მზადდება',
             ready: 'მზადაა',
