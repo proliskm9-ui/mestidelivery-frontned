@@ -19,6 +19,8 @@ interface SummaryBlockProps {
   /** First-order promo discount on delivery. */
   deliveryDiscount: number;
   serviceFee: number;
+  /** Restaurant packaging (Sunset). Row appears only when > 0. */
+  packagingFee?: number;
   tip: number;
   /** Extra discounts confirmed by the server (promo code, bonuses). Rows appear only when present. */
   discounts?: SummaryDiscount[];
@@ -34,6 +36,7 @@ const SummaryBlock: React.FC<SummaryBlockProps> = ({
   baseDeliveryFee,
   deliveryDiscount,
   serviceFee,
+  packagingFee = 0,
   tip,
   discounts = [],
   freeDeliveryLeft = 0,
@@ -76,6 +79,12 @@ const SummaryBlock: React.FC<SummaryBlockProps> = ({
             <span className="summary-row-title summary-muted">{t('cart.service')}</span>
             <span className="summary-row-value">{formatPrice(serviceFee)}</span>
           </div>
+          {packagingFee > 0 && (
+            <div className="summary-row">
+              <span className="summary-row-title summary-muted">{t('checkout.packaging')}</span>
+              <span className="summary-row-value">{formatPrice(packagingFee)}</span>
+            </div>
+          )}
           {tip > 0 && (
             <div className="summary-row">
               <span className="summary-row-title summary-muted">{t('checkout.tips_title')}</span>

@@ -14,6 +14,7 @@ import HeaderBlock from './blocks/HeaderBlock/HeaderBlock';
 import { addressText, detectZoneFromText, deviceHasOrdered, accountHasOrders, markDeviceOrdered } from '../utils/deliveryPromo';
 import AddressBlock, { AddressData } from './blocks/AddressBlock/AddressBlock';
 import SummaryBlock from './blocks/SummaryBlock/SummaryBlock';
+import { getPackagingFee } from '../utils/packaging';
 import Sheet from '../components/UI/Sheet';
 import TipsBlock from './blocks/TipsBlock/TipsBlock';
 import FooterBlock from './blocks/FooterBlock/FooterBlock';
@@ -231,7 +232,10 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
   const deliveryFee = Math.max(0, baseDeliveryFee - deliveryDiscount);
   const serviceFee = subtotal > 0 ? Math.max(0.99, Math.min(2.00, subtotal * 0.06)) : 0;
   
-  const finalTotal = subtotal + deliveryFee + serviceFee;
+  // Restaurant packaging (Sunset): shown and charged here, not added silently at submit
+  const packagingFee = getPackagingFee(cartItems);
+
+  const finalTotal = subtotal + deliveryFee + serviceFee + packagingFee;
   const totalAmount = finalTotal + orderData.tip;
 
   // Навигация назад
@@ -373,6 +377,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
               baseDeliveryFee={baseDeliveryFee}
               deliveryDiscount={deliveryDiscount}
               serviceFee={serviceFee}
+              packagingFee={packagingFee}
               tip={orderData.tip}
               total={totalAmount}
               freeDeliveryLeft={isFirstOrder && baseDeliveryFee <= 12 && subtotal < 100 ? 100 - subtotal : 0}

@@ -16,6 +16,7 @@ import PlaceTypeModal from '../Оплата/modals/PlaceTypeModal/PlaceTypeModal
 import MapModal from '../Оплата/modals/MapModal/MapModal';
 import AddressBlock, { AddressData } from '../Оплата/blocks/AddressBlock/AddressBlock';
 import { toast } from 'sonner';
+import { getPackagingFee } from '../utils/packaging';
 
 // SVG Icons
 const IconArrowLeft = () => (
@@ -113,7 +114,8 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
         : 0;
     const deliveryFee = Math.max(0, baseDeliveryFee - deliveryDiscount);
     const serviceFee = subtotal > 0 ? Math.max(0.99, Math.min(2.00, subtotal * 0.06)) : 0;
-    const finalTotal = subtotal + deliveryFee + serviceFee;
+    // Packaging row is drawn by the Sunset helper script; the total must include it
+    const finalTotal = subtotal + deliveryFee + serviceFee + getPackagingFee(cartItems);
 
     const handleUpdateAddress = (field: string, value: string) => {
         setAddress(prev => ({ ...prev, [field]: value }));

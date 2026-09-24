@@ -6,6 +6,7 @@ import { pickI18nText } from '../utils/i18nContent';
 import { formatPortionWeight } from '../utils/formatProductMeta';
 import Dialog, { DialogClose } from '../components/UI/Dialog';
 import { formatPrice } from '../utils/formatPrice';
+import { getPackagingFee } from '../utils/packaging';
 
 // SVG Icons
 const IconTrash = () => (
@@ -69,7 +70,8 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
         serviceFee = Math.max(0.99, Math.min(2.00, subtotal * 0.06));
     }
 
-    const total = subtotal + deliveryFee + serviceFee;
+    // Packaging row is drawn by the Sunset helper script; the total must include it
+    const total = subtotal + deliveryFee + serviceFee + getPackagingFee(initialCartItems);
     const totalItems = initialCartItems.reduce((sum, item) => sum + item.quantity, 0);
 
     // Sync cutlery with items logic
