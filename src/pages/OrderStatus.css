@@ -2222,3 +2222,39 @@
     font: var(--t-secondary);
     color: var(--color-text-secondary);
 }
+
+/* ---------- Calm pass: no neon ----------
+   Active step: accent ring + soft fill; one thin rotating arc says "in progress". */
+.primary-status-label h1 {
+    text-shadow: none !important;
+}
+
+.step-item.active .icon-circle,
+.step-item.completed .icon-circle {
+    box-shadow: none !important;
+}
+
+.step-item.active .icon-circle {
+    border-width: 2px !important;
+    background: var(--color-accent-subtle);
+}
+
+.active-ring-dashed {
+    display: none;
+}
+
+.active-ring-solid {
+    border-width: 1.5px;
+    animation-duration: 2.4s;
+    animation-timing-function: linear;
+}
+
+.call-courier-btn {
+    box-shadow: none;
+}
+
+@media (min-width: 1025px) {
+    .step-item.active .icon-circle {
+        box-shadow: none !important;
+    }
+}

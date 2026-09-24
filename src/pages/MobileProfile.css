@@ -526,3 +526,9 @@
     color: var(--color-accent);
     font: 800 28px/1 var(--font-text);
 }
+
+/* Calm pass: no decorative glow blob */
+.mp-bg-glow,
+.od-bg-glow {
+    display: none;
+}
