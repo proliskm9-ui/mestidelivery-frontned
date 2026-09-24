@@ -118,7 +118,8 @@ const COMPANY = {
     addressRu: 'Местийский муниципалитет, с. Латали, Грузия',
     addressEn: 'Mestia Municipality, Latali village, Georgia',
     addressKa: 'მესტიის მუნიციპალიტეტი, სოფელი ლატალი, საქართველო',
-    email: 'support@mestidelivery.ge',
+    email: 'support@mestidelivery.com',
+    ceoEmail: 'ceo@mestidelivery.com',
     phone: '+995 551 58 43 76',
     tg: '@MestigoSupport_Bot',
 };

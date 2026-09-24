@@ -132,7 +132,7 @@ export const translations = {
             footer_popular_categories: 'Популярные категории',
             footer_rights: 'Все права защищены.',
             footer_company: 'ИП Анастасия Вербицкая · рег. № 335897747 · Местиа, Грузия',
-            footer_support: 'Поддержка: support@mestidelivery.ge · +995 551 58 43 76',
+            footer_support: 'Поддержка: support@mestidelivery.com · +995 551 58 43 76',
             language: 'Язык'
         },
         menu: {
@@ -174,7 +174,7 @@ export const translations = {
             popular_stores: 'Популярные магазины',
             search_stores_placeholder: 'Искать магазин, товар..',
             all_stores: 'Все магазины',
-            promo_first_order: '-10₾ на первый заказ',
+            promo_first_order: 'Бесплатная доставка от 100 ₾',
             order_status_rating: {
                 delivered_title: 'Заказ доставлен',
                 delivered_subtitle: 'Оцените качество блюд и работу ресторана.',
@@ -877,7 +877,7 @@ export const translations = {
             footer_popular_categories: 'Popular Categories',
             footer_rights: 'All rights reserved.',
             footer_company: 'IE Anastasiya Viarbitskaya · Reg. No. 335897747 · Mestia, Georgia',
-            footer_support: 'Support: support@mestidelivery.ge · +995 551 58 43 76',
+            footer_support: 'Support: support@mestidelivery.com · +995 551 58 43 76',
             language: 'Language'
         },
         menu: {
@@ -919,7 +919,7 @@ export const translations = {
             popular_stores: 'Popular stores',
             search_stores_placeholder: 'Search store, product..',
             all_stores: 'All stores',
-            promo_first_order: '-10₾ on first order',
+            promo_first_order: 'Free delivery from 100 ₾',
             order_status_rating: {
                 delivered_title: 'Order delivered',
                 delivered_subtitle: 'Rate the quality of food and restaurant service.',
@@ -1622,7 +1622,7 @@ export const translations = {
             footer_popular_categories: 'პოპულარული კატეგორიები',
             footer_rights: 'ყველა უფლება დაცულია.',
             footer_company: 'ინდ. მეწარმე ანასტასია ვერბიცკაია · რეგ. № 335897747 · მესტია, საქართველო',
-            footer_support: 'მხარდაჭერა: support@mestidelivery.ge · +995 551 58 43 76',
+            footer_support: 'მხარდაჭერა: support@mestidelivery.com · +995 551 58 43 76',
             language: 'ენა'
         },
         menu: {
@@ -1664,7 +1664,7 @@ export const translations = {
             popular_stores: 'პოპულარული მაღაზიები',
             search_stores_placeholder: 'მოძებნეთ მაღაზია, პროდუქტი..',
             all_stores: 'ყველა მაღაზია',
-            promo_first_order: '-10₾ პირველ შეკვეთაზე',
+            promo_first_order: 'უფასო მიწოდება 100 ₾-დან',
             order_status_rating: {
                 delivered_title: 'შეკვეთა მიტანილია',
                 delivered_subtitle: 'შეაფასეთ კერძების ხარისხი და რესტორნის მუშაობა.',
