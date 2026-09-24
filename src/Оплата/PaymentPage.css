@@ -819,11 +819,6 @@ body:has(.mobile-payment-wrapper),
 }
 
 .mp-amount-value {
-  font-size: 36px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--color-accent);
-  text-shadow: none;
   font-variant-numeric: tabular-nums;
 }
 
