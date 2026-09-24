@@ -336,12 +336,12 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
                     height: 34px !important;
                     top: 8px !important;
                     right: 8px !important;
-                    background: rgba(0, 0, 0, 0.45) !important;
+                    background: #21EA7C !important;
                 }
                 .fav-vertical-grid .fav-btn svg {
                     width: 21px !important;
                     height: 21px !important;
-                    stroke: currentColor !important;
+                    stroke: black !important;
                 }
                 .fav-vertical-grid .rest-details {
                     margin-top: 0 !important;
