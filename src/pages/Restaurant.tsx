@@ -16,6 +16,8 @@ import { formatPrice } from '../utils/formatPrice';
 import { deviceHasOrdered, accountHasOrders } from '../utils/deliveryPromo';
 import { cuisineLine } from '../utils/restaurantCuisine';
 import Sheet from '../components/UI/Sheet';
+import DishModifiers from '../components/UI/DishModifiers';
+import { acceptsModifiers, isAvailableModifier, isModifierProduct } from '../utils/modifiers';
 
 interface RestaurantPageProps {
     restaurantId: string | null;
@@ -114,6 +116,9 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
 
     const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
+    // Sauces / bread: not a menu section, offered inside the dish card
+    const [modifierProducts, setModifierProducts] = useState<Product[]>([]);
+    const [pickedMods, setPickedMods] = useState<string[]>([]);
     const [, setCategories] = useState<string[]>([]);
     const [activeCategory, setActiveCategory] = useState('All');
     const [loading, setLoading] = useState(true);
@@ -283,7 +288,9 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                     };
                 }
 
-                const prodData = (await api.getProducts(restaurantId).catch(() => [])).filter(isVisibleMenuProduct);
+                const allProducts = await api.getProducts(restaurantId).catch(() => [] as Product[]);
+                setModifierProducts(allProducts.filter(isAvailableModifier));
+                const prodData = allProducts.filter((p) => isVisibleMenuProduct(p) && !isModifierProduct(p));
                 const cats = Array.from(new Set(prodData.map(p => p.category))).filter(Boolean) as string[];
 
                 setRestaurant(restData);
@@ -305,6 +312,23 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     const getQuantity = (id: string) => {
         const item = cart.find(c => c.product.id === id);
         return item ? item.quantity : 0;
+    };
+
+    // ----- Dish add-ons -----
+    useEffect(() => { setPickedMods([]); }, [selectedProduct?.id]);
+    const modOptions = selectedProduct && acceptsModifiers(selectedProduct)
+        ? modifierProducts.map((m) => ({ id: m.id, name: locName(m.name), price: Number(m.price) || 0 }))
+        : [];
+    const toggleMod = (id: string) => setPickedMods((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    const pickedModsSum = modOptions.filter((o) => pickedMods.includes(o.id)).reduce((sum, o) => sum + o.price, 0);
+    /** Adds the picked add-ons once per portion of the dish (they go to the order as their own items). */
+    const addPickedMods = (portions: number) => {
+        if (!selectedProduct || !pickedMods.length) return;
+        // Another restaurant's cart: the switch dialog handles the dish; add-ons would overwrite it
+        if (cart.length > 0 && cart[0].product.restaurant_id !== selectedProduct.restaurant_id) return;
+        for (const mod of modifierProducts.filter((m) => pickedMods.includes(m.id))) {
+            for (let i = 0; i < Math.max(1, portions); i++) onAddToCart(mod);
+        }
     };
 
     // ----- MOBILE HOOKS (must be called unconditionally, before any early returns) -----
@@ -764,7 +788,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             <div className="pc-dish-modal-body">
                                 <div className="pc-dish-modal-header">
                                     <h2>{locName(selectedProduct.name)}</h2>
-                                    <span>{formatPrice(selectedProduct.price)}</span>
+                                    <span>{formatPrice(Number(selectedProduct.price) + pickedModsSum)}</span>
                                 </div>
                                 <p className="pc-dish-modal-desc">{locDesc(selectedProduct.description) || ''}</p>
                                 {(formatWeight(selectedProduct.weight) || getMinimumOrderQuantity(selectedProduct) > 1) && (
@@ -776,6 +800,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                             : ''}
                                     </div>
                                 )}
+                                <DishModifiers title={t('restaurant.add_to_dish')} options={modOptions} picked={pickedMods} onToggle={toggleMod} />
                                 {/* Same nutrition block as the phone modal */}
                                 <div className="kbju-section-v2">
                                     <h3 className="section-label-v3">{t('restaurant.kbju')}</h3>
@@ -799,7 +824,9 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                     </div>
                                 </div>
                                 <button type="button" className="pc-dish-modal-add" onClick={(e) => {
+                                    const portions = getQuantity(selectedProduct.id) === 0 ? getMinimumOrderQuantity(selectedProduct) : 1;
                                     addToCartAnimated(selectedProduct, e.currentTarget);
+                                    addPickedMods(portions);
                                     setSelectedProduct(null);
                                 }}>
                                     {t('restaurant.add')}
@@ -1094,6 +1121,8 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                         <div className="modal-body">
                             <p className="modal-description">{locDesc(selectedProduct.description) || ''}</p>
 
+                            <DishModifiers title={t('restaurant.add_to_dish')} options={modOptions} picked={pickedMods} onToggle={toggleMod} />
+
                             <div className="kbju-section-v2">
                                 <h3 className="section-label-v3">{t('restaurant.kbju')}</h3>
                                 <div className="kbju-grid-modal">
@@ -1126,7 +1155,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                         <span className="footer-dish-weight">мин. {getMinimumOrderQuantity(selectedProduct)} шт.</span>
                                     )}
                                 </h2>
-                                <span className="footer-dish-price">{formatPrice(selectedProduct.price)}</span>
+                                <span className="footer-dish-price">{formatPrice(Number(selectedProduct.price) + pickedModsSum)}</span>
                             </div>
 
                             <div className="footer-actions-row">
@@ -1148,7 +1177,9 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                     >+</button>
                                 </div>
                                 <button className="modal-main-add-btn" onClick={() => {
-                                    if (getQuantity(selectedProduct.id) === 0) onAddToCart(selectedProduct);
+                                    const inCart = getQuantity(selectedProduct.id);
+                                    if (inCart === 0) onAddToCart(selectedProduct);
+                                    addPickedMods(inCart || getMinimumOrderQuantity(selectedProduct));
                                     setSelectedProduct(null);
                                 }}>
                                     {t('restaurant.add')}

@@ -1037,3 +1037,29 @@ body.dish-modal-open .glass-panel-container,
     color: rgba(255, 255, 255, 0.4);
     text-transform: uppercase;
 }
+
+/* Tall dish cards (add-ons + nutrition): the card scrolls, the add button stays visible */
+.pc-dish-modal {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 48px);
+}
+
+.pc-dish-modal-img {
+    flex-shrink: 0;
+}
+
+.pc-dish-modal-body {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.pc-dish-modal-add {
+    position: sticky;
+    bottom: 0;
+    box-shadow: 0 -12px 24px #121212;
+}
+
+.pc-dish-modal .dish-mods {
+    margin: 22px 0 26px;
+}

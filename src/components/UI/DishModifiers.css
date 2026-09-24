@@ -1,0 +1,86 @@
+/* Dish add-ons: label in the KBJU style, hairline rows, price + round check */
+.dish-mods {
+    margin: 30px 0 36px;
+}
+
+.dish-mods-label {
+    margin: 0 0 6px;
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+}
+
+.dish-mods-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.dish-mods-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 60px;
+    padding: 0;
+    border: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    background: none;
+    color: #ffffff;
+    text-align: left;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.dish-mods-row:last-child {
+    border-bottom: 0;
+}
+
+.dish-mods-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.dish-mods-price {
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.5);
+    transition: color 0.15s ease;
+}
+
+.dish-mods-check {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.dish-mods-check svg {
+    width: 12px;
+    height: 12px;
+}
+
+.dish-mods-row.is-on .dish-mods-price {
+    color: var(--color-accent, #21ea7c);
+}
+
+.dish-mods-row.is-on .dish-mods-check {
+    background: var(--color-accent, #21ea7c);
+    border-color: var(--color-accent, #21ea7c);
+    color: #0c1c11;
+}
+
+.dish-mods-row:focus-visible {
+    outline: 2px solid var(--color-accent, #21ea7c);
+    outline-offset: 2px;
+    border-radius: 8px;
+}

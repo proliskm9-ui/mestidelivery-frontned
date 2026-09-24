@@ -216,18 +216,21 @@
       "  display: flex !important;",
       "  align-items: center !important;",
       "  gap: 12px !important;",
-      "  min-height: 60px !important;",
-      "  margin: 30px 0 36px 0 !important;",
-      "  padding: 0 !important;",
-      "  background: none !important;",
-      "  border: 0 !important;",
-      "  border-radius: 0 !important;",
+      "  min-height: 52px !important;",
+      "  margin: 24px 0 32px 0 !important;",
+      "  padding: 12px 16px !important;",
+      "  background: rgba(255, 255, 255, 0.03) !important;",
+      "  border: 1px solid rgba(255, 255, 255, 0.06) !important;",
+      "  border-radius: 16px !important;",
       "  box-sizing: border-box !important;",
       "  width: 100% !important;",
       "  text-align: left !important;",
       "}",
       ".sunset-modal-footnote svg {",
-      "  display: none !important;",
+      "  width: 20px !important;",
+      "  height: 20px !important;",
+      "  stroke: #21ea7c !important;",
+      "  flex-shrink: 0 !important;",
       "}",
       ".sunset-fn-text {",
       "  flex: 1 !important;",
@@ -237,7 +240,7 @@
       "  align-items: center !important;",
       "}",
       ".sunset-fn-title {",
-      "  font-size: 16px !important;",
+      "  font-size: 15px !important;",
       "  font-weight: 500 !important;",
       "  color: #ffffff !important;",
       "  line-height: 1.3 !important;",
@@ -250,7 +253,7 @@
       "}",
       ".sunset-fn-price {",
       "  grid-column: 2 !important;",
-      "  grid-row: 1 / span 2 !important;",
+      "  grid-row: 1 !important;",
       "  font-size: 15px !important;",
       "  font-weight: 500 !important;",
       "  color: rgba(255, 255, 255, 0.5) !important;",
@@ -314,19 +317,19 @@
     var lang = MestiSunset.getLang();
     var copy = {
       combinable: {
-        ru: ["Упаковка", "Повторные порции без доплаты"],
-        en: ["Packaging", "No charge for extra portions"],
-        ka: ["შეფუთვა", "დამატებითი პორციები უფასოდ"]
+        ru: ["Общий бокс на все порции"],
+        en: ["One box for all portions"],
+        ka: ["ერთი ბოქსი ყველა პორციაზე"]
       },
       individual: {
-        ru: ["Отдельный контейнер", "На каждую порцию"],
-        en: ["Separate container", "For each portion"],
-        ka: ["ცალკე კონტეინერი", "თითოეულ პორციაზე"]
+        ru: ["Контейнер на каждую порцию"],
+        en: ["Container for each portion"],
+        ka: ["კონტეინერი თითოეულ პორციაზე"]
       }
     };
     var c = copy[itemType === "combinable" ? "combinable" : "individual"][lang] || copy.individual.ru;
     // Plain spans only: the observer compares innerHTML, so the markup must serialise back unchanged
-    var textHtml = '<span class="sunset-fn-title">' + c[0] + '</span><span class="sunset-fn-price">+2 ₾</span><span class="sunset-fn-sub">' + c[1] + '</span>';
+    var textHtml = '<span class="sunset-fn-title">' + c[0] + '</span><span class="sunset-fn-price">+2 ₾</span>';
 
     // Determine insertion target (above KBJU section or before meta/add button)
     var targetBefore = null;
