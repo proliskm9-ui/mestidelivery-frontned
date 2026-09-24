@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
 import './OrderDetails.css';
+import Sheet from '../components/UI/Sheet';
 import { api, restaurantCache } from '../services/api';
 import FullPageLoader from '../components/UI/FullPageLoader';
 import NetworkErrorState from '../components/UI/NetworkErrorState';
@@ -62,7 +62,6 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
     const [loading, setLoading] = useState(true);
     const [isNetworkError, setIsNetworkError] = useState(false);
     const [rating, setRating] = useState(0);
-    const [hoverRating, setHoverRating] = useState(0);
 
     const [isSubmittingRating, setIsSubmittingRating] = useState(false);
     const [ratingSubmitted, setRatingSubmitted] = useState(false);
@@ -388,68 +387,31 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                 </div>
             </div>
 
-            {showRatingModal && createPortal(
-                <div className="rating-modal-overlay" onClick={() => setShowRatingModal(false)}>
-                    <div className="rating-modal-content" onClick={e => e.stopPropagation()}>
-                        <div style={{ marginBottom: '16px' }}>
-                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="icon-star-sparkle">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="rgba(245, 158, 11, 0.2)"></path>
+            <Sheet
+                open={showRatingModal}
+                onOpenChange={setShowRatingModal}
+                title={t('order.delivered_title')}
+                description={t('order.delivered_subtitle')}
+                footer={
+                    <>
+                        <button type="button" className="ds-btn ds-btn--primary" onClick={handleModalSubmit} disabled={rating === 0 || isSubmittingRating}>
+                            {isSubmittingRating ? t('order.sending') : t('order.rate')}
+                        </button>
+                        <button type="button" className="md-dialog-cancel" onClick={() => setShowRatingModal(false)}>{t('order.later')}</button>
+                    </>
+                }
+            >
+                <div className="od-rate-stars">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                        <button key={star} type="button" className="od-rate-star" onClick={() => setRating(star)} aria-label={String(star)}>
+                            <svg width="40" height="40" viewBox="0 0 24 24" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"
+                                fill={rating >= star ? '#FFC53D' : 'none'} stroke={rating >= star ? '#FFC53D' : 'rgba(255, 255, 255, 0.24)'}>
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                             </svg>
-                        </div>
-                        <h2 className="pam-title" style={{ fontSize: '24px', marginBottom: '8px' }}>{t('order.delivered_title')}</h2>
-                        <p className="pam-subtitle" style={{ marginBottom: '24px', color: '#888' }}>{t('order.delivered_subtitle')}</p>
-                        
-                        <div className="stars-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}>
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                    key={star}
-                                    type="button"
-                                    className="star-btn"
-                                    onClick={() => setRating(star)}
-                                    onMouseEnter={() => setHoverRating(star)}
-                                    onMouseLeave={() => setHoverRating(0)}
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0', transition: 'transform 0.2s' }}
-                                >
-                                    <svg
-                                        width="40" height="40" viewBox="0 0 24 24"
-                                        fill={(hoverRating || rating) >= star ? "#f59e0b" : "none"}
-                                        stroke={(hoverRating || rating) >= star ? "#f59e0b" : "#555"}
-                                        strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-                                        style={{ transform: (hoverRating || rating) >= star ? 'scale(1.1)' : 'scale(1)' }}
-                                    >
-                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                    </svg>
-                                </button>
-                            ))}
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '12px' }}>
-                            <button
-                                className="pam-save-btn ct-confirm-btn"
-                                onClick={() => setShowRatingModal(false)}
-                                style={{ background: '#3A3A3C', color: '#fff', flex: 1 }}
-                            >
-                                {t('order.later')}
-                            </button>
-                            <button
-                                className="pam-save-btn ct-confirm-btn"
-                                onClick={handleModalSubmit}
-                                disabled={rating === 0 || isSubmittingRating}
-                                style={{
-                                    flex: 1,
-                                    background: rating > 0 ? '#21EA7C' : '#3A3A3C',
-                                    color: rating > 0 ? '#000' : '#888',
-                                    opacity: rating > 0 ? 1 : 0.5,
-                                    cursor: rating > 0 ? 'pointer' : 'not-allowed'
-                                }}
-                            >
-                                {isSubmittingRating ? t('order.sending') : t('order.rate')}
-                            </button>
-                        </div>
-                    </div>
-                </div>,
-                document.body
-            )}
+                        </button>
+                    ))}
+                </div>
+            </Sheet>
         </div>
     );
 };

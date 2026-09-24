@@ -303,37 +303,25 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                 </div>
             </div>
 
-            {showMinOrderModal && (
-                <div className="min-order-overlay" onClick={() => setShowMinOrderModal(false)}>
-                    <div className="min-order-modal" onClick={e => e.stopPropagation()}>
-                        <h3>{t('checkout.min_order_title')}</h3>
-                        <p>
-                            {t('checkout.min_order_desc').split('{diff}').map((part, index, arr) => (
-                                <React.Fragment key={index}>
-                                    {part}
-                                    {index < arr.length - 1 && <strong>{formatPrice(50 - subtotal)}</strong>}
-                                </React.Fragment>
-                            ))}
-                        </p>
-                        <div className="min-order-actions">
-                            <button
-                                type="button"
-                                className="min-order-primary"
-                                onClick={() => { setShowMinOrderModal(false); onBack(); }}
-                            >
-                                {t('cart.go_to_restaurant')}
-                            </button>
-                            <button
-                                type="button"
-                                className="min-order-secondary"
-                                onClick={() => setShowMinOrderModal(false)}
-                            >
-                                {t('checkout.got_it')}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <Dialog
+                open={showMinOrderModal}
+                onOpenChange={setShowMinOrderModal}
+                title={t('checkout.min_order_title')}
+                description={t('checkout.min_order_desc').split('{diff}').map((part, index, arr) => (
+                    <React.Fragment key={index}>
+                        {part}
+                        {index < arr.length - 1 && <strong style={{ color: 'var(--color-accent)' }}>{formatPrice(50 - subtotal)}</strong>}
+                    </React.Fragment>
+                ))}
+                actions={
+                    <>
+                        <button type="button" className="ds-btn ds-btn--primary" onClick={() => { setShowMinOrderModal(false); onBack(); }}>
+                            {t('cart.go_to_restaurant')}
+                        </button>
+                        <DialogClose className="md-dialog-cancel">{t('common.cancel')}</DialogClose>
+                    </>
+                }
+            />
             <Dialog
                 open={confirmClearOpen}
                 onOpenChange={setConfirmClearOpen}

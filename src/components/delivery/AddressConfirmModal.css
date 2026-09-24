@@ -17,7 +17,7 @@
     max-height: min(94vh, 860px);
     display: flex;
     flex-direction: column;
-    background: #161614;
+    background: var(--material-sheet-bg);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 28px;
     overflow: hidden;

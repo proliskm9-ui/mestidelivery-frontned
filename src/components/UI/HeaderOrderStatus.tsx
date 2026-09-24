@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
+import Sheet from './Sheet';
 import { api } from '../../services/api';
 import { useLanguage } from '../../translations/LanguageContext';
 import { Clock, ClipboardCheck, ChefHat, ShoppingBag, Bike, MapPin } from 'lucide-react';
@@ -53,7 +53,6 @@ const HeaderOrderStatus: React.FC<Props> = ({ onNavigate, compact }) => {
 
     // Rating state
     const [showRatingModal, setShowRatingModal] = useState(false);
-    const [hoverRating, setHoverRating] = useState(0);
     const [ratingValue, setRatingValue] = useState(0);
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -225,59 +224,31 @@ const HeaderOrderStatus: React.FC<Props> = ({ onNavigate, compact }) => {
                 </div>
             </div>
 
-            {showRatingModal && createPortal(
-                <div className="premium-modal-overlay-global" onClick={() => setShowRatingModal(false)}>
-                    <div className="premium-modal-content-global" onClick={e => e.stopPropagation()} style={{ maxWidth: '420px', padding: '40px 24px 32px' }}>
-                        <div className="premium-icon-container">
-                            <div className="premium-icon-glow"></div>
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="icon-star-sparkle">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="rgba(245, 158, 11, 0.2)"></path>
+            <Sheet
+                open={showRatingModal}
+                onOpenChange={setShowRatingModal}
+                title={t('menu.order_status_rating.delivered_title')}
+                description={t('menu.order_status_rating.delivered_subtitle')}
+                footer={
+                    <>
+                        <button type="button" className="ds-btn ds-btn--primary" onClick={handleRateSubmit} disabled={ratingValue === 0 || isSubmitting}>
+                            {isSubmitting ? t('menu.order_status_rating.submit_loading') : t('menu.order_status_rating.submit_btn')}
+                        </button>
+                        <button type="button" className="md-dialog-cancel" onClick={() => setShowRatingModal(false)}>{t('menu.order_status_rating.later_btn')}</button>
+                    </>
+                }
+            >
+                <div className="od-rate-stars">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                        <button key={star} type="button" className="od-rate-star" onClick={() => setRatingValue(star)} aria-label={String(star)}>
+                            <svg width="40" height="40" viewBox="0 0 24 24" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"
+                                fill={ratingValue >= star ? '#FFC53D' : 'none'} stroke={ratingValue >= star ? '#FFC53D' : 'rgba(255, 255, 255, 0.24)'}>
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                             </svg>
-                        </div>
-                        <h2 className="premium-modal-title">{t('menu.order_status_rating.delivered_title')}</h2>
-                        <p className="premium-modal-subtitle">{t('menu.order_status_rating.delivered_subtitle')}</p>
-                        
-                        <div className="premium-stars-container">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                    key={star}
-                                    type="button"
-                                    className={`premium-star-btn ${(hoverRating || ratingValue) >= star ? 'active' : ''}`}
-                                    onClick={() => setRatingValue(star)}
-                                    onTouchStart={() => {
-                                        // Prevent default to stop mouseEnter/click double firing on some mobile browsers
-                                        // But actually just setting the value is enough for instant response
-                                        setRatingValue(star);
-                                    }}
-                                    onMouseEnter={() => setHoverRating(star)}
-                                    onMouseLeave={() => setHoverRating(0)}
-                                >
-                                    <svg width="100%" height="100%" viewBox="0 0 24 24" fill={(hoverRating || ratingValue) >= star ? "#f59e0b" : "none"} stroke={(hoverRating || ratingValue) >= star ? "#f59e0b" : "rgba(255,255,255,0.2)"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                                    </svg>
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="premium-modal-actions">
-                            <button 
-                                onClick={handleRateSubmit}
-                                disabled={ratingValue === 0 || isSubmitting}
-                                className={`premium-btn-submit ${ratingValue > 0 ? 'ready' : ''}`}
-                            >
-                                {isSubmitting ? t('menu.order_status_rating.submit_loading') : t('menu.order_status_rating.submit_btn')}
-                            </button>
-                            <button
-                                onClick={() => setShowRatingModal(false)}
-                                className="premium-btn-later"
-                            >
-                                {t('menu.order_status_rating.later_btn')}
-                            </button>
-                        </div>
-                    </div>
-                </div>,
-                document.body
-            )}
+                        </button>
+                    ))}
+                </div>
+            </Sheet>
         </>
     );
 };

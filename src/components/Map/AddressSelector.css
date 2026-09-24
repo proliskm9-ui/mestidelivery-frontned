@@ -101,7 +101,7 @@
 }
 
 .as-bottom-panel {
-    background: #181818;
+    background: var(--material-sheet-bg);
     padding: 24px 20px 40px;
     /* Extra bottom padding for mobile safe area */
     border-top: 1px solid #333;

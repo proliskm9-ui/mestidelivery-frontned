@@ -241,3 +241,37 @@ button.ds-row {
     color: var(--color-accent);
     font-weight: 600;
 }
+
+/* Menu sort / rating popovers (inline-styled in Menu.tsx): same surface as sheets */
+.filter-popover {
+    background: var(--material-sheet-bg) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 20px !important;
+    box-shadow: var(--shadow-3) !important;
+}
+
+.filter-popover h3 {
+    font: var(--t-nav-title) !important;
+    letter-spacing: var(--tracking-tight);
+}
+
+/* Star picker used by the short rating sheets */
+.od-rate-stars {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 4px 0 8px;
+}
+
+.od-rate-star {
+    padding: 4px;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform var(--dur-press) var(--ease-out);
+}
+
+.od-rate-star:active {
+    transform: scale(0.9);
+}

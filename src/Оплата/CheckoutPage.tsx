@@ -167,8 +167,8 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
   });
   // System Back closes whichever checkout sheet is open instead of leaving checkout
   // Sheets handle Back themselves; the map (custom full-height modal) and phone editor need it here
-  useBackToClose(modals.map || modals.phone, () =>
-    setModals((prev) => ({ ...prev, map: false, phone: false }))
+  useBackToClose(modals.map, () =>
+    setModals((prev) => ({ ...prev, map: false }))
   );
 
   // Хелпер для открытия/закрытия
@@ -425,14 +425,12 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
           />
 
         {/* 6. Телефон */}
-        {modals.phone && (
-          <PhoneModal
+                  <PhoneModal
             isOpen={modals.phone}
             onClose={() => toggleModal('phone', false)}
             currentValue={orderData.address.phone}
             onSave={(val: string) => updateAddress('phone', val)}
           />
-        )}
 
         {modals.map && (
           <MapModal

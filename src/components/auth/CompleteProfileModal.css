@@ -13,7 +13,7 @@
 .cpm-card {
   width: 100%;
   max-width: 420px;
-  background: #151514;
+  background: var(--material-sheet-bg);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 28px;
   padding: 28px 24px 24px;
