@@ -352,13 +352,13 @@
   }
 
   function updateSummaryRows() {
-    var isSunset = MestiSunset.isCurrentPageSunset();
     var cartItems = getActiveSunsetCartItems();
-    if (!isSunset && cartItems.length > 0) {
-      isSunset = cartItems.some(function (it) {
-        return MestiSunset.getItemType(it.name) !== "free";
-      });
-    }
+    // The app publishes which restaurant the cart belongs to. Without it we only
+    // trust the page itself: "any cart with a non-free dish" matched every restaurant.
+    var cartRest = window.__mestiCartRestaurant;
+    var isSunset = cartRest
+      ? MestiSunset.isSunsetRestaurant(cartRest.id, cartRest.name)
+      : MestiSunset.isCurrentPageSunset();
 
     if (!isSunset) {
       document.querySelectorAll(".sunset-pkg-row, .cw-sunset-pkg-row").forEach(function (el) { el.remove(); });
@@ -375,7 +375,8 @@
       var existingCwRow = cartWidget.querySelector(".cw-sunset-pkg-row");
       if (existingCwRow) {
         var valSpan = existingCwRow.querySelector(".cw-pkg-val");
-        if (valSpan) valSpan.textContent = "+" + fee.toFixed(2) + " ₾";
+        var cwText = "+" + fee.toFixed(2) + " ₾";
+        if (valSpan && valSpan.textContent !== cwText) valSpan.textContent = cwText;
       } else {
         var cwRow = document.createElement("div");
         cwRow.className = "cw-sunset-pkg-row";
@@ -396,7 +397,8 @@
       var existingRow = container.querySelector(".sunset-pkg-row");
       if (existingRow) {
         var valSpan = existingRow.querySelector(".sunset-pkg-val");
-        if (valSpan) valSpan.textContent = "+" + fee.toFixed(2) + " ₾";
+        var rowText = "+" + fee.toFixed(2) + " ₾";
+        if (valSpan && valSpan.textContent !== rowText) valSpan.textContent = rowText;
       } else {
         var row = document.createElement("div");
         row.className = "summary-line sunset-pkg-row";

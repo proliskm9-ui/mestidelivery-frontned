@@ -231,6 +231,11 @@ function AppContent() {
         if (location.pathname !== expected) navigate(expected, { replace: true });
     }, [currentPage, language, location.pathname, navigate, selectedOrderId]);
     const [cart, setCart] = useState<{ product: any, quantity: number }[]>([]);
+    // Tell the server-side helpers (Sunset packaging) whose cart this is
+    useEffect(() => {
+        const rid = cart[0]?.product?.restaurant_id;
+        (window as any).__mestiCartRestaurant = rid ? { id: rid, name: restaurantCache[`rest_${rid}`]?.name || '' } : null;
+    }, [cart]);
     const [pendingProductToAdd, setPendingProductToAdd] = useState<any>(null);
     const [pendingOrderData, setPendingOrderData] = useState<any>(null);
 
