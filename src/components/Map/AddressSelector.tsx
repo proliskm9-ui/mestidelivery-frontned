@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 import { useLanguage } from '../../translations/LanguageContext';
 import LocationPicker from '../delivery/LocationPicker';
 import { MESTIA_CENTER } from '../../types/delivery';
@@ -76,7 +77,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onClose, onSelect }) 
                 {view === 'map' && (
                     <div className="map-view-container">
                         <div className="map-header-floating">
-                            <button className="close-btn-round" onClick={onClose} type="button">✕</button>
+                            <button className="close-btn-round" onClick={onClose} type="button" aria-label="Close"><X size={20} strokeWidth={2.4} /></button>
                             <span className="map-title-floating">{t('map.title')}</span>
                         </div>
 
@@ -108,7 +109,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onClose, onSelect }) 
                         <div className="form-header">
                             <button className="back-btn" type="button" onClick={() => setView('map')}>←</button>
                             <h3>{t('map.details')}</h3>
-                            <button className="close-btn-text" type="button" onClick={onClose}>✕</button>
+                            <button className="close-btn-text" type="button" onClick={onClose} aria-label="Close"><X size={20} strokeWidth={2.4} /></button>
                         </div>
 
                         <div className="form-body">

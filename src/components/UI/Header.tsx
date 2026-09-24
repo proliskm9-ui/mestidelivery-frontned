@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Gift } from 'lucide-react';
 import { useLanguage } from '@/translations/LanguageContext';
 import HeaderOrderStatus from './HeaderOrderStatus';
 import AddressConfirmModal from '../delivery/AddressConfirmModal';
@@ -223,7 +224,7 @@ const Header: React.FC<HeaderProps> = (props) => {
             {referralModalOpen && (
                 <div className="modal-overlay pam-overlay" onClick={() => setReferralModalOpen(false)}>
                     <div className="premium-address-modal" onClick={e => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
-                        <div style={{ fontSize: '64px', marginBottom: '20px' }}>🎁</div>
+                        <Gift size={48} strokeWidth={1.6} color="#21EA7C" style={{ marginBottom: '20px' }} aria-hidden="true" />
                         <h2 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '12px', color: '#fff' }}>{t('referral.title')}</h2>
                         <p style={{ color: '#8E8E93', marginBottom: '32px', lineHeight: 1.5 }}>
                             {t('referral.desc').split('{bonuses}')[0]}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Flame } from 'lucide-react';
 import './HeaderBlock.css';
 import { useLanguage } from '../../../translations/LanguageContext';
 import { useRushStatus, rushTitle, rushDescription } from '../../../utils/rushStatus';
@@ -78,7 +79,7 @@ const HeaderBlock: React.FC<HeaderBlockProps> = ({
       {rush.isRush && (
         <div className="rush-hour-badge">
           <div className="rush-hour-header">
-            <span className="rush-flame">🔥</span>
+            <Flame className="rush-flame" size={15} strokeWidth={2.2} aria-hidden="true" />
             <span>{rushTitle(rush, language)}</span>
           </div>
           <p className="rush-hour-desc">{rushDescription(language)}</p>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Cookie } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../translations/LanguageContext';
 import { useDeliveryLocationOptional } from '../../delivery/DeliveryLocationContext';
@@ -93,7 +94,7 @@ const CookieConsentBanner: React.FC = () => {
                 animation: 'cookieFadeUp 0.5s cubic-bezier(0.16,1,0.3,1) forwards',
             }}>
                 {/* Icon */}
-                <span style={{ fontSize: '26px', flexShrink: 0, lineHeight: 1, userSelect: 'none' }}>🍪</span>
+                <Cookie size={24} strokeWidth={1.8} color="#21EA7C" style={{ flexShrink: 0 }} aria-hidden="true" />
 
                 {/* Text */}
                 <p style={{

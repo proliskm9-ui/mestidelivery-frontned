@@ -212,7 +212,7 @@ const MobileHome: React.FC<{ onNavigate: (page: string) => void }> = ({ onNaviga
 
                     <div className="mobile-partner-cards">
                         <div className="mobile-partner-card mobile-reveal" style={{ transitionDelay: '0s' }}>
-                            <h3>🍽 {t('home.why_us_feature3_title')}</h3>
+                            <h3>{t('home.why_us_feature3_title')}</h3>
                             <p>{t('home.partner_restaurant_desc')}</p>
                             <button className="mobile-btn-green" onClick={() => openPartnerForm('restaurant')}>
                                 {t('home.partner_restaurant_btn')}
@@ -220,7 +220,7 @@ const MobileHome: React.FC<{ onNavigate: (page: string) => void }> = ({ onNaviga
                         </div>
 
                         <div className="mobile-partner-card mobile-reveal" style={{ transitionDelay: '0.2s' }}>
-                            <h3>🚴 {t('home.partner_courier_title')}</h3>
+                            <h3>{t('home.partner_courier_title')}</h3>
                             <p>{t('home.partner_courier_desc')}</p>
                             <button className="mobile-btn-outline" onClick={() => openPartnerForm('courier')}>
                                 {t('home.partner_courier_form_btn')}

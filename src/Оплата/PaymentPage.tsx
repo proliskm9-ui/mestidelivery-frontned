@@ -8,7 +8,7 @@ import { useLanguage } from '../translations/LanguageContext';
 import { formatCheckoutAddress, formatCourierComment } from '../utils/checkoutAddress';
 import { ENABLE_CRYPTO_PAY } from '../config/features';
 import { toast } from 'sonner';
-import { CreditCard, MessageCircle } from 'lucide-react';
+import { AlertTriangle, CreditCard, Hourglass, MessageCircle } from 'lucide-react';
 import { formatPrice } from '../utils/formatPrice';
 
 /** Keepz payment link — Tribute removed. */
@@ -454,7 +454,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                         {screen === 'waiting' && (
                             <div className="mp-loading-overlay mp-waiting-overlay">
                                 <div className="mp-pulse-ring" />
-                                <div className="mp-waiting-icon">⏳</div>
+                                <div className="mp-waiting-icon"><Hourglass size={40} strokeWidth={1.8} color="#21ea7c" aria-hidden="true" /></div>
                                 <h3>{t('checkout.awaiting_confirmation')}</h3>
                                 <p className="mp-waiting-desc">
                                     {t('checkout.pay_in_window')}
@@ -520,7 +520,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                         {/* ERROR — timeout */}
                         {screen === 'error' && (
                             <div className="mp-loading-overlay mp-error-overlay">
-                                <div style={{ fontSize: '48px' }}>⚠️</div>
+                                <AlertTriangle size={44} strokeWidth={1.8} color="#fbbf24" aria-hidden="true" />
                                 <h3>{t('checkout.waiting_timeout')}</h3>
                                 <p>{t('checkout.check_telegram_status')}</p>
                                 {orderId && (

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Flame } from 'lucide-react';
 import './Checkout.css';
 import { useRushStatus, rushTitle, rushDescription } from '../utils/rushStatus';
 import { deviceHasOrdered, accountHasOrders } from '../utils/deliveryPromo';
@@ -265,7 +266,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                                 {rushState.isRush && (
                                     <div className="rush-hour-badge">
                                         <div className="rush-hour-header">
-                                            <span className="rush-flame">🔥</span>
+                                            <Flame className="rush-flame" size={15} strokeWidth={2.2} aria-hidden="true" />
                                             <span>
                                                 {rushTitle(rushState, language)}
                                             </span>

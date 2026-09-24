@@ -28,7 +28,7 @@ const customerIcon = L.divIcon({
 
 const courierIcon = L.divIcon({
     className: 'ltm-pin',
-    html: `<div style="font-size:22px;line-height:1">🚘</div>`,
+    html: `<div style="width:28px;height:28px;border-radius:50%;background:#21EA7C;display:grid;place-items:center;box-shadow:0 0 0 3px rgba(33,234,124,.25),0 4px 12px rgba(0,0,0,.4)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0c1c11" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg></div>`,
     iconSize: [28, 28],
     iconAnchor: [14, 14],
 });

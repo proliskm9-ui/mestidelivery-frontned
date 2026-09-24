@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Store as StoreIcon, UtensilsCrossed } from 'lucide-react';
 import { api, Restaurant, Store } from '../services/api';
 import { useLanguage } from '../translations/LanguageContext';
 import { matchesI18nContent } from '../utils/i18nContent';
@@ -213,8 +214,8 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
 
                 {noResults && (
                     <div style={{ padding: '60px 20px', textAlign: 'center', color: '#666' }}>
-                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>
-                            {activeTab === 'restaurants' ? '🍽️' : '🏪'}
+                        <div style={{ marginBottom: '16px', color: 'rgba(255, 255, 255, 0.3)' }} aria-hidden="true">
+                            {activeTab === 'restaurants' ? <UtensilsCrossed size={44} strokeWidth={1.6} /> : <StoreIcon size={44} strokeWidth={1.6} />}
                         </div>
                         <div style={{ fontSize: '1rem', fontWeight: 600, color: '#888' }}>
                             {searchQuery
