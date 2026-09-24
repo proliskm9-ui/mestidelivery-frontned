@@ -15,8 +15,8 @@
 
   var I18N = {
     ru: {
-      sauceTitle: "Выбери соус",
-      sauceSub: "Необязательно, выберите до 2",
+      sauceTitle: "К блюду",
+      sauceSub: "По желанию",
       breadTitle: "Хлеб к блюду",
       breadSub: "Необязательно, выберите 1",
       tkemali: "Ткемали",
@@ -26,8 +26,8 @@
       cartUpsellTitle: "Не забудьте к заказу:"
     },
     en: {
-      sauceTitle: "Choose sauce",
-      sauceSub: "Optional, choose up to 2",
+      sauceTitle: "With your dish",
+      sauceSub: "Optional",
       breadTitle: "Bread with dish",
       breadSub: "Optional, choose 1",
       tkemali: "Tkemali",
@@ -37,8 +37,8 @@
       cartUpsellTitle: "Don't forget with your order:"
     },
     ka: {
-      sauceTitle: "აირჩიეთ სოუსი",
-      sauceSub: "არასავალდებულო, აირჩიეთ 2-მდე",
+      sauceTitle: "კერძთან ერთად",
+      sauceSub: "სურვილისამებრ",
       breadTitle: "პური კერძთან",
       breadSub: "არასავალდებულო, აირჩიეთ 1",
       tkemali: "ტყემალი",
@@ -275,6 +275,19 @@
       ".ym-row.selected .ym-price {",
       "  color: #21ea7c !important;",
       "}",
+      "/* Design system pass: one card, hairline rows, round checks */",
+      ".ym-container { margin: 4px 0 20px 0 !important; gap: 12px !important; }",
+      ".ym-section { background: rgba(255, 255, 255, 0.04) !important; border: 0 !important; border-radius: 20px !important; padding: 0 16px !important; }",
+      ".ym-header { display: flex !important; align-items: baseline !important; justify-content: space-between !important; margin: 0 !important; padding: 14px 0 6px !important; }",
+      ".ym-title { font-size: 16px !important; font-weight: 700 !important; letter-spacing: -0.01em !important; }",
+      ".ym-subtitle { margin: 0 !important; font-size: 13px !important; color: rgba(255, 255, 255, 0.4) !important; }",
+      ".ym-row, .ym-row:first-child, .ym-row:last-child { min-height: 52px !important; padding: 0 !important; box-sizing: border-box !important; }",
+      ".ym-row { border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important; -webkit-tap-highlight-color: transparent !important; }",
+      ".ym-row:last-child { border-bottom: 0 !important; }",
+      ".ym-checkbox { width: 22px !important; height: 22px !important; border-radius: 50% !important; border: 2px solid rgba(255, 255, 255, 0.22) !important; background: transparent !important; }",
+      ".ym-row.selected .ym-checkbox { background: #21ea7c !important; border-color: #21ea7c !important; }",
+      ".ym-name { font-size: 15px !important; font-weight: 500 !important; }",
+      ".ym-price { font-size: 15px !important; font-weight: 600 !important; color: rgba(255, 255, 255, 0.5) !important; }",
       "/* Cart Upsell Strip */",
       ".bbq-cart-upsell {",
       "  margin: 12px 0 16px 0 !important;",
@@ -456,30 +469,22 @@
       '</div>'
     ].join("");
     container.appendChild(secSauces);
-
-    // Section 2: Bread (Choose 1)
-    var secBread = document.createElement("div");
-    secBread.className = "ym-section";
-    secBread.innerHTML = [
-      '<div class="ym-header">',
-      '  <div class="ym-title">' + MestiBBQ.getText("breadTitle") + '</div>',
-      '  <div class="ym-subtitle">' + MestiBBQ.getText("breadSub") + '</div>',
-      '</div>',
-      '<div class="ym-list">',
+    secSauces.querySelector(".ym-list").insertAdjacentHTML("beforeend", [
       '  <div class="ym-row" data-id="prod-1785110345515266453" data-group="bread" data-search="Хлеб" data-price="5">',
       '    <div class="ym-left">',
       '      <div class="ym-checkbox"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg></div>',
       '      <div class="ym-name">' + MestiBBQ.getText("bread") + '</div>',
       '    </div>',
       '    <div class="ym-price">+5 ₾</div>',
-      '  </div>',
-      '</div>'
-    ].join("");
-    container.appendChild(secBread);
+      '  </div>'
+    ].join(""));
 
     // Insertion:
     if (isMobile) {
-      body.appendChild(container);
+      // Right under the description, not below the nutrition facts
+      var kbju = body.querySelector(".kbju-section-v2, .section-label-v3, .kbju-grid-modal");
+      if (kbju && kbju.parentElement === body) body.insertBefore(container, kbju);
+      else body.appendChild(container);
     } else {
       body.insertBefore(container, addBtn);
     }

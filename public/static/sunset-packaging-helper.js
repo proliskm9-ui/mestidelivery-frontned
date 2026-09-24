@@ -215,28 +215,56 @@
       ".sunset-modal-footnote {",
       "  display: flex !important;",
       "  align-items: center !important;",
-      "  justify-content: center !important;",
-      "  gap: 6px !important;",
-      "  font-size: 12px !important;",
-      "  font-weight: 500 !important;",
-      "  color: rgba(255, 255, 255, 0.52) !important;",
-      "  margin: 0 0 8px 0 !important;",
-      "  text-align: center !important;",
-      "  line-height: 1.3 !important;",
+      "  gap: 12px !important;",
+      "  min-height: 60px !important;",
+      "  margin: 4px 0 20px 0 !important;",
+      "  padding: 10px 16px !important;",
+      "  background: rgba(255, 255, 255, 0.04) !important;",
+      "  border-radius: 20px !important;",
       "  box-sizing: border-box !important;",
       "  width: 100% !important;",
-      "}",
-      "body.light-theme .sunset-modal-footnote, [data-theme='light'] .sunset-modal-footnote {",
-      "  color: rgba(0, 0, 0, 0.52) !important;",
+      "  text-align: left !important;",
       "}",
       ".sunset-modal-footnote svg {",
-      "  width: 13px !important;",
-      "  height: 13px !important;",
-      "  stroke: rgba(255, 255, 255, 0.55) !important;",
+      "  width: 22px !important;",
+      "  height: 22px !important;",
+      "  stroke: #21ea7c !important;",
       "  flex-shrink: 0 !important;",
       "}",
-      "body.light-theme .sunset-modal-footnote svg, [data-theme='light'] .sunset-modal-footnote svg {",
-      "  stroke: rgba(0, 0, 0, 0.55) !important;",
+      ".sunset-fn-text {",
+      "  flex: 1 !important;",
+      "  display: grid !important;",
+      "  grid-template-columns: 1fr auto !important;",
+      "  column-gap: 12px !important;",
+      "  align-items: center !important;",
+      "}",
+      ".sunset-fn-title {",
+      "  font-size: 15px !important;",
+      "  font-weight: 500 !important;",
+      "  color: #ffffff !important;",
+      "  line-height: 1.3 !important;",
+      "}",
+      ".sunset-fn-sub {",
+      "  grid-column: 1 !important;",
+      "  font-size: 13px !important;",
+      "  color: rgba(255, 255, 255, 0.45) !important;",
+      "  line-height: 1.3 !important;",
+      "}",
+      ".sunset-fn-price {",
+      "  grid-column: 2 !important;",
+      "  grid-row: 1 / span 2 !important;",
+      "  font-size: 15px !important;",
+      "  font-weight: 600 !important;",
+      "  color: rgba(255, 255, 255, 0.5) !important;",
+      "}",
+      "body.light-theme .sunset-modal-footnote, [data-theme='light'] .sunset-modal-footnote {",
+      "  background: rgba(0, 0, 0, 0.04) !important;",
+      "}",
+      "body.light-theme .sunset-fn-title, [data-theme='light'] .sunset-fn-title {",
+      "  color: #111111 !important;",
+      "}",
+      "body.light-theme .sunset-fn-sub, [data-theme='light'] .sunset-fn-sub {",
+      "  color: rgba(0, 0, 0, 0.5) !important;",
       "}"
     ].join("\n");
     (document.head || document.documentElement).appendChild(style);
@@ -288,24 +316,21 @@
     }
 
     var lang = MestiSunset.getLang();
-    var textHtml = "";
-    if (itemType === "combinable") {
-      if (lang === "ka") {
-        textHtml = "შეფუთვა: <strong>2 ₾</strong> (განმეორებითი პორციები ერთ ბოქსში დამატებითი გადასახადის გარეშე)";
-      } else if (lang === "en") {
-        textHtml = "Packaging: <strong>2 ₾</strong> (repeated portions packed in a single box at no extra charge)";
-      } else {
-        textHtml = "Упаковка: <strong>2 ₾</strong> (повторные порции упакуем в общий бокс без доплаты)";
+    var copy = {
+      combinable: {
+        ru: ["Упаковка", "Повторные порции без доплаты"],
+        en: ["Packaging", "No charge for extra portions"],
+        ka: ["შეფუთვა", "დამატებითი პორციები უფასოდ"]
+      },
+      individual: {
+        ru: ["Отдельный контейнер", "На каждую порцию"],
+        en: ["Separate container", "For each portion"],
+        ka: ["ცალკე კონტეინერი", "თითოეულ პორციაზე"]
       }
-    } else {
-      if (lang === "ka") {
-        textHtml = "ინდივიდუალური ბოქსი: <strong>+2 ₾</strong> (ცალკე კონტეინერი თითოეულ პორციაზე)";
-      } else if (lang === "en") {
-        textHtml = "Individual box: <strong>+2 ₾</strong> (separate container for each portion)";
-      } else {
-        textHtml = "Индивидуальный бокс: <strong>+2 ₾</strong> (отдельный контейнер на каждую порцию)";
-      }
-    }
+    };
+    var c = copy[itemType === "combinable" ? "combinable" : "individual"][lang] || copy.individual.ru;
+    // Plain spans only: the observer compares innerHTML, so the markup must serialise back unchanged
+    var textHtml = '<span class="sunset-fn-title">' + c[0] + '</span><span class="sunset-fn-price">+2 ₾</span><span class="sunset-fn-sub">' + c[1] + '</span>';
 
     // Determine insertion target (above KBJU section or before meta/add button)
     var targetBefore = null;
