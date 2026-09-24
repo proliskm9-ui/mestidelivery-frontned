@@ -863,67 +863,6 @@
         transform: translateY(0);
     }
 }
-/* ---------- Restaurant cover (hero) ----------
-   Full-bleed photo behind the nav buttons; the title sits on the fade into the panel. */
-.v2-header-block.has-hero {
-    overflow: hidden;
-    isolation: isolate;
-}
-
-.v2-hero {
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: calc(180px + env(safe-area-inset-top, 0px));
-    z-index: -1;
-    overflow: hidden;
-    pointer-events: none;
-    animation: v2HeroIn 500ms var(--ease-out) both;
-}
-
-.v2-hero-img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform-origin: 50% 0;
-    will-change: transform;
-}
-
-.v2-hero::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-        linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 32%),
-        linear-gradient(180deg, rgba(28, 28, 27, 0) 45%, rgba(28, 28, 27, 0.85) 80%, #1c1c1b 100%);
-}
-
-@keyframes v2HeroIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-/* Nav buttons read on top of a photo */
-.v2-header-block.has-hero .v2-nav-btn {
-    background: rgba(12, 12, 12, 0.42);
-    border-color: rgba(255, 255, 255, 0.14);
-}
-
-/* Title lands on the lower part of the cover */
-.v2-header-block.has-hero .v2-nav-bar {
-    margin-bottom: 64px;
-}
-
-.v2-header-block.has-hero .v2-header-title {
-    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .v2-hero {
-        animation-duration: 1ms;
-    }
-}
-
 /* ---------- Add-to-cart feedback ----------
    Frequent action: short and subtle (press 0.9 on the control, 0.98 on the card, number tick). */
 .mobile-restaurant-page .qty-btn {

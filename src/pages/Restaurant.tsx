@@ -13,6 +13,7 @@ import './Restaurant.css';
 import './MobileRestaurant.css';
 import { useBackToClose } from '../hooks/useBackToClose';
 import { formatPrice } from '../utils/formatPrice';
+import { deviceHasOrdered, accountHasOrders } from '../utils/deliveryPromo';
 import { cuisineLine } from '../utils/restaurantCuisine';
 import Sheet from '../components/UI/Sheet';
 
@@ -127,7 +128,6 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     useBackToClose(Boolean(selectedProduct), () => setSelectedProduct(null));
     const cartWidgetRef = useRef<HTMLDivElement>(null);
     const infoCardRef = useRef<HTMLDivElement>(null);
-    const heroImgRef = useRef<HTMLImageElement>(null);
     // Dish photo flies from the grid card into the sheet (View Transitions; plain open elsewhere)
     const dishCardImgRef = useRef<HTMLImageElement | null>(null);
     const canMorph = () =>
@@ -224,13 +224,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
             ticking = true;
             window.requestAnimationFrame(() => {
                 if (isMobile) {
-                    const hero = heroImgRef.current;
-                    const y = window.scrollY;
-                    if (hero && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                        // Pull-down stretches the cover, scrolling lets it lag behind (native feel)
-                        hero.style.transform = y < 0 ? `scale(${1 + -y / 260})` : `translate3d(0, ${Math.min(y, 400) * 0.35}px, 0)`;
-                    }
-                    setIsScrolled(y > (hero ? 230 : 90));
+                    setIsScrolled(window.scrollY > 90);
                 } else {
                     const info = infoCardRef.current;
                     if (info) {
@@ -339,28 +333,26 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
         setActiveCategory(cat);
     };
 
-    // Scroll-spy: auto-highlight active category based on scroll position
+    // Scroll-spy: the active category is the last section whose top has passed under the
+    // sticky header; before any has, it's the first one (fixes a random tab lit on open).
     useEffect(() => {
         if (mobileCategories.length === 0) return;
-        const observerOptions = {
-            root: null,
-            rootMargin: isMobile ? '-140px 0px -60% 0px' : '-145px 0px -55% 0px',
-            threshold: 0,
-        };
-        const observer = new IntersectionObserver((entries) => {
-            for (const entry of entries) {
-                if (entry.isIntersecting) {
-                    const cat = entry.target.getAttribute('data-category');
-                    if (cat) setActiveCategory(cat);
-                }
+        let frame = 0;
+        const update = () => {
+            frame = 0;
+            const line = isMobile ? 170 : 160;
+            let current = mobileCategories[0];
+            for (const cat of mobileCategories) {
+                const el = sectionRefs.current[cat];
+                if (el && el.getBoundingClientRect().top <= line) current = cat;
             }
-        }, observerOptions);
-        for (const cat of mobileCategories) {
-            const el = sectionRefs.current[cat];
-            if (el) observer.observe(el);
-        }
-        return () => observer.disconnect();
-    }, [isMobile, products]);
+            setActiveCategory(current);
+        };
+        const onScroll = () => { if (!frame) frame = requestAnimationFrame(update); };
+        update();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => { window.removeEventListener('scroll', onScroll); cancelAnimationFrame(frame); };
+    }, [isMobile, products]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const scrollToCategoryDesktop = (cat: string) => {
         const el = sectionRefs.current[cat];
@@ -377,8 +369,6 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
 
     const getCategoryDisplayName = (cat: string) => localizeMenuCategory(cat, t);
     const restaurantDisplayName = locName(restaurant.name).replace(/Restaraunt/gi, 'Restaurant');
-    // Cover: dedicated hero image, else the card photo the user just tapped in the catalog
-    const heroImage = restaurant.screen || restaurant.img || '';
 
     const restaurantClosedHint = closedBadgeText(restaurant.working_hours, language);
     const restaurantIsOpen = isRestaurantOpenNow(restaurant.working_hours);
@@ -448,10 +438,32 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
         </Sheet>
     );
 
-    const closedBanner = !restaurantIsOpen && restaurantClosedHint ? (
-        <div className="rest-closed-banner" role="status">
-            <strong>{restaurantClosedHint}</strong>
-            {hasNextOpen && <span>Можно собрать корзину и оформить ко времени на открытие.</span>}
+    // Notices at the top of the menu (Yandex-style tiles): closed hours, first-order offer
+    const showFirstOrderPromo = !deviceHasOrdered() && !accountHasOrders();
+    const menuNotices = (!restaurantIsOpen && restaurantClosedHint) || showFirstOrderPromo ? (
+        <div className="rest-notices">
+            {!restaurantIsOpen && restaurantClosedHint && (
+                <div className="rest-notice rest-notice--closed" role="status">
+                    <span className="rest-notice-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><polyline points="12 7 12 12 15 14" /></svg>
+                    </span>
+                    <span className="rest-notice-text">
+                        <span className="rest-notice-title">{restaurantClosedHint}</span>
+                        {hasNextOpen && <span className="rest-notice-sub">{t('restaurant.closed_preorder')}</span>}
+                    </span>
+                </div>
+            )}
+            {showFirstOrderPromo && (
+                <div className="rest-notice rest-notice--promo">
+                    <span className="rest-notice-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12" /><rect x="2" y="7" width="20" height="5" rx="1" /><line x1="12" y1="22" x2="12" y2="7" /><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" /><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" /></svg>
+                    </span>
+                    <span className="rest-notice-text">
+                        <span className="rest-notice-title">{t('restaurant.promo_free_title')}</span>
+                        <span className="rest-notice-sub">{t('restaurant.promo_free_sub')}</span>
+                    </span>
+                </div>
+            )}
         </div>
     ) : null;
 
@@ -613,7 +625,6 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                 )}
 
                                 <h1 className="ric-title">{restaurantDisplayName}</h1>
-                                {closedBanner}
 
                                 <div className="ric-meta-row">
                                     <div className="ric-meta-item">
@@ -678,6 +689,8 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                 {renderCategoryNav('rest-sticky-cats')}
                             </div>
                         </div>
+
+                        {menuNotices}
 
                         {desktopFilteredCategories.map((cat) => (
                             <div
@@ -900,12 +913,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
             </div>
 
             {/* === Main Header (hides on scroll) === */}
-            <div className={heroImage ? 'v2-header-block has-hero' : 'v2-header-block'}>
-                {heroImage && (
-                    <div className="v2-hero" aria-hidden="true">
-                        <img ref={heroImgRef} className="v2-hero-img" src={heroImage} alt="" decoding="async" />
-                    </div>
-                )}
+            <div className="v2-header-block">
                 {/* Nav row OR Search bar */}
                 {isSearchOpen ? (
                     <div className="v2-nav-bar v2-search-bar">
@@ -958,7 +966,6 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                 {/* Restaurant info always stays visible */}
                 <div className="v2-title-section">
                     <h1 className="v2-header-title">{restaurantDisplayName}</h1>
-                    {closedBanner}
                 </div>
 
                 <div className="v2-meta-row">
@@ -1010,6 +1017,8 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                         </div>
                     ))}
                 </div>
+
+                {!mobileSearchQuery.trim() && menuNotices}
 
                 {mobileSearchQuery.trim() && filteredProducts.length === 0 ? (
                     <div className="v2-search-empty">{t('restaurant.search_empty')}</div>

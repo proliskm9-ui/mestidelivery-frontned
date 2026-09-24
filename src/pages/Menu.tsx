@@ -5,7 +5,6 @@ import StoreCard from '../components/UI/StoreCard';
 import { useLanguage } from '../translations/LanguageContext';
 import Header from '../components/UI/Header';
 import FastTravelBlock from '../components/UI/FastTravelBlock';
-import { morphNavigate } from '../utils/morph';
 import PromoBanner from '../components/UI/PromoBanner';
 import AddressDeliveryPrompt from '../components/UI/AddressDeliveryPrompt';
 import MobileRestaurantCard from '../components/UI/MobileRestaurantCard';
@@ -86,16 +85,6 @@ const MenuPage: React.FC<{
         isMobileSource?: boolean
     } | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
-    // Catalog photo grows into the restaurant cover (mobile; desktop has no cover)
-    const lastCardImgRef = useRef<HTMLImageElement | null>(null);
-    const rememberCardImg = (e: React.MouseEvent) => {
-        const card = (e.target as HTMLElement).closest('.rest-card, .allRestaurantCard');
-        lastCardImgRef.current = card ? card.querySelector<HTMLImageElement>('img[loading="lazy"]') : null;
-    };
-    const openRestaurant = (id: string) => {
-        if (window.innerWidth > 1024) { onRestaurantClick(id); return; }
-        morphNavigate(lastCardImgRef.current, 'rest-photo', () => onRestaurantClick(id), '.v2-hero-img');
-    };
     const [activeCategories, setActiveCategories] = useState<string[]>([]);
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [showRatingModal, setShowRatingModal] = useState(false);
@@ -444,7 +433,7 @@ const MenuPage: React.FC<{
                         <RestaurantCard
                             key={item.id}
                             item={item}
-                            onClick={() => openRestaurant(item.id)}
+                            onClick={() => onRestaurantClick(item.id)}
                             isVertical
                             isFavorite={favorites.includes(item.id)}
                             onToggleFavorite={() => onToggleFavorite && onToggleFavorite(item.id)}
@@ -469,7 +458,7 @@ const MenuPage: React.FC<{
     );
 
     return (
-        <div className="menu-page" onClickCapture={rememberCardImg}>
+        <div className="menu-page">
             <Header
                 onLogoClick={() => setActiveCollection(null)}
                 userAddress={userAddress}
@@ -577,7 +566,7 @@ const MenuPage: React.FC<{
                                     <MobileRestaurantCard
                                         key={item.id}
                                         item={item}
-                                        onClick={() => openRestaurant(item.id)}
+                                        onClick={() => onRestaurantClick(item.id)}
                                         isFavorite={favorites.includes(item.id)}
                                         onToggleFavorite={() => onToggleFavorite && onToggleFavorite(item.id)}
                                     />
@@ -700,7 +689,7 @@ const MenuPage: React.FC<{
                                     <RestaurantCard
                                         key={`must-try-${item.id}`}
                                         item={item}
-                                        onClick={() => openRestaurant(item.id)}
+                                        onClick={() => onRestaurantClick(item.id)}
                                         isFavorite={favorites.includes(item.id)}
                                         onToggleFavorite={() => onToggleFavorite && onToggleFavorite(item.id)}
                                     />
@@ -723,7 +712,7 @@ const MenuPage: React.FC<{
                                     <RestaurantCard
                                         key={`worth-trying-${item.id}`}
                                         item={item}
-                                        onClick={() => openRestaurant(item.id)}
+                                        onClick={() => onRestaurantClick(item.id)}
                                         isFavorite={favorites.includes(item.id)}
                                         onToggleFavorite={() => onToggleFavorite && onToggleFavorite(item.id)}
                                     />

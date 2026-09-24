@@ -922,3 +922,70 @@ body.dish-modal-open .glass-panel-container,
         font-size: 16px;
     }
 }
+
+/* ---------- Menu notices (closed / first-order offer) ----------
+   Quiet tiles at the start of the menu: one line of weight, one line of detail. */
+.rest-notices {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 4px 0 20px;
+}
+
+.rest-notice {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--row-radius);
+    background: var(--card-bg);
+    border: var(--card-border);
+}
+
+.rest-notice-icon {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+}
+
+.rest-notice--promo .rest-notice-icon {
+    background: var(--color-accent-subtle);
+    color: var(--color-accent);
+}
+
+.rest-notice--closed .rest-notice-icon {
+    background: rgba(255, 159, 10, 0.12);
+    color: #ff9f0a;
+}
+
+.rest-notice-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.rest-notice-title {
+    font: var(--t-item);
+    font-size: 15px;
+    color: var(--color-text);
+}
+
+.rest-notice-sub {
+    font: var(--t-caption);
+    color: var(--color-text-secondary);
+}
+
+.mobile-restaurant-page .rest-notices {
+    margin: 4px 16px 20px;
+}
+
+.desktop-restaurant .rest-notices {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 12px;
+    margin: 0 0 24px;
+}

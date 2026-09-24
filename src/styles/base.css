@@ -69,21 +69,3 @@ html:has(.app-container) img[loading='lazy']:not(.is-loaded) {
     transition: none;
   }
 }
-
-/* Catalog -> restaurant cover morph: hold the page/cover entrance so the target rect is final */
-html.vt-nav .page-transition-wrapper,
-html.vt-nav .mobile-restaurant-page .v2-hero {
-    animation: none !important;
-}
-
-::view-transition-group(rest-photo) {
-    animation-duration: 380ms;
-    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
-}
-
-::view-transition-old(rest-photo),
-::view-transition-new(rest-photo) {
-    height: 100%;
-    object-fit: cover;
-    overflow: clip;
-}
