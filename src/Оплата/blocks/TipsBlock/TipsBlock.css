@@ -162,3 +162,39 @@
   padding: 0 14px;
   white-space: nowrap;
 }
+
+/* All five options fit the row: nothing hidden behind the screen edge */
+.tip-buttons {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  overflow: visible;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.tip-buttons::after {
+  content: none;
+}
+
+.tip-btn,
+.tip-btn--text {
+  width: auto;
+  min-width: 0;
+  padding: 0 4px;
+  white-space: normal;
+}
+
+.tip-btn--text {
+  font-size: 13px;
+  line-height: 15px;
+  letter-spacing: -0.2px;
+}
+
+.tip-btn--number {
+  font-size: 15px;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+}
