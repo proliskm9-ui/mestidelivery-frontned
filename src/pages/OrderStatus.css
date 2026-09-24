@@ -2222,3 +2222,18 @@
     font: var(--t-secondary);
     color: var(--color-text-secondary);
 }
+
+/* Header: restaurant name + order number; one calm line under the big status */
+.header-title-block .os-order-no {
+    font-size: 13px;
+    text-transform: none;
+    letter-spacing: 0;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.primary-status-label .os-status-line {
+    margin: 10px 0 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { api } from '../services/api';
+import { api, restaurantCache } from '../services/api';
 import FullPageLoader from '../components/UI/FullPageLoader';
 import NetworkErrorState from '../components/UI/NetworkErrorState';
 import './OrderStatus.css';
@@ -304,6 +304,21 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
 
     const currentStatusLabel = STATUS_STEPS[activeStepIndex]?.label || order.status;
 
+    // Header: where the food comes from; under the status: what happens next / when
+    const restaurantTitle: string = pickI18nText(order.restaurant_name || restaurantCache[`rest_${order.restaurant_id}`]?.name || '', language);
+    const stepKey = STATUS_STEPS[activeStepIndex]?.key || 'pending';
+    const scheduledHm = (() => {
+        const m = /(\d{2}):(\d{2})/.exec(String(order.scheduled_time || ''));
+        return m ? `${m[1]}:${m[2]}` : '';
+    })();
+    const statusLine = stepKey === 'delivered'
+        ? t('status.desc_delivered')
+        : scheduledHm && (stepKey === 'pending' || stepKey === 'confirmed')
+            ? t('status.deliver_at').replace('{time}', scheduledHm)
+            : stepKey === 'delivering'
+                ? t('status.desc_delivering')
+                : `${t(`status.desc_${stepKey}`)} · ${t('status.eta_short')}`;
+
     const parseItems = (items: any): { name: string; price: number; quantity: number }[] => {
         if (!items) return [];
         if (Array.isArray(items)) return items;
@@ -334,13 +349,14 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                         <IconChevronLeft />
                     </button>
                     <div className="header-title-block">
-                        <h2>{t('common.order')} #{order.id}</h2>
-                        <p>{t('status.est_time')}</p>
+                        <h2>{restaurantTitle || `${t('common.order')} #${order.id}`}</h2>
+                        {restaurantTitle && <p className="os-order-no">{t('common.order')} #{order.id}</p>}
                     </div>
                 </header>
 
                 <div className="primary-status-label">
                     <h1 key={currentStatusLabel} className="os-status-swap">{currentStatusLabel}</h1>
+                    {statusLine && <p className="os-status-line">{statusLine}</p>}
                 </div>
 
                 <div className="status-scroll-container">
