@@ -5,6 +5,7 @@ import StoreCard from '../components/UI/StoreCard';
 import { useLanguage } from '../translations/LanguageContext';
 import Header from '../components/UI/Header';
 import FastTravelBlock from '../components/UI/FastTravelBlock';
+import { deviceHasOrdered, accountHasOrders } from '../utils/deliveryPromo';
 import PromoBanner from '../components/UI/PromoBanner';
 import AddressDeliveryPrompt from '../components/UI/AddressDeliveryPrompt';
 import MobileRestaurantCard from '../components/UI/MobileRestaurantCard';
@@ -153,6 +154,9 @@ const MenuPage: React.FC<{
             try {
                 // Don't let stores failure blank the whole menu
                 const rests = await api.getRestaurants();
+                // Restaurant promos (set per restaurant in the admin: "Акция" + text) are a
+                // first-order offer: only shown to clients who have never ordered.
+                const isNewClient = !deviceHasOrdered() && !accountHasOrders();
                 const labeledRests = rests.map(r => {
                     const fromApi = (r.filter_tags || '')
                         .split(',')
@@ -162,7 +166,8 @@ const MenuPage: React.FC<{
                     const tags = fromApi.map(t => (t === 'soup' ? 'soups' : t));
                     return {
                         ...r,
-                        promo: r.promo_text || r.promo || '',
+                        has_promo: isNewClient && Boolean(r.has_promo),
+                        promo: isNewClient ? (r.promo_text || r.promo || '') : '',
                         tags,
                     };
                 });
