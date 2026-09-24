@@ -664,3 +664,22 @@ body:has(.checkout-page-container)::-webkit-scrollbar {
         font-size: 16px;
     }
 }
+
+/* Tips inside a desktop card: the card is the surface, the block is just content */
+.ck-tips-card .tips-card {
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.ck-tips-card .tip-buttons {
+    max-width: 620px;
+}
+
+/* Order breakdown in the sidebar (same block as the phone's "Your order") */
+.premium-summary-card .summary-body {
+    margin-bottom: 4px;
+}

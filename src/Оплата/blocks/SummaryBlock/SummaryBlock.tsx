@@ -27,6 +27,8 @@ interface SummaryBlockProps {
   /** New client below the promo threshold: how much is left to free delivery. */
   freeDeliveryLeft?: number;
   total: number;
+  /** The desktop sidebar shows its own large total under the breakdown. */
+  showTotal?: boolean;
 }
 
 /** Order breakdown shown in the "Your order" sheet (opened from the pay bar total). */
@@ -41,6 +43,7 @@ const SummaryBlock: React.FC<SummaryBlockProps> = ({
   discounts = [],
   freeDeliveryLeft = 0,
   total,
+  showTotal = true,
 }) => {
   const { t, language } = useLanguage();
   const deliveryFee = Math.max(0, baseDeliveryFee - deliveryDiscount);
@@ -98,10 +101,12 @@ const SummaryBlock: React.FC<SummaryBlockProps> = ({
             </div>
           ))}
 
-          <div className="summary-total">
-            <span>{t('common.total')}</span>
-            <span>{formatPrice(total)}</span>
-          </div>
+          {showTotal && (
+            <div className="summary-total">
+              <span>{t('common.total')}</span>
+              <span>{formatPrice(total)}</span>
+            </div>
+          )}
     </div>
   );
 };

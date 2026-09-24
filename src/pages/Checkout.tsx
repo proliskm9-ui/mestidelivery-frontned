@@ -19,6 +19,10 @@ import MapModal from '../Оплата/modals/MapModal/MapModal';
 import AddressBlock, { AddressData } from '../Оплата/blocks/AddressBlock/AddressBlock';
 import { toast } from 'sonner';
 import { getPackagingFee } from '../utils/packaging';
+import TipsBlock from '../Оплата/blocks/TipsBlock/TipsBlock';
+import CustomTipModal from '../Оплата/modals/CustomTipModal/CustomTipModal';
+import SummaryBlock from '../Оплата/blocks/SummaryBlock/SummaryBlock';
+import { formatPrice } from '../utils/formatPrice';
 
 // SVG Icons
 const IconArrowLeft = () => (
@@ -116,8 +120,11 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
         : 0;
     const deliveryFee = Math.max(0, baseDeliveryFee - deliveryDiscount);
     const serviceFee = subtotal > 0 ? Math.max(0.99, Math.min(2.00, subtotal * 0.06)) : 0;
-    // Packaging row is drawn by the Sunset helper script; the total must include it
-    const finalTotal = subtotal + deliveryFee + serviceFee + getPackagingFee(cartItems);
+    // Same breakdown as the phone: packaging (Sunset) and courier tips included in the total
+    const packagingFee = getPackagingFee(cartItems);
+    const [tip, setTip] = useState(0);
+    const [customTipOpen, setCustomTipOpen] = useState(false);
+    const finalTotal = subtotal + deliveryFee + serviceFee + packagingFee + tip;
 
     const handleUpdateAddress = (field: string, value: string) => {
         setAddress(prev => ({ ...prev, [field]: value }));
@@ -153,6 +160,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                 customerName: localStorage.getItem('user_name') || ''
             },
             total: finalTotal,
+            tip,
             timestamp: new Date().toISOString(),
             restaurant_id: restaurantId,
             restaurantComment,
@@ -170,6 +178,13 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
 
     return (
         <>
+            <CustomTipModal
+                isOpen={customTipOpen}
+                onClose={() => setCustomTipOpen(false)}
+                currentTip={tip}
+                onApply={(amount: number) => setTip(amount)}
+            />
+
             <TimeModal
                 isOpen={isTimeModalOpen}
                 onClose={() => setTimeModalOpen(false)}
@@ -322,6 +337,11 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                                     onOpenMapModal={() => setMapModalOpen(true)}
                                 />
                             </div>
+
+                            {/* Courier tips, as on the phone */}
+                            <div className="premium-card ck-tips-card">
+                                <TipsBlock tipAmount={tip} setTipAmount={setTip} onOpenCustomTip={() => setCustomTipOpen(true)} />
+                            </div>
                         </div>
 
                         {/* Summary Sidebar (Visible on PC) */}
@@ -331,26 +351,24 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                                     <h3>{t('checkout.order_summary')}</h3>
                                 </div>
 
-                                <div className="summary-details">
-                                    <div className="summary-line">
-                                        <span>{t('cart.items')}</span>
-                                        <span>{subtotal.toFixed(2)} ₾</span>
-                                    </div>
-                                    <div className="summary-line">
-                                        <span>{t('cart.delivery')}</span>
-                                        <span>{deliveryFee.toFixed(2)} ₾</span>
-                                    </div>
-                                    <div className="summary-line">
-                                        <span>{t('cart.service')}</span>
-                                        <span>{serviceFee.toFixed(2)} ₾</span>
-                                    </div>
-                                </div>
+                                <SummaryBlock
+                                    items={cartItems || []}
+                                    subtotal={subtotal}
+                                    baseDeliveryFee={baseDeliveryFee}
+                                    deliveryDiscount={deliveryDiscount}
+                                    serviceFee={serviceFee}
+                                    packagingFee={packagingFee}
+                                    tip={tip}
+                                    total={finalTotal}
+                                    freeDeliveryLeft={firstOrderEligible && subtotal < 100 ? 100 - subtotal : 0}
+                                    showTotal={false}
+                                />
 
                                 <div className="summary-divider" />
 
                                 <div className="total-line">
                                     <span className="total-label">{t('checkout.to_pay')}</span>
-                                    <span className="total-value">{finalTotal.toFixed(2)} ₾</span>
+                                    <span className="total-value">{formatPrice(finalTotal)}</span>
                                 </div>
 
                                 <button type="button" className="pay-btn" onClick={handleFinalPayment}>
@@ -366,7 +384,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
             <div className="mobile-checkout-bar">
                 <div className="total-info">
                     <span className="label">{t('checkout.to_pay')}</span>
-                    <span className="value">{finalTotal.toFixed(2)} ₾</span>
+                    <span className="value">{formatPrice(finalTotal)}</span>
                 </div>
                 <button type="button" className="mobile-confirm-btn" onClick={handleFinalPayment}>
                     {t('checkout.mobile_pay')}
