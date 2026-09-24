@@ -45,3 +45,24 @@
         height: 18px;
     }
 }
+
+/* Quiet glass circle over photos, green heart when saved (same as the phone cards) */
+.fav-btn {
+    background: rgba(0, 0, 0, 0.45) !important;
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    box-shadow: none;
+    color: #ffffff;
+}
+
+.fav-btn svg {
+    stroke: currentColor !important;
+}
+
+.fav-btn.fav-active {
+    color: #21EA7C;
+}
+
+.fav-btn.fav-active svg {
+    fill: currentColor;
+}

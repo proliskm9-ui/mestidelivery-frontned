@@ -1204,7 +1204,7 @@ const MenuPage: React.FC<{
                         height: 32px !important;
                         top: 8px !important;
                         right: 8px !important;
-                        background: #21EA7C !important;
+                        background: rgba(0, 0, 0, 0.45) !important;
                     }
                     #must-try-section .fav-btn svg,
                     /* --- Small Collection Cards (Must Try / Worth Trying) --- */
@@ -1214,13 +1214,13 @@ const MenuPage: React.FC<{
                         height: 32px !important;
                         top: 8px !important;
                         right: 8px !important;
-                        background: #21EA7C !important;
+                        background: rgba(0, 0, 0, 0.45) !important;
                     }
                     #must-try-section .fav-btn svg,
                     #worth-trying-section .fav-btn svg {
                         width: 20px !important;
                         height: 20px !important;
-                        stroke: black !important;
+                        stroke: currentColor !important;
                     }
                     #must-try-section .rest-details,
                     #worth-trying-section .rest-details {
@@ -1300,12 +1300,12 @@ const MenuPage: React.FC<{
                         height: 34px !important;
                         top: 8px !important;
                         right: 8px !important;
-                        background: #21EA7C !important;
+                        background: rgba(0, 0, 0, 0.45) !important;
                     }
                     .vertical-grid .fav-btn svg {
                         width: 21px !important;
                         height: 21px !important;
-                        stroke: black !important;
+                        stroke: currentColor !important;
                     }
                     .vertical-grid .rest-details {
                         margin-top: 0 !important;
