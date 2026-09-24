@@ -781,25 +781,15 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                 {selectedProduct && (
                     <div className="pc-dish-modal-overlay" onClick={() => setSelectedProduct(null)}>
                         <div className="pc-dish-modal" onClick={e => e.stopPropagation()}>
-                            <button type="button" className="pc-dish-modal-close ui-circle-btn" onClick={() => setSelectedProduct(null)}>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                            {/* Same card as on the phone: photo, details, footer with name / weight / price, quantity and Add */}
+                            <button type="button" className="modal-close-btn" onClick={() => setSelectedProduct(null)} aria-label={t('common.cancel')}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
                             </button>
                             <img src={resolveImageUrl(selectedProduct.img || '') || '/Assets/default-food.png'} alt={locName(selectedProduct.name)} className="pc-dish-modal-img" />
                             <div className="pc-dish-modal-body">
-                                <div className="pc-dish-modal-header">
-                                    <h2>{locName(selectedProduct.name)}</h2>
-                                    <span>{formatPrice(Number(selectedProduct.price) + pickedModsSum)}</span>
-                                </div>
                                 <p className="pc-dish-modal-desc">{locDesc(selectedProduct.description) || ''}</p>
-                                {(formatWeight(selectedProduct.weight) || getMinimumOrderQuantity(selectedProduct) > 1) && (
-                                    <div className="pc-dish-modal-meta">
-                                        {formatWeight(selectedProduct.weight)}
-                                        {formatWeight(selectedProduct.weight) && getMinimumOrderQuantity(selectedProduct) > 1 ? ' · ' : ''}
-                                        {getMinimumOrderQuantity(selectedProduct) > 1
-                                            ? `минимум ${getMinimumOrderQuantity(selectedProduct)} шт.`
-                                            : ''}
-                                    </div>
-                                )}
                                 <DishModifiers title={t('restaurant.add_to_dish')} options={modOptions} picked={pickedMods} onToggle={toggleMod} />
                                 {/* Same nutrition block as the phone modal */}
                                 <div className="kbju-section-v2">
@@ -823,17 +813,48 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" className="pc-dish-modal-add" onClick={(e) => {
-                                    const portions = getQuantity(selectedProduct.id) === 0 ? getMinimumOrderQuantity(selectedProduct) : 1;
-                                    addToCartAnimated(selectedProduct, e.currentTarget);
-                                    addPickedMods(portions);
-                                    setSelectedProduct(null);
-                                }}>
-                                    {t('restaurant.add')}
-                                    {getMinimumOrderQuantity(selectedProduct) > 1
-                                        ? ` ${getMinimumOrderQuantity(selectedProduct)} шт.`
-                                        : ''}
-                                </button>
+                            </div>
+
+                            <div className="modal-footer-v3">
+                                <div className="footer-info-row">
+                                    <h2 className="footer-dish-name">
+                                        {locName(selectedProduct.name)}
+                                        {formatWeight(selectedProduct.weight) && <span className="footer-dish-weight">{formatWeight(selectedProduct.weight)}</span>}
+                                        {getMinimumOrderQuantity(selectedProduct) > 1 && (
+                                            <span className="footer-dish-weight">мин. {getMinimumOrderQuantity(selectedProduct)} шт.</span>
+                                        )}
+                                    </h2>
+                                    <span className="footer-dish-price">{formatPrice(Number(selectedProduct.price) + pickedModsSum)}</span>
+                                </div>
+                                <div className="footer-actions-row">
+                                    <div className="modal-qty-selector">
+                                        <button
+                                            type="button"
+                                            className="modal-qty-btn"
+                                            onClick={() => onUpdateQuantity && onUpdateQuantity(selectedProduct.id, -1)}
+                                            disabled={getQuantity(selectedProduct.id) === 0}
+                                        >−</button>
+                                        <span className="modal-qty-val">
+                                            {getQuantity(selectedProduct.id) || getMinimumOrderQuantity(selectedProduct)}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            className="modal-qty-btn"
+                                            onClick={() => {
+                                                if (getQuantity(selectedProduct.id) === 0) onAddToCart(selectedProduct);
+                                                else onUpdateQuantity && onUpdateQuantity(selectedProduct.id, 1);
+                                            }}
+                                        >+</button>
+                                    </div>
+                                    <button type="button" className="modal-main-add-btn" onClick={(e) => {
+                                        const inCart = getQuantity(selectedProduct.id);
+                                        if (inCart === 0) addToCartAnimated(selectedProduct, e.currentTarget);
+                                        addPickedMods(inCart || getMinimumOrderQuantity(selectedProduct));
+                                        setSelectedProduct(null);
+                                    }}>
+                                        {t('restaurant.add')}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -1054,12 +1054,142 @@ body.dish-modal-open .glass-panel-container,
     overscroll-behavior: contain;
 }
 
-.pc-dish-modal-add {
-    position: sticky;
-    bottom: 0;
-    box-shadow: 0 -12px 24px #121212;
-}
 
 .pc-dish-modal .dish-mods {
     margin: 22px 0 26px;
+}
+
+/* Desktop dish card = the phone card: round close, footer with name, weight, price,
+   quantity and Add */
+.pc-dish-modal .modal-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    cursor: pointer;
+}
+
+.pc-dish-modal-img {
+    aspect-ratio: 4 / 3;
+}
+
+.pc-dish-modal-body {
+    padding: 22px 24px 4px;
+}
+
+.pc-dish-modal-desc {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.pc-dish-modal .kbju-section-v2 {
+    margin: 26px 0 20px;
+}
+
+.pc-dish-modal .modal-footer-v3 {
+    flex-shrink: 0;
+    padding: 16px 24px 20px;
+    background: #1c1c1c;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pc-dish-modal .footer-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.pc-dish-modal .footer-dish-name {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: none;
+}
+
+.pc-dish-modal .footer-dish-weight {
+    margin-left: 6px;
+    font-size: 15px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.pc-dish-modal .footer-dish-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #21EA7C;
+    white-space: nowrap;
+}
+
+.pc-dish-modal .footer-actions-row {
+    display: flex;
+    gap: 12px;
+}
+
+.pc-dish-modal .modal-qty-selector {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 110px;
+    padding: 2px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.pc-dish-modal .modal-qty-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.pc-dish-modal .modal-qty-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.pc-dish-modal .modal-qty-val {
+    min-width: 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+}
+
+.pc-dish-modal .modal-main-add-btn {
+    flex: 1;
+    height: var(--btn-height-sm);
+    border: none;
+    border-radius: var(--btn-radius);
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    font-size: 17px;
+    font-weight: 700;
+    box-shadow: var(--btn-primary-shadow);
+    cursor: pointer;
+}
+
+.pc-dish-modal .modal-main-add-btn:active {
+    transform: scale(0.98);
 }

@@ -292,7 +292,7 @@
 
     // Desktop modal check
     var pcModalBody = document.querySelector(".pc-dish-modal-body");
-    var titleEl = pcModalBody ? pcModalBody.querySelector(".pc-dish-modal-header h2") : null;
+    var titleEl = pcModalBody ? (document.querySelector(".pc-dish-modal .footer-dish-name") || pcModalBody.querySelector(".pc-dish-modal-header h2")) : null;
 
     // Mobile / Standard modal check (prod design)
     var mobileBody = document.querySelector(".dish-modal-content .modal-body, .mobile-restaurant-page .modal-body");
