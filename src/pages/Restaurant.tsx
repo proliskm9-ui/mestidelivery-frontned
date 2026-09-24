@@ -806,8 +806,6 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                     {getMinimumOrderQuantity(selectedProduct) > 1
                                         ? ` ${getMinimumOrderQuantity(selectedProduct)} шт.`
                                         : ''}
-                                    {' • '}
-                                    {formatPrice(selectedProduct.price * getMinimumOrderQuantity(selectedProduct))}
                                 </button>
                             </div>
                         </div>

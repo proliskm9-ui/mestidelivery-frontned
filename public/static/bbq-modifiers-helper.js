@@ -275,23 +275,22 @@
       ".ym-row.selected .ym-price {",
       "  color: #21ea7c !important;",
       "}",
-      "/* Modifiers as tiles: same material as the tip / delivery-mode buttons */",
-      ".ym-container { margin: 8px 0 28px 0 !important; gap: 0 !important; }",
+      "/* Modifiers: a plain list under a KBJU-style label, price + round check on the right */",
+      ".ym-container { margin: 30px 0 36px 0 !important; gap: 0 !important; }",
       ".ym-section { background: none !important; border: 0 !important; border-radius: 0 !important; padding: 0 !important; }",
-      ".ym-header { margin: 0 0 12px 0 !important; padding: 0 !important; }",
+      ".ym-header { margin: 0 0 6px 0 !important; padding: 0 !important; }",
       ".ym-title { font-size: 14px !important; font-weight: 700 !important; color: rgba(255, 255, 255, 0.3) !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; line-height: 1.2 !important; }",
       ".ym-subtitle { display: none !important; }",
-      ".ym-list { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; }",
-      ".ym-row, .ym-row:first-child, .ym-row:last-child { position: relative !important; display: flex !important; flex-direction: column !important; align-items: flex-start !important; justify-content: center !important; gap: 3px !important; min-height: 64px !important; padding: 10px 12px !important; border: 2px solid rgba(255, 255, 255, 0.1) !important; border-radius: 16px !important; background: transparent !important; box-sizing: border-box !important; -webkit-tap-highlight-color: transparent !important; transition: border-color 0.2s ease, background-color 0.2s ease !important; }",
-      ".ym-row.selected { border-color: rgba(33, 234, 124, 0.85) !important; background: #1F1F1E !important; }",
-      ".ym-row:active { transform: scale(0.97) !important; }",
-      ".ym-left { display: block !important; min-width: 0 !important; max-width: 100% !important; }",
-      ".ym-checkbox { position: absolute !important; top: auto !important; bottom: 10px !important; right: 10px !important; width: 18px !important; height: 18px !important; border: 0 !important; border-radius: 50% !important; background: #21ea7c !important; opacity: 0 !important; transform: scale(0.6) !important; transition: opacity 0.15s ease, transform 0.15s ease !important; }",
-      ".ym-row.selected .ym-checkbox { opacity: 1 !important; transform: scale(1) !important; }",
-      ".ym-checkbox svg { width: 10px !important; height: 10px !important; }",
-      ".ym-name { display: block !important; font-size: 14px !important; font-weight: 600 !important; color: #ffffff !important; line-height: 1.25 !important; white-space: normal !important; overflow-wrap: anywhere !important; }",
-      ".ym-price { font-size: 13px !important; font-weight: 600 !important; color: rgba(255, 255, 255, 0.45) !important; }",
+      ".ym-list { display: flex !important; flex-direction: column !important; gap: 0 !important; }",
+      ".ym-row, .ym-row:first-child, .ym-row:last-child { position: relative !important; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 60px !important; padding: 0 !important; border: 0 !important; border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important; border-radius: 0 !important; background: none !important; box-sizing: border-box !important; -webkit-tap-highlight-color: transparent !important; }",
+      ".ym-row:last-child { border-bottom: 0 !important; }",
+      ".ym-left { display: block !important; min-width: 0 !important; }",
+      ".ym-name { font-size: 16px !important; font-weight: 500 !important; color: #ffffff !important; }",
+      ".ym-price { margin-left: auto !important; margin-right: 42px !important; font-size: 15px !important; font-weight: 500 !important; color: rgba(255, 255, 255, 0.5) !important; }",
       ".ym-row.selected .ym-price { color: #21ea7c !important; }",
+      ".ym-checkbox { position: absolute !important; top: 50% !important; right: 0 !important; margin-top: -12px !important; width: 24px !important; height: 24px !important; border-radius: 50% !important; border: 2px solid rgba(255, 255, 255, 0.2) !important; background: transparent !important; transition: background-color 0.15s ease, border-color 0.15s ease !important; }",
+      ".ym-row.selected .ym-checkbox { background: #21ea7c !important; border-color: #21ea7c !important; }",
+      ".ym-checkbox svg { width: 12px !important; height: 12px !important; }",
       "/* Cart Upsell Strip */",
       ".bbq-cart-upsell {",
       "  margin: 12px 0 16px 0 !important;",
@@ -511,13 +510,9 @@
 
       var total = (basePrice + extra) * qty;
 
-      if (isMobile) {
-        if (priceEl) {
-          priceEl.textContent = total.toFixed(2) + " ₾";
-        }
-        addBtn.innerHTML = MestiBBQ.getText("add") + ' • ' + total.toFixed(2) + ' ₾';
-      } else {
-        addBtn.innerHTML = MestiBBQ.getText("add") + ' • ' + total.toFixed(2) + ' ₾';
+      // The price next to the dish name shows the total; the button stays a plain "Add"
+      if (priceEl && priceEl.textContent !== total.toFixed(2) + " ₾") {
+        priceEl.textContent = total.toFixed(2) + " ₾";
       }
     }
 
