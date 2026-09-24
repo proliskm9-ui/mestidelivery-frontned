@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { isModifierProduct } from '../utils/modifiers';
 import { api, Product } from '../services/api';
 import './Cart.css';
 import { useLanguage } from '../translations/LanguageContext';
 import { pickI18nText } from '../utils/i18nContent';
 import { formatPortionWeight } from '../utils/formatProductMeta';
+import { isVisibleMenuProduct } from '../utils/formatProductMeta';
 import Dialog, { DialogClose } from '../components/UI/Dialog';
 import { formatPrice } from '../utils/formatPrice';
 import { getPackagingFee } from '../utils/packaging';
@@ -91,7 +93,7 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                 const allProducts = await api.getProducts(restaurantId);
                 const cartIds = initialCartItems.map(i => i.product.id);
                 // Filter out products already in cart, get top 6
-                const recs = allProducts.filter(p => !cartIds.includes(p.id)).slice(0, 6);
+                const recs = allProducts.filter(p => !cartIds.includes(p.id) && isVisibleMenuProduct(p) && !isModifierProduct(p)).slice(0, 6);
                 setRecommendations(recs);
             } catch (err) {
                 console.error("Cannot load recommendations:", err);
@@ -169,11 +171,14 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                             {initialCartItems.map(({ product, quantity }, index) => (
                                 <div
                                     key={product.id}
-                                    className={`cart-premium-item${index < initialCartItems.length - 1 ? ' cart-premium-item--divided' : ''}`}
+                                    className={`cart-premium-item${index < initialCartItems.length - 1 ? ' cart-premium-item--divided' : ''}${isModifierProduct(product) ? ' cart-premium-item--addon' : ''}`}
                                 >
-                                    <div className="item-image-container">
-                                        <img src={product.img || '/Assets/default-food.png'} alt={locName(product.name)} />
-                                    </div>
+                                    {/* Add-ons (sauces, bread): compact line without a photo, aligned with the dish text */}
+                                    {!isModifierProduct(product) && (
+                                        <div className="item-image-container">
+                                            <img src={product.img || '/Assets/default-food.png'} alt={locName(product.name)} />
+                                        </div>
+                                    )}
 
                                     <div className="item-details">
                                         <div className="item-main-info">
@@ -182,10 +187,14 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                                                 <span className="item-pricing">
                                                     {(Number(product.price) * quantity).toFixed(2)} ₾
                                                 </span>
-                                                <span className="item-sep">·</span>
-                                                <span className="item-weight">
-                                                    {formatWeight(product.weight) || `350 ${portionLabels.grams}`}
-                                                </span>
+                                                {!isModifierProduct(product) && (
+                                                    <>
+                                                        <span className="item-sep">·</span>
+                                                        <span className="item-weight">
+                                                            {formatWeight(product.weight) || `350 ${portionLabels.grams}`}
+                                                        </span>
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

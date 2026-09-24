@@ -824,3 +824,15 @@ body:has(.cart-page-container)::-webkit-scrollbar {
         color: var(--primary);
     }
 }
+
+/* Add-ons (sauces, bread): compact line under the dishes, text aligned with dish names */
+.cart-premium-item.cart-premium-item--addon {
+    padding-left: 92px;
+    min-height: 0;
+}
+
+.cart-premium-item--addon .item-main-info h3 {
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+}
