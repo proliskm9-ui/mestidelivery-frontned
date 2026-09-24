@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './SummaryBlock.css';
 import { useLanguage } from '../../../translations/LanguageContext';
 import { formatPrice } from '../../../utils/formatPrice';
@@ -24,12 +24,10 @@ interface SummaryBlockProps {
   discounts?: SummaryDiscount[];
   /** New client below the promo threshold: how much is left to free delivery. */
   freeDeliveryLeft?: number;
+  total: number;
 }
 
-/**
- * "Your order": what's in it at a glance; tap to see the price breakdown.
- * The total lives in the pay bar below, so it isn't repeated here.
- */
+/** Order breakdown shown in the "Your order" sheet (opened from the pay bar total). */
 const SummaryBlock: React.FC<SummaryBlockProps> = ({
   items,
   subtotal,
@@ -39,34 +37,13 @@ const SummaryBlock: React.FC<SummaryBlockProps> = ({
   tip,
   discounts = [],
   freeDeliveryLeft = 0,
+  total,
 }) => {
   const { t, language } = useLanguage();
-  const [open, setOpen] = useState(false);
   const deliveryFee = Math.max(0, baseDeliveryFee - deliveryDiscount);
-  const preview = items.map(({ product, quantity }) => `${pickI18nText(product.name, language)} × ${quantity}`).join(', ');
 
   return (
-    <section className={open ? 'summary-card is-open' : 'summary-card'}>
-      <button type="button" className="summary-head" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-        <span className="summary-head-text">
-          <span className="summary-title">{t('checkout.summary_title')}</span>
-          {!open && <span className="summary-preview">{preview}</span>}
-          {!open && (
-            <span className="summary-mini">
-              {t('cart.items')} {formatPrice(subtotal)}
-              {' · '}{t('cart.delivery')} {deliveryDiscount > 0 ? <span className="summary-accent">{formatPrice(deliveryFee)}</span> : formatPrice(deliveryFee)}
-              {' · '}{t('cart.service')} {formatPrice(serviceFee)}
-              {tip > 0 && <>{' · '}{t('checkout.tips_title')} {formatPrice(tip)}</>}
-            </span>
-          )}
-        </span>
-        <svg className="summary-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </button>
-
-      {open && (
-        <div className="summary-body">
+    <div className="summary-body">
           {items.map(({ product, quantity }) => (
             <div key={product.id} className="summary-row">
               <span className="summary-item-name">
@@ -111,9 +88,12 @@ const SummaryBlock: React.FC<SummaryBlockProps> = ({
               <span className="summary-row-value summary-accent">−{formatPrice(d.amount)}</span>
             </div>
           ))}
-        </div>
-      )}
-    </section>
+
+          <div className="summary-total">
+            <span>{t('common.total')}</span>
+            <span>{formatPrice(total)}</span>
+          </div>
+    </div>
   );
 };
 

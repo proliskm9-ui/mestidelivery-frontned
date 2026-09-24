@@ -1989,3 +1989,17 @@
 @media (prefers-reduced-motion: reduce) {
     .os-status-swap { animation: none; }
 }
+
+/* Rating: line icons instead of emoji (badge + round icon), calm accent circles */
+.y-rate-badge svg {
+    color: var(--color-accent);
+    flex-shrink: 0;
+}
+
+.y-rate-entity-icon--rest,
+.y-rate-entity-icon--courier {
+    background: var(--color-accent-subtle);
+    border: 1px solid rgba(33, 234, 124, 0.22);
+    box-shadow: none;
+    color: var(--color-accent);
+}

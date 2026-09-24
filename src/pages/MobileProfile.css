@@ -515,3 +515,14 @@
     height: 100%;
     object-fit: cover;
 }
+
+.mp-avatar-initial {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--color-accent-subtle);
+    color: var(--color-accent);
+    font: 800 28px/1 var(--font-text);
+}

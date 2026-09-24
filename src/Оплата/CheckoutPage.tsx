@@ -14,6 +14,7 @@ import HeaderBlock from './blocks/HeaderBlock/HeaderBlock';
 import { addressText, detectZoneFromText, deviceHasOrdered, accountHasOrders, markDeviceOrdered } from '../utils/deliveryPromo';
 import AddressBlock, { AddressData } from './blocks/AddressBlock/AddressBlock';
 import SummaryBlock from './blocks/SummaryBlock/SummaryBlock';
+import Sheet from '../components/UI/Sheet';
 import TipsBlock from './blocks/TipsBlock/TipsBlock';
 import FooterBlock from './blocks/FooterBlock/FooterBlock';
 
@@ -93,6 +94,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
   const { t, language } = useLanguage();
   const deliveryLoc = useDeliveryLocationOptional();
   const [workingHours, setWorkingHours] = useState('');
+  const [summaryOpen, setSummaryOpen] = useState(false);
   // Load saved address from prop or localStorage
   const savedAddressRaw = localStorage.getItem('user_address');
   const savedAddress = initialAddress || (savedAddressRaw ? (() => { try { return JSON.parse(savedAddressRaw); } catch { return null; } })() : null);
@@ -356,22 +358,26 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
             onOpenCustomTip={() => toggleModal('customTip', true)}
           />
 
-          {/* --- 5. СТОИМОСТЬ --- */}
-          <SummaryBlock
-            items={cartItems || []}
-            subtotal={subtotal}
-            baseDeliveryFee={baseDeliveryFee}
-            deliveryDiscount={deliveryDiscount}
-            serviceFee={serviceFee}
-            tip={orderData.tip}
-            freeDeliveryLeft={isFirstOrder && baseDeliveryFee <= 12 && subtotal < 100 ? 100 - subtotal : 0}
-          />
-
           {/* --- 6. ФУТЕР --- */}
           <FooterBlock
             totalAmount={totalAmount}
             onPay={handlePay}
+            onShowDetails={() => setSummaryOpen(true)}
           />
+
+          {/* Order breakdown, opened from the total in the pay bar */}
+          <Sheet open={summaryOpen} onOpenChange={setSummaryOpen} title={t('checkout.summary_title')}>
+            <SummaryBlock
+              items={cartItems || []}
+              subtotal={subtotal}
+              baseDeliveryFee={baseDeliveryFee}
+              deliveryDiscount={deliveryDiscount}
+              serviceFee={serviceFee}
+              tip={orderData.tip}
+              total={totalAmount}
+              freeDeliveryLeft={isFirstOrder && baseDeliveryFee <= 12 && subtotal < 100 ? 100 - subtotal : 0}
+            />
+          </Sheet>
 
         </div>
 

@@ -452,9 +452,9 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                         <div className="y-rate-header">
                             <div className="y-rate-badge">
                                 <span>
-                                    {ratingStep === 'restaurant' && '\u{1F37D}\uFE0F'}
-                                    {ratingStep === 'courier' && '\u{1F6F5}'}
-                                    {ratingStep === 'success' && '\u2705'}
+                                    {ratingStep === 'restaurant' && <Utensils size={14} strokeWidth={2.2} />}
+                                    {ratingStep === 'courier' && <Bike size={14} strokeWidth={2.2} />}
+                                    {ratingStep === 'success' && <Check size={14} strokeWidth={2.6} />}
                                 </span>
                                 <span className="y-rate-badge-rest">
                                     {ratingStep === 'restaurant' && t('rating.rate_restaurant')}
@@ -488,7 +488,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                         {ratingStep === 'restaurant' && (
                             <div className="y-rate-step-body">
                                 <div className="y-rate-entity-icon y-rate-entity-icon--rest">
-                                    <span style={{ fontSize: 28 }}>&#127869;&#65039;</span>
+                                    <Utensils size={28} strokeWidth={1.8} />
                                 </div>
                                 <h2 className="y-rate-title">{t('rating.rate_restaurant')}</h2>
                                 <p className="y-rate-subtitle">
@@ -562,7 +562,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                         {ratingStep === 'courier' && (
                             <div className="y-rate-step-body">
                                 <div className="y-rate-entity-icon y-rate-entity-icon--courier">
-                                    <span style={{ fontSize: 28 }}>&#128693;</span>
+                                    <Bike size={28} strokeWidth={1.8} />
                                 </div>
                                 <h2 className="y-rate-title">{t('rating.how_was_delivery')}</h2>
                                 <p className="y-rate-subtitle">{t('rating.courier_subtitle')}</p>

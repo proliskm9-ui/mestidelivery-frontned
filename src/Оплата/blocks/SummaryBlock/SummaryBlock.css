@@ -65,7 +65,19 @@
 }
 
 .summary-body {
-  padding: 0 24px 20px;
+  padding: 0;
+}
+
+.summary-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font: var(--t-total);
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
 }
 
 .summary-row {

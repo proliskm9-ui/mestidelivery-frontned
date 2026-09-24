@@ -128,7 +128,7 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                         {userProfile?.avatar && userProfile.avatar.length > 2 ? (
                             <img src={userProfile.avatar} alt="Avatar" className="mp-avatar" />
                         ) : (
-                            <span style={{ fontSize: '32px' }}>👤</span>
+                            <span className="mp-avatar-initial">{(userProfile?.name || '?').trim().charAt(0).toUpperCase()}</span>
                         )}
                         <div className="mp-avatar-edit-icon"><IconEdit /></div>
                     </div>

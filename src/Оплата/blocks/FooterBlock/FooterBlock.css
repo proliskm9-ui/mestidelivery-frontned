@@ -70,3 +70,29 @@
   transform: scale(0.96);
   opacity: 0.9;
 }
+/* Total is tappable: opens the order breakdown sheet */
+.footer-total-btn {
+  align-items: flex-start;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: opacity 120ms ease;
+}
+
+.footer-total-btn:active {
+  opacity: 0.6;
+}
+
+.footer-total-btn .footer-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.55);
+  white-space: nowrap;
+}
