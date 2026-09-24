@@ -989,3 +989,6 @@ body.dish-modal-open .glass-panel-container,
     gap: 12px;
     margin: 0 0 24px;
 }
+
+.ds-row-sub.rest-open { color: var(--color-accent); }
+.ds-row-sub.rest-closed { color: var(--color-danger); }

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import './SummaryBlock.css';
 import { useLanguage } from '../../../translations/LanguageContext';
-import AnimatedPrice from '../../../components/UI/AnimatedPrice';
 import { formatPrice } from '../../../utils/formatPrice';
 import { pickI18nText } from '../../../utils/i18nContent';
 
@@ -21,14 +20,16 @@ interface SummaryBlockProps {
   deliveryDiscount: number;
   serviceFee: number;
   tip: number;
-  total: number;
   /** Extra discounts confirmed by the server (promo code, bonuses). Rows appear only when present. */
   discounts?: SummaryDiscount[];
   /** New client below the promo threshold: how much is left to free delivery. */
   freeDeliveryLeft?: number;
 }
 
-/** "Ваш заказ": order contents and the full price breakdown above the pay button. */
+/**
+ * "Your order": what's in it at a glance; tap to see the price breakdown.
+ * The total lives in the pay bar below, so it isn't repeated here.
+ */
 const SummaryBlock: React.FC<SummaryBlockProps> = ({
   items,
   subtotal,
@@ -36,94 +37,74 @@ const SummaryBlock: React.FC<SummaryBlockProps> = ({
   deliveryDiscount,
   serviceFee,
   tip,
-  total,
   discounts = [],
   freeDeliveryLeft = 0,
 }) => {
   const { t, language } = useLanguage();
   const [open, setOpen] = useState(false);
-  const count = items.reduce((n, i) => n + i.quantity, 0);
   const deliveryFee = Math.max(0, baseDeliveryFee - deliveryDiscount);
+  const preview = items.map(({ product, quantity }) => `${pickI18nText(product.name, language)} × ${quantity}`).join(', ');
 
   return (
-    <section className="summary-card">
-      <h2 className="summary-title">{t('checkout.summary_title')}</h2>
-
-      <button
-        type="button"
-        className="summary-row summary-row--toggle"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span className="summary-row-main">
-          <span className="summary-row-title">{t('cart.items')} ({count})</span>
-          <span className="summary-row-sub">{open ? t('checkout.hide_items') : t('checkout.show_items')}</span>
+    <section className={open ? 'summary-card is-open' : 'summary-card'}>
+      <button type="button" className="summary-head" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        <span className="summary-head-text">
+          <span className="summary-title">{t('checkout.summary_title')}</span>
+          {!open && <span className="summary-preview">{preview}</span>}
         </span>
-        <span className="summary-row-value">{formatPrice(subtotal)}</span>
-        <svg className={open ? 'summary-chevron is-open' : 'summary-chevron'} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg className="summary-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </button>
 
       {open && (
-        <ul className="summary-items">
+        <div className="summary-body">
           {items.map(({ product, quantity }) => (
-            <li key={product.id} className="summary-item">
-              <span className="summary-item-name">{pickI18nText(product.name, language)}</span>
-              <span className="summary-item-qty">× {quantity}</span>
-              <span className="summary-item-price">{formatPrice(Number(product.price) * quantity)}</span>
-            </li>
+            <div key={product.id} className="summary-row">
+              <span className="summary-item-name">
+                {pickI18nText(product.name, language)} <span className="summary-qty">× {quantity}</span>
+              </span>
+              <span className="summary-row-value">{formatPrice(Number(product.price) * quantity)}</span>
+            </div>
           ))}
-        </ul>
-      )}
 
-      <div className="summary-row">
-        <span className="summary-row-main">
-          <span className="summary-row-title">{t('cart.delivery')}</span>
-          {deliveryDiscount > 0 && <span className="summary-row-sub summary-row-sub--accent">{t('checkout.first_order_promo')}</span>}
-        </span>
-        {deliveryDiscount > 0 && <s className="summary-old">{formatPrice(baseDeliveryFee)}</s>}
-        <span className={deliveryDiscount > 0 ? 'summary-row-value summary-row-value--accent' : 'summary-row-value'}>
-          {formatPrice(deliveryFee)}
-        </span>
-      </div>
+          <div className="summary-divider" />
 
-      <div className="summary-row">
-        <span className="summary-row-main">
-          <span className="summary-row-title">{t('cart.service')}</span>
-          <span className="summary-row-sub">{t('delivery.service_fee_hint')}</span>
-        </span>
-        <span className="summary-row-value">{formatPrice(serviceFee)}</span>
-      </div>
-
-      {tip > 0 && (
-        <div className="summary-row">
-          <span className="summary-row-main">
-            <span className="summary-row-title">{t('checkout.tips_title')}</span>
-          </span>
-          <span className="summary-row-value">{formatPrice(tip)}</span>
+          <div className="summary-row">
+            <span className="summary-row-title summary-muted">{t('cart.items')}</span>
+            <span className="summary-row-value">{formatPrice(subtotal)}</span>
+          </div>
+          <div className="summary-row">
+            <span className="summary-row-title summary-muted">
+              {t('cart.delivery')}
+              {deliveryDiscount > 0 && <span className="summary-note">{t('checkout.first_order_promo')}</span>}
+              {deliveryDiscount === 0 && freeDeliveryLeft > 0 && (
+                <span className="summary-note">{t('checkout.free_delivery_left').replace('{sum}', formatPrice(freeDeliveryLeft))}</span>
+              )}
+            </span>
+            <span className="summary-row-value">
+              {deliveryDiscount > 0 && <s className="summary-old">{formatPrice(baseDeliveryFee)}</s>}
+              {formatPrice(deliveryFee)}
+            </span>
+          </div>
+          <div className="summary-row">
+            <span className="summary-row-title summary-muted">{t('cart.service')}</span>
+            <span className="summary-row-value">{formatPrice(serviceFee)}</span>
+          </div>
+          {tip > 0 && (
+            <div className="summary-row">
+              <span className="summary-row-title summary-muted">{t('checkout.tips_title')}</span>
+              <span className="summary-row-value">{formatPrice(tip)}</span>
+            </div>
+          )}
+          {discounts.map((d) => (
+            <div className="summary-row" key={d.label}>
+              <span className="summary-row-title summary-muted">{d.label}</span>
+              <span className="summary-row-value summary-accent">−{formatPrice(d.amount)}</span>
+            </div>
+          ))}
         </div>
       )}
-
-      {discounts.map((d) => (
-        <div className="summary-row" key={d.label}>
-          <span className="summary-row-main">
-            <span className="summary-row-title">{d.label}</span>
-          </span>
-          <span className="summary-row-value summary-row-value--accent">−{formatPrice(d.amount)}</span>
-        </div>
-      ))}
-
-      {freeDeliveryLeft > 0 && (
-        <p className="summary-hint">
-          {t('checkout.free_delivery_left').replace('{sum}', formatPrice(freeDeliveryLeft))}
-        </p>
-      )}
-
-      <div className="summary-total">
-        <span>{t('common.total')}</span>
-        <AnimatedPrice className="summary-total-value" value={total} />
-      </div>
     </section>
   );
 };

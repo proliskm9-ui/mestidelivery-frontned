@@ -5,7 +5,7 @@ import { useLanguage } from '../translations/LanguageContext';
 import { pickI18nText } from '../utils/i18nContent';
 import { formatPortionCalories, formatPortionWeight } from '../utils/formatProductMeta';
 import GlassBottomPanel from '../components/UI/GlassBottomPanel';
-import Sheet from '../components/UI/Sheet';
+import Dialog, { DialogClose } from '../components/UI/Dialog';
 import AnimatedPrice from '../components/UI/AnimatedPrice';
 import { formatPrice } from '../utils/formatPrice';
 
@@ -122,33 +122,7 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
     if (initialCartItems.length === 0) {
         return (
             <div style={{ color: 'white', padding: '40px 40px 80px 40px', textAlign: 'center', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', background: 'var(--bg)', paddingTop: '80px' }}>
-                <button
-                    type="button"
-                    aria-label={t('common.back')}
-                    onClick={onBack}
-                    style={{
-                        position: 'absolute',
-                        top: 'calc(24px + env(safe-area-inset-top, 0px))',
-                        left: '20px',
-                        width: '44px',
-                        height: '44px',
-                        borderRadius: '50%',
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        color: 'white',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        backdropFilter: 'blur(15px)',
-                        WebkitBackdropFilter: 'blur(15px)',
-                        zIndex: 10
-                    }}
-                >
-                    <IconBack />
-                </button>
-
-                <img src="/Assets/корзина.png" alt="Empty" style={{ width: '280px', height: '195px', marginBottom: '24px', objectFit: 'contain' }} />
+<img src="/Assets/корзина.png" alt="Empty" style={{ width: '280px', height: '195px', marginBottom: '24px', objectFit: 'contain' }} />
 
                 <h2 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '16px', lineHeight: '22px', color: '#FFFFFF', margin: '0 0 8px 0', opacity: 1, textTransform: 'none', letterSpacing: 'normal' }}>
                     {t('cart.empty_subtitle')}
@@ -306,7 +280,7 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                 showPriceInButton={false}
             />
 
-            <Sheet
+            <Dialog
                 open={showMinOrderModal}
                 onOpenChange={setShowMinOrderModal}
                 title={t('checkout.min_order_title')}
@@ -316,26 +290,30 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                         {index < arr.length - 1 && <strong className="mc-accent">{formatPrice(50 - subtotal)}</strong>}
                     </React.Fragment>
                 ))}
-                footer={
+                actions={
+                    <>
                     <button
                         type="button"
-                        className="md-sheet-cta"
+                        className="ds-btn ds-btn--primary"
                         onClick={() => { setShowMinOrderModal(false); onBack(); }}
                     >
                         {t('cart.go_to_restaurant')}
                     </button>
+                        <DialogClose className="md-dialog-cancel">{t('common.cancel')}</DialogClose>
+                    </>
                 }
             />
-            <Sheet
+            <Dialog
                 open={confirmClearOpen}
                 onOpenChange={setConfirmClearOpen}
                 title={t('cart.clear_confirm')}
                 description={t('cart.clear_confirm_desc')}
-                footer={
+                actions={
                     <>
-                        <button type="button" className="md-sheet-cta md-sheet-cta--danger" onClick={confirmClear}>
+                        <button type="button" className="ds-btn ds-btn--danger" onClick={confirmClear}>
                             {t('cart.clear')}
                         </button>
+                        <DialogClose className="md-dialog-cancel">{t('common.cancel')}</DialogClose>
                     </>
                 }
             />

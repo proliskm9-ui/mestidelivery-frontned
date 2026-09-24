@@ -1,0 +1,83 @@
+/* Centered alert — same material as sheets, scales in from 0.96 */
+
+.md-dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    min-height: 100dvh;
+    z-index: var(--z-modal);
+    background: var(--color-scrim);
+    -webkit-backdrop-filter: var(--scrim-filter);
+    backdrop-filter: var(--scrim-filter);
+    transition: opacity 200ms ease;
+}
+
+.md-dialog-backdrop[data-starting-style],
+.md-dialog-backdrop[data-ending-style] {
+    opacity: 0;
+}
+
+.md-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: var(--z-modal);
+    box-sizing: border-box;
+    width: min(360px, calc(100vw - 40px));
+    padding: 28px 24px 20px;
+    border-radius: var(--radius-card);
+    background: var(--material-sheet-bg);
+    border-top: 1px solid var(--material-sheet-edge);
+    box-shadow: var(--shadow-3);
+    color: var(--color-text);
+    font-family: var(--font-text);
+    text-align: center;
+    outline: 0;
+    transform: translate(-50%, -50%);
+    transition: transform 220ms var(--ease-out), opacity 180ms ease;
+}
+
+.md-dialog[data-starting-style],
+.md-dialog[data-ending-style] {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96);
+}
+
+.md-dialog-title {
+    margin: 0;
+    font: var(--t-section);
+    font-size: 20px;
+    letter-spacing: var(--tracking-tight);
+    text-wrap: balance;
+}
+
+.md-dialog-description {
+    margin: 10px 0 0;
+    font: var(--t-body);
+    color: var(--color-text-secondary);
+    text-wrap: pretty;
+}
+
+.md-dialog-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 24px;
+}
+
+/* Quiet text button for the secondary choice */
+.md-dialog-cancel {
+    height: 44px;
+    border: 0;
+    background: none;
+    color: var(--color-text-secondary);
+    font: var(--btn-font);
+    font-size: 16px;
+    cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .md-dialog,
+    .md-dialog-backdrop {
+        transition: none;
+    }
+}

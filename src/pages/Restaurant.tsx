@@ -387,54 +387,31 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
             title={restaurantDisplayName}
             description={getCuisineLine(restaurant)}
         >
-            <div className="ds-stack">
-                {!restaurantIsOpen && restaurantClosedHint && (
-                    <p className="ds-note ds-note--warn"><b>{restaurantClosedHint}</b></p>
-                )}
-                <ul className="ds-card">
-                    <li className="ds-row">
-                        <span className="ds-row-icon" aria-hidden="true">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
-                        </span>
-                        <span className="ds-row-main">
-                            <span className="ds-row-title">{restaurant.address || mestiaAddress}</span>
-                            <span className="ds-row-sub">{t('restaurant.address_label')}</span>
-                        </span>
-                    </li>
-                    <li className="ds-row">
-                        <span className="ds-row-icon" aria-hidden="true">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><polyline points="12 7 12 12 15 14" /></svg>
-                        </span>
-                        <span className="ds-row-main">
-                            <span className="ds-row-title">{hoursValue}</span>
-                            {hoursLabel && <span className="ds-row-sub">{hoursLabel}</span>}
-                        </span>
-                        <span className={restaurantIsOpen ? 'ds-badge' : 'ds-badge ds-badge--danger'}>
+            <ul className="ds-list">
+                <li className="ds-row">
+                    <span className="ds-row-label">{t('restaurant.address_label')}</span>
+                    <span className="ds-row-text">{restaurant.address || mestiaAddress}</span>
+                </li>
+                <li className="ds-row">
+                    <span className="ds-row-main">
+                        <span className="ds-row-label">{hoursLabel || t('restaurant.hours_short')}</span>
+                        <span className={restaurantIsOpen ? 'ds-row-sub rest-open' : 'ds-row-sub rest-closed'}>
                             {restaurantIsOpen ? t('restaurant.open_now') : t('restaurant.closed_now')}
                         </span>
-                    </li>
+                    </span>
+                    <span className="ds-row-text">{hoursValue}</span>
+                </li>
+                <li className="ds-row">
+                    <span className="ds-row-label">{etaLabel || t('restaurant.delivery')}</span>
+                    <span className="ds-row-text">{etaValue}</span>
+                </li>
+                {restaurant.rating ? (
                     <li className="ds-row">
-                        <span className="ds-row-icon" aria-hidden="true">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="7" width="13" height="10" rx="2" /><path d="M14 10h4l3 3v4h-7" /><circle cx="6" cy="18" r="2" /><circle cx="18" cy="18" r="2" /></svg>
-                        </span>
-                        <span className="ds-row-main">
-                            <span className="ds-row-title">{etaValue}</span>
-                            {etaLabel && <span className="ds-row-sub">{etaLabel}</span>}
-                        </span>
+                        <span className="ds-row-label">{t('restaurant.rating_label')}</span>
+                        <span className="ds-row-text">★ {restaurant.rating} <span className="ds-row-text--muted">· {getReviewsLabel(restaurant)}</span></span>
                     </li>
-                    {restaurant.rating ? (
-                        <li className="ds-row">
-                            <span className="ds-row-icon" aria-hidden="true">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z" /></svg>
-                            </span>
-                            <span className="ds-row-main">
-                                <span className="ds-row-title">{restaurant.rating}</span>
-                                <span className="ds-row-sub">{getReviewsLabel(restaurant)} {t('restaurant.reviews_count')}</span>
-                            </span>
-                        </li>
-                    ) : null}
-                </ul>
-            </div>
+                ) : null}
+            </ul>
         </Sheet>
     );
 

@@ -4,7 +4,7 @@ import './Cart.css';
 import { useLanguage } from '../translations/LanguageContext';
 import { pickI18nText } from '../utils/i18nContent';
 import { formatPortionWeight } from '../utils/formatProductMeta';
-import Sheet from '../components/UI/Sheet';
+import Dialog, { DialogClose } from '../components/UI/Dialog';
 import { formatPrice } from '../utils/formatPrice';
 
 // SVG Icons
@@ -334,16 +334,17 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                     </div>
                 </div>
             )}
-            <Sheet
+            <Dialog
                 open={confirmClearOpen}
                 onOpenChange={setConfirmClearOpen}
                 title={t('cart.clear_confirm')}
                 description={t('cart.clear_confirm_desc')}
-                footer={
+                actions={
                     <>
-                        <button type="button" className="md-sheet-cta md-sheet-cta--danger" onClick={confirmClear}>
+                        <button type="button" className="ds-btn ds-btn--danger" onClick={confirmClear}>
                             {t('cart.clear')}
                         </button>
+                        <DialogClose className="md-dialog-cancel">{t('common.cancel')}</DialogClose>
                     </>
                 }
             />

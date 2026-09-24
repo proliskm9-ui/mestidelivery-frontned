@@ -364,7 +364,6 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
             deliveryDiscount={deliveryDiscount}
             serviceFee={serviceFee}
             tip={orderData.tip}
-            total={totalAmount}
             freeDeliveryLeft={isFirstOrder && baseDeliveryFee <= 12 && subtotal < 100 ? 100 - subtotal : 0}
           />
 

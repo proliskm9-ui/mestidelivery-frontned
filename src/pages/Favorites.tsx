@@ -65,35 +65,7 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
                     .fav-empty-cta { transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1); touch-action: manipulation; }
                     .fav-empty-cta:active { transform: scale(0.97); }
                 `}</style>
-                <button
-                    type="button"
-                    aria-label={t('common.back')}
-                    onClick={() => onNavigate && onNavigate('menu')}
-                    style={{
-                        position: 'absolute',
-                        top: 'calc(24px + env(safe-area-inset-top, 0px))',
-                        left: '20px',
-                        width: '44px',
-                        height: '44px',
-                        borderRadius: '50%',
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        color: 'white',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        backdropFilter: 'blur(15px)',
-                        WebkitBackdropFilter: 'blur(15px)',
-                        zIndex: 10
-                    }}
-                >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
-                    </svg>
-                </button>
-
-                <img src="/Assets/избранное.png" alt="Empty" style={{ width: '280px', height: '195px', marginBottom: '24px', objectFit: 'contain' }} />
+<img src="/Assets/избранное.png" alt="Empty" style={{ width: '280px', height: '195px', marginBottom: '24px', objectFit: 'contain' }} />
 
                 <h2 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '16px', lineHeight: '22px', color: '#FFFFFF', margin: '0 0 8px 0', opacity: 1, textTransform: 'none', letterSpacing: 'normal' }}>
                     {t('favorites.empty_subtitle')}

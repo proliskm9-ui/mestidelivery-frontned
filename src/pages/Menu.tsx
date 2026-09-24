@@ -601,7 +601,7 @@ const MenuPage: React.FC<{
                                 </svg>
                                 <h2>{t('menu.search_empty_title')}</h2>
                                 <p>{t('menu.search_empty_desc')}</p>
-                                <button type="button" className="ds-btn ds-btn--secondary ds-btn--sm" onClick={() => setSearchQuery('')}>
+                                <button type="button" className="ds-btn ds-btn--primary ds-btn--sm" onClick={() => setSearchQuery('')}>
                                     {t('menu.search_clear')}
                                 </button>
                             </div>

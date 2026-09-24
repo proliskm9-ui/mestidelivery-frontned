@@ -122,7 +122,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                                 if (onLogoClick) onLogoClick();
                                 else onNavigate?.('menu');
                             }}>
-                                <img src="/Assets/Loading/logo.png" alt="MestiGo" className="header-logo" />
+                                <img src="/Assets/Loading/logo.png" alt="MestiDelivery" className="header-logo" />
                             </div>
                         )}
 

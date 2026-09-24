@@ -6,7 +6,7 @@ import LiquidNavBar from './components/UI/LiquidNavBar';
 import LoadingScreen from './components/UI/LoadingScreen';
 import { PageSkeleton } from './components/UI/Skeleton';
 import Toaster from './components/UI/Toaster';
-import Sheet from './components/UI/Sheet';
+import Dialog, { DialogClose } from './components/UI/Dialog';
 import { useAuth } from './auth/AuthContext';
 import { addressText, detectZoneFromText, deviceHasOrdered, accountHasOrders } from './utils/deliveryPromo';
 import CompleteProfileModal from './components/auth/CompleteProfileModal';
@@ -584,7 +584,7 @@ function AppContent() {
                 {!['home', 'login', 'forgot_password', 'menu', 'restaurant', 'cart', 'checkout', 'profile', 'favorites', 'payment', 'admin'].includes(currentPage) && !isLegalPath(window.location.pathname) && (
                     <nav style={{ padding: '0 2rem', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 100 }}>
                         <div className="logo" onClick={() => setCurrentPage(token ? 'menu' : 'home')} style={{ cursor: 'pointer' }}>
-                            <img src="/Assets/general-green.png" alt="MESTIGO" style={{ height: '40px' }} />
+                            <img src="/Assets/general-green.png" alt="MestiDelivery" style={{ height: '40px' }} />
                         </div>
                         <div className="menu desktop-only" style={{ display: 'flex', gap: '2rem' }}>
                             <span className="menu-item" onClick={() => setCurrentPage('menu')} style={{ cursor: 'pointer', color: currentPage === 'menu' ? '#21EA7C' : 'inherit' }}>{t('nav.menu')}</span>
@@ -889,16 +889,16 @@ function AppContent() {
             </div>
 
             {/* Cross-restaurant warning modal */}
-            <Sheet
+            <Dialog
                 open={Boolean(pendingProductToAdd)}
                 onOpenChange={(open) => { if (!open) setPendingProductToAdd(null); }}
                 title={t('cart.other_restaurant_title')}
                 description={t('cart.other_restaurant_desc')}
-                footer={
+                actions={
                     <>
                         <button
                             type="button"
-                            className="md-sheet-cta md-sheet-cta--danger"
+                            className="ds-btn ds-btn--danger"
                             onClick={() => {
                                 if (!pendingProductToAdd) return;
                                 setCart([{
@@ -910,6 +910,7 @@ function AppContent() {
                         >
                             {t('cart.other_restaurant_clear')}
                         </button>
+                        <DialogClose className="md-dialog-cancel">{t('common.cancel')}</DialogClose>
                     </>
                 }
             />
