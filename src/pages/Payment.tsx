@@ -1,6 +1,5 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Clock } from 'lucide-react';
 import './Payment.css';
 import { api, restaurantCache } from '../services/api';
 import IsometricBoxLoader from '../components/UI/IsometricBoxLoader';
@@ -8,6 +7,10 @@ import { useLanguage } from '../translations/LanguageContext';
 import { formatCheckoutAddress, formatCourierComment } from '../utils/checkoutAddress';
 import { ENABLE_CRYPTO_PAY } from '../config/features';
 import { toast } from 'sonner';
+import { formatPrice } from '../utils/formatPrice';
+import PayMarks from '../components/Payment/PayMarks';
+import { OrderPlacedActions, OrderPlacedMark } from '../components/Payment/OrderPlaced';
+import { useOrderHandover } from '../hooks/useOrderHandover';
 
 /** Keepz payment link — same as mobile (no Tribute). */
 const PAYMENT_URL = 'https://app.keepz.me/pay?qrType=DEFAULT&receiverType=USER&receiverId=6ea6970c-20ee-4119-b25f-6ebcc8a888c6';
@@ -58,6 +61,12 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
 
     const orderCreatedRef = useRef(false);
     const shellRef = useRef<HTMLDivElement>(null);
+    // Same hand-over as on the phone: back from Keepz -> replay the mark -> order status
+    const { complete, rememberOrder, replayKey } = useOrderHandover(
+        onPaymentComplete,
+        screen === 'pending_confirmation' && method !== 'cash',
+        orderId,
+    );
     const idempotencyKey = useMemo(() => {
         if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
         return Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -162,13 +171,10 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
             }
 
             setOrderId(result.id);
+            rememberOrder(result.id, 'cash');
             setScreen('pending_confirmation');
             await new Promise(r => setTimeout(r, 3000));
-            try {
-                onPaymentComplete('cash', result.id);
-            } catch (navError) {
-                console.error('Order created but post-success navigation failed', navError);
-            }
+            complete('cash', result.id);
         } catch (e: any) {
             console.error('Order creation error:', e);
             toast.error(t('common.error') + ': ' + (e.message || t('checkout.order_failed')));
@@ -207,6 +213,7 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
             }
 
             setOrderId(result.id);
+            rememberOrder(result.id, 'card');
 
             try {
                 await api.updateOrderStatus(result.id, 'pending:card');
@@ -223,7 +230,7 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
         }
     };
 
-    const busy = screen === 'creating' || screen === 'pending_confirmation' || screen === 'success';
+    const busy = screen === 'creating' || screen === 'success';
 
     return (
         <div className="page-transition-wrapper pc-payment-wrap">
@@ -257,54 +264,16 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
                             )}
 
                             {screen === 'pending_confirmation' && (
-                                <>
-                                    <div className="pc-pending-icon">
-                                        {method === 'cash' ? (
-                                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#21ea7c" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                                <polyline points="20 6 9 17 4 12" />
-                                            </svg>
-                                        ) : (
-                                            <Clock color="#21ea7c" size={40} strokeWidth={2} />
-                                        )}
-                                    </div>
-                                    <h2>{t('checkout.order_placed')}</h2>
-                                    <p>
-                                        {method === 'cash'
-                                            ? t('checkout.pay_cash_on_delivery')
-                                            : t('checkout.waiting_payment_confirm')}
+                                <div className="pc-placed" role="status" aria-live="polite">
+                                    <OrderPlacedMark key={replayKey} />
+                                    <h2 className="pc-placed-title" key={`t${replayKey}`}>
+                                        {orderId ? t('checkout.order_placed_n').replace('{id}', String(orderId)) : t('checkout.order_placed')}
+                                    </h2>
+                                    <p className="pc-placed-text">
+                                        {method === 'cash' ? t('checkout.pay_cash_on_delivery') : t('checkout.placed_card_desc')}
                                     </p>
-                                    {orderId && (
-                                        <div className="pc-order-badge">{t('common.order')} #{orderId}</div>
-                                    )}
-                                    {method !== 'cash' && orderId && (
-                                        <div className="pc-pending-actions">
-                                            <button
-                                                type="button"
-                                                className="pc-btn-view-order"
-                                                onClick={() => onPaymentComplete('card', orderId)}
-                                            >
-                                                <span>{t('checkout.view_order') || 'Посмотреть заказ'}</span>
-                                                <div className="pc-btn-arrow">
-                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                                        <line x1="5" y1="12" x2="19" y2="12" />
-                                                        <polyline points="12 5 19 12 12 19" />
-                                                    </svg>
-                                                </div>
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="pc-btn-reopen-link"
-                                                onClick={() => openPaymentUrl(PAYMENT_URL)}
-                                            >
-                                                <span>{t('checkout.open_payment_page')}</span>
-                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                    <path d="M7 17L17 7" />
-                                                    <path d="M8 7h9v9" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    )}
-                                </>
+                                    {method !== 'cash' && <OrderPlacedActions onOpenKeepz={() => openPaymentUrl(PAYMENT_URL)} />}
+                                </div>
                             )}
 
                             {screen === 'success' && (
@@ -351,8 +320,9 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
                                     className="pc-pay-btn primary"
                                     onClick={handleConfirmPaid}
                                 >
-                                    {t('checkout.pay_online')}
+                                    {t('checkout.pay_amount').replace('{amount}', formatPrice(totalAmount))}
                                 </button>
+                                <PayMarks />
 
                                 <div className="pc-pay-separator">
                                     <span>{t('checkout.or_other_methods')}</span>

@@ -879,3 +879,36 @@
   color: #21ea7c;
   background: rgba(255, 255, 255, 0.04);
 }
+
+/* ===== Same language as the phone payment ===== */
+.pc-amount-value {
+    font-weight: 900;
+    text-shadow: 0 0 20px rgba(33, 234, 124, 0.3);
+}
+
+.pc-actions-panel .mp-pay-marks {
+    margin: 2px 0 6px;
+}
+
+.pc-placed {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.pc-placed-title {
+    margin: 0;
+    font-size: 26px !important;
+    font-weight: 800;
+    color: #ffffff !important;
+    letter-spacing: -0.01em;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+    animation: mpDoneRise 420ms ease-out 700ms both;
+}
+
+.pc-placed-text {
+    max-width: 420px !important;
+    font-size: 15px !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+}
