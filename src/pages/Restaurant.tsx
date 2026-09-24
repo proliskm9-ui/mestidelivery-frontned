@@ -825,7 +825,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                         {locName(selectedProduct.name)}
                                         {formatWeight(selectedProduct.weight) && <span className="footer-dish-weight">{formatWeight(selectedProduct.weight)}</span>}
                                         {getMinimumOrderQuantity(selectedProduct) > 1 && (
-                                            <span className="footer-dish-weight">мин. {getMinimumOrderQuantity(selectedProduct)} шт.</span>
+                                            <span className="footer-dish-weight">{t('restaurant.min_qty').replace('{n}', String(getMinimumOrderQuantity(selectedProduct)))}</span>
                                         )}
                                     </h2>
                                     <span className="footer-dish-price">{formatPrice(Number(selectedProduct.price) + pickedModsSum)}</span>
@@ -1177,7 +1177,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                     {locName(selectedProduct.name)}
                                     {formatWeight(selectedProduct.weight) && <span className="footer-dish-weight">{formatWeight(selectedProduct.weight)}</span>}
                                     {getMinimumOrderQuantity(selectedProduct) > 1 && (
-                                        <span className="footer-dish-weight">мин. {getMinimumOrderQuantity(selectedProduct)} шт.</span>
+                                        <span className="footer-dish-weight">{t('restaurant.min_qty').replace('{n}', String(getMinimumOrderQuantity(selectedProduct)))}</span>
                                     )}
                                 </h2>
                                 <span className="footer-dish-price">{formatPrice(Number(selectedProduct.price) + pickedModsSum)}</span>

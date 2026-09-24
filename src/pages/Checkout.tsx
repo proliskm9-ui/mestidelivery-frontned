@@ -247,7 +247,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                                 </h3>
                                 {!restaurantOpen && closedHint && (
                                     <p style={{ margin: '0 0 12px', color: '#f87171', fontSize: 14, fontWeight: 600 }}>
-                                        {closedHint}. Сейчас оформить нельзя — выберите время на открытие.
+                                        {closedHint}. {t('checkout.closed_pick_open')}
                                     </p>
                                 )}
                                 <div className="delivery-options">

@@ -52,7 +52,7 @@ const HeaderBlock: React.FC<HeaderBlockProps> = ({
 
       {asapDisabled && closedHint && (
         <p style={{ margin: '0 16px 10px', color: '#f87171', fontSize: 13, fontWeight: 600 }}>
-          {closedHint}. Сейчас оформить нельзя — выберите время на открытие.
+          {closedHint}. {t('checkout.closed_pick_open')}
         </p>
       )}
 
