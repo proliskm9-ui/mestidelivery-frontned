@@ -1919,7 +1919,7 @@ export const translations = {
             courier_on_site: 'კურიერი ადგილზეა',
             desc_pending: 'ველოდებით დადასტურებას',
             desc_confirmed: 'შეკვეთა გადაეცა სამზარეულოს',
-            desc_preparing: 'რესტорანმა დაიწყო მომზადება',
+            desc_preparing: 'რესტორანმა დაიწყო მომზადება',
             desc_ready: 'ელოდება კურიერს',
             desc_delivering: 'კურიერი უკვე გზაშია',
             desc_delivered: 'გემრიელად მიირთვით!'
