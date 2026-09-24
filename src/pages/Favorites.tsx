@@ -61,10 +61,13 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ favorites, onRestaurantCl
 
     if (totalFavoritesCount === 0) {
         return (
-            <div style={{ color: 'white', padding: '40px 40px 80px 40px', textAlign: 'center', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', paddingTop: '80px' }}>
+            <div style={{ color: 'white', padding: '40px 40px 80px 40px', textAlign: 'center', minHeight: '100vh', width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', paddingTop: '80px' }}>
                 <style>{`
                     .fav-empty-cta { transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1); touch-action: manipulation; }
                     .fav-empty-cta:active { transform: scale(0.97); }
+                    @media (min-width: 1025px) {
+                        .fav-empty-cta { position: static !important; margin: 28px auto 0 !important; width: 320px !important; }
+                    }
                 `}</style>
 <img src="/Assets/избранное.png" alt="Empty" style={{ width: '280px', height: '195px', marginBottom: '24px', objectFit: 'contain' }} />
 
