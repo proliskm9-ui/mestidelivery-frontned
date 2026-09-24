@@ -933,3 +933,19 @@ body:has(.mobile-payment-wrapper),
     animation-delay: 0ms !important;
   }
 }
+
+/* Order placed: sit in the optical centre of the block instead of hugging its top */
+.payment-block-bottom:has(.mp-placed),
+.payment-block-bottom:has(.mp-placed) > .mobile-payment-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.payment-block-bottom:has(.mp-placed) > .mobile-payment-content {
+  flex: 1;
+}
+
+.mp-methods-card:has(.mp-placed) {
+  justify-content: center;
+  padding-bottom: 8vh;
+}
