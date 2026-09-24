@@ -400,6 +400,8 @@ export const translations = {
             cancelled: 'Отменен',
             est_time: 'Ожидаемое время: ~35 мин',
             eta_short: '~35 мин',
+            eta_in: 'Будет у вас через {range}',
+            eta_about: 'будет около {time}',
             deliver_at: 'Доставим к {time}',
             order_items: 'Состав заказа',
             courier_on_site: 'Курьер на месте',
@@ -407,7 +409,7 @@ export const translations = {
             desc_confirmed: 'Заказ передан на кухню',
             desc_preparing: 'Ресторан начал готовку',
             desc_ready: 'Ожидает курьера',
-            desc_delivering: 'Будет у вас через ~7 мин',
+            desc_delivering: 'Курьер уже едет к вам',
             desc_delivered: 'Приятного аппетита!'
         },
         cart: {
@@ -1154,6 +1156,8 @@ export const translations = {
             cancelled: 'Cancelled',
             est_time: 'Est. time: ~35 min',
             eta_short: '~35 min',
+            eta_in: 'At your door in {range}',
+            eta_about: 'arriving around {time}',
             deliver_at: 'Delivery at {time}',
             order_items: 'Order Items',
             courier_on_site: 'Courier on site',
@@ -1161,7 +1165,7 @@ export const translations = {
             desc_confirmed: 'Order sent to kitchen',
             desc_preparing: 'Restaurant started cooking',
             desc_ready: 'Awaiting courier',
-            desc_delivering: 'Will be with you in ~7 min',
+            desc_delivering: 'The courier is on the way',
             desc_delivered: 'Bon appétit!'
         },
         cart: {
@@ -1908,6 +1912,8 @@ export const translations = {
             cancelled: 'გაუქმებულია',
             est_time: 'დრო: ~35 წთ',
             eta_short: '~35 წთ',
+            eta_in: 'მოგიტანთ {range}-ში',
+            eta_about: 'მიტანა დაახლოებით {time}-ზე',
             deliver_at: 'მიტანა {time}-ზე',
             order_items: 'შეკვეთის შემადგენლობა',
             courier_on_site: 'კურიერი ადგილზეა',
@@ -1915,7 +1921,7 @@ export const translations = {
             desc_confirmed: 'შეკვეთა გადაეცა სამზარეულოს',
             desc_preparing: 'რესტорანმა დაიწყო მომზადება',
             desc_ready: 'ელოდება კურიერს',
-            desc_delivering: 'თქვენთან იქნება ~7 წუთში',
+            desc_delivering: 'კურიერი უკვე გზაშია',
             desc_delivered: 'გემრიელად მიირთვით!'
         },
         cart: {

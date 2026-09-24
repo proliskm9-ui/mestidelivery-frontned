@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useDeliveryEta } from '../../hooks/useDeliveryEta';
 import './MobileRestaurantCard.css';
 import { Restaurant, Store } from '../../services/api';
 import { useLanguage, formatDuration } from '../../translations/LanguageContext';
@@ -19,6 +20,7 @@ const MobileRestaurantCard: React.FC<MobileRestaurantCardProps> = ({ item, onCli
     const hasImage = Boolean(item.img && item.img.trim());
     const showSkeleton = !hasImage || !imageOk;
     const closedText = closedBadgeText((item as Restaurant).working_hours, language);
+    const eta = useDeliveryEta(String(item.id), pickI18nText(item.name, 'en'), formatDuration((item as Restaurant).delivery || '25–30 мин', language));
 
     useEffect(() => {
         setImageOk(true);
@@ -77,7 +79,7 @@ const MobileRestaurantCard: React.FC<MobileRestaurantCardProps> = ({ item, onCli
                 </div>
                 <div className="allRestaurantDelivery">
                     <img src="/Assets/ChatGPT Image 23 нояб. 2025 г., 09_04_55 1.png" alt="" />
-                    {formatDuration((item as Restaurant).delivery || '25–30 мин', language)}
+                    {eta}
                 </div>
             </div>
         </div>

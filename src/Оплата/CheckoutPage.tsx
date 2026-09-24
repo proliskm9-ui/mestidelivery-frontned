@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './CheckoutPage.css';
 import { useLanguage } from '../translations/LanguageContext';
-import { api } from '../services/api';
+import { api, restaurantCache } from '../services/api';
 import { useDeliveryLocationOptional } from '../delivery/DeliveryLocationContext';
 import {
   closedBadgeText,
@@ -317,6 +317,9 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
           scheduledDisplay={scheduledDisplay}
           setScheduledTime={(val: string) => updateOrder('scheduledTime', val || null)}
           onOpenTimeModal={() => toggleModal('time', true)}
+          restaurantId={rid}
+          restaurantName={rid ? restaurantCache[`rest_${rid}`]?.name : null}
+          zoneId={pricedZone}
           asapDisabled={!restaurantOpen}
           closedHint={closedHint}
         />

@@ -1,4 +1,5 @@
 import { Suspense, useState, useEffect, useCallback, lazy } from 'react';
+import { useDeliveryEta } from './hooks/useDeliveryEta';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import './App.css';
 import { api, restaurantCache } from './services/api';
@@ -231,6 +232,8 @@ function AppContent() {
         if (location.pathname !== expected) navigate(expected, { replace: true });
     }, [currentPage, language, location.pathname, navigate, selectedOrderId]);
     const [cart, setCart] = useState<{ product: any, quantity: number }[]>([]);
+    // Panel ETA: the cart's restaurant, or the restaurant being viewed
+    const cartEta = useDeliveryEta(cart[0]?.product?.restaurant_id || selectedRestaurantId, null, deliveryLoc.etaLabel);
     // Tell the server-side helpers (Sunset packaging) whose cart this is
     useEffect(() => {
         const rid = cart[0]?.product?.restaurant_id;
@@ -875,7 +878,7 @@ function AppContent() {
                                     <GlassBottomPanel
                                         totalItems={cart.reduce((a, b) => a + b.quantity, 0)}
                                         totalPrice={cart.reduce((a, b) => a + (b.product.price * b.quantity), 0)}
-                                        deliveryTime={deliveryLoc.etaLabel}
+                                        deliveryTime={cartEta}
                                         deliveryFee={deliveryFee}
                                         onNext={() => setCurrentPage('cart')}
                                         buttonText={t('common.next')}

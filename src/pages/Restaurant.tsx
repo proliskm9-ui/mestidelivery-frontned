@@ -17,6 +17,7 @@ import { deviceHasOrdered, accountHasOrders } from '../utils/deliveryPromo';
 import { cuisineLine } from '../utils/restaurantCuisine';
 import Sheet from '../components/UI/Sheet';
 import DishModifiers from '../components/UI/DishModifiers';
+import { useDeliveryEta } from '../hooks/useDeliveryEta';
 import { acceptsModifiers, isAvailableModifier, isModifierProduct } from '../utils/modifiers';
 
 interface RestaurantPageProps {
@@ -106,7 +107,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
         cuisineLine(r?.name, language) || (language === 'en' ? 'Restaurant • Food delivery' : language === 'ka' ? 'რესტორანი • საკვების მიტანა' : 'Ресторан • Доставка еды');
 
     const getDeliveryTimeLine = (r: Restaurant) => {
-        const d = String((r as any)?.delivery || '20-30 мин');
+        const d = String(deliveryEta || (r as any)?.delivery || '20-30 мин');
         if (language === 'en') return `Delivery time: ~${d.replace(/мин/g, 'min')}`;
         if (language === 'ka') return `მიტანის დრო: ~${d.replace(/мин/g, 'წთ')}`;
         return `Время доставки: ~${d}`;
@@ -119,6 +120,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
     // Sauces / bread: not a menu section, offered inside the dish card
     const [modifierProducts, setModifierProducts] = useState<Product[]>([]);
     const [pickedMods, setPickedMods] = useState<string[]>([]);
+    const deliveryEta = useDeliveryEta(restaurant?.id || restaurantId, restaurant?.name || null, restaurant?.delivery || null);
     const [, setCategories] = useState<string[]>([]);
     const [activeCategory, setActiveCategory] = useState('All');
     const [loading, setLoading] = useState(true);
@@ -639,7 +641,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                     <div className="ric-meta-item">
                                         <img src="/Assets/иконка_человек_2 пнг 32.png" alt="" style={{ width: 32, height: 32, objectFit: 'contain' }} />
                                         <div className="ric-meta-text">
-                                            <span className="ric-meta-val">{restaurant.delivery || t('cart.time')}</span>
+                                            <span className="ric-meta-val">{deliveryEta || restaurant.delivery || t('cart.time')}</span>
                                             <span className="ric-meta-sub">{t('restaurant.delivery')}</span>
                                         </div>
                                     </div>
@@ -758,11 +760,11 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                                 <div className="cw-info-text">
                                     <div>
                                         {deliveryFee != null && cart.length > 0 && cartDeliveryFee === 0
-                                            ? `${t('menu.free_delivery')} · ${deliveryLoc?.etaLabel || restaurant.delivery || t('cart.time')}`
+                                            ? `${t('menu.free_delivery')} · ${deliveryEta || restaurant.delivery || t('cart.time')}`
                                             : deliveryFee != null
                                             ? t('delivery.fee_with_eta')
                                                 .replace('{fee}', String(Math.round(cart.length > 0 ? (cartDeliveryFee ?? deliveryFee) : deliveryFee)))
-                                                .replace('{eta}', deliveryLoc?.etaLabel || restaurant.delivery || t('cart.time'))
+                                                .replace('{eta}', deliveryEta || restaurant.delivery || t('cart.time'))
                                             : t('delivery.need_location')}
                                     </div>
                                     {restaurant.address && (
@@ -1034,7 +1036,7 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             style={{ width: '32px', height: '32px', objectFit: 'contain' }}
                         />
                         <div className="v2-meta-text">
-                            <span className="v2-meta-val" style={{ color: '#21EA7C' }}>{restaurant.delivery || t('cart.time')}</span>
+                            <span className="v2-meta-val" style={{ color: '#21EA7C' }}>{deliveryEta || restaurant.delivery || t('cart.time')}</span>
                             <span className="v2-meta-sub">{t('restaurant.delivery')}</span>
                         </div>
                     </div>

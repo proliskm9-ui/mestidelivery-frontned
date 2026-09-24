@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useDeliveryEta } from '../hooks/useDeliveryEta';
 import { api, Product, Restaurant } from '../services/api';
 import './MobileCart.css';
 import { useLanguage } from '../translations/LanguageContext';
@@ -64,6 +65,7 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
     const [isCommentOpen, setIsCommentOpen] = useState(false);
     const [cutleryCount, setCutleryCount] = useState(1);
     const [recommendations, setRecommendations] = useState<Product[]>([]);
+    const cartEta = useDeliveryEta(initialCartItems[0]?.product?.restaurant_id || null, null, null);
     const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
     const [showMinOrderModal, setShowMinOrderModal] = useState(false);
 
@@ -291,7 +293,7 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                 totalItems={totalItems}
                 // Dishes only: the 100 ₾ free-delivery threshold is on the subtotal (as at checkout)
                 totalPrice={subtotal}
-                deliveryTime={restaurant?.delivery || `30-35 ${t('checkout.min_short')}`}
+                deliveryTime={cartEta || restaurant?.delivery || `30-35 ${t('checkout.min_short')}`}
                 deliveryFee={deliveryFee}
                 onNext={handleCheckoutClick}
                 buttonText={t('cart.checkout_btn')}

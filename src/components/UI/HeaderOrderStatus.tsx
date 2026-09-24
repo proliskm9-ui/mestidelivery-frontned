@@ -36,7 +36,7 @@ const ESTIMATED_TIMES: Record<string, string> = {
     confirmed: 'Заказ передан на кухню',
     preparing: 'Ресторан начал готовку',
     ready: 'Ожидает курьера',
-    delivering: 'Будет у вас через ~7 мин',
+    delivering: 'Курьер уже едет к вам',
     delivered: 'Приятного аппетита!',
     scheduled: 'Заказ ко времени',
 };

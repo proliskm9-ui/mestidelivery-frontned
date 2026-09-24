@@ -7,6 +7,9 @@ import './OrderStatus.css';
 import { formatPrice } from '../utils/formatPrice';
 import { useLanguage } from '../translations/LanguageContext';
 import { pickI18nText } from '../utils/i18nContent';
+import { useRushStatus } from '../utils/rushStatus';
+import { useDeliveryLocationOptional } from '../delivery/DeliveryLocationContext';
+import { clockAt, minutesLabel, remainingWindow, OrderStage } from '../utils/eta';
 import {
     Clock,
     ClipboardCheck,
@@ -101,6 +104,11 @@ interface Props {
 const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
     const { t, language } = useLanguage();
     const [order, setOrder] = useState<any>(null);
+    // Live ETA: re-evaluated every 30 s while the page is open
+    const [etaNow, setEtaNow] = useState(() => Date.now());
+    useEffect(() => { const id = setInterval(() => setEtaNow(Date.now()), 30000); return () => clearInterval(id); }, []);
+    const etaRush = useRushStatus(order?.restaurant_id ?? null);
+    const etaZone = useDeliveryLocationOptional()?.zoneId ?? null;
     const [loading, setLoading] = useState(true);
     const [isNetworkError, setIsNetworkError] = useState(false);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -311,13 +319,22 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
         const m = /(\d{2}):(\d{2})/.exec(String(order.scheduled_time || ''));
         return m ? `${m[1]}:${m[2]}` : '';
     })();
+    // Remaining time from the restaurant's kitchen time, the stage and the order's age
+    const left = remainingWindow(stepKey as OrderStage, order.created_at, {
+        restaurantId: order.restaurant_id,
+        restaurantName: pickI18nText(order.restaurant_name || '', 'en'),
+        zoneId: etaZone,
+        rush: etaRush.isRush,
+    }, etaNow);
     const statusLine = stepKey === 'delivered'
         ? t('status.desc_delivered')
         : scheduledHm && (stepKey === 'pending' || stepKey === 'confirmed')
             ? t('status.deliver_at').replace('{time}', scheduledHm)
-            : stepKey === 'delivering'
-                ? t('status.desc_delivering')
-                : `${t(`status.desc_${stepKey}`)} · ${t('status.eta_short')}`;
+            : !left
+                ? t(`status.desc_${stepKey}`)
+                : stepKey === 'delivering'
+                    ? t('status.eta_in').replace('{range}', minutesLabel(left, language))
+                    : `${t(`status.desc_${stepKey}`)} · ${t('status.eta_about').replace('{time}', clockAt((left[0] + left[1]) / 2, etaNow))}`;
 
     const parseItems = (items: any): { name: string; price: number; quantity: number }[] => {
         if (!items) return [];

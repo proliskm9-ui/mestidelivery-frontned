@@ -2,10 +2,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Flame } from 'lucide-react';
 import './Checkout.css';
 import { useRushStatus, rushTitle, rushDescription } from '../utils/rushStatus';
+import { deliveryLabel } from '../utils/eta';
 import { deviceHasOrdered, accountHasOrders } from '../utils/deliveryPromo';
 import './MobileCheckout.css';
 import { useLanguage } from '../translations/LanguageContext';
-import { api } from '../services/api';
+import { api, restaurantCache } from '../services/api';
 import { getDeliveryFeeForAddress } from '../utils/deliveryCalculator';
 import {
     closedBadgeText,
@@ -248,7 +249,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                                     >
                                         <span className="title">{t('checkout.standard')}</span>
                                         <span className="subtitle">
-                                            {rushState.isRush ? '45-65 ' : '25-40 '}{t('common.min')}
+                                            {deliveryLabel({ restaurantId: rid, restaurantName: rid ? restaurantCache[`rest_${rid}`]?.name : null, zoneId: address.deliveryZone, rush: rushState.isRush }, language)}
                                         </span>
                                     </button>
                                     <button
@@ -268,7 +269,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                                         <div className="rush-hour-header">
                                             <Flame className="rush-flame" size={15} strokeWidth={2.2} aria-hidden="true" />
                                             <span>
-                                                {rushTitle(rushState, language)}
+                                                {rushTitle(rushState, language, deliveryLabel({ restaurantId: rid, restaurantName: rid ? restaurantCache[`rest_${rid}`]?.name : null, zoneId: address.deliveryZone, rush: true }, language))}
                                             </span>
                                         </div>
                                         <p className="rush-hour-desc">

@@ -14,33 +14,43 @@ function localRushState(): RushState {
     return { isRush, reason: isRush ? 'evening_rush' : 'normal' };
 }
 
+// One request per restaurant per 2 minutes, shared by every card / page that asks
+const RUSH_TTL_MS = 2 * 60 * 1000;
+const rushCache = new Map<string, { at: number; value: Promise<RushState | null> }>();
+
+function fetchRush(restaurantId?: string | number | null): Promise<RushState | null> {
+    const key = restaurantId ? String(restaurantId) : '';
+    const hit = rushCache.get(key);
+    if (hit && Date.now() - hit.at < RUSH_TTL_MS) return hit.value;
+    const url = key
+        ? `/api/bot/v1/rush-status?restaurant_id=${encodeURIComponent(key)}`
+        : '/api/bot/v1/rush-status';
+    const value = fetch(url)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => (d && typeof d.is_rush === 'boolean' ? { isRush: d.is_rush, reason: d.reason || 'evening_rush' } : null))
+        .catch(() => null);
+    rushCache.set(key, { at: Date.now(), value });
+    return value;
+}
+
 /** Rush status from /api/bot/v1/rush-status (optionally per restaurant). */
 export function useRushStatus(restaurantId?: string | number | null): RushState {
     const [rush, setRush] = useState<RushState>(localRushState);
 
     useEffect(() => {
         let active = true;
-        const url = restaurantId
-            ? `/api/bot/v1/rush-status?restaurant_id=${encodeURIComponent(String(restaurantId))}`
-            : '/api/bot/v1/rush-status';
-        fetch(url)
-            .then((r) => (r.ok ? r.json() : null))
-            .then((d) => {
-                if (active && d && typeof d.is_rush === 'boolean') {
-                    setRush({ isRush: d.is_rush, reason: d.reason || 'evening_rush' });
-                }
-            })
-            .catch(() => {});
+        fetchRush(restaurantId).then((r) => { if (active && r) setRush(r); });
         return () => { active = false; };
     }, [restaurantId]);
 
     return rush;
 }
 
-export function rushTitle(rush: RushState, language: string): string {
-    if (language === 'en') return rush.reason === 'manual_on' ? 'High demand · Delivery ~45–65 min' : 'Evening rush hour · ~45–65 min';
-    if (language === 'ka') return rush.reason === 'manual_on' ? 'მაღალი მოთხოვნა · მიტანა ~45–65 წთ' : 'საღამოს პიკის საათი · ~45–65 წთ';
-    return rush.reason === 'manual_on' ? 'Высокий спрос · Доставка ~45–65 мин' : 'Вечерний час пик · ~45–65 мин';
+export function rushTitle(rush: RushState, language: string, eta?: string): string {
+    const time = eta || (language === 'en' ? '45–65 min' : language === 'ka' ? '45–65 წთ' : '45–65 мин');
+    if (language === 'en') return rush.reason === 'manual_on' ? `High demand · Delivery ~${time}` : `Evening rush hour · ~${time}`;
+    if (language === 'ka') return rush.reason === 'manual_on' ? `მაღალი მოთხოვნა · მიტანა ~${time}` : `საღამოს პიკის საათი · ~${time}`;
+    return rush.reason === 'manual_on' ? `Высокий спрос · Доставка ~${time}` : `Вечерний час пик · ~${time}`;
 }
 
 export function rushDescription(language: string): string {

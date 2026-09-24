@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useDeliveryEta } from '../../hooks/useDeliveryEta';
 import { Restaurant } from '../../services/api';
 import { useLanguage, formatDuration } from '../../translations/LanguageContext';
 import { pickI18nText } from '../../utils/i18nContent';
@@ -16,6 +17,7 @@ interface RestaurantCardProps {
 
 const RestaurantCard: React.FC<RestaurantCardProps> = ({ item, onClick, isVertical, isFavorite, onToggleFavorite }) => {
     const { language } = useLanguage();
+    const eta = useDeliveryEta(String(item.id), pickI18nText(item.name, 'en'), formatDuration(item.delivery || '25-35 мин', language));
     const [imageOk, setImageOk] = useState(true);
     const hasImage = Boolean(item.img && item.img.trim());
     const showSkeleton = !hasImage || !imageOk;
@@ -83,7 +85,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ item, onClick, isVertic
                 <div className="rest-sub" style={{ marginTop: '-4px', display: 'flex', alignItems: 'center' }}>
                     <img src="/Assets/ChatGPT Image 23 нояб. 2025 г., 09_04_55 1.png" alt="Person" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
                     <div className="rest-meta-content">
-                        <span>{formatDuration(item.delivery || '25-35 мин', language)}</span>
+                        <span>{eta}</span>
                     </div>
                 </div>
             </div>

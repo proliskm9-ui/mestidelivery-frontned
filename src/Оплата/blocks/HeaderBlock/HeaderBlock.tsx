@@ -3,6 +3,7 @@ import { Flame } from 'lucide-react';
 import './HeaderBlock.css';
 import { useLanguage } from '../../../translations/LanguageContext';
 import { useRushStatus, rushTitle, rushDescription } from '../../../utils/rushStatus';
+import { deliveryLabel } from '../../../utils/eta';
 
 interface HeaderBlockProps {
   deliveryType: 'standard' | 'scheduled';
@@ -14,6 +15,9 @@ interface HeaderBlockProps {
   onBack?: () => void;
   asapDisabled?: boolean;
   closedHint?: string | null;
+  restaurantId?: string | null;
+  restaurantName?: string | null;
+  zoneId?: string | null;
 }
 
 const HeaderBlock: React.FC<HeaderBlockProps> = ({
@@ -26,9 +30,13 @@ const HeaderBlock: React.FC<HeaderBlockProps> = ({
   onBack,
   asapDisabled,
   closedHint,
+  restaurantId,
+  restaurantName,
+  zoneId,
 }) => {
   const { t, language } = useLanguage();
-  const rush = useRushStatus();
+  const rush = useRushStatus(restaurantId);
+  const eta = deliveryLabel({ restaurantId, restaurantName, zoneId, rush: rush.isRush }, language);
   const timeLabel = scheduledDisplay || scheduledTime;
   return (
     <section className="checkout-top">
@@ -61,7 +69,7 @@ const HeaderBlock: React.FC<HeaderBlockProps> = ({
           style={asapDisabled ? { opacity: 0.45, cursor: 'not-allowed' } : undefined}
         >
           <span className="btn-title">{t('checkout.standard')}</span>
-          <span className="btn-sub">{rush.isRush ? '45-65 ' : '25-40 '}{t('checkout.min_short')}</span>
+          <span className="btn-sub">{eta}</span>
         </button>
 
         <button
@@ -80,7 +88,7 @@ const HeaderBlock: React.FC<HeaderBlockProps> = ({
         <div className="rush-hour-badge">
           <div className="rush-hour-header">
             <Flame className="rush-flame" size={15} strokeWidth={2.2} aria-hidden="true" />
-            <span>{rushTitle(rush, language)}</span>
+            <span>{rushTitle(rush, language, eta)}</span>
           </div>
           <p className="rush-hour-desc">{rushDescription(language)}</p>
         </div>
