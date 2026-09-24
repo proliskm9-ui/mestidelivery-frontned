@@ -967,9 +967,9 @@
     position: fixed;
     inset: 0;
     z-index: 99999;
-    background: var(--color-scrim);
-    backdrop-filter: var(--scrim-filter);
-    -webkit-backdrop-filter: var(--scrim-filter);
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -983,17 +983,17 @@
 
 .y-rate-sheet {
     width: 100%;
-    max-width: 560px;
-    background: var(--material-sheet-bg);
-    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    max-width: 480px;
+    background: #141416;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: none;
+    border-radius: 32px 32px 0 0;
     padding: 12px 24px calc(24px + env(safe-area-inset-bottom));
-    box-shadow: var(--shadow-3);
+    box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.65);
     position: relative;
     animation: yRateSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1);
     max-height: 90vh;
     overflow-y: auto;
-    border-top: 1px solid var(--material-sheet-edge);
-    font-family: var(--font-text);
 }
 
 @media (min-width: 768px) {
@@ -1068,18 +1068,17 @@
 }
 
 .y-rate-close-btn {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: var(--color-accent);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: transform var(--dur-press) var(--ease-out);
-    margin-left: auto;
+    transition: all 0.2s;
 }
 
 .y-rate-close-btn:hover {
@@ -1145,10 +1144,12 @@
 }
 
 .y-rate-title {
+    font-size: 21px;
+    font-weight: 700;
     color: #FFFFFF;
     margin: 0 0 20px;
-    letter-spacing: var(--tracking-tight);
-    font: var(--t-section);
+    line-height: 1.3;
+    letter-spacing: -0.3px;
 }
 
 .y-rate-stars-wrapper {
@@ -1263,12 +1264,12 @@
 
 .y-rate-textarea {
     width: 100%;
-    background: var(--field-bg);
-    border: 1px solid var(--field-border);
-    border-radius: var(--control-radius);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
     padding: 14px 16px;
     color: #fff;
-    font-size: 16px;
+    font-size: 14px;
     font-family: inherit;
     resize: none;
     outline: none;
@@ -1369,17 +1370,16 @@
 }
 
 .y-rate-skip-btn {
-    flex: 0 0 auto;
-    padding: 0 20px;
-    background: var(--btn-secondary-bg);
-    border: 1px solid var(--btn-secondary-border);
-    border-radius: var(--btn-radius);
-    color: var(--color-text);
+    flex: 1;
+    padding: 15px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    height: var(--btn-height);
-    font: var(--btn-font);
-    white-space: nowrap;
 }
 
 .y-rate-skip-btn:hover {
@@ -1388,28 +1388,26 @@
 }
 
 .y-rate-primary-btn {
-    flex: 1;
-    padding: 0 20px;
-    background: var(--btn-primary-bg);
+    flex: 2;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.08);
     border: none;
-    border-radius: var(--btn-radius);
-    color: var(--btn-primary-text);
+    border-radius: 18px;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 15px;
+    font-weight: 700;
     cursor: not-allowed;
     transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     align-items: center;
     justify-content: center;
-    height: var(--btn-height);
-    opacity: 0.4;
-    font: var(--btn-font);
 }
 
 .y-rate-primary-btn.active {
-    background: var(--btn-primary-bg);
-    color: var(--btn-primary-text);
+    background: linear-gradient(135deg, #21EA7C 0%, #15D26C 100%);
+    color: #061B0E;
     cursor: pointer;
-    box-shadow: var(--btn-primary-shadow);
-    opacity: 1;
+    box-shadow: 0 8px 24px rgba(33, 234, 124, 0.25);
 }
 
 .y-rate-primary-btn.active:hover {
@@ -1932,10 +1930,13 @@
 
 /* Review / tips success copy (ported from production) */
 .rate-success-title {
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-weight: 700;
+    font-size: 21px;
     color: #FFFFFF;
     margin: 0 0 12px 0;
-    letter-spacing: var(--tracking-tight);
-    font: var(--t-section);
+    letter-spacing: -0.4px;
+    text-transform: uppercase !important;
 }
 
 .rate-success-desc {
@@ -1943,8 +1944,9 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    margin: 0 0 22px 0;
-    max-width: 360px;
+    margin: 0 auto 22px;
+    max-width: 320px;
+    padding: 0 8px;
 }
 
 .rate-success-line {
@@ -1952,7 +1954,10 @@
     font-size: 13.5px;
     font-weight: 400;
     color: rgba(255, 255, 255, 0.76);
-    white-space: nowrap;
+    white-space: normal;
+    text-align: center;
+    text-wrap: balance;
+    line-height: 1.45;
     letter-spacing: -0.15px;
 }
 
@@ -1964,15 +1969,12 @@
 
 /* Touch: 16px+ text in fields so iOS doesn't zoom the page on focus */
 @media (pointer: coarse) {
-    .y-rate-custom-tip-input {
+    .y-rate-custom-tip-input,
+    .y-rate-textarea {
         font-size: 16px;
     }
 }
 
-/* Design system: the step title already says what to rate; the header only keeps the close button */
-.y-rate-sheet .y-rate-badge {
-    display: none;
-}
 
 /* ---------- Live status: the label rises in when the status changes ---------- */
 .os-status-swap {

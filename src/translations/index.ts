@@ -136,6 +136,10 @@ export const translations = {
             language: 'Язык'
         },
         menu: {
+            promos_empty_title: 'Скоро здесь появятся акции',
+            promos_empty_desc: 'Следите за обновлениями — новые предложения ресторанов появятся в этом разделе.',
+            promos_used_title: 'Акции — для первого заказа',
+            promos_used_desc: 'Скидки и бесплатная доставка действуют для новых клиентов на первый заказ. Спасибо, что вы с нами!',
             search_results: 'Результаты поиска',
             search_empty_title: 'Ничего не нашлось',
             search_empty_desc: 'Попробуйте другое название ресторана или магазина',
@@ -876,6 +880,10 @@ export const translations = {
             language: 'Language'
         },
         menu: {
+            promos_empty_title: 'Promotions are coming soon',
+            promos_empty_desc: 'Stay tuned — restaurant offers will appear here.',
+            promos_used_title: 'Promotions are for the first order',
+            promos_used_desc: 'Discounts and free delivery apply to new customers on their first order. Thanks for being with us!',
             search_results: 'Search results',
             search_empty_title: 'Nothing found',
             search_empty_desc: 'Try another restaurant or shop name',
@@ -1616,6 +1624,10 @@ export const translations = {
             language: 'ენა'
         },
         menu: {
+            promos_empty_title: 'აქციები მალე გამოჩნდება',
+            promos_empty_desc: 'თვალი ადევნეთ — რესტორნების შეთავაზებები აქ გამოჩნდება.',
+            promos_used_title: 'აქციები — პირველი შეკვეთისთვის',
+            promos_used_desc: 'ფასდაკლებები და უფასო მიწოდება ახალ კლიენტებს პირველ შეკვეთაზე ეხებათ. მადლობა, რომ ჩვენთან ხართ!',
             search_results: 'ძიების შედეგები',
             search_empty_title: 'ვერაფერი მოიძებნა',
             search_empty_desc: 'სცადეთ რესტორნის ან მაღაზიის სხვა სახელი',

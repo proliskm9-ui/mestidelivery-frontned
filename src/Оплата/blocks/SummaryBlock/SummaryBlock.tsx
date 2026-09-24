@@ -51,6 +51,14 @@ const SummaryBlock: React.FC<SummaryBlockProps> = ({
         <span className="summary-head-text">
           <span className="summary-title">{t('checkout.summary_title')}</span>
           {!open && <span className="summary-preview">{preview}</span>}
+          {!open && (
+            <span className="summary-mini">
+              {t('cart.items')} {formatPrice(subtotal)}
+              {' · '}{t('cart.delivery')} {deliveryDiscount > 0 ? <span className="summary-accent">{formatPrice(deliveryFee)}</span> : formatPrice(deliveryFee)}
+              {' · '}{t('cart.service')} {formatPrice(serviceFee)}
+              {tip > 0 && <>{' · '}{t('checkout.tips_title')} {formatPrice(tip)}</>}
+            </span>
+          )}
         </span>
         <svg className="summary-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <polyline points="6 9 12 15 18 9" />

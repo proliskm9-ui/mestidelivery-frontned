@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { api } from '../services/api';
 import FullPageLoader from '../components/UI/FullPageLoader';
 import NetworkErrorState from '../components/UI/NetworkErrorState';
 import './OrderStatus.css';
-import Sheet from '../components/UI/Sheet';
 import { formatPrice } from '../utils/formatPrice';
 import { useLanguage } from '../translations/LanguageContext';
 import { pickI18nText } from '../utils/i18nContent';
@@ -26,6 +26,7 @@ import {
     UtensilsCrossed,
     AlertTriangle,
     Check,
+    X,
     Coins,
     HeartHandshake,
     ThumbsDown,
@@ -439,18 +440,61 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
             </div>
 
             {/* ═══════ DUAL-STEP PREMIUM RATING MODAL ═══════ */}
-            <Sheet
-                open={showRatingModal}
-                onOpenChange={(open) => { if (!open) closeAndResetModal(); }}
-                title={ratingStep === 'restaurant' ? t('rating.rate_restaurant') : ratingStep === 'courier' ? t('rating.how_was_delivery') : undefined}
-                description={ratingStep === 'restaurant'
-                    ? (order.restaurant_name ? t('rating.dishes_question_from').replace('{name}', order.restaurant_name) : t('rating.dishes_question'))
-                    : ratingStep === 'courier' ? t('rating.courier_subtitle') : undefined}
-                showClose={ratingStep !== 'success'}
-            >
+            {showRatingModal && createPortal(
+                <div
+                    className="y-rate-overlay"
+                    onClick={() => { if (ratingStep !== 'success') closeAndResetModal(); }}
+                >
+                    <div className="y-rate-sheet" onClick={e => e.stopPropagation()}>
+                        <div className="y-rate-drag-handle" />
+
+                        {/* Header */}
+                        <div className="y-rate-header">
+                            <div className="y-rate-badge">
+                                <span>
+                                    {ratingStep === 'restaurant' && '\u{1F37D}\uFE0F'}
+                                    {ratingStep === 'courier' && '\u{1F6F5}'}
+                                    {ratingStep === 'success' && '\u2705'}
+                                </span>
+                                <span className="y-rate-badge-rest">
+                                    {ratingStep === 'restaurant' && t('rating.rate_restaurant')}
+                                    {ratingStep === 'courier' && t('rating.how_was_delivery')}
+                                    {ratingStep === 'success' && t('rating.thanks_short')}
+                                </span>
+                            </div>
+                            {ratingStep !== 'success' && (
+                                <button type="button" className="y-rate-close-btn" onClick={closeAndResetModal}>
+                                    <X size={16} />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Step progress dots */}
+                        {ratingStep !== 'success' && (
+                            <div className="y-rate-stepper">
+                                <div className={`y-rate-step-indicator ${ratingStep === 'restaurant' ? 'active' : 'completed'}`}>
+                                    {ratingStep === 'courier' ? <Check size={13} /> : <span>1</span>}
+                                    <span>{t('rating.step_restaurant')}</span>
+                                </div>
+                                <div className="y-rate-step-dot" />
+                                <div className={`y-rate-step-indicator ${ratingStep === 'courier' ? 'active' : ''}`}>
+                                    <span>2</span>
+                                    <span>{t('rating.step_courier')}</span>
+                                </div>
+                            </div>
+                        )}
+
                         {/* ── Step 1: Restaurant ── */}
                         {ratingStep === 'restaurant' && (
                             <div className="y-rate-step-body">
+                                <div className="y-rate-entity-icon y-rate-entity-icon--rest">
+                                    <span style={{ fontSize: 28 }}>&#127869;&#65039;</span>
+                                </div>
+                                <h2 className="y-rate-title">{t('rating.rate_restaurant')}</h2>
+                                <p className="y-rate-subtitle">
+                                    {order.restaurant_name ? t('rating.dishes_question_from').replace('{name}', order.restaurant_name) : t('rating.dishes_question')}
+                                </p>
+
                                 <div className="y-rate-stars-wrapper">
                                     <div className="y-rate-stars">
                                         {[1,2,3,4,5].map(star => (
@@ -508,7 +552,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                         disabled={restRating === 0}
                                         onClick={() => setRatingStep('courier')}
                                     >
-                                        {t('rating.next')} &#8594;
+                                        {t('rating.next')}
                                     </button>
                                 </div>
                             </div>
@@ -517,6 +561,12 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                         {/* ── Step 2: Courier ── */}
                         {ratingStep === 'courier' && (
                             <div className="y-rate-step-body">
+                                <div className="y-rate-entity-icon y-rate-entity-icon--courier">
+                                    <span style={{ fontSize: 28 }}>&#128693;</span>
+                                </div>
+                                <h2 className="y-rate-title">{t('rating.how_was_delivery')}</h2>
+                                <p className="y-rate-subtitle">{t('rating.courier_subtitle')}</p>
+
                                 <div className="y-rate-stars-wrapper">
                                     <div className="y-rate-stars">
                                         {[1,2,3,4,5].map(star => (
@@ -605,7 +655,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                     <button type="button" className="y-rate-skip-btn y-rate-back-btn"
                                         onClick={() => setRatingStep('restaurant')}
                                     >
-                                        &#8592; {t('rating.back')}
+                                        {t('rating.back')}
                                     </button>
                                     <button type="button"
                                         className={`y-rate-primary-btn ${courierRating > 0 ? 'active' : ''}`}
@@ -640,17 +690,31 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                 </div>
                             </div>
                         )}
-            </Sheet>
+                    </div>
+                </div>,
+                document.body
+            )}
 
             {/* ═══════ STANDALONE TIPS MODAL ═══════ */}
-            <Sheet
-                open={showTipsModal}
-                onOpenChange={setShowTipsModal}
-                title={tipsSent ? undefined : t('rating.thank_courier')}
-                description={tipsSent ? undefined : t('rating.tips_direct')}
-            >
+            {showTipsModal && createPortal(
+                <div className="y-rate-overlay" onClick={() => setShowTipsModal(false)}>
+                    <div className="y-rate-sheet" onClick={e => e.stopPropagation()}>
+                        <div className="y-rate-drag-handle" />
+                        <div className="y-rate-header">
+                            <div className="y-rate-badge">
+                                <span>{t('rating.tips_order').replace('{id}', String(order.id))}</span>
+                            </div>
+                            <button type="button" className="y-rate-close-btn" onClick={() => setShowTipsModal(false)}>
+                                <X size={16} />
+                            </button>
+                        </div>
                         {!tipsSent ? (
                             <div className="y-rate-step-body">
+                                <div className="y-rate-tip-icon-big">
+                                    <HeartHandshake size={32} color="#21EA7C" />
+                                </div>
+                                <h2 className="y-rate-title" style={{ marginBottom: '8px' }}>{t('rating.thank_courier')}</h2>
+                                <p className="y-rate-tip-subtitle">{t('rating.tips_direct')}</p>
                                 <div className="y-rate-tips-grid" style={{ marginTop: '16px', marginBottom: '16px' }}>
                                     {TIP_PRESETS.map(preset => (
                                         <button key={preset} type="button"
@@ -702,7 +766,10 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                                 <p className="rate-success-desc">{t('rating.tips_sent_desc')}</p>
                             </div>
                         )}
-            </Sheet>
+                    </div>
+                </div>,
+                document.body
+            )}
         </div>
     );
 };

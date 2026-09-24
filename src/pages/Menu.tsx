@@ -530,6 +530,18 @@ const MenuPage: React.FC<{
                                 {renderFiltersRow()}
                                 {renderRestaurantGrid(filteredRestaurants)}
                             </div>
+                        ) : activeCollection.type === 'restaurant' && activeCollection.items.length === 0 && activeCollection.title === t('menu.promotions') ? (
+                            <div className="menu-search-empty">
+                                <h2>{deviceHasOrdered() || accountHasOrders() ? t('menu.promos_used_title') : t('menu.promos_empty_title')}</h2>
+                                <p>{deviceHasOrdered() || accountHasOrders() ? t('menu.promos_used_desc') : t('menu.promos_empty_desc')}</p>
+                                <button
+                                    type="button"
+                                    className="ds-btn ds-btn--primary ds-btn--sm"
+                                    onClick={() => setActiveCollection({ title: t('menu.restaurants'), items: taggedRestaurants, type: 'restaurants_browse', isMobileSource: true })}
+                                >
+                                    {t('cart.go_to_restaurants')}
+                                </button>
+                            </div>
                         ) : activeCollection.type === 'restaurant' ? (
                             <div className="content-pad" style={{ paddingTop: '25px' }}>
                                 {renderRestaurantGrid(activeCollection.items)}
