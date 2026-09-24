@@ -375,6 +375,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                     <div className="mobile-payment-content">
                         {/* ── Amount card ─────────────────────────────────── */}
                         <div className="mp-amount-card">
+                            <span className="mp-amount-label">{t('checkout.total_with_delivery')}</span>
                             <h2 className="mp-amount-value">
                                 {totalAmount.toFixed(2)} ₾
                             </h2>

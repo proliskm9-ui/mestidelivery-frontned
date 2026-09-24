@@ -805,13 +805,3 @@ body:has(.mobile-payment-wrapper),
   height: 24px;
   fill: currentColor;
 }
-
-/* Header: just the amount and one line of context — no caps label, no glow */
-.mp-amount-card {
-  padding: 16px 24px 24px;
-}
-
-.mp-amount-value {
-  font-variant-numeric: tabular-nums;
-}
-
