@@ -2237,3 +2237,24 @@
     font-weight: 500;
     color: rgba(255, 255, 255, 0.6);
 }
+
+/* Desktop: all six steps fit the card - no fade cutting "Delivered" off */
+@media (min-width: 1025px) {
+    .status-scroll-container {
+        mask-image: none;
+        -webkit-mask-image: none;
+    }
+
+    .steps-track {
+        width: 100%;
+        min-width: 0;
+        justify-content: space-between;
+        gap: 0;
+        padding: 20px 24px 8px;
+    }
+
+    .steps-track::before {
+        left: 80px;
+        width: calc(100% - 160px);
+    }
+}
