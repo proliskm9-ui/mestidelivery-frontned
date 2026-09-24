@@ -788,3 +788,27 @@ body:has(.mobile-payment-wrapper),
     stroke-dashoffset: 0;
   }
 }
+
+/* What the amount is for — one quiet line under the total */
+.mp-amount-context {
+  margin: 10px 0 0;
+  font: var(--t-secondary);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+/* Accepted methods: small monochrome marks under the pay button */
+.mp-pay-marks {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  margin-top: 14px;
+  color: rgba(255, 255, 255, 0.32);
+}
+
+.mp-pay-marks svg {
+  width: 36px;
+  height: 24px;
+  fill: currentColor;
+}
