@@ -295,7 +295,7 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
 
             <GlassBottomPanel
                 totalItems={totalItems}
-                totalPrice={total}
+                totalPrice={subtotal}
                 deliveryTime={restaurant?.delivery || `30-35 ${t('checkout.min_short')}`}
                 deliveryFee={deliveryFee}
                 onNext={handleCheckoutClick}
