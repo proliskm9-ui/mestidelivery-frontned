@@ -496,18 +496,17 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                                         <path className="mp-done-check" d="M30 49.5 42.5 62 66 36" />
                                     </svg>
                                 </div>
-                                <h3 className="mp-premium-title" key={`t${replayKey}`}>{t('checkout.order_placed')}</h3>
+                                <h3 className="mp-premium-title" key={`t${replayKey}`}>
+                                    {orderId ? t('checkout.order_placed_n').replace('{id}', String(orderId)) : t('checkout.order_placed')}
+                                </h3>
                                 <p className="mp-premium-subtitle">
-                                    {method === 'cash' ? t('checkout.pay_cash_on_delivery') : t('checkout.waiting_payment_confirm')}
+                                    {method === 'cash' ? t('checkout.pay_cash_on_delivery') : t('checkout.placed_card_desc')}
                                 </p>
-                                {orderId && (
-                                    <div className="mp-premium-badge">{t('common.order')} #{orderId}</div>
-                                )}
                                 {method !== 'cash' && (
                                     <div className="mp-round-actions">
                                         <button type="button" className="mp-round-btn" onClick={() => openPaymentUrl(PAYMENT_URL)}>
                                             <span className="mp-round-icon"><CreditCard size={22} strokeWidth={2} /></span>
-                                            <span className="mp-round-label">{t('checkout.action_pay')}</span>
+                                            <span className="mp-round-label">{t('checkout.action_open_keepz')}</span>
                                         </button>
                                         <a className="mp-round-btn" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
                                             <span className="mp-round-icon"><MessageCircle size={22} strokeWidth={2} /></span>
