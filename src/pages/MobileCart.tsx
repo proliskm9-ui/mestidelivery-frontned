@@ -3,7 +3,8 @@ import { api, Product, Restaurant } from '../services/api';
 import './MobileCart.css';
 import { useLanguage } from '../translations/LanguageContext';
 import { pickI18nText } from '../utils/i18nContent';
-import { formatPortionCalories, formatPortionWeight } from '../utils/formatProductMeta';
+import { formatPortionCalories, formatPortionWeight, isVisibleMenuProduct } from '../utils/formatProductMeta';
+import { isModifierProduct } from '../utils/modifiers';
 import GlassBottomPanel from '../components/UI/GlassBottomPanel';
 import Dialog, { DialogClose } from '../components/UI/Dialog';
 import AnimatedPrice from '../components/UI/AnimatedPrice';
@@ -93,7 +94,8 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
 
                 const allProducts = await api.getProducts(restaurantId);
                 const cartIds = initialCartItems.map(i => i.product.id);
-                const recs = allProducts.filter(p => !cartIds.includes(p.id)).slice(0, 12);
+                // Only real menu dishes: no add-ons (sauces) and nothing without a photo
+                const recs = allProducts.filter(p => !cartIds.includes(p.id) && isVisibleMenuProduct(p) && !isModifierProduct(p)).slice(0, 12);
                 setRecommendations(recs);
             } catch (err) {
                 console.error("Cannot load recommendations:", err);
@@ -186,7 +188,22 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                 </header>
 
                 <div className="mc-items-list">
-                    {initialCartItems.map(({ product, quantity }) => (
+                    {initialCartItems.map(({ product, quantity }) => isModifierProduct(product) ? (
+                        // Add-on (sauce, bread): a compact line under the dishes, no photo
+                        <div key={product.id} className="mc-item-card mc-item-addon">
+                            <div className="mc-item-info">
+                                <div className="mc-item-name">{locName(product.name)}</div>
+                                <div className="mc-item-meta-row">
+                                    <span className="mc-item-price">{formatPrice(product.price)}</span>
+                                </div>
+                            </div>
+                            <div className="mc-qty-control-v2">
+                                <button onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, -1)}>−</button>
+                                <span className="mc-qty-val">{quantity}</span>
+                                <button onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, 1)}>+</button>
+                            </div>
+                        </div>
+                    ) : (
                         <div key={product.id} className="mc-item-card">
                             <div className="mc-item-img">
                                 <img src={product.img || '/Assets/default-food.png'} alt={locName(product.name)} />

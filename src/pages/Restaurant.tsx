@@ -736,8 +736,10 @@ const RestaurantPage: React.FC<RestaurantPageProps> = ({
                             ) : (
                                 <div className="cw-items">
                                     {cart.map(item => (
-                                        <div key={item.product.id} className="cw-item">
-                                            <img loading="lazy" decoding="async" src={resolveImageUrl(item.product.img || '') || '/Assets/default-food.png'} className="cw-item-img" alt={locName(item.product.name)} />
+                                        <div key={item.product.id} className={`cw-item${isModifierProduct(item.product) ? ' cw-item-addon' : ''}`}>
+                                            {!isModifierProduct(item.product) && (
+                                                <img loading="lazy" decoding="async" src={resolveImageUrl(item.product.img || '') || '/Assets/default-food.png'} className="cw-item-img" alt={locName(item.product.name)} />
+                                            )}
                                             <div className="cw-item-info">
                                                 <div className="cw-item-name">{locName(item.product.name)}</div>
                                                 <div className="cw-item-price-val">{formatPrice(item.product.price)}</div>

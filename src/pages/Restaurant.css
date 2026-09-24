@@ -1193,3 +1193,14 @@ body.dish-modal-open .glass-panel-container,
 .pc-dish-modal .modal-main-add-btn:active {
     transform: scale(0.98);
 }
+
+/* Cart widget: add-ons (sauces, bread) as compact lines aligned with the dish text */
+.cw-item.cw-item-addon {
+    margin-top: -6px;
+    padding-left: 64px;
+}
+
+.cw-item-addon .cw-item-name {
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+}
