@@ -788,39 +788,3 @@ body:has(.mobile-payment-wrapper),
     stroke-dashoffset: 0;
   }
 }
-
-/* ---------- Calm pass: no neon ---------- */
-.mp-amount-value,
-.mp-premium-title {
-  text-shadow: none !important;
-}
-
-.mp-qr-frame,
-.mp-premium-spinner,
-.mp-premium-spinner::after {
-  box-shadow: none !important;
-}
-
-.mp-premium-icon {
-  filter: none !important;
-}
-
-.mp-qr-section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.mp-qr-toggle {
-  height: 44px;
-  border: 0;
-  background: none;
-  color: var(--color-text-secondary);
-  font: var(--t-secondary);
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.mp-qr-container {
-  margin-top: 4px;
-}

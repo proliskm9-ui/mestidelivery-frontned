@@ -71,7 +71,6 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
     onPaymentComplete,
 }) => {
     const { t } = useLanguage();
-    const [showQr, setShowQr] = useState(false);
     const [screen, setScreen]             = useState<ScreenState>('select');
     const [method, setMethod]             = useState<string | null>(null);
     const [orderId, setOrderId]           = useState<number | null>(null);
@@ -505,32 +504,27 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                         {screen === 'select' && (
                             <>
                                 <div className="mp-qr-section">
-                                    <button
+                                    <h3 className="mp-methods-title">{t('checkout.qr_title')}</h3>
+                                    <div className="mp-qr-container">
+                                        <div className="mp-qr-frame">
+                                            <QRCodeSVG 
+                                                value={PAYMENT_URL}
+                                                size={180}
+                                                bgColor={"transparent"}
+                                                fgColor={"#000000"}
+                                                level={"L"}
+                                                includeMargin={false}
+                                            />
+                                        </div>
+                                        <p className="mp-qr-hint">{t('checkout.qr_hint')}</p>
+                                    </div>
+                                    <button 
                                         type="button"
                                         className="mp-pay-button-primary"
                                         onClick={handleConfirmPaid}
                                     >
                                         {t('checkout.pay_online')}
                                     </button>
-                                    {/* Scanning a QR on the phone you pay with makes no sense: offer it for another device */}
-                                    <button type="button" className="mp-qr-toggle" onClick={() => setShowQr((v) => !v)} aria-expanded={showQr}>
-                                        {showQr ? t('checkout.qr_hide') : t('checkout.qr_other_device')}
-                                    </button>
-                                    {showQr && (
-                                        <div className="mp-qr-container">
-                                            <div className="mp-qr-frame">
-                                                <QRCodeSVG
-                                                    value={PAYMENT_URL}
-                                                    size={180}
-                                                    bgColor={"transparent"}
-                                                    fgColor={"#000000"}
-                                                    level={"L"}
-                                                    includeMargin={false}
-                                                />
-                                            </div>
-                                            <p className="mp-qr-hint">{t('checkout.qr_hint')}</p>
-                                        </div>
-                                    )}
                                 </div>
 
                                 <div className="mp-separator">

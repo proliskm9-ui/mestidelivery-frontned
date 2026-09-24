@@ -792,9 +792,3 @@
 }
 
 
-
-/* Calm pass: no decorative glow blob */
-.mp-bg-glow,
-.od-bg-glow {
-    display: none;
-}
