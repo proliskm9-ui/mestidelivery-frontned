@@ -754,6 +754,8 @@
     }
 }
 
+.card-invite-bonus { color: #21EA7C; font-weight: 700; }
+
 /* Desktop invite card: same as the support card */
 .card-invite {
     grid-column: span 2;

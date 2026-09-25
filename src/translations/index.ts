@@ -389,7 +389,8 @@ export const translations = {
             info_name_phone: 'Имя, телефон',
             info_support: 'Помощь, вопросы',
             invite_title: 'Пригласите друга',
-            invite_sub: 'Другу — бесплатная доставка',
+            invite_bonus: '+5 GEL',
+            invite_sub: 'бонусами за каждого друга',
             invite_cta: 'Пригласить',
             user_fallback: 'Пользователь'
         },
@@ -1154,7 +1155,8 @@ export const translations = {
             info_name_phone: 'Name, Phone',
             info_support: 'Help, questions',
             invite_title: 'Invite a friend',
-            invite_sub: 'Free delivery for your friend',
+            invite_bonus: '+5 GEL',
+            invite_sub: 'in bonuses for every friend',
             invite_cta: 'Invite',
             user_fallback: 'User'
         },
@@ -1919,7 +1921,8 @@ export const translations = {
             info_name_phone: 'სახელი, ტელეფონი',
             info_support: 'დახმარება, კითხვები',
             invite_title: 'მოიწვიე მეგობარი',
-            invite_sub: 'მეგობარს — უფასო მიტანა',
+            invite_bonus: '+5 ლარი',
+            invite_sub: 'ბონუსად ყოველ მეგობარზე',
             invite_cta: 'მოწვევა',
             user_fallback: 'მომხმარებელი'
         },

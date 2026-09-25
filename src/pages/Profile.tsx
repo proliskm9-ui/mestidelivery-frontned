@@ -356,7 +356,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
 
                 <button type="button" className="bento-card card-invite" onClick={() => (window as any).MestiReferral?.open()}>
                     <h3 className="card-label">{t('profile.invite_title')}</h3>
-                    <p className="support-preview">{t('profile.invite_sub')}</p>
+                    <p className="support-preview"><span className="card-invite-bonus">{t('profile.invite_bonus')}</span> {t('profile.invite_sub')}</p>
                 </button>
 
                 <button
