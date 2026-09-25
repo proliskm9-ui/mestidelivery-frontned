@@ -754,7 +754,7 @@
     }
 }
 
-/* Desktop invite card: accent version of the support card */
+/* Desktop invite card: same as the support card */
 .card-invite {
     grid-column: span 2;
     display: flex;
@@ -765,16 +765,7 @@
     font-family: inherit;
     color: inherit;
     cursor: pointer;
-    border-color: rgba(33, 234, 124, 0.25) !important;
-    background: linear-gradient(135deg, rgba(33, 234, 124, 0.14), rgba(33, 234, 124, 0.03) 60%), rgba(255, 255, 255, 0.03) !important;
 }
-.card-invite-cta {
-    margin-top: auto;
-    color: #21EA7C;
-    font-weight: 800;
-    font-size: 14px;
-}
-
 /* Right column holds addresses, invite and support: orders span three rows */
 @media (min-width: 1025px) {
     .card-orders { grid-row: span 3; }
