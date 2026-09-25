@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Cookie } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../translations/LanguageContext';
 import { useDeliveryLocationOptional } from '../../delivery/DeliveryLocationContext';
@@ -86,7 +85,17 @@ const CookieConsentBanner: React.FC = () => {
     return (
         <div className="ccb" role="dialog" aria-live="polite" aria-labelledby="ccb-title">
             <div className="ccb-head">
-                <span className="ccb-icon" aria-hidden="true"><Cookie size={20} strokeWidth={1.9} /></span>
+                <span className="ccb-icon" aria-hidden="true">
+                    {/* A solid cookie with a bite and chips: crisper than a stroked icon at this size */}
+                    <svg width="22" height="22" viewBox="0 0 24 24">
+                        <path fill="#21EA7C" d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5Z" />
+                        <circle cx="8" cy="9" r="1.5" fill="#0d2416" />
+                        <circle cx="15.5" cy="15" r="1.5" fill="#0d2416" />
+                        <circle cx="10.5" cy="16.5" r="1.2" fill="#0d2416" />
+                        <circle cx="7" cy="13.5" r="1" fill="#0d2416" />
+                        <circle cx="12" cy="12" r="1" fill="#0d2416" />
+                    </svg>
+                </span>
                 <p className="ccb-text" id="ccb-title">
                     {l.text}{' '}
                     <Link to={`/${language}/privacy`} className="ccb-link">{l.link}</Link>
