@@ -34,3 +34,23 @@
         animation: none;
     }
 }
+
+/* Promo pill on a restaurant photo (top-left; the favourite button is top-right) */
+.card-promo-pill {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 3;
+    max-width: calc(100% - 64px);
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #21EA7C;
+    color: #04130a;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}

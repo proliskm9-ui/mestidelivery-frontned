@@ -42,6 +42,10 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ item, onClick, isVertic
                     />
                 )}
                 {showSkeleton && <div className="card-img-skeleton" aria-hidden="true" />}
+                {(item as any).promo && (
+                    // Restaurant promo (admin → Promotions), shown to new customers only
+                    <div className="card-promo-pill">{pickI18nText((item as any).promo, language)}</div>
+                )}
                 {closedText && (
                     <div
                         style={{

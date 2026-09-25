@@ -6,7 +6,16 @@ import {
 import { adminAuth } from '../../services/adminService';
 import './AdminStyles.css';
 
-export type AdminPage = 'dashboard' | 'orders' | 'products' | 'store_products' | 'restaurants' | 'stores' | 'categories' | 'users' | 'courier' | 'partners' | 'webhooks';
+export type AdminPage = 'dashboard' | 'orders' | 'products' | 'store_products' | 'restaurants' | 'stores' | 'categories' | 'users' | 'courier' | 'partners' | 'webhooks' | 'promotions';
+
+export function PromoIcon({ size = 24, className = '' }: { size?: number; className?: string }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z" />
+            <circle cx="7" cy="7" r="1.5" />
+        </svg>
+    );
+}
 
 export function WebhookIcon({ size = 24, className = '' }: { size?: number; className?: string }) {
     return (
@@ -156,6 +165,11 @@ export function AdminSidebar({ activePage, onNavigate, isOpen }: Props) {
                         { id: 'stores', label: 'Store List' },
                         { id: 'store_products', label: 'Products' }
                     ]
+                },
+                isSuperAdmin && {
+                    id: 'promotions' as AdminPage,
+                    Icon: PromoIcon,
+                    label: 'Promotions'
                 },
                 isSuperAdmin && { 
                     id: 'webhooks' as AdminPage, 

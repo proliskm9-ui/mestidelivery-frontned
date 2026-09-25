@@ -1,0 +1,419 @@
+/* Admin: promotions & promo codes — calm, dense, readable */
+.ap-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.ap-title {
+    margin: 0 0 6px;
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.ap-sub {
+    margin: 0;
+    max-width: 620px;
+    color: var(--admin-text-muted);
+    font-size: 0.95rem;
+}
+
+.ap-tabs {
+    display: inline-flex;
+    padding: 4px;
+    gap: 4px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--admin-card-border);
+}
+
+.ap-tab {
+    height: 38px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    color: var(--admin-text-muted);
+    font-weight: 700;
+    font-size: 0.92rem;
+    cursor: pointer;
+}
+
+.ap-tab.is-on {
+    background: var(--admin-card-bg);
+    color: var(--admin-text);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+.ap-stats {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.ap-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: var(--admin-card-bg);
+    border: 1px solid var(--admin-card-border);
+    color: var(--admin-text-muted);
+    font-size: 0.9rem;
+}
+
+.ap-stat span {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--admin-text);
+}
+
+.ap-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 14px;
+}
+
+.ap-card {
+    position: relative;
+    padding: 16px;
+    border-radius: 18px;
+    background: var(--admin-card-bg);
+    border: 1px solid var(--admin-card-border);
+    transition: border-color 0.2s ease;
+}
+
+.ap-card.is-on {
+    border-color: rgba(33, 234, 124, 0.35);
+}
+
+.ap-card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ap-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.ap-thumb--empty {
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--admin-primary);
+    font-weight: 800;
+}
+
+.ap-card-name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.ap-card-name span {
+    color: var(--admin-text-muted);
+    font-size: 0.82rem;
+}
+
+/* iOS-like switch */
+.ap-switch {
+    position: relative;
+    width: 46px;
+    height: 28px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.ap-switch input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.ap-switch span {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    transition: background-color 0.2s ease;
+}
+
+.ap-switch span::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #ffffff;
+    transition: transform 0.2s ease;
+}
+
+.ap-switch input:checked + span {
+    background: var(--admin-primary);
+}
+
+.ap-switch input:checked + span::after {
+    transform: translateX(18px);
+}
+
+.ap-switch input:focus-visible + span {
+    outline: 2px solid var(--admin-primary);
+    outline-offset: 2px;
+}
+
+.ap-langs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.ap-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.ap-field-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--admin-text-muted);
+}
+
+.ap .admin-input {
+    padding: 11px 14px;
+    font-size: 0.95rem;
+    border-radius: 12px;
+}
+
+.ap-card-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.ap-saved {
+    position: absolute;
+    top: 14px;
+    right: 72px;
+    color: var(--admin-primary);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.ap-empty {
+    padding: 48px 16px;
+    text-align: center;
+    color: var(--admin-text-muted);
+}
+
+.ap-empty--error {
+    color: var(--admin-danger);
+}
+
+.ap-notice {
+    margin-bottom: 16px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    color: #fde68a;
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.ap-notice strong {
+    display: block;
+    margin-bottom: 2px;
+    color: #fbbf24;
+}
+
+.ap-notice code {
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.ap-toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.ap-search {
+    max-width: 320px;
+}
+
+.ap-code {
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: rgba(33, 234, 124, 0.08);
+    border: 1px dashed rgba(33, 234, 124, 0.35);
+    color: var(--admin-primary);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.ap-muted {
+    color: var(--admin-text-muted);
+    font-size: 0.85rem;
+}
+
+.ap-badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.ap-badge--on { background: rgba(33, 234, 124, 0.1); color: #21EA7C; }
+.ap-badge--off { background: rgba(255, 255, 255, 0.06); color: var(--admin-text-muted); }
+.ap-badge--wait { background: rgba(125, 211, 252, 0.1); color: #7dd3fc; }
+.ap-badge--done { background: rgba(239, 68, 68, 0.1); color: #f87171; }
+
+.ap-actions {
+    display: inline-flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+/* Editor */
+.ap-editor {
+    max-width: 720px;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.ap-editor-title {
+    margin: 0 0 18px;
+    font-size: 1.35rem;
+    font-weight: 800;
+}
+
+.ap-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.ap-col-2 {
+    grid-column: 1 / -1;
+}
+
+.ap-code-input {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+}
+
+.ap-seg {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+.ap-seg-btn,
+.ap-chip {
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 12px;
+    border: 1px solid var(--admin-card-border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--admin-text);
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+}
+
+.ap-seg-btn.is-on,
+.ap-chip.is-on {
+    border-color: var(--admin-primary);
+    background: rgba(33, 234, 124, 0.1);
+    color: var(--admin-primary);
+}
+
+.ap-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ap-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.ap-check input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--admin-primary);
+}
+
+.ap-problems {
+    margin: 14px 0 0;
+    padding: 10px 14px 10px 30px;
+    border-radius: 12px;
+    background: rgba(239, 68, 68, 0.08);
+    color: #fca5a5;
+    font-size: 0.88rem;
+}
+
+.ap-editor-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--admin-card-border);
+}
+
+@media (max-width: 720px) {
+    .ap-grid { grid-template-columns: 1fr; }
+    .ap-list { grid-template-columns: 1fr; }
+}
+
+.ap-list {
+    align-items: start;
+}
+
+/* Compact row actions: one line */
+.ap .admin-table .ap-actions {
+    flex-wrap: nowrap;
+    gap: 6px;
+}
+
+.ap .admin-table .admin-btn {
+    height: 34px;
+    padding: 0 12px;
+    font-size: 0.82rem;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+
+.ap .admin-table td {
+    vertical-align: middle;
+}
