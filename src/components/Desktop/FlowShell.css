@@ -189,3 +189,14 @@
         grid-template-columns: minmax(0, 1fr) 340px;
     }
 }
+
+/* Shared phone/desktop pages: no bar and no frame on phones */
+@media (max-width: 1024px) {
+    .dfs--desktop-only .dfs-bar {
+        display: none;
+    }
+    .dfs--desktop-only .dfs-main {
+        width: auto;
+        padding: 0;
+    }
+}

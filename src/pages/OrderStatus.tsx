@@ -8,6 +8,7 @@ import { formatPrice } from '../utils/formatPrice';
 import { useLanguage } from '../translations/LanguageContext';
 import { pickI18nText } from '../utils/i18nContent';
 import { useRushStatus } from '../utils/rushStatus';
+import FlowShell from '../components/Desktop/FlowShell';
 import { useDeliveryLocationOptional } from '../delivery/DeliveryLocationContext';
 import { minutesLabel, remainingWindow, roundRange, OrderStage } from '../utils/eta';
 import {
@@ -359,6 +360,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
         : promoMinus10 ? itemsTotal + calculatedServiceFee + 10 : order.total;
 
     return (
+        <FlowShell desktopOnly onBack={onBack}>
         <div className="order-status-page page-layout">
             <div className="os-block-top">
                 <header className="status-header">
@@ -768,6 +770,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                 document.body
             )}
         </div>
+        </FlowShell>
     );
 };
 

@@ -2263,3 +2263,43 @@
 .primary-status-label h1 {
     text-transform: uppercase;
 }
+
+/* Desktop: the order flow grid - live status left, the order card right (sticky) */
+@media (min-width: 1025px) {
+    .order-status-page.page-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 380px;
+        align-items: start;
+        gap: 28px;
+        max-width: 1180px;
+        padding: 36px 32px 80px;
+    }
+
+    .os-block-top,
+    .os-block-bottom {
+        border-radius: 24px;
+        border-color: rgba(255, 255, 255, 0.07);
+        background: rgba(255, 255, 255, 0.035);
+    }
+
+    .os-block-bottom {
+        position: sticky;
+        top: 24px;
+        padding: 24px 0 26px;
+    }
+
+    .os-block-bottom {
+        margin-top: 0;
+    }
+
+    /* The bar above has the back button */
+    .dfs .order-status-page.page-layout {
+        padding: 0;
+        max-width: none;
+        min-height: 0;
+    }
+
+    .dfs .back-btn-status {
+        display: none;
+    }
+}

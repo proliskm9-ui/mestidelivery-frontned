@@ -6,7 +6,10 @@ import './FlowShell.css';
 export type FlowStep = 'cart' | 'checkout' | 'payment';
 
 interface FlowShellProps {
-    step: FlowStep;
+    /** Omit for pages outside the order flow (status, details): brand bar only. */
+    step?: FlowStep;
+    /** Pages shared with the phone layout: show the bar only on desktop widths. */
+    desktopOnly?: boolean;
     /** Everything done (order placed): all steps get a check. */
     complete?: boolean;
     onBack?: () => void;
@@ -22,9 +25,9 @@ const STEPS: FlowStep[] = ['cart', 'checkout', 'payment'];
  * Desktop order flow frame: a focused top bar (back, brand, steps) and a centred
  * content area. Cart, checkout and payment share it so the three read as one path.
  */
-const FlowShell: React.FC<FlowShellProps> = ({ step, complete, onBack, backDisabled, action, children }) => {
+const FlowShell: React.FC<FlowShellProps> = ({ step, desktopOnly, complete, onBack, backDisabled, action, children }) => {
     const { t, language } = useLanguage();
-    const current = STEPS.indexOf(step);
+    const current = step ? STEPS.indexOf(step) : -1;
     const labels: Record<FlowStep, string> = {
         cart: t('cart.title'),
         checkout: t('checkout.title'),
@@ -32,7 +35,7 @@ const FlowShell: React.FC<FlowShellProps> = ({ step, complete, onBack, backDisab
     };
 
     return (
-        <div className="dfs">
+        <div className={`dfs${desktopOnly ? ' dfs--desktop-only' : ''}`}>
             <header className="dfs-bar">
                 <div className="dfs-bar-side">
                     {onBack && (
@@ -47,6 +50,7 @@ const FlowShell: React.FC<FlowShellProps> = ({ step, complete, onBack, backDisab
                     </a>
                 </div>
 
+                {step ? (
                 <ol className="dfs-steps" aria-label="Checkout steps">
                     {STEPS.map((s, i) => {
                         const done = complete || i < current;
@@ -59,6 +63,7 @@ const FlowShell: React.FC<FlowShellProps> = ({ step, complete, onBack, backDisab
                         );
                     })}
                 </ol>
+                ) : <span aria-hidden="true" />}
 
                 <div className="dfs-bar-side dfs-bar-side--end">{action}</div>
             </header>
