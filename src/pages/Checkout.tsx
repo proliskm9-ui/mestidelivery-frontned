@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Flame } from 'lucide-react';
 import './Checkout.css';
-import { useRushStatus, rushTitle, rushDescription } from '../utils/rushStatus';
+import { useRushStatus } from '../utils/rushStatus';
 import { deliveryLabel } from '../utils/eta';
 import { deviceHasOrdered, accountHasOrders } from '../utils/deliveryPromo';
 import './MobileCheckout.css';
@@ -279,19 +278,6 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                                     </button>
                                 </div>
 
-                                {rushState.isRush && (
-                                    <div className="rush-hour-badge">
-                                        <div className="rush-hour-header">
-                                            <Flame className="rush-flame" size={15} strokeWidth={2.2} aria-hidden="true" />
-                                            <span>
-                                                {rushTitle(rushState, language, deliveryLabel({ restaurantId: rid, restaurantName: rid ? restaurantCache[`rest_${rid}`]?.name : null, zoneId: address.deliveryZone, rush: true }, language))}
-                                            </span>
-                                        </div>
-                                        <p className="rush-hour-desc">
-                                            {rushDescription(language)}
-                                        </p>
-                                    </div>
-                                )}
 
                             </div>
 

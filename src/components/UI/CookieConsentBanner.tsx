@@ -10,21 +10,24 @@ const CONSENT_AT_KEY = 'cookie_consent_at';
 /** "Later" keeps analytics off and asks again after a week. */
 const ASK_AGAIN_MS = 7 * 24 * 60 * 60 * 1000;
 
-const LABELS: Record<string, { text: string; link: string; accept: string; later: string }> = {
+const LABELS: Record<string, { title: string; text: string; link: string; accept: string; later: string }> = {
     ru: {
-        text: 'Мы используем cookie, чтобы сайт работал корректно и помнил ваши настройки.',
+        title: 'Мы используем cookie',
+        text: 'Они помогают сайту работать корректно и помнить ваши настройки.',
         link: 'Подробнее',
         accept: 'Принять',
         later: 'Позже',
     },
     en: {
-        text: 'We use cookies to keep the site working properly and remember your settings.',
+        title: 'We use cookies',
+        text: 'They keep the site working properly and remember your settings.',
         link: 'Learn more',
         accept: 'Accept',
         later: 'Later',
     },
     ka: {
-        text: 'ვიყენებთ ქუქი-ფაილებს, რომ საიტმა სწორად იმუშაოს და დაიმახსოვროს თქვენი პარამეტრები.',
+        title: 'ვიყენებთ ქუქი-ფაილებს',
+        text: 'ისინი საიტს სწორად მუშაობასა და თქვენი პარამეტრების დამახსოვრებაში ეხმარება.',
         link: 'დეტალები',
         accept: 'მიღება',
         later: 'მოგვიანებით',
@@ -81,15 +84,18 @@ const CookieConsentBanner: React.FC = () => {
     };
 
     return (
-        <div className="ccb" role="dialog" aria-live="polite" aria-label="Cookies">
-            <span className="ccb-icon" aria-hidden="true"><Cookie size={20} strokeWidth={1.9} /></span>
+        <div className="ccb" role="dialog" aria-live="polite" aria-labelledby="ccb-title">
+            <div className="ccb-head">
+                <span className="ccb-icon" aria-hidden="true"><Cookie size={20} strokeWidth={1.9} /></span>
+                <h2 className="ccb-title" id="ccb-title">{l.title}</h2>
+            </div>
             <p className="ccb-text">
                 {l.text}{' '}
                 <Link to={`/${language}/privacy`} className="ccb-link">{l.link}</Link>
             </p>
             <div className="ccb-actions">
-                <button type="button" className="ccb-later" onClick={() => save('essential')}>{l.later}</button>
                 <button type="button" className="ccb-accept" onClick={() => save('all')}>{l.accept}</button>
+                <button type="button" className="ccb-later" onClick={() => save('essential')}>{l.later}</button>
             </div>
         </div>
     );

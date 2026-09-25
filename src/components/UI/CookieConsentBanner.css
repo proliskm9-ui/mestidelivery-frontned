@@ -1,40 +1,53 @@
-/* Cookie consent: the app's sheet material, one primary action, a quiet "Later" */
+/* Cookie consent: a compact floating card (bottom-left on desktop, bottom sheet-like on phones).
+   Title, one line of text, the primary "Accept" first and full width, a quiet "Later" under it. */
 .ccb {
     position: fixed;
-    left: 50%;
-    bottom: calc(16px + env(safe-area-inset-bottom));
     z-index: 99999;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: start;
-    column-gap: 12px;
-    row-gap: 14px;
-    width: min(calc(100vw - 32px), 560px);
-    padding: 18px 18px 14px;
+    left: 16px;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 400px;
+    padding: 20px;
     background: var(--material-sheet-bg, #141416);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 24px;
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
-    transform: translateX(-50%);
     animation: ccbIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.ccb-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .ccb-icon {
     display: grid;
     place-items: center;
-    width: 36px;
-    height: 36px;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: rgba(33, 234, 124, 0.1);
     color: #21EA7C;
 }
 
+.ccb-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #ffffff;
+}
+
 .ccb-text {
     margin: 0;
-    align-self: center;
     font-size: 14px;
-    line-height: 1.45;
-    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .ccb-link {
@@ -45,72 +58,65 @@
 }
 
 .ccb-actions {
-    grid-column: 1 / -1;
     display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 6px;
+    flex-direction: column;
+    gap: 4px;
 }
 
-.ccb-later,
-.ccb-accept {
-    height: 44px;
+.ccb-accept,
+.ccb-later {
+    width: 100%;
     border: 0;
-    border-radius: 14px;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: transform 0.12s ease, background-color 0.15s ease;
-}
-
-.ccb-later {
-    padding: 0 16px;
-    background: none;
-    color: rgba(255, 255, 255, 0.55);
-}
-
-.ccb-later:hover {
-    color: rgba(255, 255, 255, 0.8);
+    transition: transform 0.12s ease, color 0.15s ease;
 }
 
 .ccb-accept {
-    min-width: 140px;
-    padding: 0 24px;
+    height: 52px;
+    border-radius: var(--btn-radius, 16px);
     background: var(--btn-primary-bg, #21EA7C);
     color: var(--btn-primary-text, #04130a);
     box-shadow: var(--btn-primary-shadow, 0 4px 18px rgba(33, 234, 124, 0.3));
 }
 
-.ccb-later:active,
-.ccb-accept:active {
-    transform: scale(0.97);
+.ccb-later {
+    height: 44px;
+    background: none;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.ccb-later:hover {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.ccb-accept:active,
+.ccb-later:active {
+    transform: scale(0.98);
 }
 
 .ccb-accept:focus-visible,
 .ccb-later:focus-visible {
     outline: 2px solid #21EA7C;
     outline-offset: 2px;
+    border-radius: var(--btn-radius, 16px);
 }
 
-/* Wide screens: text and actions on one line */
+/* Desktop: a small card in the bottom-left corner, out of the way of the content */
 @media (min-width: 700px) {
     .ccb {
-        grid-template-columns: auto 1fr auto;
-        align-items: center;
-        width: min(calc(100vw - 48px), 760px);
-        padding: 14px 14px 14px 18px;
+        left: 24px;
+        right: auto;
         bottom: 24px;
-    }
-
-    .ccb-actions {
-        grid-column: auto;
+        width: 380px;
     }
 }
 
 @keyframes ccbIn {
-    from { opacity: 0; transform: translateX(-50%) translateY(16px); }
-    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

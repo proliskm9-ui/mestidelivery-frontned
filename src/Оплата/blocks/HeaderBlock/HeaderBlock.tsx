@@ -1,8 +1,7 @@
 import React from 'react';
-import { Flame } from 'lucide-react';
 import './HeaderBlock.css';
 import { useLanguage } from '../../../translations/LanguageContext';
-import { useRushStatus, rushTitle, rushDescription } from '../../../utils/rushStatus';
+import { useRushStatus } from '../../../utils/rushStatus';
 import { deliveryLabel } from '../../../utils/eta';
 
 interface HeaderBlockProps {
@@ -84,15 +83,6 @@ const HeaderBlock: React.FC<HeaderBlockProps> = ({
         </button>
       </div>
 
-      {rush.isRush && (
-        <div className="rush-hour-badge">
-          <div className="rush-hour-header">
-            <Flame className="rush-flame" size={15} strokeWidth={2.2} aria-hidden="true" />
-            <span>{rushTitle(rush, language, eta)}</span>
-          </div>
-          <p className="rush-hour-desc">{rushDescription(language)}</p>
-        </div>
-      )}
     </section>
   );
 };

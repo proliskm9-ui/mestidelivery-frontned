@@ -42,6 +42,12 @@ export function deliveryWindow({ restaurantId, restaurantName, zoneId, rush }: E
     return [floor5(prep[0] + road[0]), ceil5(prep[1] + road[1])];
 }
 
+/** Remaining time rounded to 5 minutes for display: "15–20 мин", never "0–3". */
+export function roundRange([a, b]: Range): Range {
+    const lo = Math.max(5, Math.round(a / 5) * 5);
+    return [lo, Math.max(lo + 5, Math.round(b / 5) * 5)];
+}
+
 export function minutesLabel([a, b]: Range, language: string): string {
     const unit = language === 'en' ? 'min' : language === 'ka' ? 'წთ' : 'мин';
     return `${a}–${b} ${unit}`;

@@ -9,7 +9,7 @@ import { useLanguage } from '../translations/LanguageContext';
 import { pickI18nText } from '../utils/i18nContent';
 import { useRushStatus } from '../utils/rushStatus';
 import { useDeliveryLocationOptional } from '../delivery/DeliveryLocationContext';
-import { clockAt, minutesLabel, remainingWindow, OrderStage } from '../utils/eta';
+import { minutesLabel, remainingWindow, roundRange, OrderStage } from '../utils/eta';
 import {
     Clock,
     ClipboardCheck,
@@ -334,7 +334,7 @@ const OrderStatus: React.FC<Props> = ({ orderId, onBack, onViewDetails }) => {
                 ? t(`status.desc_${stepKey}`)
                 : stepKey === 'delivering'
                     ? t('status.eta_in').replace('{range}', minutesLabel(left, language))
-                    : `${t(`status.desc_${stepKey}`)} · ${t('status.eta_about').replace('{time}', clockAt((left[0] + left[1]) / 2, etaNow))}`;
+                    : t('status.eta_deliver_in').replace('{range}', minutesLabel(roundRange(left), language));
 
     const parseItems = (items: any): { name: string; price: number; quantity: number }[] => {
         if (!items) return [];
