@@ -25,8 +25,8 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onFirstBannerClick, onSecondB
         ka: '/Assets/banners/KA_2_refer-a-friend.png'
     }[language] || '/Assets/banners/RU_2_skidka-za-druga.png';
 
-    // "Refer a friend" is retired: the referral banner stays defined but is not shown
-    const SHOW_REFERRAL = false;
+    // The referral banner is the entry point to the invite window (mesti-referral.js)
+    const SHOW_REFERRAL = true;
     const banners = [
         { src: mainBannerSrc, onClick: onFirstBannerClick },
         ...(SHOW_REFERRAL ? [{ src: refBannerSrc, onClick: onSecondBannerClick }] : []),

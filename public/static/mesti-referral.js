@@ -27,7 +27,7 @@
       guestSubtitle: 'Получай бонусы за каждый первый заказ друзей и оплачивай ими доставку любимой еды.',
       guestNotice: 'Войдите по номеру телефона, чтобы получить персональную ссылку и копить бонусы.',
       loginBtn: 'Войти по номеру телефона',
-      shareText: 'Заказывай вкусную еду в Местии через MestiDelivery! Бесплатная доставка от 100 GEL: ',
+      shareText: '🍽 Привет! Заказываю еду в Местии через MestiDelivery — быстро и вкусно 🔥\nДержи мою ссылку: на первый заказ от 100 GEL доставка бесплатно 🎁\n👉 ',
       toastCopied: 'Ссылка скопирована в буфер обмена'
     },
     en: {
@@ -48,7 +48,7 @@
       guestSubtitle: 'Earn bonus rewards when your friends order delicious food in Mestia.',
       guestNotice: 'Sign in with your phone number to get your unique invite link and start earning.',
       loginBtn: 'Sign in with phone',
-      shareText: 'Order delicious food in Mestia with MestiDelivery! Free delivery over 100 GEL: ',
+      shareText: '🍽 Hey! I order food in Mestia with MestiDelivery — fast and tasty 🔥\nHere’s my link: free delivery on your first order over 100 GEL 🎁\n👉 ',
       toastCopied: 'Invite link copied to clipboard'
     },
     ka: {
@@ -69,12 +69,15 @@
       guestSubtitle: 'მიიღე ბონუსები მეგობრების შეკვეთებზე და გამოიყენე გადახდისას.',
       guestNotice: 'გაიარე ავტორიზაცია ტელეფონით, რომ მიიღო პირადი ლინკი და დაიწყო დაგროვება.',
       loginBtn: 'შესვლა ტელეფონით',
-      shareText: 'შეუკვეთე საჭმელი მესტიაში MestiDelivery-თ! 100 ლარიდან მიტანა უფასოა: ',
+      shareText: '🍽 გამარჯობა! მესტიაში საჭმელს MestiDelivery-ით ვუკვეთავ — სწრაფი და გემრიელი 🔥\nაი ჩემი ბმული: პირველ შეკვეთაზე 100 ლარიდან მიტანა უფასოა 🎁\n👉 ',
       toastCopied: 'ლინკი დაკოპირდა'
     }
   };
 
   function getLang() {
+    // The app sets <html lang> for the active language; it wins over the URL
+    var docLang = (document.documentElement.lang || '').slice(0, 2).toLowerCase();
+    if (docLang && I18N[docLang]) return docLang;
     var p = window.location.pathname.toLowerCase();
     if (p.indexOf('/en') === 0) return 'en';
     if (p.indexOf('/ka') === 0) return 'ka';
@@ -327,7 +330,17 @@
     ].join('\n');
 
     // Attach copy & share handlers
-    function setupActions(url) {
+    function localizeUrl(u) {
+      try {
+        var lang = getLang();
+        var parsed = new URL(u, window.location.origin);
+        if (!/^\/(ru|en|ka)(\/|$)/.test(parsed.pathname)) parsed.pathname = '/' + lang + (parsed.pathname === '/' ? '/' : parsed.pathname);
+        return parsed.toString();
+      } catch (e) { return u; }
+    }
+
+    function setupActions(rawUrl) {
+      var url = localizeUrl(rawUrl);
       var copyBtn = container.querySelector('#mesti-ref-copy-btn');
       var shareBtn = container.querySelector('#mesti-ref-share-primary');
       var tgBtn = container.querySelector('#mesti-ref-tg');
@@ -389,7 +402,9 @@
       }
 
       if (tgBtn) {
-        var tgUrl = 'https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(t.shareText);
+        // Telegram puts the link above the text, so the trailing pointer line is dropped there
+        var tgUrl = 'https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(t.shareText.replace(/
+?👉\s*$/, ''));
         tgBtn.setAttribute('href', tgUrl);
       }
 
