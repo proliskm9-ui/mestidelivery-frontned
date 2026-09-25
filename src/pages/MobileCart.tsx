@@ -181,7 +181,7 @@ const MobileCart: React.FC<MobileCartProps> = ({ onBack, initialCartItems = [], 
                     <div className="mc-header-center">
                         <h1>{restaurant ? restaurant.name : t('cart.title')}</h1>
                         <div className="mc-header-subtitle">
-                            <AnimatedPrice value={total} /> · {restaurant?.delivery || ''}
+                            <AnimatedPrice value={total} /> · {cartEta || restaurant?.delivery || ''}
                         </div>
                     </div>
                     <button className="mc-clear-btn" onClick={handleClearCart}>

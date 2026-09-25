@@ -1733,7 +1733,7 @@ export const translations = {
             kcal: 'კკალ',
             proteins: 'ცილები',
             fats: 'ცხიმები',
-            carbs: 'ნახშირწყლები',
+            carbs: 'ნახშირწყ.',
             grams: 'გ',
             ml: 'მლ',
             liter: 'ლ',
@@ -1747,7 +1747,7 @@ export const translations = {
         checkout: {
             title: 'გაფორმება',
             time: 'მიტანის დრო',
-            standard: 'სტანდარტული',
+            standard: 'სტანდარტი',
             standard_desc: 'უახლოესი დრო (25-45 წთ)',
             scheduled: 'დროით',
             scheduled_desc: 'აირჩიეთ დრო',
