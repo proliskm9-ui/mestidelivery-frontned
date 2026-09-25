@@ -218,3 +218,43 @@
         display: none;
     }
 }
+
+/* Desktop profile: a left-aligned page title instead of a small centred one */
+@media (min-width: 1025px) {
+    .dfs .profile-header {
+        justify-content: flex-start;
+        padding-left: 0;
+        margin-bottom: 20px;
+    }
+    .dfs .profile-header .ui-circle-btn,
+    .dfs .profile-header .profile-header-spacer {
+        display: none;
+    }
+    .dfs .profile-header h1 {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        text-align: left;
+    }
+    .dfs .od-header {
+        margin-top: 8px;
+    }
+}
+
+/* Order details is a fixed layer on its own; inside the frame it flows under the bar */
+@media (min-width: 1025px) {
+    .dfs .od-page {
+        position: static;
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+        z-index: auto;
+    }
+    .dfs .od-shell {
+        max-width: none;
+        padding: 0;
+    }
+    .dfs .od-header {
+        padding-top: 0;
+    }
+}

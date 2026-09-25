@@ -870,7 +870,10 @@ function AppContent() {
                                 )}
 
                                 {currentPage === 'order_details' && selectedOrderId && (
-                                    <OrderDetails orderId={selectedOrderId} onBack={() => setCurrentPage('profile')} />
+                                    // Own full-screen layer like the status page (desktop: the flow frame, no site header behind)
+                                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 5000, overflowY: 'auto', background: 'var(--bg)' }}>
+                                        <OrderDetails orderId={selectedOrderId} onBack={() => setCurrentPage('profile')} />
+                                    </div>
                                 )}
 
 

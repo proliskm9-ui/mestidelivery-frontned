@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import FlowShell from '../components/Desktop/FlowShell';
 import './OrderDetails.css';
 import Sheet from '../components/UI/Sheet';
 import { api, restaurantCache } from '../services/api';
@@ -234,6 +235,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
         : promoMinus10 ? itemsTotal + calculatedServiceFee + 10 : order.total;
 
     return (
+        <FlowShell desktopOnly onBack={onBack}>
         <div className="od-page">
             <div className="od-bg-glow" />
             <div className="od-shell">
@@ -407,6 +409,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                 </div>
             </Sheet>
         </div>
+        </FlowShell>
     );
 };
 
