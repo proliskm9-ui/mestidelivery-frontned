@@ -20,8 +20,8 @@
 
 .ccb-head {
     display: flex;
-    align-items: center;
-    gap: 12px;
+    align-items: flex-start;
+    gap: 14px;
 }
 
 .ccb-icon {
@@ -46,8 +46,8 @@
 .ccb-text {
     margin: 0;
     font-size: 14px;
-    line-height: 1.5;
-    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.72);
 }
 
 .ccb-link {
@@ -85,12 +85,11 @@
 .ccb-later {
     height: 50px;
     border-radius: var(--btn-radius, 16px);
-    background: rgba(255, 255, 255, 0.07);
-    color: rgba(255, 255, 255, 0.8);
+    background: none;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .ccb-later:hover {
-    background: rgba(255, 255, 255, 0.1);
     color: #ffffff;
 }
 

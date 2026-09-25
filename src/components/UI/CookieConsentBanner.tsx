@@ -12,22 +12,22 @@ const ASK_AGAIN_MS = 7 * 24 * 60 * 60 * 1000;
 
 const LABELS: Record<string, { title: string; text: string; link: string; accept: string; later: string }> = {
     ru: {
-        title: 'Мы используем cookie',
-        text: 'Они помогают сайту работать корректно и помнить ваши настройки.',
+        title: 'Файлы cookie',
+        text: 'Мы используем файлы cookie для корректной работы сайта, запоминания языка и ваших предпочтений.',
         link: 'Подробнее',
         accept: 'Принять',
         later: 'Позже',
     },
     en: {
-        title: 'We use cookies',
-        text: 'They keep the site working properly and remember your settings.',
+        title: 'Cookies',
+        text: 'We use cookies to ensure the site works properly and to remember your language and preferences.',
         link: 'Learn more',
         accept: 'Accept',
         later: 'Later',
     },
     ka: {
-        title: 'ვიყენებთ ქუქი-ფაილებს',
-        text: 'ისინი საიტს სწორად მუშაობასა და თქვენი პარამეტრების დამახსოვრებაში ეხმარება.',
+        title: 'ქუქი-ფაილები',
+        text: 'ჩვენ ვიყენებთ ქუქი-ფაილებს საიტის სწორი მუშაობისთვის, ენის და პარამეტრების შესანახად.',
         link: 'დეტალები',
         accept: 'მიღება',
         later: 'მოგვიანებით',
@@ -87,12 +87,11 @@ const CookieConsentBanner: React.FC = () => {
         <div className="ccb" role="dialog" aria-live="polite" aria-labelledby="ccb-title">
             <div className="ccb-head">
                 <span className="ccb-icon" aria-hidden="true"><Cookie size={20} strokeWidth={1.9} /></span>
-                <h2 className="ccb-title" id="ccb-title">{l.title}</h2>
+                <p className="ccb-text" id="ccb-title">
+                    {l.text}{' '}
+                    <Link to={`/${language}/privacy`} className="ccb-link">{l.link}</Link>
+                </p>
             </div>
-            <p className="ccb-text">
-                {l.text}{' '}
-                <Link to={`/${language}/privacy`} className="ccb-link">{l.link}</Link>
-            </p>
             <div className="ccb-actions">
                 <button type="button" className="ccb-accept" onClick={() => save('all')}>{l.accept}</button>
                 <button type="button" className="ccb-later" onClick={() => save('essential')}>{l.later}</button>

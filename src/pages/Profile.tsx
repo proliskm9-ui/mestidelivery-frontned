@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import FlowShell from '../components/Desktop/FlowShell';
 import './Profile.css';
 import { useLanguage } from '../translations/LanguageContext';
 import AvatarPickerSheet from '../components/UI/AvatarPickerSheet';
@@ -370,6 +371,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
     );
 
     return (
+        <FlowShell desktopOnly onBack={() => (view === 'dashboard' ? onBack?.() : setView('dashboard'))}>
         <div className="profile-page-wrapper">
             <div className="profile-glow" aria-hidden="true" />
             <div className="profile-container">
@@ -386,6 +388,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                 onPick={(avatar) => onUpdateProfile?.({ avatar })}
             />
         </div>
+        </FlowShell>
     );
 };
 

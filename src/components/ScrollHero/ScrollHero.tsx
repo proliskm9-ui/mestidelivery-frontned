@@ -299,8 +299,11 @@ const ScrollHero: React.FC<Props> = ({ onNavigate }) => {
 
     const cta = t('home.order_now') || 'Заказать сейчас';
     const title2Raw = t('home.hero_title_2') || 'В КАЖДОМ\nЗАКАЗЕ';
-    // Same two-line lockup as on desktop: "ВКУС МЕСТИИ" / "В КАЖДОМ ЗАКАЗЕ"
-    const outlineLines = [title2Raw.replace(/\n/g, ' ')];
+    // Desktop: two lines. Phones: Russian breaks into three ("В КАЖДОМ" / "ЗАКАЗЕ") so it
+    // can be set larger; English and Georgian keep the desktop lockup.
+    const outlineLines = isMobile && language === 'ru'
+        ? title2Raw.split('\n')
+        : [title2Raw.replace(/\n/g, ' ')];
     const loadPct = Math.round(loaded * 100);
 
     // Phones & tablets: size the title so its widest line exactly fills the column,
@@ -328,7 +331,7 @@ const ScrollHero: React.FC<Props> = ({ onNavigate }) => {
         ro.observe(box);
         document.fonts?.ready.then(fit).catch(() => {});
         return () => ro.disconnect();
-    }, [language, title2Raw]);
+    }, [language, title2Raw, isMobile]);
 
     return (
         <div ref={wrapRef} className="sh-track">

@@ -200,3 +200,21 @@
         padding: 0;
     }
 }
+
+/* Secondary pages inside the frame: the bar owns the back button and the brand */
+@media (min-width: 1025px) {
+    .dfs .od-back-btn,
+    .dfs .profile-header .ui-circle-btn {
+        visibility: hidden;
+    }
+    .dfs .od-page,
+    .dfs .profile-page-wrapper {
+        min-height: 0;
+        padding-top: 0;
+        background: none;
+    }
+    .dfs .od-bg-glow,
+    .dfs .profile-glow {
+        display: none;
+    }
+}
