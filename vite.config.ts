@@ -2,10 +2,16 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import hoverGate from './postcss-hover-gate.js'
+import pkg from './package.json'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // Shown at the bottom of the profile: app version + build date (helps support tell deploys apart)
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)),
+  },
   css: {
     postcss: {
       // Gate :hover styles to real pointers so taps on phones don't leave hover stuck

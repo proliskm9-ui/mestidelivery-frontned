@@ -227,6 +227,7 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
             <nav className="mp-legal">
                 <Link to={`/${language}/privacy`}>{t('home.footer_privacy')}</Link>
                 <Link to={`/${language}/terms`}>{t('home.footer_terms')}</Link>
+                <span className="mp-version">MestiDelivery · {t('profile.version')} {__APP_VERSION__} · {__BUILD_DATE__.split('-').reverse().join('.')}</span>
             </nav>
         </div>
     );
