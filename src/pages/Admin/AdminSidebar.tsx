@@ -82,7 +82,7 @@ export function AdminSidebar({ activePage, onNavigate, isOpen }: Props) {
                         onClick={() => onNavigate('courier')}
                     >
                         <OrdersIcon size={20} className="nav-icon" />
-                        <span>Delivery</span>
+                        <span>Доставки</span>
                     </button>
                 </div>
                 <div className="sidebar-footer">
@@ -102,7 +102,7 @@ export function AdminSidebar({ activePage, onNavigate, isOpen }: Props) {
                     </div>
                     <button className="nav-item logout-btn" onClick={adminAuth.logout} style={{ color: '#ff4444' }}>
                         <LogoutIcon size={20} className="nav-icon" />
-                        <span>Logout</span>
+                        <span>Выйти</span>
                     </button>
                 </div>
                 {avatarModal && (
@@ -140,54 +140,54 @@ export function AdminSidebar({ activePage, onNavigate, isOpen }: Props) {
         {
             title: '',
             items: [
-                { id: 'dashboard' as AdminPage, Icon: HomeIcon, label: 'Dashboard' },
-                { id: 'orders' as AdminPage, Icon: OrdersIcon, label: 'Orders' }
+                { id: 'dashboard' as AdminPage, Icon: HomeIcon, label: 'Обзор' },
+                { id: 'orders' as AdminPage, Icon: OrdersIcon, label: 'Заказы' }
             ]
         },
         {
-            title: 'Management',
+            title: 'Управление',
             items: [
                 isSuperAdmin && { 
                     id: 'folder_restaurants', 
                     Icon: RestaurantIcon, 
-                    label: 'Restaurants',
+                    label: 'Рестораны',
                     subItems: [
-                        { id: 'restaurants', label: 'Restaurant List' },
-                        { id: 'products', label: 'Products' },
-                        { id: 'categories', label: 'Categories' }
+                        { id: 'restaurants', label: 'Список' },
+                        { id: 'products', label: 'Меню' },
+                        { id: 'categories', label: 'Категории' }
                     ]
                 },
                 isSuperAdmin && { 
                     id: 'folder_stores', 
                     Icon: StoreIcon, 
-                    label: 'Stores',
+                    label: 'Магазины',
                     subItems: [
-                        { id: 'stores', label: 'Store List' },
-                        { id: 'store_products', label: 'Products' }
+                        { id: 'stores', label: 'Список' },
+                        { id: 'store_products', label: 'Товары' }
                     ]
                 },
                 isSuperAdmin && {
                     id: 'promotions' as AdminPage,
                     Icon: PromoIcon,
-                    label: 'Promotions'
+                    label: 'Акции и промокоды'
                 },
                 isSuperAdmin && { 
                     id: 'webhooks' as AdminPage, 
                     Icon: WebhookIcon, 
-                    label: 'Webhooks'
+                    label: 'Вебхуки'
                 }
             ].filter(Boolean) as any[]
         },
         {
-            title: 'Users',
+            title: 'Люди',
             items: [
                 isSuperAdmin && {
                     id: 'folder_users',
                     Icon: UsersIcon,
-                    label: 'Users',
+                    label: 'Пользователи',
                     subItems: [
-                        { id: 'users', label: 'Customers' },
-                        { id: 'partners', label: 'Partners' }
+                        { id: 'users', label: 'Клиенты' },
+                        { id: 'partners', label: 'Партнёры' }
                     ]
                 }
             ].filter(Boolean) as any[]
@@ -272,7 +272,7 @@ export function AdminSidebar({ activePage, onNavigate, isOpen }: Props) {
                     style={{ color: '#ff4444' }}
                 >
                     <LogoutIcon size={20} className="nav-icon" />
-                    <span>Logout</span>
+                    <span>Выйти</span>
                 </button>
             </div>
             {avatarModal && (
@@ -341,9 +341,9 @@ export function MobileNav({ activePage, onNavigate }: Omit<Props, 'isOpen'>) {
     }
 
     const mainItems = [
-        { id: 'dashboard' as AdminPage, Icon: HomeIcon, label: 'Home' },
-        { id: 'orders' as AdminPage, Icon: OrdersIcon, label: 'Orders' },
-        { id: 'products' as AdminPage, Icon: ProductIcon, label: 'Items' }
+        { id: 'dashboard' as AdminPage, Icon: HomeIcon, label: 'Обзор' },
+        { id: 'orders' as AdminPage, Icon: OrdersIcon, label: 'Заказы' },
+        { id: 'products' as AdminPage, Icon: ProductIcon, label: 'Меню' }
     ];
 
     return (

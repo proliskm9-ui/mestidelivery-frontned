@@ -2,7 +2,45 @@ import { useState, useEffect } from 'react';
 import { adminApi, adminAuth, type Product, type Restaurant } from '../../services/adminService';
 import { EditIcon, TrashIcon, RefreshIcon } from '../../components/icons/StatusIcons';
 import FullPageLoader from '../../components/UI/FullPageLoader';
+import { pickI18nText, parseI18nContent } from '../../utils/i18nContent';
+
+/** Menu texts may be i18n JSON ({"ru","en","ka"}): show Russian, edit only the Russian part. */
+const ruText = (raw?: string | null) => pickI18nText(raw || '', 'ru');
+const withRu = (raw: string | null | undefined, ru: string): string => {
+    const parsed = parseI18nContent(raw || '');
+    if (typeof parsed === 'string') return ru;
+    return JSON.stringify({ ...parsed, ru });
+};
+
+type Lang3 = 'ru' | 'en' | 'ka';
+const readLangs = (raw?: string | null): Record<Lang3, string> => {
+    const parsed = parseI18nContent(raw || '');
+    if (typeof parsed === 'string') return { ru: parsed, en: '', ka: '' };
+    return { ru: String(parsed.ru || ''), en: String(parsed.en || ''), ka: String(parsed.ka || '') };
+};
+const writeLangs = (v: Record<Lang3, string>): string => (!v.en && !v.ka ? v.ru : JSON.stringify(v));
+
+/** RU / EN / KA inputs for one menu text, stored as i18n JSON (plain text when only RU is set). */
+function I18nFields({ value, onChange, multiline, placeholder }: { value?: string | null; onChange: (v: string) => void; multiline?: boolean; placeholder?: string }) {
+    const v = readLangs(value);
+    const set = (l: Lang3, text: string) => onChange(writeLangs({ ...v, [l]: text }));
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {(['ru', 'en', 'ka'] as Lang3[]).map((l) => (
+                <div key={l} style={{ display: 'flex', gap: 8, alignItems: multiline ? 'flex-start' : 'center' }}>
+                    <span style={{ width: 28, flexShrink: 0, paddingTop: multiline ? 12 : 0, fontSize: 12, fontWeight: 700, color: 'var(--admin-text-muted)' }}>{l.toUpperCase()}</span>
+                    {multiline ? (
+                        <textarea className="admin-input" style={{ height: 64, resize: 'none' }} value={v[l]} placeholder={l === 'ru' ? placeholder : ''} onChange={(e) => set(l, e.target.value)} />
+                    ) : (
+                        <input className="admin-input" value={v[l]} placeholder={l === 'ru' ? placeholder : ''} onChange={(e) => set(l, e.target.value)} required={l === 'ru'} />
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+}
 import './AdminStyles.css';
+import './AdminPromotions.css';
 
 /* ─── Simple SVG Icons ─────────────────────────── */
 const ChevronDown = () => (
@@ -212,7 +250,7 @@ export function AdminProducts() {
         setEditProduct({
             ...p,
             id: undefined,
-            name: `${p.name} (копия)`
+            name: withRu(p.name, `${ruText(p.name)} (копия)`)
         });
         setIsProductModalOpen(true);
         const w = p.weight?.toLowerCase() || '';
@@ -502,6 +540,7 @@ export function AdminProducts() {
                                     <th>Название</th>
                                     <th>Цена</th>
                                     <th className="mobile-hide">Категория</th>
+                                    <th title="Выключите, если блюдо закончилось: оно пропадёт из меню">В меню</th>
                                     <th>Действия</th>
                                 </tr>
                             </thead>
@@ -513,7 +552,7 @@ export function AdminProducts() {
                                                 <img src={p.img} alt="" className="item-img" />
                                             ) : (
                                                 <div className="item-img-premium-fallback">
-                                                    {p.name[0]?.toUpperCase() || '?'}
+                                                    {ruText(p.name)[0]?.toUpperCase() || '?'}
                                                 </div>
                                             )}
                                         </td>
@@ -523,14 +562,14 @@ export function AdminProducts() {
                                                     <input
                                                         autoFocus
                                                         className="inline-edit-input-premium"
-                                                        defaultValue={p.name}
-                                                        onBlur={(e) => handleInlineUpdate(p, 'name', e.target.value)}
-                                                        onKeyDown={(e) => e.key === 'Enter' && handleInlineUpdate(p, 'name', e.currentTarget.value)}
+                                                        defaultValue={ruText(p.name)}
+                                                        onBlur={(e) => handleInlineUpdate(p, 'name', withRu(p.name, e.target.value))}
+                                                        onKeyDown={(e) => e.key === 'Enter' && handleInlineUpdate(p, 'name', withRu(p.name, e.currentTarget.value))}
                                                     />
                                                 ) : (
                                                     <div className="editable-text-wrapper" onClick={() => setEditingCell({ id: p.id, field: 'name' })}>
                                                         <span className="editable-text">
-                                                            {p.name}
+                                                            {ruText(p.name)}
                                                         </span>
                                                         <span className="edit-pencil-icon">
                                                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
@@ -538,7 +577,7 @@ export function AdminProducts() {
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="product-desc-cell" style={{ fontSize: '0.85em', color: '#888', marginTop: '4px' }}>{p.description}</div>
+                                            <div className="product-desc-cell" style={{ fontSize: '0.85em', color: '#888', marginTop: '4px' }}>{ruText(p.description)}</div>
                                         </td>
                                         <td className="inline-edit-cell" style={{ color: '#21EA7C', whiteSpace: 'nowrap', fontWeight: 700 }}>
                                             {editingCell?.id === p.id && editingCell?.field === 'price' ? (
@@ -574,6 +613,13 @@ export function AdminProducts() {
                                             }}>{p.category || 'main'}</span>
                                         </td>
                                         <td>
+                                            {/* Stop list: one click to hide a dish that ran out */}
+                                            <label className="ap-switch" title={p.is_available === false ? 'Скрыто из меню' : 'В меню'}>
+                                                <input type="checkbox" checked={p.is_available !== false} onChange={(e) => handleInlineUpdate(p, 'is_available' as any, e.target.checked as any)} />
+                                                <span />
+                                            </label>
+                                        </td>
+                                        <td>
                                             <div className="admin-action-btns-gap">
                                                 <button className="btn-action-glass btn-edit" onClick={() => openEditProduct(p)} title="Редактировать">
                                                     <EditIcon size={16} />
@@ -592,7 +638,6 @@ export function AdminProducts() {
                         </table>
                         {filteredProducts.length === 0 && (
                             <div className="admin-empty-msg" style={{ padding: '40px 20px', textAlign: 'center' }}>
-                                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🍽️</div>
                                 <div style={{ color: '#888', fontSize: '15px' }}>
                                     {categoryFilter !== 'all' ? 'Нет позиций в этой категории' : 'Меню пока пустое'}
                                 </div>
@@ -605,7 +650,6 @@ export function AdminProducts() {
                 )
             ) : (
                 <div className="admin-card" style={{ padding: '60px 20px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏪</div>
                     <h3 style={{ margin: '0 0 8px 0', fontWeight: 700 }}>Выберите ресторан</h3>
                     <p style={{ color: '#888', margin: 0 }}>Используйте выпадающий список выше, чтобы выбрать ресторан и управлять его меню</p>
                 </div>
@@ -635,12 +679,10 @@ export function AdminProducts() {
                                     <h3 className="section-subtitle">Основная информация</h3>
                                     <div className="form-group">
                                         <label className="form-label">Название блюда</label>
-                                        <input
-                                            className="admin-input"
+                                        <I18nFields
                                             placeholder="Введите название..."
-                                            value={editProduct.name || ''}
-                                            onChange={e => setEditProduct({ ...editProduct, name: e.target.value })}
-                                            required
+                                            value={editProduct.name}
+                                            onChange={(v) => setEditProduct({ ...editProduct, name: v })}
                                         />
                                     </div>
 
@@ -693,25 +735,24 @@ export function AdminProducts() {
                                                 onClick={() => setIsDrink(false)}
                                                 className={`premium-drawer-tab-btn ${!isDrink ? 'active' : ''}`}
                                             >
-                                                🍽️ Блюдо
+                                                Блюдо
                                             </button>
                                             <button 
                                                 type="button"
                                                 onClick={() => setIsDrink(true)}
                                                 className={`premium-drawer-tab-btn ${isDrink ? 'active' : ''}`}
                                             >
-                                                🥤 Напиток
+                                                Напиток
                                             </button>
                                         </div>
                                     </div>
                                     <div className="form-group">
                                         <label className="form-label">Описание</label>
-                                        <textarea
-                                            className="admin-input"
-                                            style={{ height: 80, resize: 'none' }}
+                                        <I18nFields
+                                            multiline
                                             placeholder="Краткое описание для карточки..."
-                                            value={editProduct.description || ''}
-                                            onChange={e => setEditProduct({ ...editProduct, description: e.target.value })}
+                                            value={editProduct.description}
+                                            onChange={(v) => setEditProduct({ ...editProduct, description: v })}
                                         />
                                     </div>
 

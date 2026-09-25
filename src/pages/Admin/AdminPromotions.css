@@ -129,6 +129,8 @@
 
 /* iOS-like switch */
 .ap-switch {
+    display: inline-block;
+    vertical-align: middle;
     position: relative;
     width: 46px;
     height: 28px;
