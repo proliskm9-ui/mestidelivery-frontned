@@ -299,13 +299,11 @@ const ScrollHero: React.FC<Props> = ({ onNavigate }) => {
 
     const cta = t('home.order_now') || 'Заказать сейчас';
     const title2Raw = t('home.hero_title_2') || 'В КАЖДОМ\nЗАКАЗЕ';
-    // Desktop: two lines. Phones: break into short lines so the title can be set large.
-    // RU keeps "ВКУС МЕСТИИ" whole; EN/KA split the first line at its last space too.
+    // Desktop: two lines. Phones: RU and KA break the outline line in two (three lines
+    // in total, set large); EN keeps the two-line desktop lockup.
     const title1 = t('home.hero_title_1') || 'ВКУС МЕСТИИ';
-    const solidLines = isMobile && language !== 'ru' && title1.includes(' ')
-        ? [title1.slice(0, title1.lastIndexOf(' ')), title1.slice(title1.lastIndexOf(' ') + 1)]
-        : [title1];
-    const outlineLines = isMobile
+    const solidLines = [title1];
+    const outlineLines = isMobile && language !== 'en'
         ? title2Raw.split('\n')
         : [title2Raw.replace(/\n/g, ' ')];
     const loadPct = Math.round(loaded * 100);
