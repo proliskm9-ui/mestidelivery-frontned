@@ -58,9 +58,9 @@
 }
 
 .ccb-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
 }
 
 .ccb-accept,
@@ -75,7 +75,7 @@
 }
 
 .ccb-accept {
-    height: 52px;
+    height: 50px;
     border-radius: var(--btn-radius, 16px);
     background: var(--btn-primary-bg, #21EA7C);
     color: var(--btn-primary-text, #04130a);
@@ -83,13 +83,15 @@
 }
 
 .ccb-later {
-    height: 44px;
-    background: none;
-    color: rgba(255, 255, 255, 0.55);
+    height: 50px;
+    border-radius: var(--btn-radius, 16px);
+    background: rgba(255, 255, 255, 0.07);
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .ccb-later:hover {
-    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
 }
 
 .ccb-accept:active,

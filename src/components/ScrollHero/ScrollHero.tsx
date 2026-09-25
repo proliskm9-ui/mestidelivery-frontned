@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import './ScrollHero.css';
 import { useLanguage } from '../../translations/LanguageContext';
 
@@ -299,10 +299,36 @@ const ScrollHero: React.FC<Props> = ({ onNavigate }) => {
 
     const cta = t('home.order_now') || 'Заказать сейчас';
     const title2Raw = t('home.hero_title_2') || 'В КАЖДОМ\nЗАКАЗЕ';
-    const outlineLines = isMobile
-        ? title2Raw.split('\n')
-        : [title2Raw.replace(/\n/g, ' ')];
+    // Same two-line lockup as on desktop: "ВКУС МЕСТИИ" / "В КАЖДОМ ЗАКАЗЕ"
+    const outlineLines = [title2Raw.replace(/\n/g, ' ')];
     const loadPct = Math.round(loaded * 100);
+
+    // Phones & tablets: size the title so its widest line exactly fills the column,
+    // whatever the language or screen width (desktop keeps its CSS size).
+    const titleRef = useRef<HTMLHeadingElement>(null);
+    useLayoutEffect(() => {
+        const el = titleRef.current;
+        const box = el?.parentElement;
+        if (!el || !box) return;
+        const fit = () => {
+            if (!window.matchMedia('(max-width:1024px)').matches) { el.style.fontSize = ''; return; }
+            el.style.fontSize = '100px';
+            const widths = Array.from(el.querySelectorAll('.sh-title-solid, .sh-title-outline-line')).map((line) => {
+                const range = document.createRange();
+                range.selectNodeContents(line);
+                return range.getBoundingClientRect().width;
+            });
+            const widest = Math.max(0, ...widths);
+            if (!widest) return;
+            const size = Math.min((100 * box.clientWidth * 0.96) / widest, 96);
+            el.style.fontSize = `${size.toFixed(2)}px`;
+        };
+        fit();
+        const ro = new ResizeObserver(fit);
+        ro.observe(box);
+        document.fonts?.ready.then(fit).catch(() => {});
+        return () => ro.disconnect();
+    }, [language, title2Raw]);
 
     return (
         <div ref={wrapRef} className="sh-track">
@@ -326,7 +352,7 @@ const ScrollHero: React.FC<Props> = ({ onNavigate }) => {
                 <div ref={centerRef} className="sh-center">
                     <div className="sh-center-body">
                         <span className="sh-eyebrow">MestiDelivery · Mestia</span>
-                        <h1 className={`sh-title sh-title--${language || 'ru'}`}>
+                        <h1 ref={titleRef} className={`sh-title sh-title--${language || 'ru'}`}>
                             <span className="sh-title-solid">{t('home.hero_title_1') || 'ВКУС МЕСТИИ'}</span>
                             <span className="sh-title-outline">
                                 {outlineLines.map((line, i) => (

@@ -761,3 +761,17 @@
         transform: none !important;
     }
 }
+
+/* Phones & tablets: the title is fitted to the column in JS; the outline stroke
+   scales with it so small sizes don't look heavy */
+@media (max-width: 1024px) {
+    .sh-title {
+        line-height: 1;
+        gap: 0.06em;
+        letter-spacing: -0.02em;
+    }
+    .sh-title-outline,
+    .sh-title-outline-line {
+        -webkit-text-stroke-width: max(1px, 0.034em);
+    }
+}
