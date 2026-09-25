@@ -4,6 +4,7 @@ import { useLanguage } from '../translations/LanguageContext';
 import AvatarPickerSheet from '../components/UI/AvatarPickerSheet';
 import Sheet from '../components/UI/Sheet';
 import { restaurantCache } from '../services/api';
+import { Link } from 'react-router-dom';
 
 interface MobileProfileProps {
     userAddress?: any;
@@ -14,6 +15,7 @@ interface MobileProfileProps {
     onLogout?: () => void;
     onBack?: () => void;
     onOrderClick?: (orderId: number) => void;
+    onNavigate?: (page: string) => void;
 }
 
 const IconArrowLeft = () => (
@@ -43,9 +45,10 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
     orderHistory = [],
     onLogout,
     onBack,
-    onOrderClick
+    onOrderClick,
+    onNavigate
 }) => {
-    const { t } = useLanguage();
+    const { t, language, setLanguage } = useLanguage();
     const [view, setView] = useState<'dashboard' | 'personal' | 'addresses' | 'orders'>('dashboard');
     const [avatarModal, setAvatarModal] = useState(false);
 
@@ -138,50 +141,32 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                 </button>
             </div>
 
-            {/* Bonuses: balance + how to earn more */}
-            <div className="liquid-card mp-action-list">
-                <a className="mp-action-item" onClick={openReferral}>
-                    <div className="mp-action-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="8" r="6" /><path d="M18.09 10.37A6 6 0 1 1 10.34 18" /><path d="M7 6h1v4" /><path d="m16.71 13.88.7.71-2.82 2.82" /></svg>
-                    </div>
-                    <div className="mp-action-text">
-                        <h3 className="mp-action-title">{t('profile.bonus_title')}</h3>
-                    </div>
-                    <span className="mp-action-value">{userProfile?.points || 0}</span>
-                </a>
-                <a className="mp-action-item" onClick={openReferral}>
-                    <div className="mp-action-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="8" width="18" height="4" rx="1" /><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" /><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5" /></svg>
-                    </div>
-                    <div className="mp-action-text">
-                        <h3 className="mp-action-title">{t('profile.invite_title')}</h3>
-                        <p className="mp-action-subtitle"><span className="mp-action-bonus">{t('profile.invite_bonus')}</span> {t('profile.invite_sub')}</p>
-                    </div>
-                    <div className="mp-action-chevron"><IconChevron /></div>
-                </a>
+            {/* Bonuses: the one bright spot of the page */}
+            <div className="liquid-card mp-bonus">
+                <button type="button" className="mp-bonus-balance" onClick={openReferral}>
+                    <span className="mp-bonus-label">{t('profile.bonus_title')}</span>
+                    <span className="mp-bonus-value">{userProfile?.points || 0}</span>
+                    <span className="mp-bonus-hint"><span className="mp-action-bonus">{t('profile.invite_bonus')}</span> {t('profile.invite_sub')}</span>
+                </button>
+                <button type="button" className="ds-btn ds-btn--primary mp-bonus-cta" onClick={openReferral}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1" /><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" /><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5" /></svg>
+                    {t('profile.invite_button')}
+                </button>
             </div>
 
-            {/* Settings */}
-            <div className="liquid-card mp-action-list">
-                <a className="mp-action-item" onClick={openAddresses}>
-                    <div className="mp-action-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                    </div>
-                    <div className="mp-action-text">
-                        <h3 className="mp-action-title">{t('profile.addresses')}</h3>
-                        <p className="mp-action-subtitle">{userAddress?.street ? `${userAddress.street}, ${userAddress.house}` : t('common.select_address')}</p>
-                    </div>
-                    <div className="mp-action-chevron"><IconChevron /></div>
-                </a>
-                <a className="mp-action-item" href="https://t.me/MestigoSupport_Bot" target="_blank" rel="noopener noreferrer">
-                    <div className="mp-action-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" /></svg>
-                    </div>
-                    <div className="mp-action-text">
-                        <h3 className="mp-action-title">{t('profile.support')}</h3>
-                        <p className="mp-action-subtitle">{t('profile.info_support')}</p>
-                    </div>
-                    <div className="mp-action-chevron"><IconChevron /></div>
+            {/* Quick tiles */}
+            <div className="mp-tiles">
+                <button type="button" className="mp-tile" onClick={() => onNavigate?.('favorites')}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
+                    <span>{t('nav.favorites')}</span>
+                </button>
+                <button type="button" className="mp-tile" onClick={openAddresses}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                    <span>{t('profile.tile_addresses')}</span>
+                </button>
+                <a className="mp-tile" href="https://t.me/MestigoSupport_Bot" target="_blank" rel="noopener noreferrer">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" /></svg>
+                    <span>{t('profile.support')}</span>
                 </a>
             </div>
 
@@ -218,9 +203,31 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                 </div>
             </section>
 
+            {/* Language */}
+            <div className="liquid-card mp-action-list">
+                <div className="mp-action-item mp-lang-row">
+                    <div className="mp-action-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>
+                    </div>
+                    <div className="mp-action-text"><h3 className="mp-action-title">{t('home.language')}</h3></div>
+                    <div className="mp-lang-seg" role="radiogroup">
+                        {(['ru', 'en', 'ka'] as const).map((l) => (
+                            <button key={l} type="button" role="radio" aria-checked={language === l} className={language === l ? 'is-active' : ''} onClick={() => setLanguage(l)}>
+                                {l === 'ka' ? 'ქარ' : l.toUpperCase()}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
             <button className="mp-logout-btn" onClick={onLogout}>
                 {t('profile.logout')}
             </button>
+
+            <nav className="mp-legal">
+                <Link to={`/${language}/privacy`}>{t('home.footer_privacy')}</Link>
+                <Link to={`/${language}/terms`}>{t('home.footer_terms')}</Link>
+            </nav>
         </div>
     );
 

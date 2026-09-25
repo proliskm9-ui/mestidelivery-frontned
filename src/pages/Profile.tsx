@@ -40,6 +40,7 @@ interface ProfilePageProps {
     onLogout?: () => void;
     onBack?: () => void;
     onOrderClick?: (orderId: number) => void;
+    onNavigate?: (page: string) => void;
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = ({
@@ -50,6 +51,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
     onLogout,
     onBack,
     onOrderClick,
+    onNavigate,
     orderHistory = []
 }) => {
     const { t } = useLanguage();
@@ -76,6 +78,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                 onLogout={onLogout}
                 onBack={onBack}
                 onOrderClick={onOrderClick}
+                onNavigate={onNavigate}
             />
         );
     }

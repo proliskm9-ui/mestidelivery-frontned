@@ -676,6 +676,7 @@ function AppContent() {
                                         onLogout={handleLogout}
                                         onBack={() => setCurrentPage('menu')}
                                         onOrderClick={(id: number) => setCurrentPage('order_details', { orderId: id })}
+                                        onNavigate={(page: string) => setCurrentPage(page as any)}
                                     />
                                 )}
                                 {/* Restaurant Page - Kept visible under Cart for overlay effect */}

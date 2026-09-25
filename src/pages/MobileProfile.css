@@ -641,3 +641,69 @@
 .mp-recent-empty { margin: 0; padding: 22px 18px; font: var(--t-secondary); color: var(--color-text-tertiary); text-align: center; }
 .mp-logout-btn { margin-top: 4px; }
 .mp-recent-row .mp-action-subtitle { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- v3: bonus card, quick tiles, language, legal ---------- */
+.mp-bonus { display: flex; flex-direction: column; gap: 16px; padding: 20px !important; }
+.mp-bonus-balance {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.mp-bonus-label { font: var(--t-label); text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-tertiary); }
+.mp-bonus-value {
+    color: var(--color-accent);
+    font: 900 40px/1 var(--font-text);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 24px rgba(33, 234, 124, 0.35);
+}
+.mp-bonus-hint { font: var(--t-caption); color: var(--color-text-secondary); }
+.mp-bonus-cta { width: 100%; gap: 8px; }
+
+.mp-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.mp-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 88px;
+    padding: 14px 6px;
+    background: var(--panel-bg);
+    border: var(--panel-border);
+    border-radius: 22px;
+    color: #fff;
+    font: 600 13px/1.2 var(--font-text);
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+.mp-tile:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.06); }
+.mp-tile span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.mp-lang-row { cursor: default; }
+.mp-lang-row:active { background: none; }
+.mp-lang-seg { display: flex; gap: 2px; padding: 3px; margin-left: 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.06); }
+.mp-lang-seg button {
+    min-width: 44px;
+    height: 32px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 9px;
+    background: none;
+    color: var(--color-text-secondary);
+    font: 700 13px/1 var(--font-text);
+    cursor: pointer;
+}
+.mp-lang-seg button.is-active { background: var(--color-accent); color: var(--color-on-accent, #000); }
+
+.mp-legal { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 18px; padding: 4px 0 8px; }
+.mp-legal a { font: var(--t-caption); color: var(--color-text-tertiary); text-decoration: none; }
