@@ -683,3 +683,137 @@ body:has(.checkout-page-container)::-webkit-scrollbar {
 .premium-summary-card .summary-body {
     margin-bottom: 4px;
 }
+
+/* ===== Desktop flow: checkout cards on the shared surface ===== */
+.ck-desk {
+    max-width: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ck-desk .forms-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+}
+
+.ck-desk .premium-card {
+    margin: 0;
+    padding: 28px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 24px;
+    animation: none;
+}
+
+.ck-desk .dfs-card-title,
+.ck-desk .address-live-heading {
+    margin: 0 0 20px;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-transform: none;
+}
+
+.ck-desk .delivery-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    max-width: 520px;
+}
+
+.ck-desk .option-btn {
+    min-height: 72px;
+    border-radius: 18px;
+}
+
+.ck-desk .tips-title {
+    font-size: 20px;
+}
+
+.ck-desk .option-btn {
+    width: 100%;
+}
+
+/* Address on desktop: boxed fields with a floating label, focus in brand green */
+.ck-desk .address-card--live {
+    padding: 28px;
+}
+
+.ck-desk .address-card--live .place-type-row {
+    margin-bottom: 16px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    transition: border-color 0.15s ease;
+}
+
+.ck-desk .address-card--live .place-type-row:hover {
+    border-color: rgba(33, 234, 124, 0.45);
+}
+
+.ck-desk .address-card--live .place-text-col {
+    margin-top: 0;
+}
+
+.ck-desk .address-card--live .divider-line,
+.ck-desk .address-card--live .bottom-border,
+.ck-desk .address-card--live .phone-line {
+    display: none;
+}
+
+.ck-desk .address-card--live .fields-grid {
+    margin-top: 0;
+    gap: 12px;
+}
+
+.ck-desk .address-card--live .grid-row {
+    gap: 12px;
+}
+
+.ck-desk .address-card--live .icon-input-row {
+    height: auto;
+}
+
+.ck-desk .address-card--live .input-cell {
+    height: 62px;
+    padding: 0 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.ck-desk .address-card--live .input-cell:hover {
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.ck-desk .address-card--live .input-cell:focus-within {
+    border-color: rgba(33, 234, 124, 0.7);
+    background: rgba(33, 234, 124, 0.04);
+}
+
+.ck-desk .address-card--live .input-transparent,
+.ck-desk .address-card--live .icon-input-row .input-cell .input-transparent {
+    margin: 28px 0 0;
+    font-size: 16px;
+}
+
+.ck-desk .address-card--live .floating-label,
+.ck-desk .address-card--live .icon-input-row .floating-label {
+    left: 16px;
+    top: 20px;
+}
+
+.ck-desk .address-card--live .input-transparent:focus ~ .floating-label,
+.ck-desk .address-card--live .input-cell.has-value .floating-label {
+    top: 10px;
+    font-size: 12px;
+}
+
+.ck-desk .address-card--live .icon-input-row {
+    margin-top: 12px;
+}

@@ -1,0 +1,105 @@
+.oa-card {
+    padding: 26px 26px 24px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 24px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.oa-head {
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.oa-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: #ffffff;
+    text-transform: none;
+}
+
+.oa-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    margin: 8px 0 0;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.oa-rest {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.oa-eta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #21EA7C;
+    font-weight: 600;
+}
+
+/* The shared breakdown sits flat inside the card */
+.oa-card .summary-body {
+    padding: 0;
+    background: none;
+}
+
+.oa-card .summary-row {
+    font-size: 14px;
+}
+
+.oa-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 18px 0 20px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.oa-total span {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.oa-total strong {
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: #21EA7C;
+    text-shadow: 0 0 18px rgba(33, 234, 124, 0.25);
+}
+
+.oa-cta {
+    width: 100%;
+    height: 56px;
+    border: 0;
+    border-radius: var(--btn-radius, 16px);
+    background: var(--btn-primary-bg, #21EA7C);
+    color: var(--btn-primary-text, #04130a);
+    font-size: 17px;
+    font-weight: 800;
+    box-shadow: var(--btn-primary-shadow, 0 6px 22px rgba(33, 234, 124, 0.3));
+    cursor: pointer;
+    transition: transform 0.12s ease, filter 0.15s ease;
+}
+
+.oa-cta:hover:not(:disabled) {
+    filter: brightness(1.05);
+}
+
+.oa-cta:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.oa-cta:disabled {
+    opacity: 0.45;
+    cursor: default;
+}

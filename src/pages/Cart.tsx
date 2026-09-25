@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import FlowShell from '../components/Desktop/FlowShell';
+import OrderAside from '../components/Desktop/OrderAside';
+import { useDeliveryEta } from '../hooks/useDeliveryEta';
 import { isModifierProduct } from '../utils/modifiers';
-import { api, Product } from '../services/api';
+import { api, Product, restaurantCache } from '../services/api';
 import './Cart.css';
 import { useLanguage } from '../translations/LanguageContext';
 import { pickI18nText } from '../utils/i18nContent';
@@ -73,7 +76,11 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
     }
 
     // Packaging row is drawn by the Sunset helper script; the total must include it
-    const total = subtotal + deliveryFee + serviceFee + getPackagingFee(initialCartItems);
+    const packagingFee = getPackagingFee(initialCartItems);
+    const total = subtotal + deliveryFee + serviceFee + packagingFee;
+    const cartRestaurantId = initialCartItems[0]?.product?.restaurant_id || null;
+    const cartRestaurant = cartRestaurantId ? pickI18nText(restaurantCache[`rest_${cartRestaurantId}`]?.name || '', language) : '';
+    const cartEta = useDeliveryEta(cartRestaurantId, null, null);
     const totalItems = initialCartItems.reduce((sum, item) => sum + item.quantity, 0);
 
     // Sync cutlery with items logic
@@ -152,22 +159,27 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
     }
 
     return (
-        <div className="page-transition-wrapper">
-            <div className="cart-page-container">
-
-                <header className="cart-main-header">
-                    <button type="button" className="ui-circle-btn" onClick={onBack} aria-label={t('common.back')}>
-                        <IconBack />
-                    </button>
-                    <h1>{t('cart.title')}</h1>
-                    <button type="button" className="clear-cart-btn" onClick={handleClearCart} aria-label={t('cart.clear')}>
-                        <IconTrash />
-                    </button>
-                </header>
-
-                <div className="cart-main-content">
+        <>
+        <FlowShell
+            step="cart"
+            onBack={onBack}
+            action={(
+                <button type="button" className="dfs-clear" onClick={handleClearCart}>
+                    <IconTrash />
+                    <span>{t('cart.clear')}</span>
+                </button>
+            )}
+        >
+            <div className="cart-page-container cart-desk">
+                <div className="dfs-grid">
                     <div className="items-column">
                         <div className="cart-glass-block">
+                            {cartRestaurant && (
+                                <div className="cart-desk-head">
+                                    <h2>{cartRestaurant}</h2>
+                                    <span>{cartEta}</span>
+                                </div>
+                            )}
                             {initialCartItems.map(({ product, quantity }, index) => (
                                 <div
                                     key={product.id}
@@ -270,37 +282,19 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                         )}
                     </div>
 
-                    <div className="summary-column">
-                        <div className="premium-summary-card">
-                            <h2>{t('cart.details')}</h2>
-
-                            <div className="summary-details">
-                                <div className="summary-line">
-                                    <span>{t('cart.items')} ({totalItems})</span>
-                                    <span>{subtotal.toFixed(2)} ₾</span>
-                                </div>
-                                <div className="summary-line">
-                                    <span>{t('cart.delivery')}</span>
-                                    <span>{deliveryFee.toFixed(2)} ₾</span>
-                                </div>
-                                <div className="summary-line service">
-                                    <span>{t('cart.service')}</span>
-                                    <span>{serviceFee.toFixed(2)} ₾</span>
-                                </div>
-                            </div>
-
-                            <div className="summary-divider"></div>
-
-                            <div className="total-line">
-                                <div className="total-label">{t('common.total')}</div>
-                                <div className="total-value">{total.toFixed(2)} ₾</div>
-                            </div>
-
-                            <button type="button" className="confirm-order-btn" onClick={handleCheckoutClick}>
-                                {t('cart.checkout')}
-                            </button>
-                        </div>
-                    </div>
+                    <OrderAside
+                        restaurantName={null}
+                        eta={null}
+                        items={initialCartItems}
+                        subtotal={subtotal}
+                        baseDeliveryFee={deliveryFee}
+                        serviceFee={serviceFee}
+                        packagingFee={packagingFee}
+                        total={total}
+                        ctaLabel={t('cart.checkout')}
+                        onCta={handleCheckoutClick}
+                        showItems={false}
+                    />
                 </div>
 
                 <div className="mobile-checkout-bar">
@@ -313,6 +307,7 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                     </button>
                 </div>
             </div>
+        </FlowShell>
 
             <Dialog
                 open={showMinOrderModal}
@@ -347,7 +342,7 @@ const CartPage: React.FC<CartPageProps> = ({ onBack, initialCartItems = [], onCl
                     </>
                 }
             />
-        </div>
+        </>
     );
 };
 

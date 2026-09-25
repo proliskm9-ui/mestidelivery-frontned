@@ -29,6 +29,8 @@ interface SummaryBlockProps {
   total: number;
   /** The desktop sidebar shows its own large total under the breakdown. */
   showTotal?: boolean;
+  /** The desktop cart already lists the dishes on the left. */
+  showItems?: boolean;
 }
 
 /** Order breakdown shown in the "Your order" sheet (opened from the pay bar total). */
@@ -44,13 +46,14 @@ const SummaryBlock: React.FC<SummaryBlockProps> = ({
   freeDeliveryLeft = 0,
   total,
   showTotal = true,
+  showItems = true,
 }) => {
   const { t, language } = useLanguage();
   const deliveryFee = Math.max(0, baseDeliveryFee - deliveryDiscount);
 
   return (
     <div className="summary-body">
-          {items.map(({ product, quantity }) => (
+          {showItems && items.map(({ product, quantity }) => (
             <div key={product.id} className="summary-row">
               <span className="summary-item-name">
                 {pickI18nText(product.name, language)} <span className="summary-qty">× {quantity}</span>
@@ -59,7 +62,7 @@ const SummaryBlock: React.FC<SummaryBlockProps> = ({
             </div>
           ))}
 
-          <div className="summary-divider" />
+          {showItems && <div className="summary-divider" />}
 
           <div className="summary-row">
             <span className="summary-row-title summary-muted">{t('cart.items')}</span>

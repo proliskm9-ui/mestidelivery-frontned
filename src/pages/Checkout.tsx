@@ -20,15 +20,12 @@ import { toast } from 'sonner';
 import { getPackagingFee } from '../utils/packaging';
 import TipsBlock from '../Оплата/blocks/TipsBlock/TipsBlock';
 import CustomTipModal from '../Оплата/modals/CustomTipModal/CustomTipModal';
-import SummaryBlock from '../Оплата/blocks/SummaryBlock/SummaryBlock';
+import FlowShell from '../components/Desktop/FlowShell';
+import OrderAside from '../components/Desktop/OrderAside';
+import { pickI18nText } from '../utils/i18nContent';
 import { formatPrice } from '../utils/formatPrice';
 
 // SVG Icons
-const IconArrowLeft = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
-    </svg>
-);
 const IconMapPin = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>);
 
 const emptyAddress = (initial?: any, saved?: any, phone?: string): AddressData => ({
@@ -227,23 +224,13 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                 }}
             />
 
-            <div className="page-transition-wrapper">
-                <div className="checkout-page-container">
-                    <header className="checkout-main-header">
-                        <button type="button" className="back-circle-btn ui-circle-btn" onClick={onBack} aria-label={t('common.back')}>
-                            <IconArrowLeft />
-                        </button>
-                        <h1>{t('checkout.title')}</h1>
-                        <div className="checkout-header-spacer" aria-hidden="true" />
-                    </header>
-
-                    <div className="checkout-main-content">
+            <FlowShell step="checkout" onBack={onBack}>
+                <div className="checkout-page-container ck-desk">
+                    <div className="dfs-grid">
                         <div className="forms-column">
                             {/* 1. Delivery Section */}
                             <div className="premium-card">
-                                <h3 className="card-title">
-                                    {scheduledDisplay ? `${t('checkout.time')}: ${scheduledDisplay}` : t('checkout.time')}
-                                </h3>
+                                <h2 className="dfs-card-title">{t('checkout.time')}</h2>
                                 {!restaurantOpen && closedHint && (
                                     <p style={{ margin: '0 0 12px', color: '#f87171', fontSize: 14, fontWeight: 600 }}>
                                         {closedHint}. {t('checkout.closed_pick_open')}
@@ -330,41 +317,25 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                             </div>
                         </div>
 
-                        {/* Summary Sidebar (Visible on PC) */}
-                        <aside className="summary-column">
-                            <div className="premium-summary-card">
-                                <div className="summary-header">
-                                    <h3>{t('checkout.order_summary')}</h3>
-                                </div>
-
-                                <SummaryBlock
-                                    items={cartItems || []}
-                                    subtotal={subtotal}
-                                    baseDeliveryFee={baseDeliveryFee}
-                                    deliveryDiscount={deliveryDiscount}
-                                    serviceFee={serviceFee}
-                                    packagingFee={packagingFee}
-                                    tip={tip}
-                                    total={finalTotal}
-                                    freeDeliveryLeft={firstOrderEligible && subtotal < 100 ? 100 - subtotal : 0}
-                                    showTotal={false}
-                                />
-
-                                <div className="summary-divider" />
-
-                                <div className="total-line">
-                                    <span className="total-label">{t('checkout.to_pay')}</span>
-                                    <span className="total-value">{formatPrice(finalTotal)}</span>
-                                </div>
-
-                                <button type="button" className="pay-btn" onClick={handleFinalPayment}>
-                                    {t('checkout.pay_btn')}
-                                </button>
-                            </div>
-                        </aside>
+                        {/* The same order card on every step */}
+                        <OrderAside
+                            restaurantName={rid ? pickI18nText(restaurantCache[`rest_${rid}`]?.name || '', language) : null}
+                            eta={deliveryType === 'scheduled' && scheduledDisplay ? scheduledDisplay : deliveryLabel({ restaurantId: rid, restaurantName: rid ? restaurantCache[`rest_${rid}`]?.name : null, zoneId: address.deliveryZone, rush: rushState.isRush }, language)}
+                            items={cartItems || []}
+                            subtotal={subtotal}
+                            baseDeliveryFee={baseDeliveryFee}
+                            deliveryDiscount={deliveryDiscount}
+                            serviceFee={serviceFee}
+                            packagingFee={packagingFee}
+                            tip={tip}
+                            total={finalTotal}
+                            freeDeliveryLeft={firstOrderEligible && subtotal < 100 ? 100 - subtotal : 0}
+                            ctaLabel={t('checkout.pay_btn')}
+                            onCta={handleFinalPayment}
+                        />
                     </div>
                 </div>
-            </div>
+            </FlowShell>
 
             {/* Mobile Checkout Bar */}
             <div className="mobile-checkout-bar">

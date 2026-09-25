@@ -836,3 +836,101 @@ body:has(.cart-page-container)::-webkit-scrollbar {
     font-weight: 500;
     color: rgba(255, 255, 255, 0.85);
 }
+
+/* ===== Desktop flow: cart inside the shared frame ===== */
+.cart-page-container.cart-desk {
+    min-height: 0;
+    padding: 0;
+    background: none;
+    animation: none;
+}
+
+.cart-desk .items-column {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    min-width: 0;
+}
+
+.cart-desk .cart-glass-block {
+    padding: 8px 28px 8px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 24px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.cart-desk-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 20px 0 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.cart-desk-head h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-transform: none;
+    color: #ffffff;
+}
+
+.cart-desk-head span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #21EA7C;
+}
+
+.cart-desk .extras-title {
+    margin: 0 0 12px;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-transform: none;
+    color: #ffffff;
+}
+
+.cart-desk .extra-card,
+.cart-desk .comment-card,
+.cart-desk .rec-card {
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.cart-desk .recommendations-scroll {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+}
+
+/* Clear cart: quiet text action in the bar */
+.dfs-clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 12px;
+    background: none;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.dfs-clear:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.dfs-clear svg {
+    width: 18px;
+    height: 18px;
+}

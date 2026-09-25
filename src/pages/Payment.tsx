@@ -11,15 +11,15 @@ import { formatPrice } from '../utils/formatPrice';
 import PayMarks from '../components/Payment/PayMarks';
 import { OrderPlacedActions, OrderPlacedMark } from '../components/Payment/OrderPlaced';
 import { useOrderHandover } from '../hooks/useOrderHandover';
+import { useDeliveryEta } from '../hooks/useDeliveryEta';
+import FlowShell from '../components/Desktop/FlowShell';
+import OrderAside from '../components/Desktop/OrderAside';
+import { getPackagingFee } from '../utils/packaging';
+import { pickI18nText } from '../utils/i18nContent';
 
 /** Keepz payment link — same as mobile (no Tribute). */
 const PAYMENT_URL = 'https://app.keepz.me/pay?qrType=DEFAULT&receiverType=USER&receiverId=6ea6970c-20ee-4119-b25f-6ebcc8a888c6';
 
-const IconBack = () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
-    </svg>
-);
 
 const IconCrypto = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -54,7 +54,7 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
     cartItems,
     onPaymentComplete,
 }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [screen, setScreen] = useState<ScreenState>('select');
     const [method, setMethod] = useState<string | null>(null);
     const [orderId, setOrderId] = useState<number | null>(null);
@@ -232,24 +232,24 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
 
     const busy = screen === 'creating' || screen === 'success';
 
-    return (
-        <div className="page-transition-wrapper pc-payment-wrap">
-            <div className="pc-payment">
-                <div className="pc-payment-stack">
-                    <header className="pc-payment-header">
-                        <button
-                            type="button"
-                            className="ui-circle-btn"
-                            onClick={onBack}
-                            aria-label={t('common.back')}
-                            disabled={busy}
-                        >
-                            <IconBack />
-                        </button>
-                        <h1>{t('checkout.payment_page_title')}</h1>
-                        <div className="pc-payment-header-spacer" aria-hidden="true" />
-                    </header>
+    // Order card on the right: the same breakdown the user saw in checkout
+    const asideRestaurantId = cartItems?.[0]?.product?.restaurant_id || null;
+    const asideRestaurant = asideRestaurantId ? pickI18nText(restaurantCache[`rest_${asideRestaurantId}`]?.name || '', language) : null;
+    const asideSubtotal = (cartItems || []).reduce((sum, ci) => sum + Number(ci.product?.price || 0) * ci.quantity, 0);
+    const asideService = Number(orderData?.serviceFee ?? 0) || 0;
+    const asideTip = Number(orderData?.tip ?? 0) || 0;
+    const asidePackaging = getPackagingFee(cartItems);
+    const asideDelivery = Math.max(0, +(totalAmount - asideSubtotal - asideService - asideTip - asidePackaging).toFixed(2));
+    const scheduledLabel = orderData?.deliveryType === 'scheduled' && orderData?.scheduledTime
+        ? String(orderData.scheduledTime).split(' ').pop() || null
+        : null;
+    const liveEta = useDeliveryEta(asideRestaurantId, null, null);
+    const asideEta = scheduledLabel ? t('status.deliver_at').replace('{time}', scheduledLabel) : liveEta;
 
+    return (
+        <FlowShell step="payment" complete={screen === 'pending_confirmation'} onBack={onBack} backDisabled={busy}>
+            <div className="dfs-grid pc-pay-desk">
+                <div className="pc-payment">
                     <div className="pc-payment-shell" ref={shellRef}>
                         <div className="pc-payment-glow" aria-hidden="true" />
 
@@ -366,8 +366,20 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
                     )}
                     </div>
                 </div>
+
+                <OrderAside
+                    restaurantName={asideRestaurant}
+                    eta={asideEta}
+                    items={cartItems || []}
+                    subtotal={asideSubtotal}
+                    baseDeliveryFee={asideDelivery}
+                    serviceFee={asideService}
+                    packagingFee={asidePackaging}
+                    tip={asideTip}
+                    total={totalAmount}
+                />
             </div>
-        </div>
+        </FlowShell>
     );
 };
 
