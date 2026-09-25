@@ -403,8 +403,7 @@
 
       if (tgBtn) {
         // Telegram puts the link above the text, so the trailing pointer line is dropped there
-        var tgUrl = 'https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(t.shareText.replace(/
-?👉\s*$/, ''));
+        var tgUrl = 'https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(t.shareText.replace(/\n?👉\s*$/, ''));
         tgBtn.setAttribute('href', tgUrl);
       }
 
