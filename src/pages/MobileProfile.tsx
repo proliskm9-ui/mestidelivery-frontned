@@ -148,7 +148,7 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                     <span className="mp-bonus-value">{userProfile?.points || 0}</span>
                     <span className="mp-bonus-hint"><span className="mp-action-bonus">{t('profile.invite_bonus')}</span> {t('profile.invite_sub')}</span>
                 </button>
-                <button type="button" className="ds-btn ds-btn--primary mp-bonus-cta" onClick={openReferral}>
+                <button type="button" className="ds-btn ds-btn--sm mp-bonus-cta" onClick={openReferral}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1" /><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" /><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5" /></svg>
                     {t('profile.invite_button')}
                 </button>
@@ -203,7 +203,7 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                 </div>
             </section>
 
-            {/* Language */}
+            {/* Language + logout */}
             <div className="liquid-card mp-action-list">
                 <div className="mp-action-item mp-lang-row">
                     <div className="mp-action-icon">
@@ -218,11 +218,13 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                         ))}
                     </div>
                 </div>
+                <a className="mp-action-item mp-logout-row" onClick={onLogout}>
+                    <div className="mp-action-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                    </div>
+                    <div className="mp-action-text"><h3 className="mp-action-title">{t('profile.logout')}</h3></div>
+                </a>
             </div>
-
-            <button className="mp-logout-btn" onClick={onLogout}>
-                {t('profile.logout')}
-            </button>
 
             <nav className="mp-legal">
                 <Link to={`/${language}/privacy`}>{t('home.footer_privacy')}</Link>

@@ -707,3 +707,23 @@
 
 .mp-legal { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 18px; padding: 4px 0 8px; }
 .mp-legal a { font: var(--t-caption); color: var(--color-text-tertiary); text-decoration: none; }
+
+/* v3.1: lighter - one bright figure, soft CTA, logout as a row */
+.mp-bonus { gap: 14px; padding: 18px 18px 16px !important; }
+.mp-bonus-cta {
+    width: 100%;
+    gap: 8px;
+    background: var(--color-accent-subtle, rgba(33, 234, 124, 0.12));
+    color: var(--color-accent);
+    border: 0;
+    box-shadow: none;
+    font-weight: 700;
+}
+.mp-bonus-cta:active { transform: scale(0.98); }
+.mp-tile { min-height: 78px; padding: 12px 6px; gap: 7px; border-radius: 20px; }
+.mp-logout-row { color: var(--color-danger, #FF453A); }
+.mp-logout-row .mp-action-title { color: inherit; }
+.mp-legal { gap: 4px 16px; padding: 0 0 8px; }
+.mp-legal a { font-size: 12px; }
+.mp-recent { margin-top: 14px; }
+.mp-recent + .mp-action-list { margin-top: 10px; }
