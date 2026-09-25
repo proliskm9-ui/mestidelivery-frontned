@@ -233,7 +233,7 @@ function AppContent() {
     }, [currentPage, language, location.pathname, navigate, selectedOrderId]);
     const [cart, setCart] = useState<{ product: any, quantity: number }[]>([]);
     // Panel ETA: the cart's restaurant, or the restaurant being viewed
-    const cartEta = useDeliveryEta(cart[0]?.product?.restaurant_id || selectedRestaurantId, null, deliveryLoc.etaLabel);
+    const cartEta = useDeliveryEta(cart[0]?.product?.restaurant_id || selectedRestaurantId, selectedRestaurantId, null, true);
     // Tell the server-side helpers (Sunset packaging) whose cart this is
     useEffect(() => {
         const rid = cart[0]?.product?.restaurant_id;
