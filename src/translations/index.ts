@@ -389,7 +389,7 @@ export const translations = {
             info_name_phone: 'Имя, телефон',
             info_support: 'Помощь, вопросы',
             invite_title: 'Пригласите друга',
-            invite_sub: 'Бонусы за каждый первый заказ друга',
+            invite_sub: 'Бонусы за заказ друга',
             invite_cta: 'Пригласить',
             user_fallback: 'Пользователь'
         },
@@ -1154,7 +1154,7 @@ export const translations = {
             info_name_phone: 'Name, Phone',
             info_support: 'Help, questions',
             invite_title: 'Invite a friend',
-            invite_sub: 'Bonuses for every friend’s first order',
+            invite_sub: 'Bonuses for a friend’s order',
             invite_cta: 'Invite',
             user_fallback: 'User'
         },
@@ -1919,7 +1919,7 @@ export const translations = {
             info_name_phone: 'სახელი, ტელეფონი',
             info_support: 'დახმარება, კითხვები',
             invite_title: 'მოიწვიე მეგობარი',
-            invite_sub: 'ბონუსები მეგობრის ყოველ პირველ შეკვეთაზე',
+            invite_sub: 'ბონუსი მეგობრის შეკვეთაზე',
             invite_cta: 'მოწვევა',
             user_fallback: 'მომხმარებელი'
         },

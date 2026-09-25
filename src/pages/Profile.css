@@ -774,3 +774,9 @@
     font-weight: 800;
     font-size: 14px;
 }
+
+/* Right column holds addresses, invite and support: orders span three rows */
+@media (min-width: 1025px) {
+    .card-orders { grid-row: span 3; }
+    .card-invite, .card-support { min-height: 0; }
+}
