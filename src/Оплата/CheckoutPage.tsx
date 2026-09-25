@@ -12,7 +12,7 @@ import {
 // === БЛОКИ ===
 import HeaderBlock from './blocks/HeaderBlock/HeaderBlock';
 import { addressText, detectZoneFromText, deviceHasOrdered, accountHasOrders, markDeviceOrdered } from '../utils/deliveryPromo';
-import AddressBlock, { AddressData } from './blocks/AddressBlock/AddressBlock';
+import type { AddressData } from './blocks/AddressBlock/AddressBlock';
 import SummaryBlock from './blocks/SummaryBlock/SummaryBlock';
 import { getPackagingFee } from '../utils/packaging';
 import Sheet from '../components/UI/Sheet';
@@ -27,6 +27,8 @@ import CustomTipModal from './modals/CustomTipModal/CustomTipModal';
 import CommentModal from './modals/CommentModal/CommentModal';
 import PhoneModal from './modals/PhoneModal/PhoneModal';
 import MapModal from './modals/MapModal/MapModal';
+import AddressSheet from './modals/AddressSheet/AddressSheet';
+import AddressSummary from './blocks/AddressBlock/AddressSummary';
 import './modals/sheets.css';
 import { toast } from 'sonner';
 import { useBackToClose } from '../hooks/useBackToClose';
@@ -52,6 +54,7 @@ interface ModalState {
   comment: boolean;
   phone: boolean;
   map: boolean;
+  address: boolean;
 }
 
 export interface CheckoutOrderData {
@@ -165,6 +168,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
     comment: false,
     phone: false,
     map: false,
+    address: false,
   });
   // System Back closes whichever checkout sheet is open instead of leaving checkout
   // Sheets handle Back themselves; the map (custom full-height modal) and phone editor need it here
@@ -257,8 +261,15 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
           ? !!(addr.hotelName?.trim() && addr.room?.trim())
           : !!addr.street?.trim();
 
-    if (!hasLocation || !addr.phone?.trim()) {
+    // Open the sheet that is missing information instead of a bare error
+    if (!hasLocation) {
       toast.error(t('checkout.fill_alert'));
+      toggleModal(addr.type === 'map' && !addr.geo?.trim() ? 'map' : 'address', true);
+      return;
+    }
+    if (!addr.phone?.trim()) {
+      toast.error(t('checkout.fill_alert'));
+      toggleModal('phone', true);
       return;
     }
 
@@ -327,11 +338,9 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
         <div className="checkout-content">
 
           {/* --- 2. АДРЕС --- */}
-          <AddressBlock
+          <AddressSummary
             address={orderData.address}
-            updateAddress={updateAddress}
-            onOpenPlaceModal={() => toggleModal('place', true)}
-            onOpenMapModal={() => toggleModal('map', true)}
+            onEditAddress={() => toggleModal('address', true)}
             onEditComment={() => toggleModal('comment', true)}
             onEditPhone={() => toggleModal('phone', true)}
           />
@@ -425,6 +434,14 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
           />
 
         {/* 5. Комментарий */}
+                  <AddressSheet
+            isOpen={modals.address}
+            onClose={() => toggleModal('address', false)}
+            address={orderData.address}
+            updateAddress={updateAddress}
+            onOpenMap={() => toggleModal('map', true)}
+          />
+
                   <CommentModal
             isOpen={modals.comment}
             onClose={() => toggleModal('comment', false)}
