@@ -27,7 +27,8 @@
       guestSubtitle: 'Получай бонусы за каждый первый заказ друзей и оплачивай ими доставку любимой еды.',
       guestNotice: 'Войдите по номеру телефона, чтобы получить персональную ссылку и копить бонусы.',
       loginBtn: 'Войти по номеру телефона',
-      shareText: '🍽 Привет! Заказываю еду в Местии через MestiDelivery — быстро и вкусно 🔥\nДержи мою ссылку: на первый заказ от 100 GEL доставка бесплатно 🎁\n👉 ',
+      shareText: 'Привет! Делюсь MestiDelivery — доставкой из лучших ресторанов Местии 🍽\n\n• бесплатная доставка на первый заказ от 100 GEL\n• привезут за 15–25 минут\n• оплата картой или наличными\n\n🎁 Моя ссылка:',
+      shareLinkAbove: 'Моя ссылка — выше ☝️',
       toastCopied: 'Ссылка скопирована в буфер обмена'
     },
     en: {
@@ -48,7 +49,8 @@
       guestSubtitle: 'Earn bonus rewards when your friends order delicious food in Mestia.',
       guestNotice: 'Sign in with your phone number to get your unique invite link and start earning.',
       loginBtn: 'Sign in with phone',
-      shareText: '🍽 Hey! I order food in Mestia with MestiDelivery — fast and tasty 🔥\nHere’s my link: free delivery on your first order over 100 GEL 🎁\n👉 ',
+      shareText: 'Hi! Sharing MestiDelivery — delivery from the best restaurants in Mestia 🍽\n\n• free delivery on your first order over 100 GEL\n• at your door in 15–25 minutes\n• pay by card or cash\n\n🎁 My link:',
+      shareLinkAbove: 'My link is above ☝️',
       toastCopied: 'Invite link copied to clipboard'
     },
     ka: {
@@ -69,7 +71,8 @@
       guestSubtitle: 'მიიღე ბონუსები მეგობრების შეკვეთებზე და გამოიყენე გადახდისას.',
       guestNotice: 'გაიარე ავტორიზაცია ტელეფონით, რომ მიიღო პირადი ლინკი და დაიწყო დაგროვება.',
       loginBtn: 'შესვლა ტელეფონით',
-      shareText: '🍽 გამარჯობა! მესტიაში საჭმელს MestiDelivery-ით ვუკვეთავ — სწრაფი და გემრიელი 🔥\nაი ჩემი ბმული: პირველ შეკვეთაზე 100 ლარიდან მიტანა უფასოა 🎁\n👉 ',
+      shareText: 'გამარჯობა! გიზიარებ MestiDelivery-ს — მიტანა მესტიის საუკეთესო რესტორნებიდან 🍽\n\n• უფასო მიტანა პირველ შეკვეთაზე 100 ლარიდან\n• მოგიტანენ 15–25 წუთში\n• გადახდა ბარათით ან ნაღდით\n\n🎁 ჩემი ბმული:',
+      shareLinkAbove: 'ჩემი ბმული ზემოთაა ☝️',
       toastCopied: 'ლინკი დაკოპირდა'
     }
   };
@@ -403,7 +406,7 @@
 
       if (tgBtn) {
         // Telegram puts the link above the text, so the trailing pointer line is dropped there
-        var tgUrl = 'https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(t.shareText.replace(/\n?👉\s*$/, ''));
+        var tgUrl = 'https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(t.shareText.replace(/[^\n]*$/, t.shareLinkAbove));
         tgBtn.setAttribute('href', tgUrl);
       }
 

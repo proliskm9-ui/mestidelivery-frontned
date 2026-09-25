@@ -388,6 +388,9 @@ export const translations = {
             points_label: 'баллов',
             info_name_phone: 'Имя, телефон',
             info_support: 'Помощь, вопросы',
+            invite_title: 'Пригласите друга',
+            invite_sub: 'Бонусы за каждый первый заказ друга',
+            invite_cta: 'Пригласить',
             user_fallback: 'Пользователь'
         },
         status: {
@@ -1150,6 +1153,9 @@ export const translations = {
             points_label: 'points',
             info_name_phone: 'Name, Phone',
             info_support: 'Help, questions',
+            invite_title: 'Invite a friend',
+            invite_sub: 'Bonuses for every friend’s first order',
+            invite_cta: 'Invite',
             user_fallback: 'User'
         },
         status: {
@@ -1912,6 +1918,9 @@ export const translations = {
             points_label: 'ქულა',
             info_name_phone: 'სახელი, ტელეფონი',
             info_support: 'დახმარება, კითხვები',
+            invite_title: 'მოიწვიე მეგობარი',
+            invite_sub: 'ბონუსები მეგობრის ყოველ პირველ შეკვეთაზე',
+            invite_cta: 'მოწვევა',
             user_fallback: 'მომხმარებელი'
         },
         status: {

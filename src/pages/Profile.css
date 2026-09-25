@@ -753,3 +753,24 @@
         margin-left: auto;
     }
 }
+
+/* Desktop invite card: accent version of the support card */
+.card-invite {
+    grid-column: span 2;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 130px;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+    cursor: pointer;
+    border-color: rgba(33, 234, 124, 0.25) !important;
+    background: linear-gradient(135deg, rgba(33, 234, 124, 0.14), rgba(33, 234, 124, 0.03) 60%), rgba(255, 255, 255, 0.03) !important;
+}
+.card-invite-cta {
+    margin-top: auto;
+    color: #21EA7C;
+    font-weight: 800;
+    font-size: 14px;
+}
