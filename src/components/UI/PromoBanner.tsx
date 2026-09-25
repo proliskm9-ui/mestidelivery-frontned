@@ -25,12 +25,15 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onFirstBannerClick, onSecondB
         ka: '/Assets/banners/KA_2_refer-a-friend.png'
     }[language] || '/Assets/banners/RU_2_skidka-za-druga.png';
 
+    // "Refer a friend" is retired: the referral banner stays defined but is not shown
+    const SHOW_REFERRAL = false;
     const banners = [
         { src: mainBannerSrc, onClick: onFirstBannerClick },
-        { src: refBannerSrc, onClick: onSecondBannerClick },
+        ...(SHOW_REFERRAL ? [{ src: refBannerSrc, onClick: onSecondBannerClick }] : []),
     ];
 
     useEffect(() => {
+        if (banners.length < 2) return;
         const interval = setInterval(() => {
             setActiveIndex((current) => (current + 1) % banners.length);
         }, 5000);
@@ -85,14 +88,14 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onFirstBannerClick, onSecondB
                     ))}
                 </div>
 
-                <div className="promoBannerDots">
+                {banners.length > 1 && <div className="promoBannerDots">
                     {banners.map((_, index) => (
                         <div
                             key={index}
                             className={`promoBannerDot${index === activeIndex ? ' active' : ''}`}
                         />
                     ))}
-                </div>
+                </div>}
             </div>
 
             {/* Desktop — side-by-side cards */}

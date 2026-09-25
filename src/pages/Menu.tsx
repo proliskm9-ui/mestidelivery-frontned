@@ -1405,14 +1405,14 @@ const MenuPage: React.FC<{
                     .filters-row .horizontal-scroll {
                         padding: 10px 24px; margin: -10px -24px 0 -24px;
                     }
-                    /* PC: ~4 cards × 350px */
+                    /* PC: cards fill the row (4 across at 1440) instead of a fixed 350px that left a gap */
                     .horizontal-scroll .rest-card,
                     .store-card,
                     .vertical-grid .rest-card,
                     .vertical-grid .store-card {
-                        min-width: 350px;
-                        max-width: 350px;
-                        width: 350px;
+                        min-width: 0;
+                        max-width: none;
+                        width: 100%;
                     }
                     .vertical-grid,
                     .expanded-grid,
@@ -1421,7 +1421,7 @@ const MenuPage: React.FC<{
                     #must-try-section .horizontal-scroll:not(.expanded-grid),
                     #worth-trying-section .horizontal-scroll:not(.expanded-grid) {
                         display: grid;
-                        grid-template-columns: repeat(auto-fill, 350px);
+                        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
                         justify-content: start;
                         overflow: visible;
                         gap: 20px;
@@ -1435,9 +1435,9 @@ const MenuPage: React.FC<{
                     .desktop-only .horizontal-scroll:not(.expanded-grid) .store-card,
                     #must-try-section .horizontal-scroll:not(.expanded-grid) .rest-card,
                     #worth-trying-section .horizontal-scroll:not(.expanded-grid) .rest-card {
-                        min-width: 350px;
-                        max-width: 350px;
-                        width: 350px;
+                        min-width: 0;
+                        max-width: none;
+                        width: 100%;
                     }
                     .rest-details {
                         padding: 6px 2px 0;
