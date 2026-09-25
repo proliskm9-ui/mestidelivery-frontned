@@ -792,3 +792,19 @@
         text-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
     }
 }
+
+/* Georgian: a real heavy Georgian face (Outfit has no Georgian glyphs) */
+.sh-title--ka {
+    font-family: 'Noto Sans Georgian', 'Outfit', sans-serif;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+}
+
+.sh-title--ka .sh-title-solid,
+.sh-title--ka .sh-title-outline-line {
+    font-weight: 900;
+}
+
+.sh-title-solid + .sh-title-solid {
+    margin-top: 0.02em;
+}

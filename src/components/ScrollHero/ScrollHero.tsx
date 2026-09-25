@@ -299,9 +299,13 @@ const ScrollHero: React.FC<Props> = ({ onNavigate }) => {
 
     const cta = t('home.order_now') || 'Заказать сейчас';
     const title2Raw = t('home.hero_title_2') || 'В КАЖДОМ\nЗАКАЗЕ';
-    // Desktop: two lines. Phones: Russian breaks into three ("В КАЖДОМ" / "ЗАКАЗЕ") so it
-    // can be set larger; English and Georgian keep the desktop lockup.
-    const outlineLines = isMobile && language === 'ru'
+    // Desktop: two lines. Phones: break into short lines so the title can be set large.
+    // RU keeps "ВКУС МЕСТИИ" whole; EN/KA split the first line at its last space too.
+    const title1 = t('home.hero_title_1') || 'ВКУС МЕСТИИ';
+    const solidLines = isMobile && language !== 'ru' && title1.includes(' ')
+        ? [title1.slice(0, title1.lastIndexOf(' ')), title1.slice(title1.lastIndexOf(' ') + 1)]
+        : [title1];
+    const outlineLines = isMobile
         ? title2Raw.split('\n')
         : [title2Raw.replace(/\n/g, ' ')];
     const loadPct = Math.round(loaded * 100);
@@ -323,7 +327,8 @@ const ScrollHero: React.FC<Props> = ({ onNavigate }) => {
             });
             const widest = Math.max(0, ...widths);
             if (!widest) return;
-            const size = Math.min((100 * box.clientWidth * 0.96) / widest, 96);
+            // Cap at the Russian lockup's scale so short EN/KA lines don't blow up
+            const size = Math.min((100 * box.clientWidth * 0.96) / widest, 96, window.innerWidth * 0.125);
             el.style.fontSize = `${size.toFixed(2)}px`;
         };
         fit();
@@ -356,7 +361,9 @@ const ScrollHero: React.FC<Props> = ({ onNavigate }) => {
                     <div className="sh-center-body">
                         <span className="sh-eyebrow">MestiDelivery · Mestia</span>
                         <h1 ref={titleRef} className={`sh-title sh-title--${language || 'ru'}`}>
-                            <span className="sh-title-solid">{t('home.hero_title_1') || 'ВКУС МЕСТИИ'}</span>
+                            {solidLines.map((line, i) => (
+                                <span key={i} className="sh-title-solid">{line}</span>
+                            ))}
                             <span className="sh-title-outline">
                                 {outlineLines.map((line, i) => (
                                     <span key={i} className="sh-title-outline-line">{line}</span>

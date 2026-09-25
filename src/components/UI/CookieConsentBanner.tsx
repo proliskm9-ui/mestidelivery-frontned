@@ -13,21 +13,21 @@ const ASK_AGAIN_MS = 7 * 24 * 60 * 60 * 1000;
 const LABELS: Record<string, { title: string; text: string; link: string; accept: string; later: string }> = {
     ru: {
         title: 'Файлы cookie',
-        text: 'Мы используем файлы cookie для корректной работы сайта, запоминания языка и ваших предпочтений.',
+        text: 'Мы используем cookie, чтобы сайт работал корректно и запоминал ваш язык и настройки.',
         link: 'Подробнее',
         accept: 'Принять',
         later: 'Позже',
     },
     en: {
         title: 'Cookies',
-        text: 'We use cookies to ensure the site works properly and to remember your language and preferences.',
+        text: 'We use cookies to keep the site working and remember your language and settings.',
         link: 'Learn more',
         accept: 'Accept',
         later: 'Later',
     },
     ka: {
         title: 'ქუქი-ფაილები',
-        text: 'ჩვენ ვიყენებთ ქუქი-ფაილებს საიტის სწორი მუშაობისთვის, ენის და პარამეტრების შესანახად.',
+        text: 'ვიყენებთ ქუქი-ფაილებს საიტის სწორი მუშაობისა და თქვენი პარამეტრების შესანახად.',
         link: 'დეტალები',
         accept: 'მიღება',
         later: 'მოგვიანებით',
