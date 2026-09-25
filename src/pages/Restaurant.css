@@ -1080,7 +1080,8 @@ body.dish-modal-open .glass-panel-container,
 }
 
 .pc-dish-modal-img {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 16 / 10;
+    max-height: 38vh;
 }
 
 .pc-dish-modal-body {

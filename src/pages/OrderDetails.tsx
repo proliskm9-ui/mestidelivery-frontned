@@ -301,12 +301,6 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onBack }) => {
                                         <span className="od-item-price">{(item.price * item.quantity).toFixed(2)} ₾</span>
                                     </div>
                                 ))}
-                                {deliveryFee > 0 && (
-                                    <div className="od-item-row od-item-row-delivery">
-                                        <span className="od-item-name">{t('order.delivery')}</span>
-                                        <span className="od-item-price">{deliveryFee.toFixed(2)} ₾</span>
-                                    </div>
-                                )}
                             </div>
                         </div>
 
