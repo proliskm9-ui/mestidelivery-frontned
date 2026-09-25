@@ -286,7 +286,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onForgotPassword }) => {
                 return;
             }
             if (/unauthorized-domain/i.test(code)) {
-                setError('Google пока не подключён к mestidelivery.com. Войдите по email и паролю — это работает.');
+                setError(t('auth.errors.google_domain'));
             } else {
                 setError(!code || /unexpected error|Google auth failed/i.test(code)
                     ? t('auth.errors.generic')

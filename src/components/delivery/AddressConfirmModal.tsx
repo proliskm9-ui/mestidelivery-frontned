@@ -61,7 +61,7 @@ const AddressConfirmModal: React.FC<AddressConfirmModalProps> = ({
       if (ctrl.signal.aborted) return;
       setIsGeocoding(false);
       if (!result) {
-        setApproxLabel('Местия');
+        setApproxLabel(t('map.mestia'));
         return;
       }
       setApproxLabel(result.displayName);

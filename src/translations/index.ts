@@ -472,8 +472,9 @@ export const translations = {
             comment: 'Комментарий курьеру',
             comment_ph: 'Оставьте у двери...',
             save: 'Сохранить адрес',
-            client: 'Client',
-            courier: 'Courier',
+            mestia: 'Местия',
+            client: 'Клиент',
+            courier: 'Курьер',
             specify_location: 'Укажите точное местоположение',
             confirm_location: 'Подтвердить местоположение',
             location_unavailable: 'Нам не удалось отследить ваше местоположение. Укажите, пожалуйста, адрес или название отеля, где вы находитесь.'
@@ -685,6 +686,7 @@ export const translations = {
             partner_login_title: 'Вход для партнёра',
             partner_login_desc: 'Email и пароль. Доступ только к своему заведению.',
             errors: {
+                google_domain: 'Вход через Google пока недоступен. Войдите по email и паролю.',
                 popup_closed: 'Окно авторизации закрыто, попробуйте снова',
                 account_exists: 'Этот email уже используется другим способом входа',
                 network: 'Проблема с соединением, проверьте интернет',
@@ -1232,6 +1234,7 @@ export const translations = {
             comment: 'Comment for courier',
             comment_ph: 'Leave at the door...',
             save: 'Save Address',
+            mestia: 'Mestia',
             client: 'Client',
             courier: 'Courier',
             specify_location: 'Specify exact location',
@@ -1445,6 +1448,7 @@ export const translations = {
             partner_login_title: 'Partner sign in',
             partner_login_desc: 'Email and password. Access only to your venue.',
             errors: {
+                google_domain: 'Google sign-in isn’t available yet. Please sign in with email and password.',
                 popup_closed: 'Sign-in window was closed, please try again',
                 account_exists: 'This email is already used with a different sign-in method',
                 network: 'Connection problem, check your internet',
@@ -1992,8 +1996,9 @@ export const translations = {
             comment: 'კომენტარი კურიერს',
             comment_ph: 'დატოვეთ კართან...',
             save: 'მისამართის შენახვა',
-            client: 'Client',
-            courier: 'Courier',
+            mestia: 'მესტია',
+            client: 'კლიენტი',
+            courier: 'კურიერი',
             specify_location: 'მიუთითეთ ზუსტი ადგილმდებარეობა',
             confirm_location: 'მდებარეობის დადასტურება',
             location_unavailable: 'მდებარეობის განსაზღვრა ვერ მოხერხდა. გთხოვთ მიუთითოთ მისამართი ან სასტუმროს დასახელება, სადაც იმყოფებით.'
@@ -2205,6 +2210,7 @@ export const translations = {
             partner_login_title: 'პარტნიორის შესვლა',
             partner_login_desc: 'Email და პაროლი. მხოლოდ საკუთარი დაწესებულება.',
             errors: {
+                google_domain: 'Google-ით შესვლა ჯერ მიუწვდომელია. შედით ელფოსტითა და პაროლით.',
                 popup_closed: 'ავტორიზაციის ფანჯარა დაიხურა, სცადეთ თავიდან',
                 account_exists: 'ეს email უკვე გამოიყენება სხვა შესვლის მეთოდით',
                 network: 'კავშირის პრობლემა, შეამოწმეთ ინტერნეტი',

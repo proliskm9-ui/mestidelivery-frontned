@@ -36,8 +36,12 @@ const TimeModal: React.FC<TimeModalProps> = ({ isOpen, onClose, currentTime, onS
     const diff = Math.round((day.getTime() - today.getTime()) / 86400000);
     if (diff === 0) return t('checkout.day_today');
     if (diff === 1) return t('checkout.day_tomorrow');
-    const locale = language === 'ka' ? 'ka-GE' : language === 'en' ? 'en-GB' : 'ru-RU';
-    return d.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' });
+    // Own day/month names: devices without Georgian locale data would fall back to their system language
+    const months = t('calendar.months') as unknown as string[];
+    const dow = t('calendar.dow') as unknown as string[];
+    const name = dow[d.getDay()] || '';
+    const date = language === 'en' ? `${months[d.getMonth()]} ${d.getDate()}` : `${d.getDate()} ${months[d.getMonth()]}`;
+    return `${name.charAt(0).toUpperCase()}${name.slice(1)}, ${date}`;
   };
 
   const handleSlotClick = (slot: TimeSlot): void => {
