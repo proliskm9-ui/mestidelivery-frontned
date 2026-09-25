@@ -867,6 +867,26 @@ const LegalInfoPage: React.FC = () => {
                     color: #1bca6a !important;
                 }
 
+                /* Brand wordmark like the rest of the site; calmer reading rhythm */
+                .legal-logo-v2 .legal-brand {
+                    font-weight: 900;
+                    letter-spacing: -0.02em;
+                }
+                .legal-logo-v2 .legal-brand-accent,
+                .dark-mode-legal .legal-logo-v2 .legal-brand-accent {
+                    color: #21EA7C !important;
+                }
+                .legal-section-block p {
+                    line-height: 1.7;
+                    margin-bottom: 14px;
+                }
+                .dark-mode-legal .legal-section-block p {
+                    color: rgba(255, 255, 255, 0.72) !important;
+                }
+                .dark-mode-legal .legal-section-block h2 {
+                    letter-spacing: -0.01em;
+                }
+
                 /* 4. Text Font Size Classes */
                 .size-small p {
                     font-size: 0.925rem !important;
@@ -1246,7 +1266,7 @@ const LegalInfoPage: React.FC = () => {
             <header className="legal-header-v2">
                 <div className="legal-header-inner-v2">
                     <Link to="/" className="legal-logo-v2">
-                        <span>MestiDelivery</span>
+                        <span className="legal-brand"><span className="legal-brand-accent">MESTI</span>DELIVERY</span>
                         <span className="badge">{BADGE_TRANSLATIONS[language] || BADGE_TRANSLATIONS.ru}</span>
                     </Link>
                     <div className="legal-header-right">

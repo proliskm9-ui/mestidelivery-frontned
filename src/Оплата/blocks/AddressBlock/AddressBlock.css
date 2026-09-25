@@ -259,3 +259,52 @@
   height: 10px;
   color: #21EA7C;
 }
+/* Phone checkout: address fields in boxes (same as desktop), floating label inside */
+.mobile-checkout-wrapper .fields-grid {
+  margin-top: 4px;
+  gap: 10px;
+}
+
+.mobile-checkout-wrapper .fields-grid .grid-row {
+  gap: 10px;
+}
+
+.mobile-checkout-wrapper .fields-grid .grid-row .input-cell {
+  height: 58px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.mobile-checkout-wrapper .fields-grid .grid-row .input-cell:focus-within {
+  border-color: rgba(33, 234, 124, 0.7);
+  background: rgba(33, 234, 124, 0.04);
+}
+
+.mobile-checkout-wrapper .fields-grid .grid-row .bottom-border {
+  display: none;
+}
+
+.mobile-checkout-wrapper .fields-grid .grid-row .input-transparent {
+  margin: 25px 0 0;
+}
+
+.mobile-checkout-wrapper .fields-grid .grid-row .floating-label {
+  left: 14px;
+  top: 18px;
+  font-size: 15px;
+}
+
+.mobile-checkout-wrapper .fields-grid .grid-row .input-transparent:focus ~ .floating-label,
+.mobile-checkout-wrapper .fields-grid .grid-row .input-cell.has-value .floating-label {
+  top: 9px;
+  font-size: 11px;
+}
+
+.mobile-checkout-wrapper .fields-grid + .divider-line,
+.mobile-checkout-wrapper .fields-grid ~ .divider-line.indented:first-of-type {
+  margin-top: 6px;
+}
