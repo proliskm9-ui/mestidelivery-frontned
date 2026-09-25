@@ -709,3 +709,5 @@
 .mp-legal a { font: var(--t-caption); color: var(--color-text-tertiary); text-decoration: none; }
 .mp-recent { margin-top: 14px; }
 .mp-version { flex-basis: 100%; text-align: center; font: var(--t-caption); font-size: 12px; color: var(--color-text-tertiary); opacity: 0.7; }
+.mp-action-list a.mp-action-item { color: inherit; }
+.mp-version { margin: 0; padding: 2px 0 8px; flex-basis: auto; font-size: 12px; }
