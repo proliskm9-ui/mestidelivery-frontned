@@ -144,13 +144,13 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
             <div className="liquid-card mp-bonus">
                 <button type="button" className="mp-bonus-balance" onClick={openReferral}>
                     <span className="mp-bonus-label">{t('profile.bonus_title')}</span>
-                    <span className="mp-bonus-value">{userProfile?.points || 0}<small>₾</small></span>
+                    <span className="mp-bonus-value">{userProfile?.points || 0}<small>GEL</small></span>
                     <span className="mp-bonus-spend">{t('profile.bonus_spend')}</span>
+                    <span className="mp-bonus-hint"><span className="mp-action-bonus">{t('profile.invite_bonus')}</span> {t('profile.invite_sub')}</span>
                 </button>
                 <button type="button" className="ds-btn ds-btn--primary mp-bonus-cta" onClick={openReferral}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1" /><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" /><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5" /></svg>
                     {t('profile.invite_button')}
-                    <span className="mp-bonus-cta-tag">{t('profile.invite_bonus')}</span>
                 </button>
             </div>
 
