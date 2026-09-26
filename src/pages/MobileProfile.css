@@ -711,3 +711,15 @@
 .mp-version { flex-basis: 100%; text-align: center; font: var(--t-caption); font-size: 12px; color: var(--color-text-tertiary); opacity: 0.7; }
 .mp-action-list a.mp-action-item { color: inherit; }
 .mp-version { margin: 0; padding: 2px 0 8px; flex-basis: auto; font-size: 12px; }
+.mp-bonus-value small { font-size: 26px; font-weight: 800; margin-left: 2px; }
+.mp-bonus-spend { font: var(--t-caption); color: var(--color-text-tertiary); margin-top: -2px; }
+.mp-bonus-spend + .mp-bonus-hint { margin-top: 8px; }
+.mp-bonus-value small { margin-left: 4px; }
+.mp-bonus-cta-tag {
+    margin-left: 4px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.14);
+    font-size: 13px;
+    font-weight: 800;
+}

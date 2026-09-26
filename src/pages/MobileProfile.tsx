@@ -4,7 +4,6 @@ import { useLanguage } from '../translations/LanguageContext';
 import AvatarPickerSheet from '../components/UI/AvatarPickerSheet';
 import Sheet from '../components/UI/Sheet';
 import { restaurantCache } from '../services/api';
-import { Link } from 'react-router-dom';
 
 interface MobileProfileProps {
     userAddress?: any;
@@ -145,12 +144,13 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
             <div className="liquid-card mp-bonus">
                 <button type="button" className="mp-bonus-balance" onClick={openReferral}>
                     <span className="mp-bonus-label">{t('profile.bonus_title')}</span>
-                    <span className="mp-bonus-value">{userProfile?.points || 0}</span>
-                    <span className="mp-bonus-hint"><span className="mp-action-bonus">{t('profile.invite_bonus')}</span> {t('profile.invite_sub')}</span>
+                    <span className="mp-bonus-value">{userProfile?.points || 0}<small>₾</small></span>
+                    <span className="mp-bonus-spend">{t('profile.bonus_spend')}</span>
                 </button>
                 <button type="button" className="ds-btn ds-btn--primary mp-bonus-cta" onClick={openReferral}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1" /><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" /><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5" /></svg>
                     {t('profile.invite_button')}
+                    <span className="mp-bonus-cta-tag">{t('profile.invite_bonus')}</span>
                 </button>
             </div>
 
@@ -203,7 +203,7 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                 </div>
             </section>
 
-            {/* Language + documents */}
+            {/* Language */}
             <div className="liquid-card mp-action-list">
                 <div className="mp-action-item mp-lang-row">
                     <div className="mp-action-icon">
@@ -218,16 +218,6 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
                         ))}
                     </div>
                 </div>
-                <Link className="mp-action-item" to={`/${language}/privacy`}>
-                    <div className="mp-action-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg></div>
-                    <div className="mp-action-text"><h3 className="mp-action-title">{t('home.footer_privacy')}</h3></div>
-                    <div className="mp-action-chevron"><IconChevron /></div>
-                </Link>
-                <Link className="mp-action-item" to={`/${language}/terms`}>
-                    <div className="mp-action-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="8" y1="13" x2="16" y2="13" /><line x1="8" y1="17" x2="13" y2="17" /></svg></div>
-                    <div className="mp-action-text"><h3 className="mp-action-title">{t('home.footer_terms')}</h3></div>
-                    <div className="mp-action-chevron"><IconChevron /></div>
-                </Link>
             </div>
 
             <button className="mp-logout-btn" onClick={onLogout}>
