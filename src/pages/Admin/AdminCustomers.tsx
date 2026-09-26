@@ -212,7 +212,7 @@ export function Avatar({ name, large }: { name?: string | null; large?: boolean 
     );
 }
 
-export function Kpi({ label, value, accent, tone, hint }: { label: string; value: React.ReactNode; accent?: boolean; tone?: 'danger' | 'warn'; hint?: string }) {
+export function Kpi({ label, value, accent, tone, hint }: { label: React.ReactNode; value: React.ReactNode; accent?: boolean; tone?: 'danger' | 'warn'; hint?: string }) {
     return (
         <div className={`crm-kpi${accent ? ' is-accent' : ''}${tone ? ` is-${tone}` : ''}`} title={hint}>
             <span className="crm-kpi-value">{value}</span>

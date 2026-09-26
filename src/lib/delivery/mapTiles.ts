@@ -4,13 +4,15 @@ export const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 export const MAP_TILE_ATTR =
   '&copy; OpenStreetMap &copy; OpenFreeMap';
 
-/** Leaflet raster fallback (tracking map) — Carto Voyager */
-export const MAP_TILE_URL =
-  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+/**
+ * Leaflet raster tiles (courier map, admin dispatch) — OpenStreetMap.
+ * Carto basemaps started answering "API KEY REQUIRED" (Sept 2026), so they are no longer used.
+ */
+export const MAP_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
 export const MAP_TILE_OPTIONS = {
-  subdomains: 'abcd' as const,
-  maxZoom: 20,
+  maxZoom: 19,
+  attribution: '&copy; OpenStreetMap',
 };
 
 /** English / Latin only — skip local script (ka) so labels stay readable */

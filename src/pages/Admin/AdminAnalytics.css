@@ -1,0 +1,97 @@
+/* Admin: analytics (sales, restaurants, couriers, KPI). Builds on AdminCrm.css. */
+
+.an-tabs { margin-bottom: 18px; }
+.an-trend { margin-left: 6px; font-weight: 700; font-size: 0.8rem; color: var(--admin-text-muted); }
+.an-trend.is-up { color: var(--admin-primary); }
+.an-trend.is-down { color: #FF6B61; }
+
+.an-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+.an-span-2 { grid-column: span 2; }
+.an-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.an-panel-head .crm-panel-title { margin: 0; }
+.an-note { margin: 10px 0 0; font-size: 0.82rem; }
+
+/* Daily bars — same green gradient as the dashboard chart */
+.an-bars { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 6px; align-items: end; height: 220px; }
+.an-bar { position: relative; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; }
+.an-bar-fill {
+    display: block;
+    width: 100%;
+    border-radius: 8px 8px 4px 4px;
+    background: linear-gradient(180deg, #21EA7C 0%, #10b95c 100%);
+    box-shadow: 0 0 18px rgba(33, 234, 124, 0.12);
+    transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.an-bar:hover .an-bar-fill { filter: brightness(1.15); }
+.an-bar-label { height: 18px; margin-top: 6px; text-align: center; font-size: 0.72rem; color: var(--admin-text-muted); font-variant-numeric: tabular-nums; }
+
+/* Share bars */
+.an-share, .an-dishes { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.an-share li, .an-dishes li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; align-items: baseline; }
+.an-share-name, .an-dish-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.an-share-val { font-weight: 700; font-variant-numeric: tabular-nums; }
+.an-share-bar { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.06); overflow: hidden; }
+.an-share-bar i { display: block; height: 100%; border-radius: 3px; background: var(--admin-primary); }
+.an-dishes { counter-reset: dish; }
+
+/* Heatmap */
+.an-heat { display: grid; grid-template-columns: 28px repeat(24, minmax(0, 1fr)); gap: 3px; }
+.an-heat-h { font-size: 0.68rem; color: var(--admin-text-muted); text-align: center; }
+.an-heat-d { font-size: 0.75rem; color: var(--admin-text-muted); align-self: center; }
+.an-heat-c { aspect-ratio: 1; border-radius: 4px; background: rgba(33, 234, 124, var(--a)); outline: 1px solid rgba(255, 255, 255, 0.03); }
+
+/* Tables */
+.an-thumb { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+.an-table .crm-person > span:last-child { gap: 4px; }
+.an-score {
+    display: inline-grid;
+    place-items: center;
+    min-width: 40px;
+    height: 28px;
+    padding: 0 8px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.06);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+.an-score.is-good { color: var(--admin-primary); background: rgba(33, 234, 124, 0.12); }
+.an-score.is-mid { color: #FFD60A; background: rgba(255, 214, 10, 0.12); }
+.an-score.is-bad { color: #FF6B61; background: rgba(255, 69, 58, 0.14); }
+.an-bad { color: #FF6B61; font-weight: 700; }
+.an-row-weak td:first-child { box-shadow: inset 3px 0 0 #FF453A; }
+.an-badge { align-self: flex-start; padding: 1px 8px; border-radius: 7px; font-size: 0.7rem; font-weight: 800; }
+.an-badge.is-gold { color: #1a1300; background: #FFD60A; }
+.an-badge.is-silver { color: #111; background: #C9D1D9; }
+.an-badge.is-bronze { color: #1a0d00; background: #E0975A; }
+.an-badge.is-bad { color: #FF6B61; background: rgba(255, 69, 58, 0.14); }
+.an-commission-edit { display: inline-flex; align-items: center; gap: 4px; }
+.an-commission-edit .admin-input { width: 64px; height: 34px; padding: 0 8px; }
+
+/* Plans */
+.an-plans { margin-bottom: 18px; }
+.an-plan + .an-plan { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--admin-card-border); }
+.an-plan-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.an-plan-del { margin-left: auto; color: var(--admin-text-muted) !important; font-size: 0.85rem; }
+.an-plan-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.an-plan-list li { display: grid; grid-template-columns: 180px minmax(0, 1fr) 130px 150px; gap: 14px; align-items: center; }
+.an-plan-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.an-progress { height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.06); overflow: hidden; }
+.an-progress i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, #10b95c, #21EA7C); }
+.an-progress i.is-done { box-shadow: 0 0 12px rgba(33, 234, 124, 0.5); }
+.an-plan-val { text-align: right; font-variant-numeric: tabular-nums; color: var(--admin-text-muted); font-size: 0.88rem; }
+.an-plan-left { text-align: right; }
+.an-plan-list .admin-btn { height: 34px; padding: 0 12px; font-size: 0.85rem; justify-self: end; }
+.an-plan-list .crm-status { justify-self: end; }
+.an-history { margin-top: 18px; }
+
+@media (max-width: 1100px) {
+    .an-grid { grid-template-columns: 1fr; }
+    .an-span-2 { grid-column: auto; }
+    .an-plan-list li { grid-template-columns: 120px minmax(0, 1fr) auto; }
+    .an-plan-list li > :last-child { grid-column: 1 / -1; justify-self: start; }
+}
+.an-share-name, .an-dish-name, .an-plan-name, .an .crm-name { color: var(--admin-text); }
+.an-table td { white-space: nowrap; }
+.an-table .crm-name { white-space: normal; }
+.an-rank { width: 16px; color: var(--admin-text-muted); font-weight: 800; font-variant-numeric: tabular-nums; }
+.an-table td .admin-btn { height: 34px; padding: 0 12px; font-size: 0.85rem; }

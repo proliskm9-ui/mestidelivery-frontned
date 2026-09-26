@@ -6,7 +6,7 @@ import {
 import { adminAuth } from '../../services/adminService';
 import './AdminStyles.css';
 
-export type AdminPage = 'dashboard' | 'orders' | 'products' | 'store_products' | 'restaurants' | 'stores' | 'categories' | 'users' | 'courier' | 'partners' | 'webhooks' | 'promotions' | 'customers' | 'referrals';
+export type AdminPage = 'dashboard' | 'orders' | 'products' | 'store_products' | 'restaurants' | 'stores' | 'categories' | 'users' | 'courier' | 'partners' | 'webhooks' | 'promotions' | 'customers' | 'referrals' | 'dispatch' | 'analytics' | 'reviews' | 'audit';
 
 export function PromoIcon({ size = 24, className = '' }: { size?: number; className?: string }) {
     return (
@@ -23,6 +23,32 @@ export function ReferralIcon({ size = 24, className = '' }: { size?: number; cla
             <circle cx="9" cy="7" r="4" />
             <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
             <path d="M19 8v6M16 11h6" />
+        </svg>
+    );
+}
+
+export function DispatchIcon({ size = 24, className = '' }: { size?: number; className?: string }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" />
+            <circle cx="12" cy="9.5" r="2.5" />
+        </svg>
+    );
+}
+
+export function AnalyticsIcon({ size = 24, className = '' }: { size?: number; className?: string }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="M3 3v18h18" />
+            <path d="M7 15l4-4 3 3 5-6" />
+        </svg>
+    );
+}
+
+export function ReviewIcon({ size = 24, className = '' }: { size?: number; className?: string }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z" />
         </svg>
     );
 }
@@ -160,8 +186,10 @@ export function AdminSidebar({ activePage, onNavigate, isOpen }: Props) {
             title: '',
             items: [
                 { id: 'dashboard' as AdminPage, Icon: HomeIcon, label: 'Обзор' },
-                { id: 'orders' as AdminPage, Icon: OrdersIcon, label: 'Заказы' }
-            ]
+                isSuperAdmin && { id: 'dispatch' as AdminPage, Icon: DispatchIcon, label: 'Диспетчерская' },
+                { id: 'orders' as AdminPage, Icon: OrdersIcon, label: 'Заказы' },
+                isSuperAdmin && { id: 'analytics' as AdminPage, Icon: AnalyticsIcon, label: 'Аналитика' }
+            ].filter(Boolean) as any[]
         },
         {
             title: 'Управление',
@@ -202,13 +230,15 @@ export function AdminSidebar({ activePage, onNavigate, isOpen }: Props) {
             items: [
                 isSuperAdmin && { id: 'customers' as AdminPage, Icon: UsersIcon, label: 'Клиенты' },
                 isSuperAdmin && { id: 'referrals' as AdminPage, Icon: ReferralIcon, label: 'Рефералы' },
+                isSuperAdmin && { id: 'reviews' as AdminPage, Icon: ReviewIcon, label: 'Отзывы' },
                 isSuperAdmin && {
                     id: 'folder_users',
                     Icon: TeamIcon,
                     label: 'Команда',
                     subItems: [
                         { id: 'users', label: 'Сотрудники' },
-                        { id: 'partners', label: 'Партнёры' }
+                        { id: 'partners', label: 'Партнёры' },
+                        { id: 'audit', label: 'Журнал действий' }
                     ]
                 }
             ].filter(Boolean) as any[]

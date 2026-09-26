@@ -1,0 +1,27 @@
+/* Admin: reviews */
+.rv-top { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; margin-bottom: 18px; }
+.rv-kpis { margin: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.rv-dist { display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+.rv-dist-row { display: grid; grid-template-columns: 14px minmax(0, 1fr) 36px; gap: 10px; align-items: center; font-weight: 700; }
+.rv-dist-row .ap-muted { text-align: right; font-variant-numeric: tabular-nums; }
+.rv-rest { margin-left: 0; }
+
+.rv-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 12px; }
+.rv-card { display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; border-radius: 16px; background: var(--admin-card-bg); border: 1px solid var(--admin-card-border); }
+.rv-card.is-bad { border-color: rgba(255, 69, 58, 0.35); }
+.rv-card.is-mid { border-color: rgba(255, 214, 10, 0.3); }
+.rv-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.rv-stars { display: inline-flex; gap: 2px; }
+.rv-stars svg { width: 18px; height: 18px; fill: rgba(255, 255, 255, 0.12); }
+.rv-stars svg.is-on { fill: #FFD60A; }
+.rv-card.is-bad .rv-stars svg.is-on { fill: #FF6B61; }
+.rv-text { margin: 0; font-size: 0.98rem; line-height: 1.45; }
+.rv-card-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: auto; font-size: 0.9rem; }
+.rv-who { margin-left: auto; }
+.rv-card-foot .admin-btn { height: 34px; padding: 0 12px; font-size: 0.85rem; }
+
+@media (max-width: 1100px) { .rv-top { grid-template-columns: 1fr; } }
+.rv-top { align-items: start; }
+.rv-kpis .crm-kpi { min-height: 0; }
+.rv-card b, .rv-who, .rv-text { color: var(--admin-text); }
+.rv-text.ap-muted { color: var(--admin-text-muted); }

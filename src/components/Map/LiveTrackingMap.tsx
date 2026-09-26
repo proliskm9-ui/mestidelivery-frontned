@@ -74,7 +74,6 @@ const LiveTrackingMap: React.FC<LiveTrackingMapProps> = ({ courierLocation, orde
                 <TileLayer
                     url={MAP_TILE_URL}
                     attribution={MAP_TILE_ATTR}
-                    subdomains={[...MAP_TILE_OPTIONS.subdomains]}
                     maxZoom={MAP_TILE_OPTIONS.maxZoom}
                 />
                 <FitBounds points={points.length ? points : [MESTIA_CENTER]} />

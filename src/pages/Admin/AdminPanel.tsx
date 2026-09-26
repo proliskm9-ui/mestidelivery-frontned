@@ -17,6 +17,10 @@ import { AdminWebhooks } from './AdminWebhooks';
 import { AdminPromotions } from './AdminPromotions';
 import { AdminCustomers } from './AdminCustomers';
 import { AdminReferrals } from './AdminReferrals';
+import { AdminDispatch } from './AdminDispatch';
+import { AdminAnalytics } from './AdminAnalytics';
+import { AdminReviews } from './AdminReviews';
+import { AdminAudit } from './AdminAudit';
 import './AdminStyles.css';
 
 export function AdminPanel() {
@@ -97,6 +101,10 @@ export function AdminPanel() {
                 {activePage === 'promotions' && <AdminPromotions />}
                 {activePage === 'customers' && <AdminCustomers />}
                 {activePage === 'referrals' && <AdminReferrals />}
+                {activePage === 'dispatch' && <AdminDispatch />}
+                {activePage === 'analytics' && <AdminAnalytics />}
+                {activePage === 'reviews' && <AdminReviews />}
+                {activePage === 'audit' && <AdminAudit />}
             </main>
         </div>
     );
