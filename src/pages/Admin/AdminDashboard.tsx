@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { adminAuth, adminApi, type Order, type Product, type Restaurant } from '../../services/adminService';
 import FullPageLoader from '../../components/UI/FullPageLoader';
 import './AdminStyles.css';
-import { AdminCrmStrip } from './AdminCrmStrip';
 
 // --- Reusable Components ---
 
@@ -589,16 +588,13 @@ export function AdminDashboard() {
                     color="#06b6d4" 
                 />
                 <MetricCard 
-                    title="Время доставки" 
+                    title="Время" 
                     value={<>{avgDeliveryMins} мин</>} 
                     percentage={80} 
                     subtext="Норматив: 30 мин" 
                     color="#a855f7" 
                 />
             </div>
-
-            {/* Customers & referrals (super admin, once the CRM endpoints exist) */}
-            {isSuperAdmin && <AdminCrmStrip />}
 
             {/* Middle Row: Chart & Live Dispatch */}
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', marginBottom: '36px' }}>

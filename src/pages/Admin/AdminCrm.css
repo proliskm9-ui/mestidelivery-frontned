@@ -250,8 +250,5 @@ button.admin-btn.crm-link { padding: 0 8px; background: none; border-color: tran
 .admin-table-premium table.admin-table.crm-table td:last-child { padding-right: 18px; }
 .crm-flags { max-width: 330px; }
 .crm-flag { font-size: 0.72rem; }
-.crm-strip { margin: -12px 0 36px; }
-.crm-strip .crm-kpi { text-align: left; font-family: inherit; cursor: pointer; transition: border-color 0.2s ease, transform 0.2s ease; }
-.crm-strip .crm-kpi:hover { border-color: rgba(33, 234, 124, 0.35); transform: translateY(-1px); }
 .crm-sort { padding: 0 36px 0 14px; line-height: 44px; }
 .crm-toolbar .ap-search { padding: 0 16px; }
