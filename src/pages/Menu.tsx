@@ -7,6 +7,7 @@ import Header from '../components/UI/Header';
 import FastTravelBlock from '../components/UI/FastTravelBlock';
 import { deviceHasOrdered, accountHasOrders } from '../utils/deliveryPromo';
 import PromoBanner from '../components/UI/PromoBanner';
+import PromosHub from '../components/UI/PromosHub';
 import AddressDeliveryPrompt from '../components/UI/AddressDeliveryPrompt';
 import MobileRestaurantCard from '../components/UI/MobileRestaurantCard';
 import NetworkErrorState from '../components/UI/NetworkErrorState';
@@ -82,7 +83,7 @@ const MenuPage: React.FC<{
     const [activeCollection, setActiveCollection] = useState<{
         title: string,
         items: (Restaurant | Store)[],
-        type: 'store' | 'restaurant' | 'restaurants_browse' | 'stores_soon',
+        type: 'store' | 'restaurant' | 'restaurants_browse' | 'stores_soon' | 'promos',
         isMobileSource?: boolean
     } | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -530,18 +531,13 @@ const MenuPage: React.FC<{
                                 {renderFiltersRow()}
                                 {renderRestaurantGrid(filteredRestaurants)}
                             </div>
-                        ) : activeCollection.type === 'restaurant' && activeCollection.items.length === 0 && activeCollection.title === t('menu.promotions') ? (
-                            <div className="menu-search-empty">
-                                <h2>{deviceHasOrdered() || accountHasOrders() ? t('menu.promos_used_title') : t('menu.promos_empty_title')}</h2>
-                                <p>{deviceHasOrdered() || accountHasOrders() ? t('menu.promos_used_desc') : t('menu.promos_empty_desc')}</p>
-                                <button
-                                    type="button"
-                                    className="ds-btn ds-btn--primary ds-btn--sm"
-                                    onClick={() => setActiveCollection({ title: t('menu.restaurants'), items: taggedRestaurants, type: 'restaurants_browse', isMobileSource: true })}
-                                >
-                                    {t('cart.go_to_restaurants')}
-                                </button>
-                            </div>
+                        ) : activeCollection.type === 'promos' ? (
+                            <PromosHub
+                                promoCount={activeCollection.items.length}
+                                grid={renderRestaurantGrid(activeCollection.items)}
+                                isNewClient={!deviceHasOrdered() && !accountHasOrders()}
+                                onBrowse={() => setActiveCollection({ title: t('menu.restaurants'), items: taggedRestaurants, type: 'restaurants_browse', isMobileSource: true })}
+                            />
                         ) : activeCollection.type === 'restaurant' ? (
                             <div className="content-pad" style={{ paddingTop: '25px' }}>
                                 {renderRestaurantGrid(activeCollection.items)}
@@ -659,7 +655,7 @@ const MenuPage: React.FC<{
                                 setActiveCollection({
                                     title: t('menu.promotions'),
                                     items: promoRestaurants,
-                                    type: 'restaurant',
+                                    type: 'promos',
                                     isMobileSource: true
                                 });
                             }

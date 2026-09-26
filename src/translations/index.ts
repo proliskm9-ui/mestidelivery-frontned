@@ -135,6 +135,13 @@ export const translations = {
             footer_support: 'Поддержка: support@mestidelivery.com · +995 551 58 43 76',
             language: 'Язык'
         },
+        promos_hub: {
+            restaurants: 'Акции ресторанов',
+            restaurants_sub: 'Для первого заказа — выберите ресторан',
+            ours: 'Выгода с MestiDelivery',
+            free_title: 'Бесплатная доставка',
+            free_sub: 'На первый заказ от 100 GEL',
+        },
         menu: {
             promos_empty_title: 'Скоро здесь появятся акции',
             promos_empty_desc: 'Следите за обновлениями — новые предложения ресторанов появятся в этом разделе.',
@@ -920,6 +927,13 @@ export const translations = {
             footer_support: 'Support: support@mestidelivery.com · +995 551 58 43 76',
             language: 'Language'
         },
+        promos_hub: {
+            restaurants: 'Restaurant deals',
+            restaurants_sub: 'For your first order — pick a restaurant',
+            ours: 'Save with MestiDelivery',
+            free_title: 'Free delivery',
+            free_sub: 'On your first order over 100 GEL',
+        },
         menu: {
             promos_empty_title: 'Promotions are coming soon',
             promos_empty_desc: 'Stay tuned — restaurant offers will appear here.',
@@ -1704,6 +1718,13 @@ export const translations = {
             footer_company: 'ინდ. მეწარმე ანასტასია ვერბიცკაია · რეგ. № 335897747 · მესტია, საქართველო',
             footer_support: 'მხარდაჭერა: support@mestidelivery.com · +995 551 58 43 76',
             language: 'ენა'
+        },
+        promos_hub: {
+            restaurants: 'რესტორნების აქციები',
+            restaurants_sub: 'პირველი შეკვეთისთვის — აირჩიე რესტორანი',
+            ours: 'სარგებელი MestiDelivery-სთან',
+            free_title: 'უფასო მიტანა',
+            free_sub: 'პირველ შეკვეთაზე 100 ლარიდან',
         },
         menu: {
             promos_empty_title: 'აქციები მალე გამოჩნდება',
