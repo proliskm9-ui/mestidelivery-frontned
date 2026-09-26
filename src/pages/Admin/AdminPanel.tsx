@@ -15,6 +15,8 @@ import AdminPartners from './AdminPartners';
 import { AdminCategories } from './AdminCategories';
 import { AdminWebhooks } from './AdminWebhooks';
 import { AdminPromotions } from './AdminPromotions';
+import { AdminCustomers } from './AdminCustomers';
+import { AdminReferrals } from './AdminReferrals';
 import './AdminStyles.css';
 
 export function AdminPanel() {
@@ -93,6 +95,8 @@ export function AdminPanel() {
                 {activePage === 'partners' && <AdminPartners />}
                 {activePage === 'webhooks' && <AdminWebhooks />}
                 {activePage === 'promotions' && <AdminPromotions />}
+                {activePage === 'customers' && <AdminCustomers />}
+                {activePage === 'referrals' && <AdminReferrals />}
             </main>
         </div>
     );

@@ -123,7 +123,7 @@ export function AdminUsers() {
     return (
         <div className="admin-users-page">
             <div className="page-header">
-                <h1 className="page-title">Управление пользователями</h1>
+                <h1 className="page-title">Сотрудники</h1>
                 <button className="admin-btn admin-btn-primary" onClick={() => handleOpenModal()}>
                     Добавить
                 </button>
@@ -183,7 +183,7 @@ export function AdminUsers() {
                 <div className="admin-modal-overlay" onClick={() => setIsModalOpen(false)}>
                     <div className="admin-modal" onClick={e => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2 className="modal-title">{editUser.id ? 'Редактировать' : 'Новый пользователь'}</h2>
+                            <h2 className="modal-title">{editUser.id ? 'Редактировать сотрудника' : 'Новый сотрудник'}</h2>
                             <button className="modal-close" onClick={() => setIsModalOpen(false)}>×</button>
                         </div>
                         <form onSubmit={handleSave} className="admin-form" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>

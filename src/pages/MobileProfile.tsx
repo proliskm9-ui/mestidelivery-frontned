@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './MobileProfile.css';
 import { useLanguage } from '../translations/LanguageContext';
 import AvatarPickerSheet from '../components/UI/AvatarPickerSheet';
+import PromoCodesSheet from '../components/Profile/PromoCodesSheet';
 import Sheet from '../components/UI/Sheet';
 import { restaurantCache } from '../services/api';
 
@@ -44,12 +45,12 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
     orderHistory = [],
     onLogout,
     onBack,
-    onOrderClick,
-    onNavigate
+    onOrderClick
 }) => {
     const { t, language, setLanguage } = useLanguage();
     const [view, setView] = useState<'dashboard' | 'personal' | 'addresses' | 'orders'>('dashboard');
     const [avatarModal, setAvatarModal] = useState(false);
+    const [promoOpen, setPromoOpen] = useState(false);
 
     // Temp state for editing
     const [editProfile, setEditProfile] = useState({ name: '', phone: '' });
@@ -160,9 +161,9 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
 
             {/* Quick tiles */}
             <div className="mp-tiles">
-                <button type="button" className="mp-tile" onClick={() => onNavigate?.('favorites')}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
-                    <span>{t('nav.favorites')}</span>
+                <button type="button" className="mp-tile" onClick={() => setPromoOpen(true)}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" /><path d="M9 9h.01M15 15h.01M15.5 8.5l-7 7" /></svg>
+                    <span>{t('profile.promo_title')}</span>
                 </button>
                 <button type="button" className="mp-tile" onClick={openAddresses}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#21EA7C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
@@ -390,6 +391,8 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
             {renderPersonalForm()}
             {renderAddressesForm()}
             {renderOrdersForm()}
+
+            <PromoCodesSheet open={promoOpen} onOpenChange={setPromoOpen} />
 
             <AvatarPickerSheet
                 open={avatarModal}

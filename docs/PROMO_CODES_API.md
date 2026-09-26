@@ -26,6 +26,7 @@ CREATE TABLE promo_codes (
   ends_at            DATE NULL,                          -- inclusive
   is_active          BOOLEAN NOT NULL DEFAULT TRUE,
   note               TEXT NULL,
+  customer_id        INT NULL,                           -- personal code (docs/ADMIN_CUSTOMERS_API.md), NULL = public
   created_at         TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

@@ -13,6 +13,7 @@ import PayMarks from '../components/Payment/PayMarks';
 import { useOrderHandover } from '../hooks/useOrderHandover';
 import { OrderPlacedActions, OrderPlacedMark } from '../components/Payment/OrderPlaced';
 import { formatPrice } from '../utils/formatPrice';
+import { setPendingPromo } from '../utils/pendingPromo';
 
 /** Keepz payment link — Tribute removed. */
 const PAYMENT_URL = 'https://app.keepz.me/pay?qrType=DEFAULT&receiverType=USER&receiverId=6ea6970c-20ee-4119-b25f-6ebcc8a888c6';
@@ -219,6 +220,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                 orderCreatedRef.current = false;
                 return;
             }
+            setPendingPromo('');
 
             setOrderId(result.id);
             rememberOrder(result.id, selectedMethod);
@@ -248,7 +250,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
 
         } catch (e: any) {
             console.error('Order creation error:', e);
-            toast.error(t('common.error') + ': ' + (e.message || t('checkout.order_failed')));
+            toast.error(orderErrorText(e));
             setScreen('select');
             orderCreatedRef.current = false;
         }
@@ -321,6 +323,7 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
                 orderCreatedRef.current = false;
                 return;
             }
+            setPendingPromo('');
 
             setOrderId(result.id);
             rememberOrder(result.id, 'card');
@@ -336,11 +339,17 @@ const MobilePaymentPage: React.FC<MobilePaymentPageProps> = ({
 
         } catch (e: any) {
             console.error('Order creation error:', e);
-            toast.error(t('common.error') + ': ' + (e.message || t('checkout.order_failed')));
+            toast.error(orderErrorText(e));
             setScreen('select');
             orderCreatedRef.current = false;
         }
     };
+
+    function orderErrorText(e: any): string {
+        if (e?.message === 'customer_blocked') return t('checkout.account_blocked');
+        if (e?.message === 'promo_invalid') { setPendingPromo(''); return t('checkout.promo_invalid'); }
+        return t('common.error') + ': ' + (e?.message || t('checkout.order_failed'));
+    }
 
     // ─── Render ────────────────────────────────────────────────────────────
 

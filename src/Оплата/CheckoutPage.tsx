@@ -23,6 +23,7 @@ import FooterBlock from './blocks/FooterBlock/FooterBlock';
 import TimeModal from './modals/TimeModal/TimeModal';
 import PlaceTypeModal from './modals/PlaceTypeModal/PlaceTypeModal';
 import PromoCodeModal from './modals/PromoCodeModal/PromoCodeModal';
+import { getPendingPromo, setPendingPromo } from '../utils/pendingPromo';
 import CustomTipModal from './modals/CustomTipModal/CustomTipModal';
 import CommentModal from './modals/CommentModal/CommentModal';
 import PhoneModal from './modals/PhoneModal/PhoneModal';
@@ -124,7 +125,8 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
     },
 
     payment: 'cash',
-    promoCode: '',
+    // A code picked in Profile → Promo codes starts pre-filled
+    promoCode: getPendingPromo(),
     tip: 0
   });
 
@@ -413,7 +415,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
             isOpen={modals.promo}
             onClose={() => toggleModal('promo', false)}
             currentCode={orderData.promoCode}
-            onApply={(code: string) => updateOrder('promoCode', code)}
+            onApply={(code: string) => { setPendingPromo(code.toUpperCase()); updateOrder('promoCode', code); }}
           />
 
         {/* 4. Чаевые (Другая сумма) */}

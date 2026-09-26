@@ -387,7 +387,8 @@ export const api = {
         });
         if (!res.ok) {
             const err = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
-            throw new Error(err.detail || 'Failed to create order');
+            // `error` carries machine codes: customer_blocked, promo_invalid (docs/ADMIN_CUSTOMERS_API.md)
+            throw new Error(err.error || err.detail || 'Failed to create order');
         }
         const result = await res.json();
         return { ...result, id: result.order_id || result.id };

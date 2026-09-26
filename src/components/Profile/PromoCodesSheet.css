@@ -1,0 +1,56 @@
+/* Profile → Promo codes sheet. Same tokens as the checkout promo sheet. */
+.pcs-input { text-transform: uppercase; letter-spacing: 0.04em; }
+.pcs-input::placeholder { text-transform: none; letter-spacing: 0; }
+
+.pcs-saved {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 15px;
+    background: var(--color-accent-subtle, rgba(33, 234, 124, 0.12));
+}
+.pcs-saved-code { color: var(--color-accent); font: 800 15px/1.2 var(--font-text); letter-spacing: 0.04em; }
+.pcs-saved-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.pcs-saved-text { font: var(--t-caption); color: var(--color-text-secondary); }
+.pcs-saved-clear {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-text-tertiary);
+    font: 600 13px/1.2 var(--font-text);
+    cursor: pointer;
+}
+
+.pcs-section {
+    margin: 24px 0 10px;
+    font: var(--t-label);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-tertiary);
+}
+.pcs-empty { margin: 0; font: var(--t-secondary); color: var(--color-text-tertiary); }
+.pcs-skeleton { height: 72px; border-radius: 15px; background: rgba(255, 255, 255, 0.04); }
+
+.pcs-list { display: flex; flex-direction: column; border-radius: 15px; background: #2D2D2B; overflow: hidden; }
+.pcs-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+.pcs-item + .pcs-item { border-top: 1px solid rgba(255, 255, 255, 0.06); }
+.pcs-item.is-used { opacity: 0.5; }
+.pcs-item-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.pcs-item-benefit { color: var(--color-accent); font: 800 17px/1.2 var(--font-text); }
+.pcs-item-code { font: 700 14px/1.2 var(--font-text); letter-spacing: 0.06em; color: #fff; }
+.pcs-item-terms { font: var(--t-caption); color: var(--color-text-tertiary); }
+.pcs-item-state { font: var(--t-caption); color: var(--color-text-tertiary); }
+.pcs-item-btn {
+    flex-shrink: 0;
+    height: 36px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--color-accent);
+    color: var(--color-on-accent, #000);
+    font: 700 14px/1 var(--font-text);
+    cursor: pointer;
+}
+.pcs-item-btn.is-on { background: var(--color-accent-subtle, rgba(33, 234, 124, 0.12)); color: var(--color-accent); cursor: default; }
