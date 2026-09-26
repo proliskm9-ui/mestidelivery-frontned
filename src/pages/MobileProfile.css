@@ -723,3 +723,13 @@
     font-size: 13px;
     font-weight: 800;
 }
+
+/* v4: title + note on the left, amount on the right */
+.mp-bonus-balance { flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; width: 100%; }
+.mp-bonus-head { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.mp-bonus-label { font: 700 18px/1.2 var(--font-text); text-transform: none; letter-spacing: var(--tracking-tight); color: #fff; }
+.mp-bonus-spend { margin-top: 0; }
+.mp-bonus-value { flex-shrink: 0; font-size: 36px; }
+.mp-bonus-value small { font-size: 18px; }
+.mp-bonus-invite { padding: 0; border: 0; background: none; text-align: left; cursor: pointer; margin-bottom: -4px; }
+.mp-bonus-spend + .mp-bonus-hint { margin-top: 0; }

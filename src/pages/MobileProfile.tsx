@@ -143,9 +143,13 @@ const MobileProfile: React.FC<MobileProfileProps> = ({
             {/* Bonuses: the one bright spot of the page */}
             <div className="liquid-card mp-bonus">
                 <button type="button" className="mp-bonus-balance" onClick={openReferral}>
-                    <span className="mp-bonus-label">{t('profile.bonus_title')}</span>
+                    <span className="mp-bonus-head">
+                        <span className="mp-bonus-label">{t('profile.bonus_title')}</span>
+                        <span className="mp-bonus-spend">{t('profile.bonus_spend')}</span>
+                    </span>
                     <span className="mp-bonus-value">{userProfile?.points || 0}<small>GEL</small></span>
-                    <span className="mp-bonus-spend">{t('profile.bonus_spend')}</span>
+                </button>
+                <button type="button" className="mp-bonus-invite" onClick={openReferral}>
                     <span className="mp-bonus-hint"><span className="mp-action-bonus">{t('profile.invite_bonus')}</span> {t('profile.invite_sub')}</span>
                 </button>
                 <button type="button" className="ds-btn ds-btn--primary mp-bonus-cta" onClick={openReferral}>
