@@ -2044,3 +2044,13 @@ div::-webkit-scrollbar-thumb:hover {
 }
 
 
+
+/* Orders: search / period / totals / export */
+.ao-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: -12px 0 22px; }
+.ao-search { flex: 1 1 300px; max-width: 440px; height: 44px; }
+.ao-period { width: auto; min-width: 150px; height: 44px; }
+.ao-summary { margin-left: auto; color: var(--admin-text-muted); font-size: 0.92rem; font-variant-numeric: tabular-nums; }
+.ao-toolbar .admin-btn, .ao-more { height: 44px; padding: 0 18px; font-size: 0.92rem; }
+.ao-more { justify-self: center; margin-top: 4px; }
+.ao-period { padding: 0 36px 0 14px; line-height: 44px; }
+.ao-search { padding: 0 16px; }

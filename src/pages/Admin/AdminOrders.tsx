@@ -5,7 +5,7 @@ import {
     DeliveryIcon, StarIcon, CancelIcon, WalletIcon
 } from '../../components/icons/StatusIcons';
 import FullPageLoader from '../../components/UI/FullPageLoader';
-import { pickKitchenText } from '../../utils/i18nContent';
+import { pickKitchenText, pickI18nText } from '../../utils/i18nContent';
 import './AdminStyles.css';
 
 const STATUS_MAP: Record<string, { label: string; color: string; Icon: any; step: number }> = {
@@ -36,6 +36,9 @@ export function AdminOrders() {
     const [activeDropdownId, setActiveDropdownId] = useState<number | null>(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [refundingId, setRefundingId] = useState<number | null>(null);
+    const [query, setQuery] = useState('');
+    const [period, setPeriod] = useState<'today' | '7' | '30' | 'all'>('all');
+    const [limit, setLimit] = useState(50);
     const prevCountRef = useRef(0);
     const user = adminAuth.getUser();
 
@@ -166,14 +169,44 @@ export function AdminOrders() {
         return `${hrs} ч ${mins % 60} мин назад`;
     };
 
-    // Filter logic
-    const filtered = (() => {
+    // Filter logic: status tab, then period, then search
+    const byStatus = (() => {
         if (!Array.isArray(orders)) return [];
         if (filter === 'active') return orders.filter(o => !['delivered', 'cancelled'].includes(o.status));
         if (filter === 'waiting') return orders.filter(o => ['pending_payment', 'pending'].includes(o.status));
         if (filter === 'all') return orders;
         return orders.filter(o => o.status === filter);
     })();
+    const periodFrom = period === 'all' ? 0
+        : period === 'today' ? new Date(new Date().setHours(0, 0, 0, 0)).getTime()
+        : Date.now() - Number(period) * 24 * 3600e3;
+    const q = query.trim().toLowerCase();
+    const qDigits = q.replace(/\D/g, '');
+    const filtered = byStatus.filter(o => {
+        if (periodFrom && new Date(o.created_at).getTime() < periodFrom) return false;
+        if (!q) return true;
+        return String(o.id) === q.replace('#', '')
+            || (o.customer_name || '').toLowerCase().includes(q)
+            || (o.address || '').toLowerCase().includes(q)
+            || (qDigits.length >= 3 && (o.phone || '').replace(/\D/g, '').includes(qDigits));
+    });
+    const shownOrders = filtered.slice(0, limit);
+    const sumTotal = filtered.filter(o => o.status !== 'cancelled').reduce((s, o) => s + Number(o.total || 0), 0);
+    const paidCount = filtered.filter(o => o.status !== 'cancelled').length;
+
+    const exportCsv = () => {
+        const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+        const restName = (id: string) => pickI18nText(restaurants.find(r => r.id === id)?.name || id, 'ru');
+        const rows = [['ID', 'Дата', 'Статус', 'Ресторан', 'Клиент', 'Телефон', 'Адрес', 'Сумма'].join(';')]
+            .concat(filtered.map(o => [o.id, new Date(o.created_at).toLocaleString('ru-RU'), STATUS_MAP[o.status]?.label || o.status, restName(o.restaurant_id), o.customer_name, o.phone, o.address, Number(o.total || 0).toFixed(2)].map(esc).join(';')));
+        // BOM so Excel opens Cyrillic correctly
+        const blob = new Blob(['﻿' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    };
 
 
     if (loading) return <FullPageLoader variant="list" />;
@@ -219,9 +252,25 @@ export function AdminOrders() {
                 </FilterBtn>
             </div>
 
+            {/* Search, period, totals, export */}
+            <div className="ao-toolbar">
+                <input className="admin-input ao-search" placeholder="Номер заказа, телефон, имя или адрес" value={query} onChange={(e) => { setQuery(e.target.value); setLimit(50); }} />
+                <select className="admin-input ao-period" value={period} onChange={(e) => { setPeriod(e.target.value as any); setLimit(50); }} aria-label="Период">
+                    <option value="today">Сегодня</option>
+                    <option value="7">7 дней</option>
+                    <option value="30">30 дней</option>
+                    <option value="all">Всё время</option>
+                </select>
+                <span className="ao-summary">
+                    {filtered.length} {filtered.length % 10 === 1 && filtered.length % 100 !== 11 ? 'заказ' : [2, 3, 4].includes(filtered.length % 10) && ![12, 13, 14].includes(filtered.length % 100) ? 'заказа' : 'заказов'}
+                    {' · '}{sumTotal.toFixed(0)} ₾{paidCount ? ` · средний чек ${(sumTotal / paidCount).toFixed(0)} ₾` : ''}
+                </span>
+                <button className="admin-btn ao-export" onClick={exportCsv} disabled={!filtered.length}>Скачать CSV</button>
+            </div>
+
             {/* Orders list */}
             <div style={{ display: 'grid', gap: '16px' }}>
-                {filtered.map(order => {
+                {shownOrders.map(order => {
                     const items = parseItems(order.items);
                     
                     // Parse comments to separate payment method from customer comments
@@ -745,8 +794,13 @@ export function AdminOrders() {
                 })}
                 {filtered.length === 0 && (
                     <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--admin-text-muted)' }}>
-                        Нет заказов
+                        {query ? 'Ничего не нашли' : 'Нет заказов'}
                     </div>
+                )}
+                {filtered.length > limit && (
+                    <button className="admin-btn ao-more" onClick={() => setLimit((l) => l + 50)}>
+                        Показать ещё {Math.min(50, filtered.length - limit)} из {filtered.length - limit}
+                    </button>
                 )}
             </div>
 
